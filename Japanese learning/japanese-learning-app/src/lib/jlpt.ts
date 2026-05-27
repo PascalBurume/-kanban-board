@@ -102,6 +102,12 @@ export function isValidLevel(v: string | undefined | null): v is JLPTLevel {
   return !!v && (LEVELS as string[]).includes(v);
 }
 
+export const SECTION_KEYS: readonly SectionKey[] = ["vocab", "grammar", "reading", "listening"];
+
+export function isValidSection(v: string | undefined | null): v is SectionKey {
+  return !!v && (SECTION_KEYS as readonly string[]).includes(v);
+}
+
 // JLPT is held on the first Sunday of July and the first Sunday of December.
 export function nextExamDate(from = new Date()): Date {
   const candidates: Date[] = [];

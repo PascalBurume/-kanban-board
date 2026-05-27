@@ -2,9 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/me";
-import { isValidLevel } from "@/lib/jlpt";
-
-const VALID_SECTIONS = new Set(["vocab", "grammar", "reading", "listening"]);
+import { isValidLevel, isValidSection } from "@/lib/jlpt";
 
 export interface RecordedAnswer {
   /** Kanji id (or other item id, future-proofing). */
@@ -20,10 +18,11 @@ export async function recordJlptAttempt(input: {
   answers: RecordedAnswer[];
   startedAtISO: string;
 }) {
-  if (!isValidLevel(input.level)) throw new Error("invalid level");
-  if (!VALID_SECTIONS.has(input.section)) throw new Error("invalid section");
-
   const user = await getCurrentUser();
+
+  if (!isValidLevel(input.level)) throw new Error("invalid level");
+  if (!isValidSection(input.section)) throw new Error("invalid section");
+
   const total = input.answers.length;
   const correct = input.answers.filter((a) => a.correct).length;
   const scorePct = total === 0 ? 0 : (correct / total) * 100;

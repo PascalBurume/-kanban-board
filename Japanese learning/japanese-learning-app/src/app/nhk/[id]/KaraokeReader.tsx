@@ -142,6 +142,7 @@ export function KaraokeReader({
           {currentRubyHtml ? (
             <p
               className="jp text-center text-[26px] leading-relaxed md:text-[32px]"
+              // bodyJpWithFuri is seeded ruby/furigana HTML from the DB (author-controlled), safe to render
               dangerouslySetInnerHTML={{ __html: currentRubyHtml }}
             />
           ) : (

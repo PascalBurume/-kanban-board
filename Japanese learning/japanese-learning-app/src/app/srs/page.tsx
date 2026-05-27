@@ -91,6 +91,7 @@ export default async function SRSPage({
     <AppShell active="srs">
       <Suspense fallback={null}>
         <SRSReview
+          key={selectedLevel ?? "all"}
           cards={session}
           forecast={forecast}
           leeches={leeches}

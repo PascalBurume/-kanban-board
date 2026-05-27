@@ -40,30 +40,101 @@ const RATING_COLOR: Record<Rating, string> = {
 
 const MC_LABELS = ["A", "B", "C", "D"];
 
+type Mode = "type" | "mc";
+
+interface SessionState {
+  queue: ReviewCard[];
+  idx: number;
+  typed: string;
+  revealed: boolean;
+  mode: Mode;
+  showFurigana: boolean;
+  showMeaning: boolean;
+  mcAnswered: boolean;
+  mcChosen: string | null;
+  pending: boolean;
+  stats: { correct: number; again: number; done: number };
+}
+
+type SessionAction =
+  | { type: "TYPE"; value: string }
+  | { type: "REVEAL" }
+  | { type: "ANSWER_MC"; chosen: string }
+  | { type: "RATE_START" }
+  | { type: "RATE_FAIL" }
+  | { type: "RATE_END"; rating: Rating; card: ReviewCard; wasCorrect: boolean }
+  | { type: "SET_MODE"; mode: Mode }
+  | { type: "TOGGLE_FURIGANA" }
+  | { type: "TOGGLE_MEANING" };
+
+function initSession(cards: ReviewCard[]): SessionState {
+  return {
+    queue: cards,
+    idx: 0,
+    typed: "",
+    revealed: false,
+    mode: "type",
+    showFurigana: true,
+    showMeaning: true,
+    mcAnswered: false,
+    mcChosen: null,
+    pending: false,
+    stats: { correct: 0, again: 0, done: 0 },
+  };
+}
+
+function sessionReducer(s: SessionState, a: SessionAction): SessionState {
+  switch (a.type) {
+    case "TYPE":
+      return { ...s, typed: a.value };
+    case "REVEAL":
+      return { ...s, revealed: true };
+    case "ANSWER_MC":
+      return { ...s, mcChosen: a.chosen, mcAnswered: true, revealed: true };
+    case "RATE_START":
+      return { ...s, pending: true };
+    case "RATE_FAIL":
+      return { ...s, pending: false };
+    case "RATE_END": {
+      const isAgain = a.rating === "again";
+      return {
+        ...s,
+        pending: false,
+        queue: isAgain ? [...s.queue, a.card] : s.queue,
+        idx: s.idx + 1,
+        typed: "",
+        revealed: false,
+        mcAnswered: false,
+        mcChosen: null,
+        stats: {
+          correct: s.stats.correct + (a.wasCorrect && !isAgain ? 1 : 0),
+          again: s.stats.again + (isAgain ? 1 : 0),
+          done: s.stats.done + 1,
+        },
+      };
+    }
+    case "SET_MODE":
+      return { ...s, mode: a.mode };
+    case "TOGGLE_FURIGANA":
+      return { ...s, showFurigana: !s.showFurigana };
+    case "TOGGLE_MEANING":
+      return { ...s, showMeaning: !s.showMeaning };
+  }
+}
+
 export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, selectedLevel, levels }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [queue, setQueue] = React.useState<ReviewCard[]>(cards);
-  const [idx, setIdx] = React.useState(0);
-  const [typed, setTyped] = React.useState("");
-  const [revealed, setRevealed] = React.useState(false);
-  const [mode, setMode] = React.useState<"type" | "mc">("type");
-  const [showFurigana, setShowFurigana] = React.useState(true);
-  const [showMeaning, setShowMeaning] = React.useState(true);
-  const [mcAnswered, setMcAnswered] = React.useState(false);
-  const [mcChosen, setMcChosen] = React.useState<string | null>(null);
-  const [pending, setPending] = React.useState(false);
-  const [stats, setStats] = React.useState({ correct: 0, again: 0, done: 0 });
-  const [sessionStart] = React.useState(() => Date.now());
+  const [state, dispatch] = React.useReducer(sessionReducer, cards, initSession);
+  const { queue, idx, typed, revealed, mode, showFurigana, showMeaning, mcAnswered, mcChosen, pending, stats } = state;
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Re-sync queue + counters when the level filter changes (parent re-renders with new cards).
+  // sessionStart on the client only — avoids hydration mismatch on Date.now()
+  const sessionStartRef = React.useRef(0);
   React.useEffect(() => {
-    setQueue(cards);
-    setIdx(0);
-    setStats({ correct: 0, again: 0, done: 0 });
-  }, [cards]);
+    sessionStartRef.current = Date.now();
+  }, []);
 
   function setLevel(next: string | null) {
     const params = new URLSearchParams(searchParams?.toString() ?? "");
@@ -74,7 +145,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
   }
 
   const total = cards.length;
-  const c = queue[idx];
+  const c: ReviewCard | undefined = queue[idx];
   const hiragana = romajiToHiragana(typed);
   const typingCorrect = c ? hiragana === c.reading : false;
   const mcCorrect = mcChosen === c?.meaningEn;
@@ -82,62 +153,72 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
 
   const previews = React.useMemo(() => {
     if (!c) return null;
-    const out: Record<Rating, string> = {} as any;
+    const out: Record<Rating, string> = {} as Record<Rating, string>;
     for (const r of RATINGS) out[r] = formatInterval(scheduleNext({ ease: c.ease, interval: c.interval }, r).interval);
     return out;
   }, [c]);
 
   const mcOptions = React.useMemo(() => {
-    if (!c) return [];
-    const others = cards.filter((x) => x.cardId !== c.cardId).map((x) => x.meaningEn);
-    return [c.meaningEn, ...[...others].sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
-  }, [c?.cardId, cards]);
-
-  React.useEffect(() => {
-    if (!c) return;
-    const onKey = (e: KeyboardEvent) => {
-      const inInput = e.target instanceof HTMLInputElement;
-      if (e.key === " " && !revealed && !inInput) { e.preventDefault(); setRevealed(true); return; }
-      if (revealed && !pending) {
-        if (e.key === "1") void rate("again");
-        if (e.key === "2") void rate("hard");
-        if (e.key === "3") void rate("good");
-        if (e.key === "4") void rate("easy");
-      }
-      // MC letter shortcuts
-      if (!revealed && mode === "mc" && !mcAnswered) {
-        const i = ["a","b","c","d"].indexOf(e.key.toLowerCase());
-        if (i >= 0 && mcOptions[i]) answerMC(mcOptions[i]);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [c?.cardId, revealed, pending, mode, mcAnswered, mcOptions]);
-
-  React.useEffect(() => {
-    setTyped(""); setRevealed(false); setMcAnswered(false); setMcChosen(null);
-    if (mode === "type") inputRef.current?.focus();
-  }, [c?.cardId, idx]);
+    if (!c) return [] as string[];
+    const others = cards.reduce<string[]>((acc, x) => {
+      if (x.cardId !== c.cardId) acc.push(x.meaningEn);
+      return acc;
+    }, []);
+    return [c.meaningEn, ...others.toSorted(() => Math.random() - 0.5).slice(0, 3)].toSorted(() => Math.random() - 0.5);
+  }, [c, cards]);
 
   async function rate(r: Rating) {
     if (!c || pending) return;
-    setPending(true);
+    dispatch({ type: "RATE_START" });
     try {
       await gradeCard(c.cardId, r);
     } catch {
-      setPending(false); return;
+      dispatch({ type: "RATE_FAIL" });
+      return;
     }
-    setStats((s) => ({ correct: s.correct + (isCorrect && r !== "again" ? 1 : 0), again: s.again + (r === "again" ? 1 : 0), done: s.done + 1 }));
-    if (r === "again") setQueue((q) => [...q, c]);
-    setIdx((i) => i + 1);
-    setPending(false);
+    dispatch({ type: "RATE_END", rating: r, card: c, wasCorrect: isCorrect });
   }
 
   function answerMC(opt: string) {
     if (!c || mcAnswered) return;
-    setMcChosen(opt); setMcAnswered(true); setRevealed(true);
+    dispatch({ type: "ANSWER_MC", chosen: opt });
   }
+
+  // Focus the type input whenever a fresh card appears (idx advances, or mode switch).
+  React.useEffect(() => {
+    if (mode === "type" && !revealed && c) inputRef.current?.focus();
+  }, [c?.cardId, mode, revealed, c]);
+
+  // Keyboard shortcuts. Use a ref to hold the latest handlers + state so the
+  // listener is attached once and always sees fresh values without re-binding.
+  const keyboardRef = React.useRef({ rate, answerMC, revealed, pending, mode, mcAnswered, mcOptions, hasCard: !!c });
+  React.useEffect(() => {
+    keyboardRef.current = { rate, answerMC, revealed, pending, mode, mcAnswered, mcOptions, hasCard: !!c };
+  });
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = keyboardRef.current;
+      if (!k.hasCard) return;
+      const inInput = e.target instanceof HTMLInputElement;
+      if (e.key === " " && !k.revealed && !inInput) {
+        e.preventDefault();
+        dispatch({ type: "REVEAL" });
+        return;
+      }
+      if (k.revealed && !k.pending) {
+        if (e.key === "1") void k.rate("again");
+        if (e.key === "2") void k.rate("hard");
+        if (e.key === "3") void k.rate("good");
+        if (e.key === "4") void k.rate("easy");
+      }
+      if (!k.revealed && k.mode === "mc" && !k.mcAnswered) {
+        const i = ["a", "b", "c", "d"].indexOf(e.key.toLowerCase());
+        if (i >= 0 && k.mcOptions[i]) k.answerMC(k.mcOptions[i]);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // ── empty / done ──────────────────────────────────────────────────────
   if (total === 0) {
@@ -175,7 +256,10 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
       </div>
     );
   }
-  if (idx >= queue.length) return <SessionDone stats={stats} total={total} elapsedMs={Date.now() - sessionStart} />;
+  if (idx >= queue.length) {
+    const elapsedMs = sessionStartRef.current === 0 ? 0 : Date.now() - sessionStartRef.current;
+    return <SessionDone stats={stats} total={total} elapsedMs={elapsedMs} />;
+  }
 
   const progressPct = Math.round((stats.done / total) * 100);
 
@@ -220,7 +304,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                 <input
                   type="checkbox"
                   checked={showFurigana}
-                  onChange={(e) => setShowFurigana(e.target.checked)}
+                  onChange={() => dispatch({ type: "TOGGLE_FURIGANA" })}
                   className="h-3.5 w-3.5 accent-accent"
                 />
                 <span>Show furigana <span className="jp text-ink-3">（ふりがな）</span></span>
@@ -229,7 +313,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                 <input
                   type="checkbox"
                   checked={showMeaning}
-                  onChange={(e) => setShowMeaning(e.target.checked)}
+                  onChange={() => dispatch({ type: "TOGGLE_MEANING" })}
                   className="h-3.5 w-3.5 accent-accent"
                 />
                 <span>Show meaning</span>
@@ -257,7 +341,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                     <span className="text-ink-3/40 select-none">·</span>
                   )}
                   <button
-                    onClick={() => setMode(m)}
+                    onClick={() => dispatch({ type: "SET_MODE", mode: m })}
                     title={m === "type" ? "Write the answer from memory" : "Pick from multiple choices"}
                     className={`relative inline-flex items-center gap-1 text-[11px] font-medium leading-none transition-colors duration-150 ${
                       mode === m ? "text-ink" : "text-ink-3 hover:text-ink-2"
@@ -318,10 +402,9 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
               <>
                 <input
                   ref={inputRef}
-                  autoFocus
                   value={typed}
-                  onChange={(e) => setTyped(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") setRevealed(true); }}
+                  onChange={(e) => dispatch({ type: "TYPE", value: e.target.value })}
+                  onKeyDown={(e) => { if (e.key === "Enter") dispatch({ type: "REVEAL" }); }}
                   placeholder="Type the reading in romaji…"
                   disabled={revealed}
                   className="w-full rounded-lg border border-ink-3/40 bg-paper-2 px-4 py-3 text-center text-base outline-none transition placeholder:text-ink-3 focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:opacity-60"
@@ -435,14 +518,14 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
             <div className="flex gap-2">
               {mode === "type" && (
                 <button
-                  onClick={() => setRevealed(true)}
+                  onClick={() => dispatch({ type: "REVEAL" })}
                   className="flex-1 rounded-lg bg-ink px-4 py-3 text-sm font-medium text-paper transition hover:bg-ink/80"
                 >
                   Check answer
                 </button>
               )}
               <button
-                onClick={() => setRevealed(true)}
+                onClick={() => dispatch({ type: "REVEAL" })}
                 className="flex-1 rounded-lg border border-ink-3/35 bg-paper px-4 py-3 text-sm text-ink-2 transition hover:bg-paper-2"
               >
                 Reveal answer

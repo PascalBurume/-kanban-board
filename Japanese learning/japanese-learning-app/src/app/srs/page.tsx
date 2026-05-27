@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/me";
@@ -88,15 +89,17 @@ export default async function SRSPage({
 
   return (
     <AppShell active="srs">
-      <SRSReview
-        cards={session}
-        forecast={forecast}
-        leeches={leeches}
-        totalCards={totalCards}
-        nextDueISO={nextDue?.toISOString() ?? null}
-        selectedLevel={selectedLevel}
-        levels={JLPT_LEVELS as unknown as string[]}
-      />
+      <Suspense fallback={null}>
+        <SRSReview
+          cards={session}
+          forecast={forecast}
+          leeches={leeches}
+          totalCards={totalCards}
+          nextDueISO={nextDue?.toISOString() ?? null}
+          selectedLevel={selectedLevel}
+          levels={JLPT_LEVELS as unknown as string[]}
+        />
+      </Suspense>
     </AppShell>
   );
 }

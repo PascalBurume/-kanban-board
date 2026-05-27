@@ -41,8 +41,7 @@ function TutorInner() {
       prefillSent.current = true;
       append({ role: "user", content: prefillQ });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prefillQ, messages.length, append]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({

@@ -1,0 +1,369 @@
+// Japanese Learning App — content schema
+// Generated from the ER diagram (three layers: Curriculum, Verb Engine, Learner).
+// Local dev uses SQLite for zero setup; switch provider to "postgresql" for prod.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// A. CURRICULUM CONTENT
+// =====================================================================
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  title       String // "Genki I" / "Genki II"
+  level       String? // "N5", "N5-N4"
+  lessonStart Int
+  lessonEnd   Int
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id                Int                @id @default(autoincrement())
+  course            Course             @relation(fields: [courseId], references: [id])
+  courseId          Int
+  number            Int
+  titleJp           String?
+  titleEn           String
+  section           String? // "Conversation & Grammar" | "Reading & Writing"
+
+  // Source framework — drives per-curriculum UX (Irodori shows Can-do
+  // hero + JF attribution; Genki shows chapter header; etc.).
+  // Values: "genki" | "irodori-starter" | "irodori-elem1"
+  //       | "irodori-elem2" | "irodori-preint"
+  //       | "shinkanzen-n2" | "shinkanzen-n1"
+  framework        String?
+  // Irodori-style task-based learning objective (e.g.,
+  // "Can introduce yourself and exchange greetings").
+  canDo            String?
+  topicJp          String? // 私のこと
+  topicEn          String? // About me
+  // Full attribution footer rendered at the bottom of every lesson page
+  // when the lesson is sourced from a third-party curriculum.
+  attributionHtml  String?
+  attributionUrl   String?
+
+  grammarPoints     GrammarPoint[]
+  vocabulary        Vocabulary[]
+  kanji             Kanji[]
+  dialogues         Dialogue[]
+  cultureNotes      CultureNote[]
+  usefulExpressions UsefulExpression[]
+  exercises         Exercise[]
+  readingPassages   ReadingPassage[]
+  progress          LessonProgress[]
+  usersStudyingHere User[]             @relation("CurrentLesson")
+
+  @@unique([courseId, number])
+}
+
+model GrammarPoint {
+  id             Int               @id @default(autoincrement())
+  lesson         Lesson            @relation(fields: [lessonId], references: [id])
+  lessonId       Int
+  order          Int
+  title          String
+  pattern        String?
+  explanation    String? // English explanation (- bullets in Irodori)
+  explanationJp  String? // Japanese explanation (• bullets in Irodori)
+  examples       ExampleSentence[]
+  exercises      Exercise[]
+
+  @@unique([lessonId, order])
+}
+
+model Vocabulary {
+  id           Int               @id @default(autoincrement())
+  lesson       Lesson            @relation(fields: [lessonId], references: [id])
+  lessonId     Int
+  kana         String
+  kanji        String?
+  romaji       String?
+  english      String
+  partOfSpeech String?
+  jlptLevel    String? // "N5".."N1" — used by JLPT prep + filters
+  audioUrl     String?
+  verb         Verb?
+  examples     ExampleSentence[]
+}
+
+model Kanji {
+  id          Int     @id @default(autoincrement())
+  lesson      Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId    Int
+  character   String  @unique
+  onYomi      String?
+  kunYomi     String?
+  meaning     String?
+  strokes     Int?
+  jlptLevel   String? // "N5".."N1"
+  radicals    String? // comma-separated
+  mnemonic    String?
+  // KanjiVG stroke-order paths, JSON-encoded array of SVG path "d" strings,
+  // in stroke order. Used by the trace canvas to render the ghost and score
+  // user strokes.
+  strokesSvg  String?
+}
+
+model Dialogue {
+  id          Int            @id @default(autoincrement())
+  lesson      Lesson         @relation(fields: [lessonId], references: [id])
+  lessonId    Int
+  title       String?
+  scenarioEn  String? // Irodori dialogues are scenario-driven ("Tanaka meets Park at the office")
+  audioUrl    String?
+  lines       DialogueLine[]
+}
+
+model DialogueLine {
+  id         Int      @id @default(autoincrement())
+  dialogue   Dialogue @relation(fields: [dialogueId], references: [id])
+  dialogueId Int
+  order      Int
+  speaker    String?
+  jp         String
+  romaji     String?
+  en         String?
+}
+
+model CultureNote {
+  id        Int     @id @default(autoincrement())
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  Int
+  title     String
+  titleEn   String? // Irodori TIPS render bilingually
+  body      String? // JP body
+  bodyEn    String? // EN body
+}
+
+model UsefulExpression {
+  id        Int     @id @default(autoincrement())
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  Int
+  category  String?
+  itemsJson String? // JSON-encoded array (SQLite has no native arrays)
+}
+
+model Exercise {
+  id             Int           @id @default(autoincrement())
+  lesson         Lesson        @relation(fields: [lessonId], references: [id])
+  lessonId       Int
+  grammarPoint   GrammarPoint? @relation(fields: [grammarPointId], references: [id])
+  grammarPointId Int?
+  type           String // "fill_blank" | "translate" | "multiple_choice" | ...
+  prompt         String
+  answerKey      String?
+  quizResults    QuizResult[]
+}
+
+model ExampleSentence {
+  id             Int           @id @default(autoincrement())
+  grammarPoint   GrammarPoint? @relation(fields: [grammarPointId], references: [id])
+  grammarPointId Int?
+  vocab          Vocabulary?   @relation(fields: [vocabId], references: [id])
+  vocabId        Int?
+  jp             String
+  romaji         String?
+  en             String?
+}
+
+model ReadingPassage {
+  id       Int     @id @default(autoincrement())
+  lesson   Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  title    String?
+  body     String?
+}
+
+// =====================================================================
+// B. VERB CONJUGATION ENGINE
+// =====================================================================
+
+// SQLite doesn't support enums; these are validated in application code.
+// VerbGroup values: "GODAN" | "ICHIDAN" | "IRREGULAR"
+model Verb {
+  id             Int         @id @default(autoincrement())
+  vocab          Vocabulary? @relation(fields: [vocabId], references: [id])
+  vocabId        Int?        @unique
+  dictionaryForm String
+  masuForm       String?
+  romaji         String?
+  english        String?
+  group          String
+  transitivity   String?
+  forms          VerbForm[]
+}
+
+// FormType values: "PRESENT" | "PAST" | "TE" | "PRESENT_CONTINUOUS"
+//                | "NEGATIVE_PRESENT" | "TE_REQUEST" | "POTENTIAL" | "VOLITIONAL"
+model VerbForm {
+  id        Int     @id @default(autoincrement())
+  verb      Verb    @relation(fields: [verbId], references: [id])
+  verbId    Int
+  formType  String
+  valueKana String
+  romaji    String?
+  example   String?
+
+  @@unique([verbId, formType])
+}
+
+model ConjugationRule {
+  id            Int     @id @default(autoincrement())
+  group         String
+  endingPattern String?
+  rule          String
+  example       String?
+}
+
+// =====================================================================
+// C. LEARNER & PROGRESS
+// =====================================================================
+
+model User {
+  id              Int              @id @default(autoincrement())
+  name            String?
+  email           String           @unique
+  level           String? // "N5".."N1"
+  dailyGoalMin   Int              @default(30)
+  streakCount     Int              @default(0)
+  streakLastAt    DateTime?
+  dailyMinutes    Int              @default(0) // minutes studied today (reset by job)
+  xp              Int              @default(0)
+  currentLesson   Lesson?          @relation("CurrentLesson", fields: [currentLessonId], references: [id])
+  currentLessonId Int?
+  progress        LessonProgress[]
+  srsCards        SRSCard[]
+  quizResults     QuizResult[]
+  nhkSaves        NHKSave[]
+  jlptAttempts    JLPTAttempt[]
+  shelfItems      UserShelfItem[]
+}
+
+model LessonProgress {
+  id       Int    @id @default(autoincrement())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   Int
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  status   String @default("not_started") // not_started | in_progress | completed
+  percent  Int    @default(0)
+
+  @@unique([userId, lessonId])
+}
+
+// SRSCard.item is polymorphic: (itemType, itemId) points at a Vocabulary,
+// Kanji, GrammarPoint, or Verb. Resolve in application code.
+// ReviewItemType values: "VOCABULARY" | "KANJI" | "GRAMMAR_POINT" | "VERB"
+model SRSCard {
+  id       Int      @id @default(autoincrement())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   Int
+  itemType String
+  itemId   Int
+  ease     Float          @default(2.5)
+  interval Int            @default(0) // days until next review
+  dueDate  DateTime       @default(now())
+  reviews  ReviewLog[]
+
+  @@index([userId, dueDate])
+}
+
+model ReviewLog {
+  id         Int      @id @default(autoincrement())
+  card       SRSCard  @relation(fields: [cardId], references: [id])
+  cardId     Int
+  rating     Int // 0..5 (SM-2 quality)
+  reviewedAt DateTime @default(now())
+}
+
+model QuizResult {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId Int
+  score      Int
+  takenAt    DateTime @default(now())
+}
+
+// =====================================================================
+// D. NHK NEWS WEB EASY CONTENT
+// =====================================================================
+
+model NHKClip {
+  id              Int       @id @default(autoincrement())
+  source          String    @default("nhk-easy") // "nhk-easy" | "nhk-news"
+  url             String?
+  publishedAt     DateTime
+  titleJp         String
+  titleEn         String?
+  bodyJp          String // raw paragraphs joined by \n
+  bodyJpWithFuri  String? // markup with ruby annotations if available
+  summaryEn       String?
+  audioUrl        String?
+  durationSec     Int?
+  difficulty      String? // "N5".."N1"
+  saves           NHKSave[]
+}
+
+model NHKSave {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  clip        NHKClip  @relation(fields: [clipId], references: [id])
+  clipId      Int
+  wordSurface String
+  reading     String?
+  meaningEn   String?
+  savedAt     DateTime @default(now())
+}
+
+// =====================================================================
+// E. JLPT MOCK TESTS
+// =====================================================================
+
+model JLPTAttempt {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  level      String // "N5".."N1"
+  section    String // "vocab" | "grammar" | "reading" | "listening" | "full"
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  scorePct   Float?
+  answers    String? // JSON
+}
+
+// =====================================================================
+// F. LIBRARY OF RESOURCES
+// =====================================================================
+
+model LibraryResource {
+  id        Int             @id @default(autoincrement())
+  type      String // "textbook" | "podcast" | "news" | "manga" | "video" | "grammar-site"
+  source    String // "NHK" | "YouTube" | "Tofugu" | "Tae Kim" | "Genki" | ...
+  title     String
+  subtitle  String?
+  url       String?
+  level     String? // "N5".."N1"
+  shelved   UserShelfItem[]
+}
+
+model UserShelfItem {
+  id         Int             @id @default(autoincrement())
+  user       User            @relation(fields: [userId], references: [id])
+  userId     Int
+  resource   LibraryResource @relation(fields: [resourceId], references: [id])
+  resourceId Int
+  addedAt    DateTime        @default(now())
+  progressPct Int            @default(0)
+
+  @@unique([userId, resourceId])
+}

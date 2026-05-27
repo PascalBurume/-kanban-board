@@ -1,0 +1,2977 @@
+[
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 1,
+    "titleJp": "先週、日本に来たばかりです",
+    "titleEn": null,
+    "canDo": "とができる。",
+    "cultureNotes": [
+      "J-POP／Perfume",
+      "食べ歩き",
+      "アニソン",
+      "SNSの日本語学習グループ"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N1というN2",
+        "pattern": "N1というN2",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ホアは「花」という意味です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-たばかりです",
+        "pattern": "V-たばかりです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "先週、日本に来たばかりです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ていました",
+        "pattern": "V-ていました",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ベトナムでは、ホテルで働いていました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "それ／そこ ＜文脈指示＞",
+        "pattern": "それ／そこ ＜文脈指示＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ジャワ島に、ジョグジャカルタという大きい町があります。ウォノソボは、そこから、バスで4 時間ぐらいです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "～て、～",
+        "pattern": "～て、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "～から、～～けど、～お茶の畑がたくさんあって、のんびりしています。",
+            "en": null
+          },
+          {
+            "jp": "ウランバートルは首都だから、都会ですよ。",
+            "en": null
+          },
+          {
+            "jp": "首都ではないけど、とてもにぎやかです。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 2,
+    "titleJp": "まじめそうな人ですね",
+    "titleEn": null,
+    "canDo": "か特定したりすることができる。",
+    "cultureNotes": [
+      "日本人とひげ",
+      "安室奈美恵",
+      "三船敏郎／七人の侍",
+      "コミュニティ誌",
+      "残業時間"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N1 はN2 が ナA-です／イA-いです ②",
+        "pattern": "N1 はN2 が ナA-です／イA-いです ②",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "江口さんは、髪が短いです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ている+人",
+        "pattern": "V-ている+人",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ナインさんは、帽子をかぶっている人です。",
+            "en": null
+          },
+          {
+            "jp": "加藤さんは、あそこで、コピーをしている人です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Sよ",
+        "pattern": "Sよ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "原さんは、座って、本を読んでる人ですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Sし、～",
+        "pattern": "Sし、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "三船敏郎は、演技が上手だし、本当にかっこいいです。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 3,
+    "titleJp": "アレルギーがあるので、食べられないんです",
+    "titleEn": null,
+    "canDo": "できる。",
+    "cultureNotes": [
+      "定食",
+      "おかわり／大盛り",
+      "コーヒー／紅茶",
+      "わさび",
+      "自転車ルール",
+      "飲食店での喫煙",
+      "フライ"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S1 ので、S2",
+        "pattern": "S1 ので、S2",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "今日は自転車で来たので、飲めないんです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Sよね",
+        "pattern": "Sよね",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "おすし、わさび、入ってますよね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 11,
+        "title": "Nで～",
+        "pattern": "Nで～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "Ａ：テーブルと座敷がございますが…。",
+            "en": null
+          },
+          {
+            "jp": "Ｂ：テーブルでお願いします。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 12,
+        "title": "ナA-な／イA-い／V-る のは、Nです",
+        "pattern": "ナA-な／イA-い／V-る のは、Nです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "人気があるのは、お刺身定食です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 4,
+    "titleJp": "しょうゆをつけないで食べてください",
+    "titleEn": null,
+    "canDo": "おすすめの飲食店についての紹介を聞いて、店の特徴を理解することができる。どこかいい店、ありませんか？よく混ぜて食べてください15料理の食べ方の説明を聞いて、理解することができる。",
+    "cultureNotes": [
+      "ラーメン",
+      "郷土料理",
+      "しょうゆ／ソース／つゆ／たれ",
+      "手巻きずし",
+      "焼きいも",
+      "しゃぶしゃぶ"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nなら、～",
+        "pattern": "Nなら、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "Ａ：この近くに、おすすめの店がありますか？",
+            "en": null
+          },
+          {
+            "jp": "Ｂ：この近くなら、「平兵衛」がおすすめです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-て、～",
+        "pattern": "V-て、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "V-ないで、～ ＜方法＞こちらの野菜の天ぷらは、つゆにつけて食べてください。",
+            "en": null
+          },
+          {
+            "jp": "エビはつゆにつけないで、塩をかけて食べてください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ちゃだめです",
+        "pattern": "V-ちゃだめです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "一度に、そんなにたくさんお肉を入れちゃだめですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てから、～",
+        "pattern": "V-てから、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "うどんは、お肉と野菜を食べてから、入れましょう。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "S1 が、S2",
+        "pattern": "S1 が、S2",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お店は新しくてきれいですが、お昼は混んでいます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 5,
+    "titleJp": "早く予約したほうがいいですよ",
+    "titleEn": null,
+    "canDo": "きるかなどを理解することができる。",
+    "cultureNotes": [
+      "日本の観光地1（北海道／東京／京都／沖縄）",
+      "富士山および富士五湖周辺",
+      "高速バス"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-（られ）ます ＜可能形①＞",
+        "pattern": "V-（られ）ます ＜可能形①＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "新鮮なカニとかウニとか食べられますよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "～ところ",
+        "pattern": "～ところ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "遊べるところはありますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）って聞きました",
+        "pattern": "S（普通形）って聞きました",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "S（普通形）って言っていましたうどんがおいしいって聞きました。",
+            "en": null
+          },
+          {
+            "jp": "バスが安くて便利だって先輩が言ってました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "【疑問詞】V-たらいいですか？",
+        "pattern": "【疑問詞】V-たらいいですか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "日光に行くんですけど、何で行ったらいいですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-たほうがいいです",
+        "pattern": "V-たほうがいいです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "厚い上着を持って行ったほうがいいですよ。",
+            "en": null
+          },
+          {
+            "jp": "できれば、日曜日は行かないほうがいいですよ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 6,
+    "titleJp": "いろいろなところに行けて、よかったです",
+    "titleEn": null,
+    "canDo": "ができる。",
+    "cultureNotes": [
+      "新幹線の切符",
+      "日本の観光地3（大阪／ハウステンボス／高尾山／浄土ヶ浜）",
+      "串カツ",
+      "たこ焼き",
+      "ゆば"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-るつもりです",
+        "pattern": "V-るつもりです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "明日は、中禅寺湖に行くつもりです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-（られ）て、～",
+        "pattern": "V-（られ）て、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "いろいろなところに行けて、よかったです。",
+            "en": null
+          },
+          {
+            "jp": "ショーが見られなくて、残念でした。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S1 し、S2 し、～",
+        "pattern": "S1 し、S2 し、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "海で泳げたし、船に乗れたし、楽しかったです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-る／V-ている／V-た とき、～",
+        "pattern": "V-る／V-ている／V-た とき、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "道を歩いているとき、リスを見ました。",
+            "en": null
+          },
+          {
+            "jp": "ウミネコが近くに来たとき、ちょっとこわかったです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "【人】と【人数】で",
+        "pattern": "【人】と【人数】で",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "友だちと2 人でハウステンボスに行って来ました。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 7,
+    "titleJp": "雨が降ったら、ホールでやります",
+    "titleEn": null,
+    "canDo": "ことができる。",
+    "cultureNotes": [
+      "祭りと神輿",
+      "町内会",
+      "地域の掲示板／回覧板",
+      "地域の防災無線放送",
+      "花火大会",
+      "道の駅",
+      "盆踊り",
+      "浴衣"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "～たら、～",
+        "pattern": "～たら、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "雨が降ったら、盆踊りは日曜日にやるよ。",
+            "en": null
+          },
+          {
+            "jp": "盆踊りが終わったら、いっしょに居酒屋に行きましょう。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-（ら）れます ＜受身①＞",
+        "pattern": "V-（ら）れます ＜受身①＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "7 月14 日、「ひかりホール」において、コンサートが開催されます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-（られ）ます ＜可能形②＞",
+        "pattern": "V-（られ）ます ＜可能形②＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "盆踊りは簡単だから、だれでも踊れますよ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 8,
+    "titleJp": "屋台はどこかわかりますか？",
+    "titleEn": null,
+    "canDo": "ことができる。",
+    "cultureNotes": [
+      "国際交流フェスティバル",
+      "日本語スピーチコンテスト",
+      "カラオケ大会"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "もうV-ました",
+        "pattern": "もうV-ました",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "まだV-て（い）ませんＡ：スピーチコンテストは、もう始まりましたか？",
+            "en": null
+          },
+          {
+            "jp": "Ｂ：まだ始まってません。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "まだV-ます",
+        "pattern": "まだV-ます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "イベント、まだやってますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【疑問詞】＋S（普通形）か、～",
+        "pattern": "【疑問詞】＋S（普通形）か、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "明日のフリーマーケットは、何時からか、わかりますか？",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 9,
+    "titleJp": "成人の日は、何をするんですか？",
+    "titleEn": null,
+    "canDo": "ことができる。",
+    "cultureNotes": [
+      "日本のお正月",
+      "成人の日",
+      "日本の年中行事",
+      "餅つき"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "～んですか？",
+        "pattern": "～んですか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "成人の日は、何をするんですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Nしか＋否定文",
+        "pattern": "Nしか＋否定文",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "乗り物に3 つしか乗れませんでした。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Nだけ",
+        "pattern": "Nだけ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "今年は、1 日だけ実家に帰りました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-たりして、～",
+        "pattern": "V-たりして、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "友だちといっしょに買い物をしたりして、楽しかったです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-なくちゃならない",
+        "pattern": "V-なくちゃならない",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "甥や姪にお年玉をあげなくちゃならないし、大変でした。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "V-れます ＜可能形③＞",
+        "pattern": "V-れます ＜可能形③＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "DVDもたくさん見れました。",
+            "en": null
+          },
+          {
+            "jp": "久しぶりに、実家の母の料理を食べれてよかったです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 7,
+        "title": "S（普通形）＋人が～",
+        "pattern": "S（普通形）＋人が～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "春節は、田舎に帰る人が多いです。",
+            "en": null
+          },
+          {
+            "jp": "最近では、海外に旅行する人もいます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 8,
+        "title": "V-ながら、～",
+        "pattern": "V-ながら、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ソンクラーンは、町を歩きながら、みんなで水をかけ合います。",
+            "en": null
+          },
+          {
+            "jp": "レバランは、年によって違います。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 10,
+    "titleJp": "どんな服を着て行けばいいですか？",
+    "titleEn": null,
+    "canDo": "することができる。",
+    "cultureNotes": [
+      "葬式",
+      "携帯電話マナー",
+      "結婚式のパーティー",
+      "お見舞い",
+      "新築パーティー",
+      "地方ごとの風習",
+      "フードコート"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "【疑問詞】V-ばいいですか？",
+        "pattern": "【疑問詞】V-ばいいですか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お葬式には、何を持って行けばいいですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ては\tいけません／だめです",
+        "pattern": "V-ては\tいけません／だめです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "Vちゃ\t いけません／だめです信号が赤のときは、横断歩道を渡ってはいけませんよ。",
+            "en": null
+          },
+          {
+            "jp": "バスの中では、話しちゃだめだよね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-なくちゃ",
+        "pattern": "V-なくちゃ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "食器は自分で片付けなくちゃ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-るように、～",
+        "pattern": "V-るように、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "次の人がすぐに席に座れるように、食器を片付けます。",
+            "en": null
+          },
+          {
+            "jp": "トイレがつまらないように、紙はごみ箱に捨てます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-（ら）れます ＜受身②＞",
+        "pattern": "V-（ら）れます ＜受身②＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お店の店長さんに、「今度から気をつけて」と注意されました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "S（普通形）の？",
+        "pattern": "S（普通形）の？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お金を払わないで、ジュース飲んだの？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 7,
+        "title": "V-なきゃ",
+        "pattern": "V-なきゃ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ちゃんとお金を払ってから飲まなきゃ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 11,
+    "titleJp": "ポイントカードを忘れてしまいました",
+    "titleEn": null,
+    "canDo": "とができる。",
+    "cultureNotes": [
+      "洋服のサイズ",
+      "緊急時の電話番号",
+      "ポイントカード",
+      "ショッピングセンターのインフォメーション",
+      "セール"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-てみてもいいですか？",
+        "pattern": "V-てみてもいいですか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "このセーター、着てみてもいいですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "ナA- ／イA- すぎます",
+        "pattern": "ナA- ／イA- すぎます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "この色はちょっと派手すぎます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "ナA-な／イA-い の",
+        "pattern": "ナA-な／イA-い の",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "もうちょっと大きいの、ありますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "NをV-（ら）れます ＜受身③＞",
+        "pattern": "NをV-（ら）れます ＜受身③＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "（私は）自転車を盗まれました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "S（普通形）かもしれません",
+        "pattern": "S（普通形）かもしれません",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "もしかしたら、バッグをとられたかもしれません。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "V-てしまいました",
+        "pattern": "V-てしまいました",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ポイントカード、忘れてしまいました。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 12,
+    "titleJp": "この掃除機は軽くて動かしやすいですよ",
+    "titleEn": null,
+    "canDo": "相談することができる。",
+    "cultureNotes": [
+      "フリマサイト／フリマアプリ",
+      "値切り交渉"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-るまで、～",
+        "pattern": "V-るまで、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "手元に届くまで、2 日しかかかりませんでした。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-やすいです",
+        "pattern": "V-やすいです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "どっちが使いやすいですか？",
+            "en": null
+          },
+          {
+            "jp": "この掃除機は、重くて、使いにくいですね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "N1とN2（と）、どちら／どっちが～か？",
+        "pattern": "N1とN2（と）、どちら／どっちが～か？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "（N1 より）N2 のほうが、～。",
+            "en": null
+          },
+          {
+            "jp": "Ａ：どっちが使いやすいですか？",
+            "en": null
+          },
+          {
+            "jp": "Ｂ：セーシバの掃除機のほうがスギシタより軽くて、動かしやすいですよ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 13,
+    "titleJp": "いろいろな資料を展示してあります",
+    "titleEn": null,
+    "canDo": "施設などを案内されたとき、そこに何があるか、どんなことができるかを、聞いて理解することができる。",
+    "cultureNotes": [
+      "公共の文化施設／体育施設",
+      "図書館",
+      "やさしい日本語"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-（ら）れます ＜受身④＞",
+        "pattern": "V-（ら）れます ＜受身④＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "この建物は、2 年前に建てられました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-てあります",
+        "pattern": "V-てあります",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "昔、使われた道具とか、いろいろな資料を展示してあります。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "N1 だけじゃなくて、N2 も～",
+        "pattern": "N1 だけじゃなくて、N2 も～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "本だけじゃなくて、CDとか、DVDもただで借りられます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Nなら、～",
+        "pattern": "Nなら、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "返却は、市内の図書館なら、どこに返してもいいです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "【疑問詞】V-ても、～",
+        "pattern": "【疑問詞】V-ても、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "返却は、市内の図書館なら、どこに返してもいいです。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 14,
+    "titleJp": "前髪は、もう少し短く切ってもらえますか？",
+    "titleEn": null,
+    "canDo": "を理解することができる。",
+    "cultureNotes": [
+      "クリーニングサービス",
+      "宅配便",
+      "理髪店／美容院",
+      "外国人向けの公共サービス"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "ナA-に／イA-く V",
+        "pattern": "ナA-に／イA-く V",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "全体的に短く切ってください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Nのために、～",
+        "pattern": "Nのために、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "外国の方のために、いろいろなサービスがあります。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 15,
+    "titleJp": "会議室の電気がついたままでした",
+    "titleEn": null,
+    "canDo": "ことができる。",
+    "cultureNotes": [
+      "クールビズ",
+      "レジ袋とマイバッグ",
+      "ごみの分別"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-たままです",
+        "pattern": "V-たままです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "会議室の電気がついたままでしたよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-るのにいいです",
+        "pattern": "V-るのにいいです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "マイストローは、ごみを減らすのにいいんですよ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 16,
+    "titleJp": "地震が来ても、あわてて動かないでください",
+    "titleEn": null,
+    "canDo": "いかを理解することができる。",
+    "cultureNotes": [
+      "自然災害とハザードマップ",
+      "非常持ち出し袋と防災グッズ",
+      "マグニチュードと震度",
+      "日本の地方区分",
+      "防災訓練"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V （命令形）",
+        "pattern": "V （命令形）",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "急げ。こっちに集まれ。",
+            "en": null
+          },
+          {
+            "jp": "V-るな （禁止の命令形）",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ないようにしてください",
+        "pattern": "V-ないようにしてください",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "できるだけ煙を吸わないようにしてください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-（られ）なくなります",
+        "pattern": "V-（られ）なくなります",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ドアが開かなくなると、外に逃げられなくなります。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Sても、～",
+        "pattern": "Sても、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "大きな地震が来ても、あわてて動かないでください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V（普通形）かどうか、～",
+        "pattern": "V（普通形）かどうか、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "店が開いているかどうか、わからないけど…。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 17,
+    "titleJp": "日本語が前より話せるようになりました",
+    "titleEn": null,
+    "canDo": "73日本に来てからのできごとや生活の変化について、簡単に話すことができる。",
+    "cultureNotes": [
+      "和太鼓",
+      "ほめられたとき",
+      "日本のテレビドラマ"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-（られ）るようになりました",
+        "pattern": "V-（られ）るようになりました",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "最近は、ほかの人にお店の情報を教えられるようになりました。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem2",
+    "lessonNumber": 18,
+    "titleJp": "将来、自分の会社を作ろうと思います",
+    "titleEn": null,
+    "canDo": "76自分の将来の夢や希望を、簡単に話すことができる。",
+    "cultureNotes": [
+      "職人",
+      "送別会",
+      "日本語の勉強法"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-（よ）うと思います／思っています",
+        "pattern": "V-（よ）うと思います／思っています",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "将来は、タイで、自分の会社を作ろうと思います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-るために、～",
+        "pattern": "V-るために、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "日本に住むために、もっと日本語をがんばろうと思います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-てあげます",
+        "pattern": "V-てあげます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "両親に、家を建ててあげるつもりです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てもらいます",
+        "pattern": "V-てもらいます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "JF工業のみなさんには、とても親切にしてもらいました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-てくれます",
+        "pattern": "V-てくれます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "山内さんは、私にたくさん、日本語を教えてくれました。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 3,
+    "titleJp": "よろしくお願いします",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N です",
+        "pattern": "N1 はN2 ですトンです。",
+        "explanation": "I’m Ton. -\t In Japanese, you do not need to say things that can be understood from the context. When introducing yourself, example",
+        "examples": [
+          {
+            "jp": "私はマルシアです。",
+            "en": "I’m Márcia."
+          },
+          {
+            "jp": "• 「です」は、名詞（N）のあとについて文を作る働きをします。この課では、「【名前】です」の形で、自分の名前を言うときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「N1 はN2 です」は、「N1＝N2」という意味です。",
+            "en": null
+          },
+          {
+            "jp": "• 「N1は」の「は」は話題（トピック）を示す助詞で、これから何について言うかを示します。「は」と書いて、「わ」と読みます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【place  場所】から来ました",
+        "pattern": "ブラジルから来ました。",
+        "explanation": "I’m from Brazil. -\t This expression is used to say where you are from. In this lesson, it is used to say what country you are from when introducing yourself.",
+        "examples": []
+      },
+      {
+        "order": 3,
+        "title": "Ｎは？",
+        "pattern": "Ｎは？",
+        "explanation": "-\t This expression is used to ask about a topic. In this lesson, it is used to ask a person’s name and where they are from. -\t If you want to ask more than one person about the same topic you do not need to repeat the question. Instead, example",
+        "examples": [
+          {
+            "jp": "お名前は？",
+            "en": "What’s your name?"
+          },
+          {
+            "jp": "• 自分が知りたい話題について、相手に質問するときの言い方です。この課では、相手の名前や出身について質問するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「Nは？」の「は」は「N1はN2 です」の「は」と同じで、話題（トピック）を示す助詞です。上昇イントネーションで発音することによって、質問を表します。",
+            "en": null
+          },
+          {
+            "jp": "• 同じ話題について複数の人にたずねるときは、質問を繰り返さずに、人の名前のあとに「は？」をつけて、「ニンさんは？」のように言うことができます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "S か？",
+        "pattern": "みなさんは、友だちですか？",
+        "explanation": "Are you all friends? example",
+        "examples": [
+          {
+            "jp": "• 疑問文は、文の最後に「か」をつけて、上昇イントネーションで発音します。「友だちです。」は平叙文、「友だちですか？」は疑問文です。",
+            "en": null
+          },
+          {
+            "jp": "• 2 人称を示す「あなた」は、会話ではほとんど使われません。その代わり、相手の名前がわかっている場合は、名前に「さん」をつけて「マイさん」のように言います（例①）。相手が複数の場合は、例文のように「みなさん」を使うこともできます。また、だれに話しかけているかが場面からわかるときは、何も言う必要がありません（例②③）。",
+            "en": null
+          },
+          {
+            "jp": "• 「さん」は、名前のあとにつけて女性にも男性にも使うことができますが、尊称なので、自分の名前にはつけません。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t①\t Ａ\t：\tマイさんは、ベトナムからですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "N も",
+        "pattern": "ケマラさんも、ベトナムからですか？",
+        "explanation": "Are you also from Vietnam, Khemera-san?",
+        "examples": []
+      },
+      {
+        "order": 6,
+        "title": "I’m from the Philippines, too.",
+        "pattern": "N じゃないですベトナムじゃないです。",
+        "explanation": "I’m not from Vietnam. -\t This expression is used to say a negative noun sentence. The example shows how to answer negatively when somone asks if you are from Vietnam. example",
+        "examples": [
+          {
+            "jp": "• 名詞文の否定の言い方です。例文は、べトナム出身かと聞かれて、否定するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 否定文にするときは、「～です」を「～じゃないです」に変えます。「Nじゃないです」は「N です」の否定形です。",
+            "en": null
+          },
+          {
+            "jp": "• 「～じゃないです」の「じゃ」は話しことばで使われます。書きことばでは、「では」になります。",
+            "en": null
+          },
+          {
+            "jp": "• 「N です」の否定形には、「N じゃないです」のほかに「N じゃありません」という形もあります。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 4,
+    "titleJp": "東京に住んでいます",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N1とN2",
+        "pattern": "夫と子どもです。",
+        "explanation": "This is my husband and child.",
+        "examples": [
+          {
+            "jp": "• 「と」は、いくつかの名詞を並べて言うときに使う助詞です。名詞と名詞をつなぐ働きをします。",
+            "en": null
+          },
+          {
+            "jp": "• この課では、家族のメンバーを紹介するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t私の家族です。父と母と姉です。",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "example This is my family. This is my father, mother, and sister."
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【interrogative expressions  疑問表現 】ですか？",
+        "pattern": "何歳ですか？",
+        "explanation": "How old are you?",
+        "examples": [
+          {
+            "jp": "• 疑問表現を使った質問の言い方です。疑問表現のあとに「ですか？」をつけて上昇イントネーションで発音します。上の例文では、年齢をたずねるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「何歳」「いくつ」は、この課では同じ意味で使われていますが、「いくつ」は、もともとは数を聞くときに使われることばです。",
+            "en": null
+          },
+          {
+            "jp": "• 「いくつ」を使って丁寧にたずねるときは、「お」をつけて、「おいくつですか？」と質問します。",
+            "en": null
+          },
+          {
+            "jp": "• 友だち同士などのカジュアルな会話では、「ですか？」を省略して「何歳？」のように質問することができます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "It’s a secret.",
+        "pattern": "【place  場所】に 住",
+        "explanation": "-\t This expression is used to say where someone lives. example",
+        "examples": [
+          {
+            "jp": "家族は、フィリピンに住んでいます。",
+            "en": "My family lives in the Philippines."
+          },
+          {
+            "jp": "• 住んでいるところの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 「フィリピンに」「東京に」のように、国名や都市名のあとに助詞「に」をつけて、住んでいる場所を示します。",
+            "en": null
+          },
+          {
+            "jp": "• 「住んでいます」は動詞「住む」から作られますが、この用法については『初級1』で勉強します。この課では、「～に住んでいます」を1 つのフレーズとして覚えてください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "N1 のN2",
+        "pattern": "N1 のN2",
+        "explanation": "2.\tThe noun in front and the noun after it are the same thing example",
+        "examples": [
+          {
+            "jp": "私の母です。",
+            "en": "That’s my mother."
+          },
+          {
+            "jp": "ペットのジョンです。",
+            "en": "That’s my pet, John."
+          },
+          {
+            "jp": "5歳の誕本語の先族の写",
+            "en": "-\t You can also use it to connect three or more nouns (example ① and ②)."
+          },
+          {
+            "jp": "「の」は助詞で、名詞と名詞の関係を示します。この課では、次の2 つの用法を取り上げます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 5,
+    "titleJp": "うどんが好きです",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N が 好",
+        "pattern": "N が 好",
+        "explanation": "-\t These expressions are used to express what you like or dislike. example",
+        "examples": [
+          {
+            "jp": "N は 好きじゃないです",
+            "en": null
+          },
+          {
+            "jp": "肉と野菜が好きです。",
+            "en": "I like meat and vegetables."
+          },
+          {
+            "jp": "魚は好きじゃないです。",
+            "en": "I don’t like fish."
+          },
+          {
+            "jp": "• 好き嫌いを表すときの言い方です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "What Japanese food do you like?",
+        "pattern": "N は ちょっと…わさびは、ちょっと…。",
+        "explanation": "I don’t really like wasabi. -\t This expression is used to gently say something negative. In this lesson, it is used to say that you don’t really like something when asked about food preferences.",
+        "examples": [
+          {
+            "jp": "• 否定的なことを相手に柔らかく伝える言い方です。この課では、食べ物の好みを聞かれて、苦手だということを伝えるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「ちょっと」は、もともとは「少し」という意味です。「～はちょっと…」のように、最後まで言わないことによって、「ちょっとだめです」「ちょっと苦手です」ということを表します。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tＡ\t：\t日本の食べ物、何が好きですか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "example"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V- ますか？\b（マス-form  マス形",
+        "pattern": "V- ますか？\b（マス-form  マス形",
+        "explanation": "） -\t These expressions are used to ask a question using verbs. They are used to ask someone’s intention. In this lesson, it is used to ask questions about what someone wants to drink.",
+        "examples": [
+          {
+            "jp": "お茶、飲みますか？",
+            "en": "Would you like tea?"
+          },
+          {
+            "jp": "何、飲む？",
+            "en": "Do you want something to drink?"
+          },
+          {
+            "jp": "みますか？.",
+            "en": null
+          },
+          {
+            "jp": "級１』.",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Orange juice, please.",
+        "pattern": "N をV- ます",
+        "explanation": "example",
+        "examples": [
+          {
+            "jp": "シリアルを食べます。",
+            "en": "I eat cereal."
+          },
+          {
+            "jp": "つも、何、食、飲• 動詞のマス形は、意志を表すだけでなく、事実や習慣を表すときにも使われます。この課では、朝食の習慣を話すときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 動詞の目的語は、「シリアルを」のように、名詞に助詞「を」をつけて動詞の前に置きます。「を」と書いて「お」と読みます。「シリアル」は「食べます」の目的語です。",
+            "en": null
+          },
+          {
+            "jp": "• 質問する場合、目的語を示す助詞「を」は省略されることが多いです。下の例の「いつも、何、食べますか？」は、「何を」の「を」が省略された形です。➌の「お茶、飲みますか？」も同様です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V- ません",
+        "pattern": "（N は）V- ないです",
+        "explanation": "-\t These are ways to say negative verb sentences.",
+        "examples": [
+          {
+            "jp": "私は、朝ご飯は、あまり食べません。",
+            "en": "I don’t usually eat breakfast."
+          },
+          {
+            "jp": "私も、食べないです。",
+            "en": "I don’t eat breakfast, either."
+          },
+          {
+            "jp": "ご飯",
+            "en": null
+          },
+          {
+            "jp": "• 動詞文の否定の言い方です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "I don’t eat breakfast.",
+        "pattern": "いつも／よく V- ます",
+        "explanation": "-\t These expressions are used to talk about frequency. example",
+        "examples": [
+          {
+            "jp": "私は、パンと、卵と、ヨーグルトをよく食べます。",
+            "en": "I often eat bread, eggs, and yogurt."
+          },
+          {
+            "jp": "朝ご飯は、あまり食べません。",
+            "en": "I don’t usually eat breakfast."
+          },
+          {
+            "jp": "• 頻度を表す言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 「いつも」「よく」「あまり」は副詞で、動詞の前に置かれます。語順は、「よくヨーグルトを食べます」「ヨーグルトをよく食べます」のどちらでもかまいません。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 6,
+    "titleJp": "チーズバーガーください",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "お願",
+        "pattern": "N、",
+        "explanation": "-\t These expressions are used to order something. example",
+        "examples": [
+          {
+            "jp": "ホットコーヒー、お願いします。",
+            "en": "Hot coffee, please."
+          },
+          {
+            "jp": "これ、ください。",
+            "en": "I’ll have this."
+          },
+          {
+            "jp": "• 注文するときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• ほしいものを言って、そのあとに「ください」、または「お願いします」をつけます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Ｎにします",
+        "pattern": "私は、うどんにします。",
+        "explanation": "I’ll have udon. -\t This expression is used to say that you have made a decision. In this lesson, it is used to ask and answer questions about what to eat. example",
+        "examples": [
+          {
+            "jp": "• 「します」は動詞「する」のマス形で、助詞「に」をつけて「～にします」の形で、決めたものを表します。",
+            "en": null
+          },
+          {
+            "jp": "• 何にするか質問するときは、疑問詞「何」と「か？」を使ってたずねます。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tＡ\t：\t何にしますか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "What will you have?"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "お願",
+        "pattern": "N、【number  数",
+        "explanation": "】 -\t These expressions are used to order a certain amount of something.",
+        "examples": [
+          {
+            "jp": "生ビール3つと、ウーロン茶",
+            "en": "1"
+          },
+          {
+            "jp": "つ、お願いします。",
+            "en": "I’ll have three draft beers and one oolong tea, please."
+          },
+          {
+            "jp": "枝豆2つ、ください。",
+            "en": "Two edamames, please."
+          },
+          {
+            "jp": "に….",
+            "en": "-\t When counting things such as dishes, use 1"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "We’ll have three hot coffees and one iced coffee, please.",
+        "pattern": "Ｎ（は） ありますか？",
+        "explanation": "-\t This expression is used to ask for something. In this lesson, it is used to request a certain item at a restaurant. example",
+        "examples": [
+          {
+            "jp": "マヨネーズ、ありますか？",
+            "en": "Do you have mayonnaise?"
+          },
+          {
+            "jp": "• あるかどうか質問するときの言い方です。この課では、レストランでほしいものがあって、それを頼むときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「あります」は動詞「ある」のマス形で、存在を表します。ほしいものを話題（トピック）にして、助詞「は」をつけて、「～はありますか？」とたずねます。助詞「は」は省略してもかまいません。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t　客：\tすみません。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 7,
+    "titleJp": "部屋が4 つあります",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "ここは 【place  場所】です",
+        "pattern": "ここは 【place  場所】です",
+        "explanation": "-\t This expression is used to describe a place. In this lesson, it is used to describe rooms while giving a house tour. example",
+        "examples": [
+          {
+            "jp": "ここは玄関です。",
+            "en": "This is the entrance."
+          },
+          {
+            "jp": "• 場所を説明するときの言い方です。この課では、家の中を案内しながら、部屋の説明をするときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「ここ」は、今いる場所を示す指示詞です。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tここはお風呂です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "This is Son-san’s room. Feel free to enter.",
+        "pattern": "【place  場所】にN が あります",
+        "explanation": "1 -\t These expressions are used to explain the existence of something. In this lesson, they are used to explain what kinds of rooms and facilities are in a house.",
+        "examples": [
+          {
+            "jp": "ここに階段があります。",
+            "en": "These are the stairs."
+          },
+          {
+            "jp": "階に部屋が4つあります。",
+            "en": "The first floor has four rooms."
+          },
+          {
+            "jp": "• 何があるかを説明するときの言い方です。この課では、家の中にどんな部屋や設備があるか説明するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「ここに」の助詞「に」は、どこにあるかを示します。「階段が」の助詞「が」は、何があるかを示します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "（N は）",
+        "pattern": "（N は）",
+        "explanation": "example",
+        "examples": [
+          {
+            "jp": "トースターはありません。",
+            "en": "There’s no toaster."
+          },
+          {
+            "jp": "ベッドはないです。",
+            "en": "There’s no bed."
+          },
+          {
+            "jp": "• 「ありません」は「あります」の否定の形で、ないことを表します。この課では、「～はありますか？」と、あるかどうか聞かれて答えるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「ないです」は「ありません」と同じ意味です。辞書形「ある」の否定形「ない」の後ろに、「です」がついた言い方です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "No, it doesn’t.",
+        "pattern": "ナA- ですイA- いですいえ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "家は静かです。",
+            "en": "The house is quiet."
+          },
+          {
+            "jp": "ちょっとせまいです。",
+            "en": "It’s a bit small."
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "But, it’s very clean.",
+        "pattern": "ナA- じゃないですイA- くないです",
+        "explanation": "-\t These expressions use the negative form of adjective sentences. In this lesson, they are used to answer questions  negatively about your home.",
+        "examples": [
+          {
+            "jp": "アパートは、あまり静かじゃないです。",
+            "en": "My apartment is not very quiet."
+          },
+          {
+            "jp": "寮は広くないです。",
+            "en": "The dormitory isn’t large."
+          },
+          {
+            "jp": "• 形容詞文の否定の言い方です。この課では、住まいについての質問に否定の答えを返すときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 否定文にするには、ナ形容詞の場合、「～です」を「～じゃないです」に変えます。イ形容詞の場合、「～いです」を「～くないです」に変えます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 8,
+    "titleJp": "山田さんはどこにいますか？",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "【place  場所】で V- ます",
+        "pattern": "ここで着替えます。",
+        "explanation": "You can change your clothes here. example",
+        "examples": [
+          {
+            "jp": "• 助詞「で」は、「ここで」のように、場所を表す名詞のあとについて、動作の場所を示します。この課では、職場を案内しながら、何をする部屋か説明するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tここは食堂です。ここで昼ご飯を食べます。",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "This is the cafeteria. This is where we eat lunch."
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【person  人】は 【place  場所】に います",
+        "pattern": "山田さんは、食堂にいます。",
+        "explanation": "Yamada-san is in the cafeteria. -\t This expression is used to explain where a person is. In this lesson, it is used for asking and answering where a person is at work. example",
+        "examples": [
+          {
+            "jp": "• 人の居場所を説明するときの言い方です。この課では、職場で人を探したりどこにいるか教えたりするときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 人の居場所を述べるには、動詞「いる」を使います。「います」は「いる」のマス形です。",
+            "en": null
+          },
+          {
+            "jp": "• 「山田さんは」のように人を話題（トピック）にして助詞「は」をつけます。その人がいる場所を、「食堂に」のように助詞「に」を使って示します。",
+            "en": null
+          },
+          {
+            "jp": "• 「～にいます」は、簡単に「～です」で言い換えることができます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "In the warehouse.",
+        "pattern": "（【person  人】は）",
+        "explanation": "example",
+        "examples": [
+          {
+            "jp": "辻さんは、いませんね。",
+            "en": "Tsuji-san isn’t here, is he."
+          },
+          {
+            "jp": "アマンダさん、いないですね。",
+            "en": "Amanda-san isn’t here, is she."
+          },
+          {
+            "jp": "• 「いません」は「います」の否定の形です。",
+            "en": null
+          },
+          {
+            "jp": "• 「いないです」は、「いません」と同じ意味です。「いる」の否定形「いない」の後ろに、「です」がついた形です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "【something  もの】はそこ　　　に あります",
+        "pattern": "【something  もの】はそこ　　　に あります",
+        "explanation": "-\t This expression is used to describe the location of an object. In this lesson, it is used to say where stationery or equipment, etc. is at work.",
+        "examples": [
+          {
+            "jp": "はさみは、そこにあります。",
+            "en": "The scissors are over there."
+          },
+          {
+            "jp": "• ものがある場所を説明するときの言い方です。この課では、職場で文房具や備品などがどこにあるか教えるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• ものがある場所を述べるには、動詞「ある」を使います。「あります」は「ある」のマス形です。",
+            "en": null
+          },
+          {
+            "jp": "• 「はさみは」のように、ものを話題（トピック）にして助詞「は」をつけます。ものがある場所を、「そこに」のように助詞「に」を使って示します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "It’s over there.",
+        "pattern": "N の【location  位置】に あります",
+        "explanation": "-\t This expression is used to explain a specific location. In this lesson, it is used to say the location of stationery or equipment, etc. at work. example",
+        "examples": [
+          {
+            "jp": "引き出しの中にあります。",
+            "en": "It’s in the drawer."
+          },
+          {
+            "jp": "• 基準になるものを使って、「～の上／中／下」のように位置を説明します。",
+            "en": "］ ▶\tＡ\t：\tF"
+          },
+          {
+            "jp": "AX は、どこにありますか。",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "Where is the fax machine?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 9,
+    "titleJp": "12 時から1 時まで昼休みです",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "【time  時間】にV- ます",
+        "pattern": "【time  時間】にV- ます",
+        "explanation": "-\t These are expressions of time. In this lesson, they are used to say what time you wake up and go to bed. example Ｂ\t：\t７",
+        "examples": [
+          {
+            "jp": "5 時に起きます。",
+            "en": "I wake up at 5."
+          },
+          {
+            "jp": "11 時ごろ寝ます。",
+            "en": "I go to bed at around 11."
+          },
+          {
+            "jp": "• 時間の言い方です。この課では、起きる時間、寝る時間を言うときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 時間は、「5 時に」のように助詞「に」をつけて示します。「に」はその時間ちょうどであることを表します。「に」の代わりに「ごろ」をつけると、前後を含んだ幅のある時間を表します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Around midnight.",
+        "pattern": "【time  時間】から【time  時間】まで",
+        "explanation": "-\t This expression is used to say the start time and end time. In this lesson, it is used to explain the work schedule for the day.",
+        "examples": [
+          {
+            "jp": "12 時から1 時まで、昼休みです。",
+            "en": "Lunch is from noon to 1."
+          },
+          {
+            "jp": "• 始まる時間と終わる時間の言い方です。この課では、1 日の仕事のスケジュールを説明するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 助詞「から」は、開始を示します。助詞「まで」は、終わりを示します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "At 6 pm.",
+        "pattern": "【date and time  日時】がいいです",
+        "explanation": "-\t This expression is used to ask or answer about a schedule. example",
+        "examples": [
+          {
+            "jp": "私は、土曜日がいいです。",
+            "en": "Saturday is convenient for me."
+          },
+          {
+            "jp": "• 相手に都合をたずねたり答えたりするときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 「いいです」は、都合がいいことを表します。「土曜日が」「6 時が」のように、曜日や日時に助詞「が」をつけて言います。都合がいい日時を質問するときは、「いつ」や「何時」を使います。",
+            "en": null
+          },
+          {
+            "jp": "• 都合が悪いことを言うときは、「～はだめです」、「～はちょっと…」のように答えます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 10,
+    "titleJp": "ホチキス貸してください",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V- てくださいV- てV- てくれる？",
+        "pattern": "V- てくださいV- てV- てくれる？",
+        "explanation": "-\t These expressions are used to give instructions or make requests to another person. In this lesson, they are used to make requests at work. -\t The goal of this lesson is to understand the expressions above when you hear them. Being able to give example",
+        "examples": [
+          {
+            "jp": "ちょっと、手伝ってください。",
+            "en": "Excuse me, could you give me a hand?"
+          },
+          {
+            "jp": "そこのドライバー、取って。",
+            "en": "Pass me that screwdriver."
+          },
+          {
+            "jp": "窓、閉めてくれる？",
+            "en": "Could you close the window?"
+          },
+          {
+            "jp": "• 相手に指示や依頼をするときの言い方です。この課では、職場で仕事を頼むときに使っています。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Here you are.",
+        "pattern": "Ｎですね　＜Confirmation  確認＞",
+        "explanation": "-\t This expression is used to check some information. In this lesson, it is used to confirm instructions. -\t When you don’t understand well about the instructions, such as the amount or time, ask again using inter- example",
+        "examples": [
+          {
+            "jp": "Ａ： これ、コピー、30 枚お願い。",
+            "en": "Please make 30 copies of this."
+          },
+          {
+            "jp": "Ｂ： はい、30 ですね。",
+            "en": "Right, 30 copies."
+          },
+          {
+            "jp": "• 情報を確認するときの言い方です。この課では、指示された内容を確認するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 確認したいことのあとに「ですね」をつけて言います。文末の「ね」は相手への確認を表します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "N、貸",
+        "pattern": "N、貸",
+        "explanation": "-\t These expressions are used when borrowing something. In this lesson, they are used to borrow stationery from people at work. -\t This lesson covers the following four expressions.",
+        "examples": [
+          {
+            "jp": "N、借りてもいいですか？",
+            "en": null
+          },
+          {
+            "jp": "N、いいですか？",
+            "en": null
+          },
+          {
+            "jp": "N、ありますか？",
+            "en": null
+          },
+          {
+            "jp": "ホチキス、貸してください。",
+            "en": "Please lend me the stapler."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 11,
+    "titleJp": "どんなマンガが好きですか？",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nは何ですか？",
+        "pattern": "Nは何ですか？",
+        "explanation": "example",
+        "examples": [
+          {
+            "jp": "趣味は、何ですか？",
+            "en": "What is your hobby?"
+          },
+          {
+            "jp": "• 疑問詞「何」は、自分が知りたいことを話題（トピック）にして「～は何ですか？」の形でさまざまな話題について質問することができます。ここでは、趣味について質問するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「何」の読み方には「なん」と「なに」があります。",
+            "en": null
+          },
+          {
+            "jp": "①\u0007 「ですか？」をつけて言うときは、「なん」と発音します。また、次のように、他のことばと組み合わせて使う場合も、「なん」と発音します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "どんなＮ",
+        "pattern": "どんなスポーツが好きですか？",
+        "explanation": "What kind of sports do you like? example",
+        "examples": [
+          {
+            "jp": "• 「どんな」は疑問詞で、「どんなスポーツ」のように、名詞の前に置かれて、それについて説明を求めるときに使います。この課では、スポーツ、映画、音楽などについて、ジャンルや作品などをたずねるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tＡ\t：\tどんな映画が好きですか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "What kind of movies do you like?"
+          },
+          {
+            "jp": "Ｂ\t：\tアクション映画が好きです。",
+            "en": "I like action movies."
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "ナA- じゃないです",
+        "pattern": "＜Extent  程度＞イA- くないです",
+        "explanation": "-\t This expression is used to express an extent. It is used with adjectives. example",
+        "examples": [
+          {
+            "jp": "スポーツは、あまり好きじゃないです。",
+            "en": "I don’t like sports much."
+          },
+          {
+            "jp": "ても好• 程度を表す言い方です。形容詞と使います。",
+            "en": null
+          },
+          {
+            "jp": "• 「あまり」は副詞で、「～はあまり好きじゃないです」のように形容詞の否定形といっしょに使うと、程度が高くないことを表します。",
+            "en": null
+          },
+          {
+            "jp": "同じような副詞に「ぜんぜん」があります。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "It’s not large at all. But, it’s very clean.",
+        "pattern": "いつも／たいてい／よく／ときどき V- ます",
+        "explanation": "-\t These expressions are used to express frequency. They are used with verbs. example",
+        "examples": [
+          {
+            "jp": "休みの日は、たいてい、映画を見ます。",
+            "en": "I mostly watch movies on my days off."
+          },
+          {
+            "jp": "スポーツは、ぜんぜんしないね。",
+            "en": "I don’t play sports at all."
+          },
+          {
+            "jp": "• 頻度を表す言い方です。動詞と使います。",
+            "en": null
+          },
+          {
+            "jp": "• 「いつも」「たいてい」「よく」は頻度が高いことを表します。「ときどき」は中間ぐらいです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "程度　  （＋ナA ／イA）とても",
+        "pattern": "【person  人】とV- ます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "夫と公園でテニスをします。",
+            "en": "I play tennis with my husband at the park."
+          },
+          {
+            "jp": "• 助詞「と」は、人を表す名詞のあとについて、動作・行為をいっしょにする人を示します。",
+            "en": null
+          },
+          {
+            "jp": "• 助詞「で」は、場所を表す名詞のあとについて、動作・行為の場所を示します。",
+            "en": null
+          },
+          {
+            "jp": "• 動詞文では、何をするかを示す部分（動詞）は文の最後に置かれます。それ以外の要素、例えば、いつ、だれと、どこでなどを示す部分の語順は自由です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 12,
+    "titleJp": "いっしょに飲みに行きませんか？",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "【date and time  日時】に【event  イベント】が あります",
+        "pattern": "【date and time  日時】に【event  イベント】が あります",
+        "explanation": "-\t This expression is used to express when and where an event takes place.",
+        "examples": [
+          {
+            "jp": "日曜日に、さくら公園でタイフェスティバルがありますね。",
+            "en": "There is a Thai festival at Sakura Park on Sunday."
+          },
+          {
+            "jp": "• イベントなどがあることを伝えるときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 日時は、「日曜日に」「12 月20 日に」「7 時に」のように、助詞「に」を使って示します。ただし、話しことばでは省略される場合もあります。また、「明日」「今晩」「来週」のようなことばには、「に」はつけません。",
+            "en": null
+          },
+          {
+            "jp": "• イベントの場所は、「さくら公園で」のように、助詞「で」を使って示します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "place of an event There’s a summer festival at Chuuoo Park tonight.",
+        "pattern": "N に行",
+        "explanation": "-\t This expression indicates the purpose of going somewhere. In this lesson, it is used to ask if a person is going to an event. example",
+        "examples": [
+          {
+            "jp": "明日の忘年会に行きますか？",
+            "en": "Are you going to the year-end party tomorrow?"
+          },
+          {
+            "jp": "• 行く目的を表す言い方です。この課では、イベントなどに行くかどうかをたずねるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 助詞「に」は、買い物、散歩、映画、パーティー、試合のような、行為やイベントを表す名詞のあとにつくとき、目的を示します。",
+            "en": null
+          },
+          {
+            "jp": "動詞「行く」といっしょに使います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V- ませんか？",
+        "pattern": "いっしょに行きませんか？",
+        "explanation": "Do you want to go together? -\t This expression is used to invite the other person. example",
+        "examples": [
+          {
+            "jp": "• 相手を誘うときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 動詞のマス形の語尾「ます」を「ませんか？」に変えて、上昇イントネーションで発音します。この課では、「行きませんか？」という言い方だけ取り上げます。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tＡ\t：\tこれから、昼ご飯に行きます。いっしょに行きませんか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "I’m going to go and have lunch. Do you want to go together?"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V- ましょう",
+        "pattern": "また今度行きましょう。",
+        "explanation": "Let’s go another time. -\t This expression is used to suggest or tell someone to do something together. In this lesson, it is used to confirm that you will do something together after being invited (example ①), or to suggest to do something on a different occasion after your invitation is declined (example ②). example",
+        "examples": [
+          {
+            "jp": "• いっしょに何かをすることを提案したり伝えたりするときの言い方です。この課では、誘われたときいっしょに行くことを確認したり（例①）、断られたとき次の機会にすることを提案したり（例②）するのに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「始めましょう。」「ちょっと、休みましょう。」のように、相手の行動を促すときにも使います。",
+            "en": null
+          },
+          {
+            "jp": "］\t▶\t①\t Ａ\t：\t今度、みんなで、ハイキングに行きませんか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "Would you like to go hiking with everyone next time?"
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "I see. Let’s do it another time.",
+        "pattern": "V- に行",
+        "explanation": "-\t This expression is used to say the purpose of going somewhere using a verb. In this lesson, it is used to invite example",
+        "examples": [
+          {
+            "jp": "みんなで、いっしょに焼肉を食べに行きませんか？",
+            "en": "Would you like to go out for grilled meat with everyone?"
+          },
+          {
+            "jp": "行• 動詞を使って行く目的を表す言い方です。この課では、「V- に行きませんか？」の形で、相手を誘うときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「食べに」のように、動詞のマス形から「ます」を取った形に、助詞「に」をつけます。文法➋の「Ｎに行きます」のＮ（名詞）の部分が動詞表現になった形です。",
+            "en": null
+          },
+          {
+            "jp": "• 「食べに行く」「見に行く」「聞きに行く」などがよく使われます。「飲みに行く」は、お店にお酒を飲みに行くことを意味します。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 13,
+    "titleJp": "このバスは空港に行きますか？",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "この【vehicle  乗り物】は【place  場所】に行きますか？",
+        "pattern": "この【vehicle  乗り物】は【place  場所】に行きますか？",
+        "explanation": "-\t This expression is used to ask the destination of a vehicle. In this lesson, it is used to check whether the transport is going where you want. example",
+        "examples": [
+          {
+            "jp": "このバスは、空港に行きますか？",
+            "en": "Does this bus go to the airport?"
+          },
+          {
+            "jp": "• 乗り物の行き先をたずねるときの言い方です。この課では、自分が行きたい場所に行くかどうか確認するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「この」は指示詞で、「このバス」のように名詞の前について、目の前にあるものを指すときに使います。",
+            "en": null
+          },
+          {
+            "jp": "• 「空港に」の助詞「に」は、目的地を示します。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "destination Does this bus go to the airport? (Lesson 13)",
+        "pattern": "ここは【place  場所】ですか？",
+        "explanation": "-\t This expression is used to ask about a place. In this lesson, it is used to check stops and station names on buses and trains. example",
+        "examples": [
+          {
+            "jp": "ここは、どこですか？",
+            "en": "Where am I?"
+          },
+          {
+            "jp": "• 今いる場所を質問するときは「ここ」を使いますが、次に止まる場所を質問するときは「次」を使います（例②）。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t①\t Ａ\t：\tすみません。ここは、どこですか？",
+            "en": null
+          },
+          {
+            "jp": "［ 例",
+            "en": "Excuse me. Where am I?"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【vehicle  乗り物】で来ます",
+        "pattern": "【vehicle  乗り物】で来ます",
+        "explanation": "-\t This expression is used to say a means of transport. example",
+        "examples": [
+          {
+            "jp": "バイクで来ます。",
+            "en": "I go by motorcycle."
+          },
+          {
+            "jp": "• 交通手段の言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 手段や方法は、「バイクで」のように、助詞「で」を使って示します。ただし、徒歩の場合は、動詞「歩く」のテ形「歩いて」を使います（例②）。",
+            "en": null
+          },
+          {
+            "jp": "• 手段や方法をたずねるときは、「どうやって」、または「何で」を使って質問します。ある場所までの交通手段を質問するときは、動詞「行く」を使って「どうやって行きますか？」と質問します（例③）。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "【time / period  時間／期間】かかります",
+        "pattern": "【time / period  時間／期間】かかります",
+        "explanation": "-\t This expression is used to say the length of time or a period. In this lesson, it is used to say your commuting time. example",
+        "examples": [
+          {
+            "jp": "1 時間半かかります。",
+            "en": "It takes about one and a half hours."
+          },
+          {
+            "jp": "• 時間の長さや期間の言い方です。この課では、通勤時間を言うときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 時刻を表すときは「～時」、時間の長さを表すときは「～時間」を使います。ただし「～分」の場合は、時刻と時間の両方を表すことができます。つまり、「10 分」は、「7 時10 分」と「10 分かかります」の両方に使われます。",
+            "en": null
+          },
+          {
+            "jp": "• 時間の長さや期間をたずねるときは、「どのぐらい／どのくらい」を使います。「30 分ぐらい」の「ぐらい」は、「だいたい、約」という意味です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "【vehicle  乗り物】に 乗",
+        "pattern": "【place  場所】で",
+        "explanation": "-\t These expressions are used to explain how to travel by a vehicle.",
+        "examples": [
+          {
+            "jp": "ここから、12 番のバスに乗ります。バスセンターで、バスを降ります。",
+            "en": "Take the No. 12 bus from here. Get off at the bus center."
+          },
+          {
+            "jp": "• 乗り物を使った移動方法を説明するときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 「乗ります」は動詞「乗る」のマス形で、助詞「に」を使って、「～に乗ります」の形で使います。",
+            "en": null
+          },
+          {
+            "jp": "• 「降ります」は動詞「降りる」のマス形で、助詞「を」を使って、「～を降ります」の形で使います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "Get off at Shiminbyooin-mae. It’s the 5th stop.",
+        "pattern": "【place  場所】から【place  場所】まで",
+        "explanation": "-\t This expression is used to say a spatial range. In this lesson, it is used to explain how to travel from one place to another. example",
+        "examples": [
+          {
+            "jp": "ここから新みなと駅まで、電車に乗ります。",
+            "en": "Take the train to Shin-Minato station from here."
+          },
+          {
+            "jp": "• 区間を表す言い方です。この課では、ある場所からある場所までの移動方法を説明するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 助詞「から」と「まで」は、場所を表す名詞と使う場合は、区間の始まりと終わりを示します。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\tＡ\t：\t空港からホテルまで、どうやって行きますか？",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 14,
+    "titleJp": "大きな建物ですね",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "【place  場所】に N（は） ありますか？",
+        "pattern": "この近くに、コンビニはありますか？",
+        "explanation": "Is there a convenience store near here? example",
+        "examples": [
+          {
+            "jp": "• あるかどうかをたずねるときの言い方です。この課では、「この近くに」を使って、コンビニやATM などの場所を聞くときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 場所をより直接的に質問する場合は、「～は、どこにありますか？」「～は、どこですか？」と聞きます（例②③）。",
+            "en": null
+          },
+          {
+            "jp": "エーティーエム",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t①\t Ａ\t：\tすみません。この近くに、ATM はありますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Ｎの【location  位置】に います",
+        "pattern": "今、改札の前にいます。",
+        "explanation": "I’m in front of the ticket gate. -\t This expression is used to specifically say where a person is. In this lesson, it is used to tell someone where you are when trying to meet.",
+        "examples": []
+      },
+      {
+        "order": 3,
+        "title": "In front of the information counter.",
+        "pattern": "ナA- なN",
+        "explanation": "-\t These expressions are used to say your impression. In this lesson, they are used to give impressions of various places.",
+        "examples": [
+          {
+            "jp": "にぎやかな通りですね。",
+            "en": "This is a busy street."
+          },
+          {
+            "jp": "広い公園ですね。",
+            "en": "It’s a large park."
+          },
+          {
+            "jp": "い公",
+            "en": null
+          },
+          {
+            "jp": "• 感想を伝えるときの言い方です。この課では、いろいろな場所の感想を言うときに使っています。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 15,
+    "titleJp": "電池がほしいんですが…",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N がほしいんですが",
+        "pattern": "N がほしいんですが",
+        "explanation": "-\t This expression is used to tell someone you want something, and to ask them for advice or some kind of action. In this lesson, it is used to ask about where a certain item is sold. example",
+        "examples": [
+          {
+            "jp": "電池がほしいんですが、どこで買えますか？",
+            "en": "I need some batteries. Where can I buy them?"
+          },
+          {
+            "jp": "延長コードがほしいんですが…。",
+            "en": "I need an extension cord..."
+          },
+          {
+            "jp": "• ほしいものがあることを相手に伝えて、アドバイスや対応を求めるときの言い方です。この課では、商品を売っている場所を質問するときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「～んですが」は、自分の状況を説明して、相手に対処を求めるときに使われる表現です。ここでは、「ほしい」のあとにつけて使っています。「ほしい」も「好き（な）」と同様、「電池が」のように、ほしい対象を助詞「が」を使って示します。ここでは、「～がほしいんですが」というフレーズとして覚えましょう。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "ナA- ですねイA- いですねナA ！",
+        "pattern": "ナA- ですねイA- いですねナA ！",
+        "explanation": "-\t These expressions are used to express your impressions. In this lesson, they are used to say something about a certain item while shopping.",
+        "examples": [
+          {
+            "jp": "このコート、おしゃれですね。",
+            "en": "This coat is stylish."
+          },
+          {
+            "jp": "この傘、おもしろいですね。",
+            "en": "This umbrella is interesting."
+          },
+          {
+            "jp": "このコート、すてき！",
+            "en": "This coat is nice!"
+          },
+          {
+            "jp": "このバッグ、かわいい！",
+            "en": "This bag is cute!"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 16,
+    "titleJp": "これ、いくらですか？",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "それ　　（は） いくらですか？",
+        "pattern": "それ　　（は） いくらですか？",
+        "explanation": "How much is this? -\t These expressions are used to refer to an item and ask its price.",
+        "examples": [
+          {
+            "jp": "• 商品を指さして、値段をたずねるときの言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 「これ」「それ」「あれ」はものを指すときに使う指示詞です。「ここ、そこ、あそこ」（→第8 課➍）と同様、話し手と聞き手の位置関係によって、使い分けます。",
+            "en": null
+          },
+          {
+            "jp": "①「これ」は、話し手の近くにあるものを指すときに使います。",
+            "en": null
+          },
+          {
+            "jp": "②「それ」は、聞き手の近くにあるものを指すときに使います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "You mean this? It’s a birthday present.",
+        "pattern": "その　　N",
+        "explanation": "example",
+        "examples": [
+          {
+            "jp": "そのカレンダー、いくらですか？",
+            "en": "How much is that calendar?"
+          },
+          {
+            "jp": "• 指示詞を名詞の前につけて言うときは、「これ、それ、あれ」ではなく、「この、その、あの」を使います。",
+            "en": null
+          },
+          {
+            "jp": "• この課では、特定の商品を指して、値段をたずねるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "］ ▶\t　客：\tあのバッグはいくらですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【amount  数量】ずつ",
+        "pattern": "【amount  数量】ずつ",
+        "explanation": "-\t This expression is used to say the amount when shopping. example",
+        "examples": [
+          {
+            "jp": "チョコレートケーキとチーズケーキ、2 個ずつお願いします。",
+            "en": "I would like two each of chocolate cake and cheese cake, please."
+          },
+          {
+            "jp": "-\t ～個• 買い物をするときの数量の言い方です。",
+            "en": null
+          },
+          {
+            "jp": "• 複数の商品を同じ数や量買う場合は、数量のあとに「ずつ」をつけて、まとめて言うことができます。例文は、「チョコレートケーキ2 個と、チーズケーキ2 個」と同じ意味です。",
+            "en": null
+          },
+          {
+            "jp": "• 「～個」は小さなものを数えるときに使う単位です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 17,
+    "titleJp": "映画を見に行きました",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V- ましたV- ませんでした",
+        "pattern": "V- ましたV- ませんでした",
+        "explanation": "-\t These expressions are used to talk about past events. In this lesson, they are used to talk about what you did on your day off. example I watched TV. I don’t watch TV.",
+        "examples": [
+          {
+            "jp": "いえ週末は、何もしませんでした。家でゆっくりしました。",
+            "en": "I didn’t do anything on the weekend. I relaxed at home."
+          },
+          {
+            "jp": "• 過去のできごとを述べるときの言い方です。この課では、休みの日にしたことを話すときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 肯定形は、動詞のマス形の「～ます」を「～ました」に変えます。",
+            "en": null
+          },
+          {
+            "jp": "• 否定形は、動詞の否定形の「～ません」を「～ませんでした」に変えます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "何",
+        "pattern": "何",
+        "explanation": "-\t These expressions are used to add emphasis to a negative sentence. In this lesson, they are used to answer questions about what you did on your day off. example",
+        "examples": [
+          {
+            "jp": "V- ませんでした",
+            "en": null
+          },
+          {
+            "jp": "週末は、何もしませんでした。",
+            "en": "I didn’t do anything on the weekend."
+          },
+          {
+            "jp": "私は、どこにも行きませんでした。",
+            "en": "I didn’t go anywhere."
+          },
+          {
+            "jp": "• 強く否定するときの言い方です。この課では、休みの日にしたことを質問されて答えるときに使っています。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "I didn’t go anywhere. I read a book at home.",
+        "pattern": "ナA- でしたイA- かったです「ゴジラ」は、まあまあでした。",
+        "explanation": "Godzilla was OK. -\t These expressions are used to talk about impressions of past events. In this lesson, they are used to express your thoughts about your day off.",
+        "examples": [
+          {
+            "jp": "国際フェスティバルは、とても楽しかったです。",
+            "en": "The international festival was a lot of fun."
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "『初級』で勉強します。",
+        "pattern": "N でした",
+        "explanation": "-\t This is a noun sentence in the past tense. It is used when talk about past events.",
+        "examples": [
+          {
+            "jp": "とてもいい天気でした。",
+            "en": "The weather was great."
+          },
+          {
+            "jp": "• 名詞文の過去の言い方です。過去のできごとについて述べるときに使います。",
+            "en": null
+          },
+          {
+            "jp": "• 文末の「～です」を「～でした」に変えます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "It rained.",
+        "pattern": "N じゃなかったですナA- じゃなかったですイA- くなかったです",
+        "explanation": "-\t These expressions use the negative form of a noun sentence or adjective sentence in the past tense. In this lesson, they are used to express comments and thoughts about past events. example",
+        "examples": [
+          {
+            "jp": "お客さんは、あまり多くなかったです。",
+            "en": "There weren’t that many customers."
+          },
+          {
+            "jp": "• 名詞文、形容詞文の過去の否定の形です。この課では、過去のできごとについて感想やコメントを述べるときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 「～なかった」は過去の否定表現に使われます。名詞とナ形容詞の場合は、否定の形「～じゃないです」を「～じゃなかったです」に変えます（例①②）。イ形容詞の場合は、否定の形「～くないです」を「～くなかったです」に変えます（例③）。",
+            "en": null
+          },
+          {
+            "jp": "• 「なかったです」の部分を「ありませんでした」に置き換えて、「N- じゃありませんでした」「ナA- じゃありませんでした」「イA- くありませんでした」という形もあります。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-starter",
+    "lessonNumber": 18,
+    "titleJp": "温泉に入りたいです",
+    "titleEn": null,
+    "canDo": null,
+    "cultureNotes": [],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V- たいです",
+        "pattern": "V- たいです",
+        "explanation": "-\t This expression is used to express a desire. In this lesson, it is used to say what you want to do on days off and what you want to do in Japan. example",
+        "examples": [
+          {
+            "jp": "炊飯器が買いたいです。",
+            "en": "I want to buy a rice cooker."
+          },
+          {
+            "jp": "飯器を買います。　　　　　→炊飯器が買いたいです。",
+            "en": "(I will buy a rice cooker.) (I want to buy a rice cooker.)"
+          },
+          {
+            "jp": "• 希望を表す言い方です。この課では、休みにしたいことや、日本でしたいことを言うときに使っています。",
+            "en": null
+          },
+          {
+            "jp": "• 動詞のマス形から「ます」を取って、「たいです」をつけます。例文の「買いたいです」は、動詞「買う」のマス形「買います」から「ます」を取って「たいです」をつけた形です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "I will go to Hokkaido. I want to ride a horse.",
+        "pattern": "どこかV- ます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "どこか旅行したいです。",
+            "en": "I want to take a trip somewhere."
+          },
+          {
+            "jp": "• 「どこか」は、場所を特定しないときに使う表現です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  }
+]

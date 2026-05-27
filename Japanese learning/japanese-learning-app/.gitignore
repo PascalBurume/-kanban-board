@@ -1,0 +1,27 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+tsconfig.tsbuildinfo
+
+# production
+/build
+
+# environment & local db
+.env
+*.db
+*.db-journal
+prisma/dev.db
+prisma/dev.db-journal
+
+# prisma generated client (regenerated on install)
+/src/generated
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json

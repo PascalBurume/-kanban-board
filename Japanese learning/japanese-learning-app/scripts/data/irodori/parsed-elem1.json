@@ -1,0 +1,930 @@
+[
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 1,
+    "titleJp": "レストランで働いています",
+    "titleEn": "I work in a restaurant.",
+    "canDo": "日本でしている仕事について、簡単に話すことができる。",
+    "cultureNotes": ["「目上」と「目下」", "「お元気ですか？」のあいさつ"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "丁寧体・普通体",
+        "pattern": "丁寧体・普通体",
+        "explanation": null,
+        "examples": [
+          { "jp": "お久しぶりです。お元気ですか？", "en": null },
+          { "jp": "久しぶり。元気？", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【期間】になります",
+        "pattern": "【期間】になります",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本に来て1年になります。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【時点】（に）来ました",
+        "pattern": "【時点】（に）来ました",
+        "explanation": null,
+        "examples": [
+          { "jp": "去年の9月に来ました。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-ています①",
+        "pattern": "V-ています",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本では、何をしていますか？", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 2,
+    "titleJp": "ゲームをするのが好きです",
+    "titleEn": "I like playing video games.",
+    "canDo": "趣味や好きなことについて、簡単に話すことができる。",
+    "cultureNotes": ["野球", "いけばな", "スタジオジブリ", "国際交流協会"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-ることです",
+        "pattern": "V-ることです",
+        "explanation": null,
+        "examples": [
+          { "jp": "趣味は映画を見ることです。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-るのが好きです",
+        "pattern": "V-るのが好きです",
+        "explanation": null,
+        "examples": [
+          { "jp": "ゲームをするのが好きです。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【人】と【場所】で V-ます",
+        "pattern": "【人】と【場所】で V-ます",
+        "explanation": null,
+        "examples": [
+          { "jp": "休みの日は、たいてい友だちと体育館でバドミントンをします。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V1-て、V2",
+        "pattern": "V1-て、V2",
+        "explanation": null,
+        "examples": [
+          { "jp": "毎週、夕方までバドミントンをして、そのあと、みんなでご飯を食べます。", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-ています②",
+        "pattern": "V-ています",
+        "explanation": null,
+        "examples": [
+          { "jp": "いけばなを習っています。", "en": null }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "Nができます",
+        "pattern": "Nができます",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本語、英語、フィリピノ語、スペイン語ができます。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 3,
+    "titleJp": "冬はとても寒くなります",
+    "titleEn": "It gets very cold in winter.",
+    "canDo": "自分が好きな季節とその理由について、簡単に話すことができる。",
+    "cultureNotes": ["日本の気候", "梅雨", "桜と花見", "紅葉", "セミ"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nに/ナA-に/イA-くなります",
+        "pattern": "Nに/ナA-に/イA-くなります",
+        "explanation": null,
+        "examples": [
+          { "jp": "春は桜の花が咲きます。暖かくなります。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "いちばんナA-です/イA-いです",
+        "pattern": "いちばん ナA-です / イA-いです",
+        "explanation": null,
+        "examples": [
+          { "jp": "秋がいちばん好きです。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "イA-いのが好きです/苦手です",
+        "pattern": "イA-いのが好きです / 苦手です",
+        "explanation": null,
+        "examples": [
+          { "jp": "私は暑いのが好きです。寒いのが苦手です。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "ナA-です/イA-いですから",
+        "pattern": "ナA-です / イA-いですから",
+        "explanation": null,
+        "examples": [
+          { "jp": "秋が好きです。もみじの景色がきれいですから。", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "S1から、S2",
+        "pattern": "S1から、S2",
+        "explanation": null,
+        "examples": [
+          { "jp": "暑いのが大好きですから、夏が好きです。", "en": null }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "N1やN2",
+        "pattern": "N1やN2",
+        "explanation": null,
+        "examples": [
+          { "jp": "海や山で遊ぶのも楽しいです。", "en": null }
+        ]
+      },
+      {
+        "order": 7,
+        "title": "N1とか（N2とか）",
+        "pattern": "N1とか（N2とか）",
+        "explanation": null,
+        "examples": [
+          { "jp": "秋は果物がおいしいですよね。ぶどうとか梨とか。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 4,
+    "titleJp": "昨日はすごい雨でしたね",
+    "titleEn": "It rained heavily yesterday, didn't it?",
+    "canDo": "天気予報を聞いて、だいたいの内容を理解することができる。",
+    "cultureNotes": ["台風", "天気予報"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Sね〈共感〉",
+        "pattern": "Sね〈共感〉",
+        "explanation": null,
+        "examples": [
+          { "jp": "今日はいい天気ですね。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "非過去・過去",
+        "pattern": "非過去・過去",
+        "explanation": null,
+        "examples": [
+          { "jp": "昨日はすごい雨でしたね。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ています③",
+        "pattern": "V-ています",
+        "explanation": null,
+        "examples": [
+          { "jp": "今も少し雨が降っています。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "N/ナA-/イA-い/V-るでしょう",
+        "pattern": "N / ナA- / イA-い / V-るでしょう",
+        "explanation": null,
+        "examples": [
+          { "jp": "明日は晴れるでしょう。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 5,
+    "titleJp": "とてもにぎやかで便利です",
+    "titleEn": "It's very lively and convenient.",
+    "canDo": "住んでいる町の感想を簡単に話すことができる。",
+    "cultureNotes": ["スポーツクラブ", "ショッピングモール", "入浴施設"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nで、〜/ナA-で、〜/イA-くて、〜",
+        "pattern": "Nで、〜 / ナA-で、〜 / イA-くて、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "この町は、とてもにぎやかで、便利です。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Nだ/ナA-だ/イA-いけど、〜",
+        "pattern": "Nだ / ナA-だ / イA-いけど、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "たちばな公園は、場所は不便だけど、きれいですよ。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ることができます",
+        "pattern": "V-ることができます",
+        "explanation": null,
+        "examples": [
+          { "jp": "一年中、いろいろな花を見ることができます。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 6,
+    "titleJp": "郵便局はどう行ったらいいですか？",
+    "titleEn": "How do I get to the post office?",
+    "canDo": "ほかの人に道をたずねて、その答えを理解することができる。",
+    "cultureNotes": ["信号", "お寺と神社"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nに行きたいんですが…",
+        "pattern": "Nに行きたいんですが…",
+        "explanation": null,
+        "examples": [
+          { "jp": "マルイチデパートに行きたいんですが…。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-て、〜",
+        "pattern": "V-て、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "この道をまっすぐ行って、2つ目の信号を左に曲がってください。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "N1じゃなくて、N2",
+        "pattern": "N1じゃなくて、N2",
+        "explanation": null,
+        "examples": [
+          { "jp": "1つ目じゃなくて、2つ目です。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 7,
+    "titleJp": "道に迷ってちょっと遅れます",
+    "titleEn": "I'm lost and will be a little late.",
+    "canDo": "待ち合わせの時間と場所を相談して決めることができる。",
+    "cultureNotes": ["遅刻", "電車の運行トラブル"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nはどうですか？",
+        "pattern": "Nはどうですか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "6時はどうですか？", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Nでもいいですか？",
+        "pattern": "Nでもいいですか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "6時半でもいいですか？", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Nで、〜〈原因・理由〉/V-て、〜",
+        "pattern": "Nで、〜〈原因・理由〉 / V-て、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "事故で電車が止まりました。", "en": null },
+          { "jp": "ねぼうして、今、起きました。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 8,
+    "titleJp": "野球、したことありますか？",
+    "titleEn": "Have you ever played baseball?",
+    "canDo": "相手の経験や興味をたずねながら、食事や買い物、イベントなどに誘うことができる。",
+    "cultureNotes": ["日本の城", "アウトレットモール", "プロレス"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "もうV-ました",
+        "pattern": "もうV-ました",
+        "explanation": null,
+        "examples": [
+          { "jp": "新しいアウトレットモール、もう行きましたか？", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-たことがあります",
+        "pattern": "V-たことがあります",
+        "explanation": null,
+        "examples": [
+          { "jp": "プロレスを見たことがありますか？", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-に行きませんか？",
+        "pattern": "V-に行きませんか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "いっしょに食べに行きませんか？", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Nの前に、〜/Nのあとで、〜",
+        "pattern": "Nの前に、〜 / Nのあとで、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "食事の前に、お金をおろしたいんですが…。", "en": null },
+          { "jp": "買い物のあとで、ゲームコーナーに行きませんか？", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-たいんですが…",
+        "pattern": "V-たいんですが…",
+        "explanation": null,
+        "examples": [
+          { "jp": "ジョギングシューズを買いたいんですが…。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 9,
+    "titleJp": "読み方を教えてもらえませんか？",
+    "titleEn": "Could you teach me how to read it?",
+    "canDo": "日本語の学習経験について、簡単に話すことができる。",
+    "cultureNotes": ["アニメで日本語を勉強する", "地域の日本語教室"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nで〈手段〉",
+        "pattern": "Nで〈手段〉",
+        "explanation": null,
+        "examples": [
+          { "jp": "アニメで日本語を勉強しました。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "N1はN2がナA-です/イA-いです①",
+        "pattern": "N1はN2がナA-です / イA-いです / NはV-るのがナA-です / イA-いです",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本語は文字が難しいです。", "en": null },
+          { "jp": "日本語は話すのが大変です。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "N1は、〜。（でも、）N2は、〜。〈対比〉",
+        "pattern": "N1は、〜。（でも、）N2は、〜。〈対比〉",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本語は、読むのは少し難しいです。でも、会話は得意です。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てもらえませんか？",
+        "pattern": "V-てもらえませんか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本語をチェックしてもらえませんか？", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-方",
+        "pattern": "V-方",
+        "explanation": null,
+        "examples": [
+          { "jp": "この書類の書き方がよくわかりません。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 10,
+    "titleJp": "日本語教室に参加したいんですが…",
+    "titleEn": "I'd like to join a Japanese class...",
+    "canDo": "地域の日本語教室について、友人に質問したり、質問に答えたりすることができる。",
+    "cultureNotes": ["公民館", "料理教室", "書道", "合気道"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-てみたいんですが…",
+        "pattern": "V-てみたいんですが…",
+        "explanation": null,
+        "examples": [
+          { "jp": "合気道をやってみたいんですが…。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【期間】（に）〜回",
+        "pattern": "【期間】（に）〜回",
+        "explanation": null,
+        "examples": [
+          { "jp": "日本語クラスは週に1回です。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ましょうか？",
+        "pattern": "V-ましょうか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "教室のチラシを持って来ましょうか？", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "聞き返し",
+        "pattern": "聞き返し",
+        "explanation": null,
+        "examples": [
+          { "jp": "すみません。「ぼご」は、どういう意味ですか？", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "Nのとき、〜/ナA-なとき、〜/イA-いとき、〜",
+        "pattern": "Nのとき、〜 / ナA-なとき、〜 / イA-いとき、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "高校のとき、少し日本語を勉強しました。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 11,
+    "titleJp": "肉と野菜は私が買って行きます",
+    "titleEn": "I'll go buy the meat and vegetables.",
+    "canDo": "バーベキューなどをするとき、だれが何を準備するか話し合うことができる。",
+    "cultureNotes": ["バーベキュー", "スーパーの惣菜コーナー", "焼き鳥", "賞味期限と消費期限", "アレルギー表示"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-て行きます/来ます",
+        "pattern": "V-て行きます / 来ます",
+        "explanation": null,
+        "examples": [
+          { "jp": "肉と野菜は、私が買って行きますよ。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "N1とN2（と）、どっちがいいですか？",
+        "pattern": "N1とN2（と）、どっちがいいですか？ / S。どれがいいですか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "チョコレートケーキとチーズケーキ、どっちがいいですか？", "en": null },
+          { "jp": "お茶、いろいろありますね。どれがいいですか？", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Nのほうがいいです",
+        "pattern": "Nのほうがいいです",
+        "explanation": null,
+        "examples": [
+          { "jp": "塩のほうがいいです。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "【疑問詞】でもいいです",
+        "pattern": "【疑問詞】でもいいです",
+        "explanation": null,
+        "examples": [
+          { "jp": "A：何が食べたいですか？　B：何でもいいです。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 12,
+    "titleJp": "お弁当、おいしそうですね",
+    "titleEn": "That bento looks delicious!",
+    "canDo": "食べ物を見て、見た目から感じた印象を言うことができる。",
+    "cultureNotes": ["お弁当", "卵焼き", "お好み焼き", "すき焼き", "茶碗蒸し", "だし", "カップ焼きそば"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "ナA-/イA-そうです",
+        "pattern": "ナA- / イA-そうです",
+        "explanation": null,
+        "examples": [
+          { "jp": "そのお弁当、おいしそうですね。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "ナA-/イA-そうなN",
+        "pattern": "ナA- / イA-そうなN",
+        "explanation": null,
+        "examples": [
+          { "jp": "それ、辛そうな料理ですね。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "イA-くて、〜/イA-くなくて、〜",
+        "pattern": "イA-くて、〜 / イA-くなくて、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "この卵焼き、甘くて、おいしいですね。", "en": null },
+          { "jp": "茶碗蒸し、甘くなくて、おいしいです。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てみます",
+        "pattern": "V-てみます",
+        "explanation": null,
+        "examples": [
+          { "jp": "よかったら、この卵焼き、食べてみてください。", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "自動詞/他動詞",
+        "pattern": "自動詞 / 他動詞",
+        "explanation": null,
+        "examples": [
+          { "jp": "鶏肉とか、エビとか、きのことが入っています。", "en": null },
+          { "jp": "ときどき、銀杏も入れますよ。", "en": null }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "イA-くないですか？",
+        "pattern": "イA-くないですか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "味は、うすくないですか？", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 13,
+    "titleJp": "あと10分ぐらいで終わりそうです",
+    "titleEn": "It looks like I'll be done in about 10 more minutes.",
+    "canDo": "職場で困ったことがあったとき、上司などに状況を伝えることができる。",
+    "cultureNotes": ["日本のトイレ"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "〜んですが…",
+        "pattern": "〜んですが…",
+        "explanation": null,
+        "examples": [
+          { "jp": "会議室の電気がつかないんですが…。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-そうです",
+        "pattern": "V-そうです",
+        "explanation": null,
+        "examples": [
+          { "jp": "どのぐらいかかりそうですか？", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-たいとき、〜",
+        "pattern": "V-たいとき、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "両面コピーしたいとき、どうすればいいですか？", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-ると、〜",
+        "pattern": "V-ると、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "このスタートボタンを押すと、コピーが始まります。", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "はい、【否定文】/いいえ、【肯定文】",
+        "pattern": "はい、【否定文】 / いいえ、【肯定文】",
+        "explanation": null,
+        "examples": [
+          { "jp": "A：コピー機、使ったことないですか？　B：はい、ないです。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 14,
+    "titleJp": "休みを取ってもいいでしょうか？",
+    "titleEn": "Would it be alright if I took the day off?",
+    "canDo": "職場に、電話で休みや遅刻の連絡をすることができる。",
+    "cultureNotes": ["印鑑/ハンコ", "有給休暇"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nで/ナA-で/イA-くて/V-て〈原因・理由〉",
+        "pattern": "Nで / ナA-で / イA-くて / V-て〈原因・理由〉",
+        "explanation": null,
+        "examples": [
+          { "jp": "道が混んでいて、ぜんぜん動きません。", "en": null },
+          { "jp": "昨日は、休んですみませんでした。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "S1。それで、S2",
+        "pattern": "S1。それで、S2",
+        "explanation": null,
+        "examples": [
+          { "jp": "これから病院に行きます。それで、少し遅刻します。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-てもいいですか？",
+        "pattern": "V-てもいいですか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "トイレに行って来てもいいですか？", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てもいいでしょうか？",
+        "pattern": "V-てもいいでしょうか？",
+        "explanation": null,
+        "examples": [
+          { "jp": "明日の午後、早退してもいいでしょうか？", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-なければなりません",
+        "pattern": "V-なければなりません",
+        "explanation": null,
+        "examples": [
+          { "jp": "ちょっと、役所に行かなければならないんです。", "en": null }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "〜んです①",
+        "pattern": "〜んです",
+        "explanation": null,
+        "examples": [
+          { "jp": "東京から、国の友だちが来るんです。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 15,
+    "titleJp": "熱があってのどが痛いんです",
+    "titleEn": "I have a fever and my throat hurts.",
+    "canDo": "病院で、自分の症状を簡単に伝えることができる。",
+    "cultureNotes": ["日本の病院に行く", "花粉症"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "〜んです②",
+        "pattern": "〜んです",
+        "explanation": null,
+        "examples": [
+          { "jp": "昨日から38度の熱があって、のどがすごく痛いんです。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ないでください",
+        "pattern": "V-ないでください",
+        "explanation": null,
+        "examples": [
+          { "jp": "今週は仕事を休んで、できるだけ人に会わないでください。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V（普通形）+N①",
+        "pattern": "V（普通形）+N",
+        "explanation": null,
+        "examples": [
+          { "jp": "こちらは、せきを抑える薬です。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-る前に、〜/V-たあと、〜",
+        "pattern": "V-る前に、〜 / V-たあと、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "1日1回、寝る前に飲んでください。", "en": null },
+          { "jp": "飲んだあと、眠くなります。運転しないでくださいね。", "en": null }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "〜とき（に）、〜",
+        "pattern": "〜とき（に）、〜",
+        "explanation": null,
+        "examples": [
+          { "jp": "この薬は、痛くてがまんできないとき、飲んでください。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 16,
+    "titleJp": "食べすぎないようにしています",
+    "titleEn": "I'm trying not to eat too much.",
+    "canDo": "自分が健康のために気をつけていることを話すことができる。",
+    "cultureNotes": ["肩こり/胃がこる", "マスク"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-るといいです（よ）",
+        "pattern": "V-るといいです（よ）",
+        "explanation": null,
+        "examples": [
+          { "jp": "よく眠れないときは、ぬるいお風呂にゆっくり入るといいですよ。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-すぎます",
+        "pattern": "V-すぎます",
+        "explanation": null,
+        "examples": [
+          { "jp": "昨日、飲みすぎました。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V1-たり、V2-たり（します）",
+        "pattern": "V1-たり、V2-たり（します）",
+        "explanation": null,
+        "examples": [
+          { "jp": "ジョギングしたり、ときどき家でヨガをしたりします。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-るようにしています/V-ないようにしています",
+        "pattern": "V-るようにしています / V-ないようにしています",
+        "explanation": null,
+        "examples": [
+          { "jp": "できるだけ、野菜をたくさん食べるようにしています。", "en": null },
+          { "jp": "健康のために、食べすぎないようにしています。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 17,
+    "titleJp": "兄がくれたお守りです",
+    "titleEn": "This is a good-luck charm my brother gave me.",
+    "canDo": "お土産を渡すとき、それは何か、どんなものか、簡単に説明することができる。",
+    "cultureNotes": ["和室での座り方", "お守り", "家族の呼び方"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V（普通形）+N②",
+        "pattern": "V（普通形）+N",
+        "explanation": null,
+        "examples": [
+          { "jp": "ネパールから持って来た飾りです。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【人】に【物】をもらいます",
+        "pattern": "【人】に【物】をもらいます",
+        "explanation": null,
+        "examples": [
+          { "jp": "このマグカップ、誕生日に、友だちにもらったんです。", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【人】が【物】をくれます",
+        "pattern": "【人】が【物】をくれます",
+        "explanation": null,
+        "examples": [
+          { "jp": "これは、兄がくれたお守りです。", "en": null }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-elem1",
+    "lessonNumber": 18,
+    "titleJp": "何かプレゼントをあげませんか？",
+    "titleEn": "Why don't we give them a present?",
+    "canDo": "誕生日や結婚などのお祝いを言うことができる。",
+    "cultureNotes": ["日本人の名前", "乾杯", "カラオケ", "寄せ書き"],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S（普通形）そうです",
+        "pattern": "S（普通形）そうです",
+        "explanation": null,
+        "examples": [
+          { "jp": "お子さんが生まれたそうですね。", "en": null }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "【人】に【物】をあげます",
+        "pattern": "【人】に【物】をあげます",
+        "explanation": null,
+        "examples": [
+          { "jp": "アナさんに何かプレゼントをあげませんか？", "en": null }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）と言っていました",
+        "pattern": "S（普通形）と言っていました",
+        "explanation": null,
+        "examples": [
+          { "jp": "アナさん、前に、焼き鳥が大好きだと言っていました。", "en": null }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "S（普通形）と思います",
+        "pattern": "S（普通形）と思います",
+        "explanation": null,
+        "examples": [
+          { "jp": "もっと、思い出に残るものがいいと思います。", "en": null }
+        ]
+      }
+    ]
+  }
+]

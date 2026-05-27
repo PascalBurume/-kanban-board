@@ -1,0 +1,1187 @@
+[
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 1,
+    "titleJp": "フットサルって、何でしたっけ？",
+    "titleEn": null,
+    "canDo": "などを理解することができる。",
+    "cultureNotes": [
+      "相撲",
+      "落語",
+      "にほん？ にっぽん？",
+      "いろいろな国のフェスティバル",
+      "日本の演劇",
+      "コロナ"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nでしたっけ？",
+        "pattern": "Nでしたっけ？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "フットサルって、何でしたっけ？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ることになった",
+        "pattern": "V-ることになった",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "私の友だちが、バリ舞踊を踊ることになったんです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-てくれませんか？",
+        "pattern": "V-てくれませんか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "もしよかったら、見に来てくれませんか？",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 2,
+    "titleJp": "ドラマを見るのがいちばん好きです",
+    "titleEn": null,
+    "canDo": "マンガについて書かれた短い簡単な口コミを読んで、理解することができる。試合のシーンが本当にドキドキしました映画について、コメントや意見を友人にある程度くわしく話すことができる。刀が人間のキャラクターになっているんです音楽やスポーツなど、自分の好きなものについて、その理由や魅力などを、友人にある程度くわしく語ることができる。",
+    "cultureNotes": [
+      "マンガアプリ",
+      "オノマトペ",
+      "ふりがなの特別な用法",
+      "スラムダンクと日本のスポーツマンガ",
+      "マンガのメディア展開"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S（普通形）でしょう？",
+        "pattern": "S（普通形）でしょう？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "おもしろかったでしょう？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "S（普通形）気がする",
+        "pattern": "S（普通形）気がする",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ストーリーがちょっと短かった気がしました。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 11,
+        "title": "S（普通形）ってN",
+        "pattern": "S（普通形）ってN",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "歴史を変えようとする敵と戦うってゲームです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 12,
+        "title": "接続の表現",
+        "pattern": "接続の表現",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "それに、ゲームだけじゃなくて、舞台とかミュージカルとかアニメとかもあって、いろいろ楽しめるんです。",
+            "en": null
+          },
+          {
+            "jp": "あと、毎回バラエティがあって、楽しいです。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 3,
+    "titleJp": "引っ越しの準備はどうですか？",
+    "titleEn": null,
+    "canDo": "を探し出すことができる。",
+    "cultureNotes": [
+      "日本特有の単位",
+      "部屋を借りる",
+      "引っ越しの手続き"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S（普通形）なら、～",
+        "pattern": "S（普通形）なら、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "住むなら、どのあたりがおすすめですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "N っぽい",
+        "pattern": "N っぽい",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "下町っぽい雰囲気ですね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 11,
+        "title": "\u0007V-てもらえたら、ありがたいです",
+        "pattern": "\u0007V-てもらえたら、ありがたいです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "引っ越しを手伝ってもらえたら、とてもありがたいんですが。",
+            "en": null
+          },
+          {
+            "jp": "荷物を運ぶのを手伝ってもらえたら、とても助かります。",
+            "en": null
+          },
+          {
+            "jp": "そうしてもらえたら、すごくうれしいです。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 4,
+    "titleJp": "エアコンが壊れたみたいなんですが…",
+    "titleEn": null,
+    "canDo": "ができる。",
+    "cultureNotes": [
+      "家のトラブル",
+      "ハチの巣",
+      "家の苦情"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S（普通形）みたいだ",
+        "pattern": "S（普通形）みたいだ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "買い物に行ったときになくしたみたいです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "お＋N ／ ご＋N",
+        "pattern": "お＋N ／ ご＋N",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ご都合の悪いお時間はありますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "\u0007お Vください",
+        "pattern": "\u0007お Vください",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お部屋でお待ちください。",
+            "en": null
+          },
+          {
+            "jp": "業者に直接ご連絡ください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-（ら）れる＜受身⑤：迷惑の受身＞",
+        "pattern": "V-（ら）れる＜受身⑤：迷惑の受身＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "遅い時間に音を出されると困る人もいますからね。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 5,
+    "titleJp": "どんなお店がいいですか？",
+    "titleEn": null,
+    "canDo": "飲食店の注文用タブレットで、食べ物や飲み物を注文することができる。",
+    "cultureNotes": [
+      "飲食店のサービスの自動化",
+      "もんじゃ焼き",
+      "じゃんけん",
+      "沖縄料理",
+      "給食",
+      "ふるさと納税"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "N1 みたいなN2",
+        "pattern": "N1 みたいなN2",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "（サイウアは）ソーセージみたいな料理で、タイの北部の名物です。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "ナA-さ／イA-さ",
+        "pattern": "ナA-さ／イA-さ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "頼めば、本場の辛さにしてくれます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）やつ",
+        "pattern": "S（普通形）やつ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "これをさらに丸めて、油で揚げたやつが、ドゥル天なんですよ。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 6,
+    "titleJp": "毎日、自炊してます",
+    "titleEn": null,
+    "canDo": "理由などを理解することができる。",
+    "cultureNotes": [
+      "語呂合わせ",
+      "業務用のスーパー",
+      "出前・デリバリー"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-ておく",
+        "pattern": "V-ておく",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "餃子とかうどんとか、まとめて買っておくと便利ですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Vがち",
+        "pattern": "Vがち",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "コンビニや外食に頼りがちな一人暮らし。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）じゃないですか",
+        "pattern": "S（普通形）じゃないですか",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "外食って、やっぱりお金がかかるじゃないですか。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 7,
+    "titleJp": "たくさんの人と友だちになれればと思っています",
+    "titleEn": null,
+    "canDo": "簡単なアドバイスを聞いて理解することができる。",
+    "cultureNotes": [
+      "児童館",
+      "日本のプロ野球チーム"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-ば、～",
+        "pattern": "V-ば、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "興味があるイベントに参加すれば、知り合いもできると思います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-ているうちに、～",
+        "pattern": "V-ているうちに、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "通っているうちに、少しずつ話ができる人が増えると思います。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ばと思っています",
+        "pattern": "V-ばと思っています",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "たくさんの人と友だちになれればと思っています。",
+            "en": null
+          },
+          {
+            "jp": "食事とか、いろいろ誘ってもらえればうれしいです。",
+            "en": null
+          },
+          {
+            "jp": "みなさんといっしょに、楽しく活動できればいいなと思います。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 8,
+    "titleJp": "隣、いいですか？",
+    "titleEn": null,
+    "canDo": "ができる。",
+    "cultureNotes": [
+      "将棋",
+      "ハローキティ（キティちゃん）",
+      "お墓・霊園"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Vなさい",
+        "pattern": "Vなさい",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "これからは、気をつけなさい。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "尊敬の動詞 ＜尊敬語①＞",
+        "pattern": "尊敬の動詞 ＜尊敬語①＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ここには、よくいらっしゃるんですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-（さ）せる＜使役①＞",
+        "pattern": "V-（さ）せる＜使役①＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "唇の両端を軽く上げるだけで、「この人、感じが良さそうだな」と思わせることができます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-なくてもいいです",
+        "pattern": "V-なくてもいいです",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "V-なくてもだいじょうぶです無理に大きな笑顔を作らなくてもいいです。",
+            "en": null
+          },
+          {
+            "jp": "高価な服は着なくても大丈夫です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 9,
+    "titleJp": "日本語の勉強を始めたきっかけって、何だったの？",
+    "titleEn": null,
+    "canDo": "日本語の学習目標とその理由について、友人に簡単に話すことができる。",
+    "cultureNotes": [
+      "日本語の試験",
+      "日本の方言"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-る間に、～",
+        "pattern": "V-る間に、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "日本にいる間に、いろいろなドラマを見たいから、鵜澤くんもおすすめのドラマがあったら、ぜひ教えて。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "丁寧体・普通体②",
+        "pattern": "丁寧体・普通体②",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "日本のドラマが好きだから、よく見るんだけど、聞き取れないセリフがあるのが悔しいんだよね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Vはじめる",
+        "pattern": "Vはじめる",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "最初は吹き替えで見てたんだけど、日本語でセリフがわかるようになりたくて、勉強しはじめたんだ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "希望を言うときの表現",
+        "pattern": "希望を言うときの表現",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "将来は、勉強したことを活かして、アニメとかゲームとかのキャラクターをデザインする仕事ができればと思ってるんだ。",
+            "en": null
+          },
+          {
+            "jp": "仕事は大変だけど、たくさん勉強して、介護の仕事を続けようと思ってます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 10,
+    "titleJp": "どうやって日本語を勉強してる？",
+    "titleEn": null,
+    "canDo": "読んで、自分に合ったものを選ぶことができる。",
+    "cultureNotes": [
+      "JF運営・監修の日本語学習サイト",
+      "タンデム学習",
+      "AIと日本語学習"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V（普通形）＋N ③",
+        "pattern": "V（普通形）＋N ③",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "アニメ・マンガを入り口として、日本語を勉強するサイトです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "名詞で終わる言い方",
+        "pattern": "名詞で終わる言い方",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "国際交流基金が運営する日本語学習プラットフォーム。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "【数量】も",
+        "pattern": "【数量】も",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "3 回も見るの？すごいね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "V-てくる",
+        "pattern": "V-てくる",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "自分の言いたいことが日本語で言えるようになってきたと思う。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 11,
+    "titleJp": "これは詐欺メールですよ",
+    "titleEn": null,
+    "canDo": "いて対応方法を理解することができる。",
+    "cultureNotes": [
+      "詐欺メール",
+      "落とし物・忘れ物",
+      "コンサートやイベントの入場",
+      "本人確認",
+      "マイナンバーカード"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-てほしいんですが",
+        "pattern": "V-てほしいんですが",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "このメールを見てほしいんですが…。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Nになっている",
+        "pattern": "Nになっている",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "缶ジュースは持ち込み禁止になっています。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "V-ていただけますか？",
+        "pattern": "V-ていただけますか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "身分証明書を見せていただけますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "おVになる ＜尊敬語②＞",
+        "pattern": "おVになる ＜尊敬語②＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "それとも、戻って、お飲みになりますか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-ることがある",
+        "pattern": "V-ることがある",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "在留カードを持っていないと、罰金を支払うことがあります。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 12,
+    "titleJp": "救急車をお願いします",
+    "titleEn": null,
+    "canDo": "なことばで手伝いを申し出ることができる。",
+    "cultureNotes": [
+      "かけ声",
+      "100 円ショップの便利グッズ",
+      "はにわ（埴輪）",
+      "警報・注意報",
+      "「～歳」と「～才」"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "おVです ＜尊敬語③＞",
+        "pattern": "おVです ＜尊敬語③＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "何かお探しですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-（ら）れる ＜尊敬語④＞",
+        "pattern": "V-（ら）れる ＜尊敬語④＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "どちらに行かれるんですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）ようだ",
+        "pattern": "S（普通形）ようだ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "転んで足をけがしているようです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "イA-がる",
+        "pattern": "イA-がる",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ずっと「痛い、痛い」と言って、とても痛がっています。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-（さ）せる＜使役②＞",
+        "pattern": "V-（さ）せる＜使役②＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "すぐ救急車を向かわせます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "V-ることにする",
+        "pattern": "V-ることにする",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "私も、災害に備えて防災リュックを買うことにしました。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 13,
+    "titleJp": "ご結婚おめでとうございます",
+    "titleEn": null,
+    "canDo": "どをやりとりすることができる。",
+    "cultureNotes": [
+      "入院",
+      "日本の教育制度",
+      "ペット",
+      "ハロウィーン（ハロウィン）",
+      "退職",
+      "バブル経済",
+      "運命の赤い糸（比喩的な表現）"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "S（普通形）らしい",
+        "pattern": "S（普通形）らしい",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "カンボジアに帰って、両親といっしょにお店を始めるらしいですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "V-（よ）うと思うんですが",
+        "pattern": "V-（よ）うと思うんですが",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "来月、恋人の誕生日なので、何かプレゼントしようと思うんですが、何がいいか迷ってるんです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "\u0007Nとか、いいんじゃないですか？",
+        "pattern": "\u0007Nとか、いいんじゃないですか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "例えばアクセサリーとか、いいんじゃない？",
+            "en": null
+          },
+          {
+            "jp": "形に残るものもいいけど、レストランで食事するのもいいんじゃないですか？",
+            "en": null
+          },
+          {
+            "jp": "S（普通形）のがいいんじゃないですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "\u0007V-てくださる",
+        "pattern": "\u0007V-てくださる",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "まだ日本語が上手ではない私たちを、やさしく教えてくださいました。",
+            "en": null
+          },
+          {
+            "jp": "もっともっと、先生に教えていただきたかったです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "V-（さ）せていただく",
+        "pattern": "V-（さ）せていただく",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "本日は、友人を代表して、お祝いのスピーチをさせていただきます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 14,
+    "titleJp": "友人のことで悩んでいます",
+    "titleEn": null,
+    "canDo": "友人のちょっとした困り事を聞いて、理解することができる。",
+    "cultureNotes": [
+      "おすそわけ",
+      "マッチングアプリ",
+      "相談サイト"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nにとって",
+        "pattern": "Nにとって",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "私にとって、大切な親友なんです。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "\u0007ナA-な ところがある",
+        "pattern": "\u0007ナA-な ところがある",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ちょっと頑固なところがあるんです。",
+            "en": null
+          },
+          {
+            "jp": "ちょっと飽きっぽいところがあるんですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "S（普通形）のに、～",
+        "pattern": "S（普通形）のに、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "最初のころは、毎日メッセージをやりとりしていたのに、最近はメッセージを送っても、なかなか既読にならなかったり、返事をくれなかったり。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "Nのことで",
+        "pattern": "Nのことで",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ルームシェアをしている友人のことで悩んでいます。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 15,
+    "titleJp": "桜島を見てみたいんです",
+    "titleEn": null,
+    "canDo": "を理解することができる。",
+    "cultureNotes": [
+      "Vlog（ブイログ）",
+      "効果音",
+      "地域ブランド食品",
+      "日本の観光地4（高山／大井川鐵道／しまなみ海道）",
+      "旧字体"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "連用中止",
+        "pattern": "連用中止",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "「みはらしの丘」が一面ネモフィラの青に染まり、空と地面の境目がわからないほどの絶景が広がります。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "N1＋助詞＋のN2",
+        "pattern": "N1＋助詞＋のN2",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "公園へのアクセスはJR勝田駅からバスで約15 分。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "もしSば、～",
+        "pattern": "もしSば、～",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "もし時間とお金があれば、ぜひ行ってみたいのは、小笠原です。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 16,
+    "titleJp": "いい写真がたくさん撮れました",
+    "titleEn": null,
+    "canDo": "メッセージアプリで、旅行先から友人にメッセージを送ることができる。",
+    "cultureNotes": [
+      "日本の観光地6（山口）",
+      "日本の観光地7（金沢/松島/鳥取）",
+      "日本三××"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V‐たところだ",
+        "pattern": "V‐たところだ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ちょうどいまお昼食べたところ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "\u0007V-てもらえますか？",
+        "pattern": "\u0007V-てもらえますか？",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "和洋室にしてもらえますか？",
+            "en": null
+          },
+          {
+            "jp": "時間まで、近くを観光することにするので、荷物だけ預かってもらってもいいですか？",
+            "en": null
+          },
+          {
+            "jp": "何かほかの料理に変えていただけませんか？",
+            "en": null
+          },
+          {
+            "jp": "V-てもらってもいいですか？",
+            "en": null
+          },
+          {
+            "jp": "V-ていただけませんか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "Nになります",
+        "pattern": "Nになります",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "1 名様2,000 円なので、3 名様で6,000 円になります。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "謙譲の動詞 ＜謙譲語①＞",
+        "pattern": "謙譲の動詞 ＜謙譲語①＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "確認いたしますので、少々お待ちください。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "\u0007おVする",
+        "pattern": "\u0007おVする",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "ごVする ＜謙譲語②＞お荷物をお預かりすることもできますが…。",
+            "en": null
+          },
+          {
+            "jp": "洋室に空きがあれば、ご案内しますね。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "V‐さ（せら）れる＜使役受身＞",
+        "pattern": "V‐さ（せら）れる＜使役受身＞",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "お昼ご飯を食べる店もなかなか決まらなくて、たくさん歩かされた。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 17,
+    "titleJp": "ホールの仕事について説明します",
+    "titleEn": null,
+    "canDo": "職場の部下や後輩に、仕事に関する簡単な指示や説明をすることができる。従業員身だしなみ規則職場のルールについて書かれた箇条書きの文書を読んで、内容を理解することができる。",
+    "cultureNotes": [
+      "料理の向き",
+      "ハラスメント",
+      "手書き",
+      "外国人向けの相談窓口"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "Nでございます",
+        "pattern": "Nでございます",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "はい、JF水産でございます。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "\u0007V-ること",
+        "pattern": "\u0007V-ること",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "指定の制服を着用すること。",
+            "en": null
+          },
+          {
+            "jp": "制服は常に清潔に保ち、汚れたままにしないこと。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "\u0007V-ていただければと思います",
+        "pattern": "\u0007V-ていただければと思います",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "冷房を、もう少し弱くしていただければと思います。",
+            "en": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "framework": "irodori-preint",
+    "lessonNumber": 18,
+    "titleJp": "働かせていただければ、うれしいです",
+    "titleEn": null,
+    "canDo": "それについてどう思っているかなどを理解することができる。",
+    "cultureNotes": [
+      "年金",
+      "さまざまな雇用形態",
+      "ほうれんそう（報告・連絡・相談）"
+    ],
+    "grammarPoints": [
+      {
+        "order": 1,
+        "title": "V-ていた",
+        "pattern": "V-ていた",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "アルバイトを始める前は、夜のシフトはつらいって聞いていたんですけど、そんなことないですよ。",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "S（普通形）はずだ",
+        "pattern": "S（普通形）はずだ",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "問題はないはずですが、もし、トラブルなどがあって、もう少し時間が必要になりそうな場合は、どうすればいいですか？",
+            "en": null
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "尊敬語と謙譲語",
+        "pattern": "尊敬語と謙譲語",
+        "explanation": null,
+        "examples": [
+          {
+            "jp": "例えば、この間は、雨の日にタクシーでお着きになったお客様がいらっしゃったんです。",
+            "en": null
+          },
+          {
+            "jp": "こちらでもう少し検討して、また改めてご連絡してもいいですか？",
+            "en": null
+          }
+        ]
+      }
+    ]
+  }
+]

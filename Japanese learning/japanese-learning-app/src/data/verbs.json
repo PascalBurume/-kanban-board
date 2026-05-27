@@ -1,0 +1,926 @@
+[
+  {
+    "group": "GODAN",
+    "masuForm": "かきます",
+    "romaji": "kaku",
+    "dictionaryForm": "書く",
+    "english": "write",
+    "forms": {
+      "PRESENT": "かきます",
+      "TE": "かいて",
+      "PRESENT_CONTINUOUS": "かいています",
+      "TE_REQUEST": "かいてください",
+      "EXAMPLE": "まいにち にっき を かきます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "ききます",
+    "romaji": "kiku",
+    "dictionaryForm": "聞く",
+    "english": "listen",
+    "forms": {
+      "PRESENT": "ききます",
+      "TE": "きいて",
+      "PRESENT_CONTINUOUS": "きいています",
+      "TE_REQUEST": "きいてください",
+      "EXAMPLE": "おんがく を ききます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "はたらきます",
+    "romaji": "hataraku",
+    "dictionaryForm": "働く",
+    "english": "work",
+    "forms": {
+      "PRESENT": "はたらきます",
+      "TE": "はたらいて",
+      "PRESENT_CONTINUOUS": "はたらいています",
+      "TE_REQUEST": "はたらいてください",
+      "EXAMPLE": "かいしゃ で はたらきます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "いきます",
+    "romaji": "iku",
+    "dictionaryForm": "行く",
+    "english": "go",
+    "forms": {
+      "PRESENT": "いきます",
+      "TE": "いって*",
+      "PRESENT_CONTINUOUS": "いっています",
+      "TE_REQUEST": "いってください",
+      "EXAMPLE": "がっこう に いきます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "およぎます",
+    "romaji": "oyogu",
+    "dictionaryForm": "泳ぐ",
+    "english": "swim",
+    "forms": {
+      "PRESENT": "およぎます",
+      "TE": "およいで",
+      "PRESENT_CONTINUOUS": "およいでいます",
+      "TE_REQUEST": "およいでください",
+      "EXAMPLE": "うみ で およぎます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "いそぎます",
+    "romaji": "isogu",
+    "dictionaryForm": "急ぐ",
+    "english": "hurry",
+    "forms": {
+      "PRESENT": "いそぎます",
+      "TE": "いそいで",
+      "PRESENT_CONTINUOUS": "いそいでいます",
+      "TE_REQUEST": "いそいでください",
+      "EXAMPLE": "みち を いそぎます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "のみます",
+    "romaji": "nomu",
+    "dictionaryForm": "飲む",
+    "english": "drink",
+    "forms": {
+      "PRESENT": "のみます",
+      "TE": "のんで",
+      "PRESENT_CONTINUOUS": "のんでいます",
+      "TE_REQUEST": "のんでください",
+      "EXAMPLE": "みず を のみます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "よみます",
+    "romaji": "yomu",
+    "dictionaryForm": "読む",
+    "english": "read",
+    "forms": {
+      "PRESENT": "よみます",
+      "TE": "よんで",
+      "PRESENT_CONTINUOUS": "よんでいます",
+      "TE_REQUEST": "よんでください",
+      "EXAMPLE": "ほん を よみます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "やすみます",
+    "romaji": "yasumu",
+    "dictionaryForm": "休む",
+    "english": "rest",
+    "forms": {
+      "PRESENT": "やすみます",
+      "TE": "やすんで",
+      "PRESENT_CONTINUOUS": "やすんでいます",
+      "TE_REQUEST": "やすんでください",
+      "EXAMPLE": "にちようび に やすみます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "あそびます",
+    "romaji": "asobu",
+    "dictionaryForm": "遊ぶ",
+    "english": "play",
+    "forms": {
+      "PRESENT": "あそびます",
+      "TE": "あそんで",
+      "PRESENT_CONTINUOUS": "あそんでいます",
+      "TE_REQUEST": "あそんでください",
+      "EXAMPLE": "こうえん で あそびます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "よびます",
+    "romaji": "yobu",
+    "dictionaryForm": "呼ぶ",
+    "english": "call",
+    "forms": {
+      "PRESENT": "よびます",
+      "TE": "よんで",
+      "PRESENT_CONTINUOUS": "よんでいます",
+      "TE_REQUEST": "よんでください",
+      "EXAMPLE": "ともだち を よびます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "かいます",
+    "romaji": "kau",
+    "dictionaryForm": "買う",
+    "english": "buy",
+    "forms": {
+      "PRESENT": "かいます",
+      "TE": "かって",
+      "PRESENT_CONTINUOUS": "かっています",
+      "TE_REQUEST": "かってください",
+      "EXAMPLE": "りんご を かいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "すいます",
+    "romaji": "suu",
+    "dictionaryForm": "吸う",
+    "english": "smoke",
+    "forms": {
+      "PRESENT": "すいます",
+      "TE": "すって",
+      "PRESENT_CONTINUOUS": "すっています",
+      "TE_REQUEST": "すってください",
+      "EXAMPLE": "たばこ を すいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "あいます",
+    "romaji": "au",
+    "dictionaryForm": "会う",
+    "english": "meet",
+    "forms": {
+      "PRESENT": "あいます",
+      "TE": "あって",
+      "PRESENT_CONTINUOUS": "あっています",
+      "TE_REQUEST": "あってください",
+      "EXAMPLE": "ともだち に あいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "ならいます",
+    "romaji": "narau",
+    "dictionaryForm": "習う",
+    "english": "learn",
+    "forms": {
+      "PRESENT": "ならいます",
+      "TE": "ならって",
+      "PRESENT_CONTINUOUS": "ならっています",
+      "TE_REQUEST": "ならってください",
+      "EXAMPLE": "にほんご を ならいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "もらいます",
+    "romaji": "morau",
+    "dictionaryForm": "もらう",
+    "english": "receive",
+    "forms": {
+      "PRESENT": "もらいます",
+      "TE": "もらって",
+      "PRESENT_CONTINUOUS": "もらっています",
+      "TE_REQUEST": "もらってください",
+      "EXAMPLE": "ぷれぜんと を もらいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "てつだいます",
+    "romaji": "tetsudau",
+    "dictionaryForm": "手伝う",
+    "english": "help",
+    "forms": {
+      "PRESENT": "てつだいます",
+      "TE": "てつだって",
+      "PRESENT_CONTINUOUS": "てつだっています",
+      "TE_REQUEST": "てつだってください",
+      "EXAMPLE": "はは を てつだいます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "まちます",
+    "romaji": "matsu",
+    "dictionaryForm": "待つ",
+    "english": "wait",
+    "forms": {
+      "PRESENT": "まちます",
+      "TE": "まって",
+      "PRESENT_CONTINUOUS": "まっています",
+      "TE_REQUEST": "まってください",
+      "EXAMPLE": "ばす を まちます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "もちます",
+    "romaji": "motsu",
+    "dictionaryForm": "持つ",
+    "english": "hold",
+    "forms": {
+      "PRESENT": "もちます",
+      "TE": "もって",
+      "PRESENT_CONTINUOUS": "もっています",
+      "TE_REQUEST": "もってください",
+      "EXAMPLE": "かばん を もちます。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "とります",
+    "romaji": "toru",
+    "dictionaryForm": "取る",
+    "english": "take",
+    "forms": {
+      "PRESENT": "とります",
+      "TE": "とって",
+      "PRESENT_CONTINUOUS": "とっています",
+      "TE_REQUEST": "とってください",
+      "EXAMPLE": "しゃしん を とります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "きります",
+    "romaji": "kiru",
+    "dictionaryForm": "切る",
+    "english": "cut",
+    "forms": {
+      "PRESENT": "きります",
+      "TE": "きって",
+      "PRESENT_CONTINUOUS": "きっています",
+      "TE_REQUEST": "きってください",
+      "EXAMPLE": "けーき を きります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "あります",
+    "romaji": "aru",
+    "dictionaryForm": "ある",
+    "english": "exist / have",
+    "forms": {
+      "PRESENT": "あります",
+      "TE": "あって",
+      "PRESENT_CONTINUOUS": "あります",
+      "TE_REQUEST": "",
+      "EXAMPLE": "おかね が あります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "かえります",
+    "romaji": "kaeru",
+    "dictionaryForm": "帰る",
+    "english": "return",
+    "forms": {
+      "PRESENT": "かえります",
+      "TE": "かえって",
+      "PRESENT_CONTINUOUS": "かえっています",
+      "TE_REQUEST": "かえってください",
+      "EXAMPLE": "いえ に かえります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "おわります",
+    "romaji": "owaru",
+    "dictionaryForm": "終わる",
+    "english": "finish",
+    "forms": {
+      "PRESENT": "おわります",
+      "TE": "おわって",
+      "PRESENT_CONTINUOUS": "おわっています",
+      "TE_REQUEST": "おわってください",
+      "EXAMPLE": "しごと が おわります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "おくります",
+    "romaji": "okuru",
+    "dictionaryForm": "送る",
+    "english": "send",
+    "forms": {
+      "PRESENT": "おくります",
+      "TE": "おくって",
+      "PRESENT_CONTINUOUS": "おくっています",
+      "TE_REQUEST": "おくってください",
+      "EXAMPLE": "てがみ を おくります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "わかります",
+    "romaji": "wakaru",
+    "dictionaryForm": "分かる",
+    "english": "understand",
+    "forms": {
+      "PRESENT": "わかります",
+      "TE": "わかって",
+      "PRESENT_CONTINUOUS": "わかっています",
+      "TE_REQUEST": "わかってください",
+      "EXAMPLE": "いみ が わかります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "かかります",
+    "romaji": "kakaru",
+    "dictionaryForm": "かかる",
+    "english": "take (time)",
+    "forms": {
+      "PRESENT": "かかります",
+      "TE": "かかって",
+      "PRESENT_CONTINUOUS": "かかっています",
+      "TE_REQUEST": "かかってください",
+      "EXAMPLE": "じかん が かかります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "はいります",
+    "romaji": "hairu",
+    "dictionaryForm": "入る",
+    "english": "enter",
+    "forms": {
+      "PRESENT": "はいります",
+      "TE": "はいって",
+      "PRESENT_CONTINUOUS": "はいっています",
+      "TE_REQUEST": "はいってください",
+      "EXAMPLE": "へや に はいります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "まがります",
+    "romaji": "magaru",
+    "dictionaryForm": "曲がる",
+    "english": "turn",
+    "forms": {
+      "PRESENT": "まがります",
+      "TE": "まがって",
+      "PRESENT_CONTINUOUS": "まがっています",
+      "TE_REQUEST": "まがってください",
+      "EXAMPLE": "みぎ に まがります。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "けします",
+    "romaji": "kesu",
+    "dictionaryForm": "消す",
+    "english": "erase",
+    "forms": {
+      "PRESENT": "けします",
+      "TE": "けして",
+      "PRESENT_CONTINUOUS": "けしています",
+      "TE_REQUEST": "けしてください",
+      "EXAMPLE": "こくばん を けします。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "かします",
+    "romaji": "kasu",
+    "dictionaryForm": "貸す",
+    "english": "lend",
+    "forms": {
+      "PRESENT": "かします",
+      "TE": "かして",
+      "PRESENT_CONTINUOUS": "かしています",
+      "TE_REQUEST": "かしてください",
+      "EXAMPLE": "ほん を かします。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "だします",
+    "romaji": "dasu",
+    "dictionaryForm": "出す",
+    "english": "take out",
+    "forms": {
+      "PRESENT": "だします",
+      "TE": "だして",
+      "PRESENT_CONTINUOUS": "だしています",
+      "TE_REQUEST": "だしてください",
+      "EXAMPLE": "ごみ を だします。"
+    }
+  },
+  {
+    "group": "GODAN",
+    "masuForm": "はなします",
+    "romaji": "hanasu",
+    "dictionaryForm": "話す",
+    "english": "speak",
+    "forms": {
+      "PRESENT": "はなします",
+      "TE": "はなして",
+      "PRESENT_CONTINUOUS": "はなしています",
+      "TE_REQUEST": "はなしてください",
+      "EXAMPLE": "にほんご で はなします。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "ねます",
+    "romaji": "neru",
+    "dictionaryForm": "寝る",
+    "english": "sleep",
+    "forms": {
+      "PRESENT": "ねます",
+      "TE": "ねて",
+      "PRESENT_CONTINUOUS": "ねています",
+      "TE_REQUEST": "ねてください",
+      "EXAMPLE": "はやく ねます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "でます",
+    "romaji": "deru",
+    "dictionaryForm": "出る",
+    "english": "go out",
+    "forms": {
+      "PRESENT": "でます",
+      "TE": "でて",
+      "PRESENT_CONTINUOUS": "でています",
+      "TE_REQUEST": "でてください",
+      "EXAMPLE": "いえ を でます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "たべます",
+    "romaji": "taberu",
+    "dictionaryForm": "食べる",
+    "english": "eat",
+    "forms": {
+      "PRESENT": "たべます",
+      "TE": "たべて",
+      "PRESENT_CONTINUOUS": "たべています",
+      "TE_REQUEST": "たべてください",
+      "EXAMPLE": "りんご を たべます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "あげます",
+    "romaji": "ageru",
+    "dictionaryForm": "あげる",
+    "english": "give",
+    "forms": {
+      "PRESENT": "あげます",
+      "TE": "あげて",
+      "PRESENT_CONTINUOUS": "あげています",
+      "TE_REQUEST": "あげてください",
+      "EXAMPLE": "ぷれぜんと を あげます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "かけます",
+    "romaji": "kakeru",
+    "dictionaryForm": "掛ける",
+    "english": "hang / put on",
+    "forms": {
+      "PRESENT": "かけます",
+      "TE": "かけて",
+      "PRESENT_CONTINUOUS": "かけています",
+      "TE_REQUEST": "かけてください",
+      "EXAMPLE": "こーと を かけます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "つけます",
+    "romaji": "tsukeru",
+    "dictionaryForm": "付ける",
+    "english": "turn on",
+    "forms": {
+      "PRESENT": "つけます",
+      "TE": "つけて",
+      "PRESENT_CONTINUOUS": "つけています",
+      "TE_REQUEST": "つけてください",
+      "EXAMPLE": "てれび を つけます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "あけます",
+    "romaji": "akeru",
+    "dictionaryForm": "開ける",
+    "english": "open",
+    "forms": {
+      "PRESENT": "あけます",
+      "TE": "あけて",
+      "PRESENT_CONTINUOUS": "あけています",
+      "TE_REQUEST": "あけてください",
+      "EXAMPLE": "まど を あけます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "みせます",
+    "romaji": "miseru",
+    "dictionaryForm": "見せる",
+    "english": "show",
+    "forms": {
+      "PRESENT": "みせます",
+      "TE": "みせて",
+      "PRESENT_CONTINUOUS": "みせています",
+      "TE_REQUEST": "みせてください",
+      "EXAMPLE": "しゃしん を みせます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "おしえます",
+    "romaji": "oshieru",
+    "dictionaryForm": "教える",
+    "english": "teach",
+    "forms": {
+      "PRESENT": "おしえます",
+      "TE": "おしえて",
+      "PRESENT_CONTINUOUS": "おしえています",
+      "TE_REQUEST": "おしえてください",
+      "EXAMPLE": "えいご を おしえます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "むかえます",
+    "romaji": "mukaeru",
+    "dictionaryForm": "迎える",
+    "english": "welcome",
+    "forms": {
+      "PRESENT": "むかえます",
+      "TE": "むかえて",
+      "PRESENT_CONTINUOUS": "むかえています",
+      "TE_REQUEST": "むかえてください",
+      "EXAMPLE": "きゃく を むかえます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "つかれます",
+    "romaji": "tsukareru",
+    "dictionaryForm": "疲れる",
+    "english": "get tired",
+    "forms": {
+      "PRESENT": "つかれます",
+      "TE": "つかれて",
+      "PRESENT_CONTINUOUS": "つかれています",
+      "TE_REQUEST": "つかれてください",
+      "EXAMPLE": "しごと で つかれます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "しめます",
+    "romaji": "shimeru",
+    "dictionaryForm": "閉める",
+    "english": "close",
+    "forms": {
+      "PRESENT": "しめます",
+      "TE": "しめて",
+      "PRESENT_CONTINUOUS": "しめています",
+      "TE_REQUEST": "しめてください",
+      "EXAMPLE": "どあ を しめます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "とめます",
+    "romaji": "tomeru",
+    "dictionaryForm": "止める",
+    "english": "stop",
+    "forms": {
+      "PRESENT": "とめます",
+      "TE": "とめて",
+      "PRESENT_CONTINUOUS": "とめています",
+      "TE_REQUEST": "とめてください",
+      "EXAMPLE": "くるま を とめます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "はじめます",
+    "romaji": "hajimeru",
+    "dictionaryForm": "始める",
+    "english": "start",
+    "forms": {
+      "PRESENT": "はじめます",
+      "TE": "はじめて",
+      "PRESENT_CONTINUOUS": "はじめています",
+      "TE_REQUEST": "はじめてください",
+      "EXAMPLE": "しごと を はじめます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "みます",
+    "romaji": "miru",
+    "dictionaryForm": "見る",
+    "english": "see / watch",
+    "forms": {
+      "PRESENT": "みます",
+      "TE": "みて",
+      "PRESENT_CONTINUOUS": "みています",
+      "TE_REQUEST": "みてください",
+      "EXAMPLE": "てれび を みます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "います",
+    "romaji": "iru",
+    "dictionaryForm": "いる",
+    "english": "be / exist",
+    "forms": {
+      "PRESENT": "います",
+      "TE": "いて",
+      "PRESENT_CONTINUOUS": "います",
+      "TE_REQUEST": "いてください",
+      "EXAMPLE": "いえ に います。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "おきます",
+    "romaji": "okiru",
+    "dictionaryForm": "起きる",
+    "english": "wake up",
+    "forms": {
+      "PRESENT": "おきます",
+      "TE": "おきて",
+      "PRESENT_CONTINUOUS": "おきています",
+      "TE_REQUEST": "おきてください",
+      "EXAMPLE": "あさ はやく おきます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "かります",
+    "romaji": "kariru",
+    "dictionaryForm": "借りる",
+    "english": "borrow",
+    "forms": {
+      "PRESENT": "かります",
+      "TE": "かりて",
+      "PRESENT_CONTINUOUS": "かりています",
+      "TE_REQUEST": "かりてください",
+      "EXAMPLE": ""
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "おります",
+    "romaji": "oriru",
+    "dictionaryForm": "降りる",
+    "english": "get off",
+    "forms": {
+      "PRESENT": "おります",
+      "TE": "おりて",
+      "PRESENT_CONTINUOUS": "おりています",
+      "TE_REQUEST": "おりてください",
+      "EXAMPLE": ""
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "あびます",
+    "romaji": "abiru",
+    "dictionaryForm": "浴びる",
+    "english": "bathe / shower",
+    "forms": {
+      "PRESENT": "あびます",
+      "TE": "あびて",
+      "PRESENT_CONTINUOUS": "あびています",
+      "TE_REQUEST": "あびてください",
+      "EXAMPLE": ""
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "できます",
+    "romaji": "dekiru",
+    "dictionaryForm": "できる",
+    "english": "can do",
+    "forms": {
+      "PRESENT": "できます",
+      "TE": "できて",
+      "PRESENT_CONTINUOUS": "できています",
+      "TE_REQUEST": "できてください",
+      "EXAMPLE": "にほんご が できます。"
+    }
+  },
+  {
+    "group": "ICHIDAN",
+    "masuForm": "たります",
+    "romaji": "tariru",
+    "dictionaryForm": "足りる",
+    "english": "suffice",
+    "forms": {
+      "PRESENT": "たります",
+      "TE": "たりて",
+      "PRESENT_CONTINUOUS": "たりています",
+      "TE_REQUEST": "たりてください",
+      "EXAMPLE": "おかね が たります。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "します",
+    "romaji": "suru",
+    "dictionaryForm": "する",
+    "english": "do",
+    "forms": {
+      "PRESENT": "します",
+      "TE": "して",
+      "PRESENT_CONTINUOUS": "しています",
+      "TE_REQUEST": "してください",
+      "EXAMPLE": "しゅくだい を します。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "べんきょうします",
+    "romaji": "benkyou suru",
+    "dictionaryForm": "べんきょうします",
+    "english": "study",
+    "forms": {
+      "PRESENT": "べんきょうします",
+      "TE": "べんきょうして",
+      "PRESENT_CONTINUOUS": "べんきょうしています",
+      "TE_REQUEST": "べんきょうしてください",
+      "EXAMPLE": "にほんご を べんきょうします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "けっこんします",
+    "romaji": "kekkon suru",
+    "dictionaryForm": "けっこんします",
+    "english": "marry",
+    "forms": {
+      "PRESENT": "けっこんします",
+      "TE": "けっこんして",
+      "PRESENT_CONTINUOUS": "けっこんしています",
+      "TE_REQUEST": "けっこんしてください",
+      "EXAMPLE": "らいねん けっこんします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "かいものします",
+    "romaji": "kaimono suru",
+    "dictionaryForm": "かいものします",
+    "english": "shop",
+    "forms": {
+      "PRESENT": "かいものします",
+      "TE": "かいものして",
+      "PRESENT_CONTINUOUS": "かいものしています",
+      "TE_REQUEST": "かいものしてください",
+      "EXAMPLE": "すーぱー で かいものします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "しょくじします",
+    "romaji": "shokuji suru",
+    "dictionaryForm": "しょくじします",
+    "english": "have a meal",
+    "forms": {
+      "PRESENT": "しょくじします",
+      "TE": "しょくじして",
+      "PRESENT_CONTINUOUS": "しょくじしています",
+      "TE_REQUEST": "しょくじしてください",
+      "EXAMPLE": "れすとらん で しょくじします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "さんぽします",
+    "romaji": "sanpo suru",
+    "dictionaryForm": "さんぽします",
+    "english": "take a walk",
+    "forms": {
+      "PRESENT": "さんぽします",
+      "TE": "さんぽして",
+      "PRESENT_CONTINUOUS": "さんぽしています",
+      "TE_REQUEST": "さんぽしてください",
+      "EXAMPLE": "こうえん を さんぽします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "コピーします",
+    "romaji": "kopii suru",
+    "dictionaryForm": "コピーします",
+    "english": "copy",
+    "forms": {
+      "PRESENT": "コピーします",
+      "TE": "コピーして",
+      "PRESENT_CONTINUOUS": "コピーしています",
+      "TE_REQUEST": "コピーしてください",
+      "EXAMPLE": "しょるい を コピーします。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "はらいます",
+    "romaji": "harau (払う)\\",
+    "dictionaryForm": "はらいます",
+    "english": "pay",
+    "forms": {
+      "PRESENT": "はらいます",
+      "TE": "はらって",
+      "PRESENT_CONTINUOUS": "はらっています",
+      "TE_REQUEST": "はらってください",
+      "EXAMPLE": "だいきん を はらいます。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "きます",
+    "romaji": "kuru",
+    "dictionaryForm": "来る",
+    "english": "come",
+    "forms": {
+      "PRESENT": "きます",
+      "TE": "きて",
+      "PRESENT_CONTINUOUS": "きています",
+      "TE_REQUEST": "きてください",
+      "EXAMPLE": "いえ に きます。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "もってきます",
+    "romaji": "motte kuru",
+    "dictionaryForm": "もってきます",
+    "english": "bring",
+    "forms": {
+      "PRESENT": "もってきます",
+      "TE": "もってきて",
+      "PRESENT_CONTINUOUS": "もってきています",
+      "TE_REQUEST": "もってきてください",
+      "EXAMPLE": "ほん を もってきます。"
+    }
+  },
+  {
+    "group": "IRREGULAR",
+    "masuForm": "つれてきます",
+    "romaji": "tsurete kuru",
+    "dictionaryForm": "つれてきます",
+    "english": "bring along",
+    "forms": {
+      "PRESENT": "つれてきます",
+      "TE": "つれてきて",
+      "PRESENT_CONTINUOUS": "つれてきています",
+      "TE_REQUEST": "つれてきてください",
+      "EXAMPLE": "ともだち を つれてきます。"
+    }
+  }
+]

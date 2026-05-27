@@ -1,0 +1,55 @@
+{
+  "name": "japanese-learning-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:extended": "tsx prisma/seed-extended.ts",
+    "db:seed:irodori": "tsx prisma/seed-irodori.ts",
+    "db:seed:genki": "tsx prisma/seed-genki.ts",
+    "db:seed:kanji-radicals": "tsx prisma/seed-kanji-radicals.ts",
+    "db:seed:irodori-preint": "tsx prisma/seed-irodori-preint.ts",
+    "db:seed:irodori-elem": "tsx prisma/seed-irodori-elem.ts",
+    "data:irodori": "node scripts/parse-irodori.mjs",
+    "data:irodori-elem": "node scripts/parse-irodori-elem.mjs",
+    "data:irodori-grammar": "node scripts/parse-irodori-grammar.mjs",
+    "db:seed:irodori-grammar": "tsx prisma/seed-irodori-grammar.ts",
+    "db:seed:irodori-elem1": "tsx prisma/seed-irodori-elem1.ts",
+    "db:seed:kanji-n3-n1": "tsx prisma/seed-kanji-n3-n1.ts",
+    "data:kanji-n3-n1": "node scripts/extract-n3-n1-kanji.mjs",
+    "data:kanjivg-n3-n1": "node scripts/fetch-kanjivg-n3-n1.mjs",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts && tsx prisma/seed-extended.ts",
+    "data:kanjivg": "node scripts/fetch-kanjivg.mjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.3.24",
+    "@ai-sdk/react": "^1.2.12",
+    "@prisma/client": "^5.22.0",
+    "ai": "^4.3.19",
+    "next": "14.2.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.0"
+  }
+}

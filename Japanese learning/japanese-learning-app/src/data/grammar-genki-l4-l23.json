@@ -1,0 +1,646 @@
+[
+  {
+    "lesson": 4,
+    "order": 1,
+    "title": "X があります / X がいます (existence)",
+    "pattern": "[Place] に [inanimate] が あります。 / [Place] に [animate] が います。",
+    "explanation": "Use あります for inanimate things (objects, plants) and います for animate beings (people, animals). The location takes に. To negate, replace あります/います with ありません/いません.",
+    "examples": [
+      { "jp": "つくえ の うえ に ほん が あります。", "romaji": "Tsukue no ue ni hon ga arimasu.", "en": "There is a book on the desk." },
+      { "jp": "こうえん に こども が います。", "romaji": "Kouen ni kodomo ga imasu.", "en": "There are children in the park." },
+      { "jp": "れいぞうこ に たまご が ありません。", "romaji": "Reizouko ni tamago ga arimasen.", "en": "There are no eggs in the refrigerator." }
+    ]
+  },
+  {
+    "lesson": 4,
+    "order": 2,
+    "title": "Location words (位置を表す言葉)",
+    "pattern": "[Object] の うえ / した / まえ / うしろ / みぎ / ひだり / なか / そと / となり / ちかく",
+    "explanation": "These nouns describe relative position and always follow の. Pair with に + あります/います to say where something is.",
+    "examples": [
+      { "jp": "えき の まえ に バス ていがあります。", "romaji": "Eki no mae ni basu-tei ga arimasu.", "en": "There is a bus stop in front of the station." },
+      { "jp": "いぬ は ソファ の した に います。", "romaji": "Inu wa sofa no shita ni imasu.", "en": "The dog is under the sofa." },
+      { "jp": "ゆうびんきょく は スーパー の となり です。", "romaji": "Yuubinkyoku wa suupaa no tonari desu.", "en": "The post office is next to the supermarket." }
+    ]
+  },
+  {
+    "lesson": 4,
+    "order": 3,
+    "title": "Past tense of verbs (〜ました / 〜ませんでした)",
+    "pattern": "[verb stem] + ました (past affirmative) / ませんでした (past negative)",
+    "explanation": "To talk about completed actions in the past, change the ます ending to ました. For negative past, use ませんでした. This is the polite (masu) form.",
+    "examples": [
+      { "jp": "きのう えいが を みました。", "romaji": "Kinou eiga o mimashita.", "en": "I watched a movie yesterday." },
+      { "jp": "けさ ちょうしょく を たべませんでした。", "romaji": "Kesa choushoku o tabemasen deshita.", "en": "I didn't eat breakfast this morning." },
+      { "jp": "せんしゅう ともだち に あいました。", "romaji": "Senshuu tomodachi ni aimashita.", "en": "I met a friend last week." }
+    ]
+  },
+  {
+    "lesson": 4,
+    "order": 4,
+    "title": "Duration: [time] に [frequency]",
+    "pattern": "[duration] に [number] かい [verb]",
+    "explanation": "Use に to express frequency within a time period: 'X times per Y'. The number + counter (かい, ど) comes after the time period.",
+    "examples": [
+      { "jp": "いっしゅうかん に さんかい にほんご を べんきょう します。", "romaji": "Isshuukan ni sankai nihongo o benkyou shimasu.", "en": "I study Japanese three times a week." },
+      { "jp": "いちにち に いちど は そとに でます。", "romaji": "Ichinichi ni ichido wa soto ni demasu.", "en": "I go outside at least once a day." }
+    ]
+  },
+  {
+    "lesson": 5,
+    "order": 1,
+    "title": "い-adjectives (affirmative present)",
+    "pattern": "[い-adj] + です。  |  [い-adj – い] + くないです。 (negative)",
+    "explanation": "い-adjectives end in い and directly precede nouns or end a sentence with です. To negate in polite speech, drop the final い and add くないです (or くありません).",
+    "examples": [
+      { "jp": "きょう は さむいです。", "romaji": "Kyou wa samui desu.", "en": "It is cold today." },
+      { "jp": "この カバン は おもく ないです。", "romaji": "Kono kaban wa omoku nai desu.", "en": "This bag is not heavy." },
+      { "jp": "たかい くつ を かいました。", "romaji": "Takai kutsu o kaimashita.", "en": "I bought expensive shoes." }
+    ]
+  },
+  {
+    "lesson": 5,
+    "order": 2,
+    "title": "な-adjectives (affirmative present)",
+    "pattern": "[な-adj] + な + [Noun]  |  [な-adj] + です (predicate)",
+    "explanation": "な-adjectives look like nouns but function as adjectives. When they come before a noun they require な. When used as a predicate (ending a sentence), drop な and add です.",
+    "examples": [
+      { "jp": "しずか な まち に すんでいます。", "romaji": "Shizuka na machi ni sunde imasu.", "en": "I live in a quiet town." },
+      { "jp": "あの レストラン は ゆうめい です。", "romaji": "Ano resutoran wa yuumei desu.", "en": "That restaurant is famous." },
+      { "jp": "ここ は べんり じゃ ないです。", "romaji": "Koko wa benri ja nai desu.", "en": "This place is not convenient." }
+    ]
+  },
+  {
+    "lesson": 5,
+    "order": 3,
+    "title": "Past tense of adjectives",
+    "pattern": "い-adj: [stem] + かったです / くなかったです  |  な-adj: でした / じゃなかったです",
+    "explanation": "For past affirmative: い-adjectives drop い and add かったです; な-adjectives use でした. For past negative: い-adjectives use くなかったです; な-adjectives use じゃなかったです.",
+    "examples": [
+      { "jp": "きのう は あつかったです。", "romaji": "Kinou wa atsukatta desu.", "en": "It was hot yesterday." },
+      { "jp": "こども の ころ、にぎやか じゃ なかったです。", "romaji": "Kodomo no koro, nigiyaka ja nakatta desu.", "en": "When I was a child, it wasn't lively." },
+      { "jp": "その えいが は おもしろかったです。", "romaji": "Sono eiga wa omoshirokatta desu.", "en": "That movie was interesting." }
+    ]
+  },
+  {
+    "lesson": 5,
+    "order": 4,
+    "title": "Connecting adjectives with て-form",
+    "pattern": "い-adj: [stem] + くて  |  な-adj: [adj] + で",
+    "explanation": "To list two or more adjectives, use the て-form. For い-adjectives, drop い and add くて. For な-adjectives, drop な and add で. Roughly means 'and' between descriptions.",
+    "examples": [
+      { "jp": "あの カフェ は やすくて、おいしいです。", "romaji": "Ano kafe wa yasukute, oishii desu.", "en": "That café is cheap and delicious." },
+      { "jp": "かれ は しんせつで、おもしろいです。", "romaji": "Kare wa shinsetsude, omoshiroi desu.", "en": "He is kind and interesting." }
+    ]
+  },
+  {
+    "lesson": 6,
+    "order": 1,
+    "title": "Te-form of verbs",
+    "pattern": "Group 1: [u → tte/ite/nde/etc.]  |  Group 2: [stem] + て  |  する → して, くる → きて",
+    "explanation": "The te-form is a connective/modifier form. Group 1 (u-verbs) change the final syllable: く→いて, ぐ→いで, ぬ/ぶ/む→んで, う/つ/る→って, す→して. Group 2 (ru-verbs) simply add て. It chains actions and forms many grammar patterns.",
+    "examples": [
+      { "jp": "かいしゃ に いって、しごと を します。", "romaji": "Kaisha ni itte, shigoto o shimasu.", "en": "I go to the office and then work." },
+      { "jp": "はを みがいて、かおを あらいます。", "romaji": "Ha o migaite, kao o araimasu.", "en": "I brush my teeth and wash my face." }
+    ]
+  },
+  {
+    "lesson": 6,
+    "order": 2,
+    "title": "〜てください (please do…)",
+    "pattern": "[te-form] + ください",
+    "explanation": "Attach ください to the te-form to make a polite request or instruction: 'Please do [verb]'. It is softer than a command and extremely common in everyday Japanese.",
+    "examples": [
+      { "jp": "ここ に なまえ を かいてください。", "romaji": "Koko ni namae o kaite kudasai.", "en": "Please write your name here." },
+      { "jp": "すこし まってください。", "romaji": "Sukoshi matte kudasai.", "en": "Please wait a moment." },
+      { "jp": "もう いちど いってください。", "romaji": "Mou ichido itte kudasai.", "en": "Please say it one more time." }
+    ]
+  },
+  {
+    "lesson": 6,
+    "order": 3,
+    "title": "〜ています (ongoing action / habitual state)",
+    "pattern": "[te-form] + います (polite) / いる (plain)",
+    "explanation": "Attach います to the te-form to express (1) an action currently in progress ('I am verb-ing'), (2) a habitual or repeated action, or (3) a state resulting from a past action. Context determines which meaning.",
+    "examples": [
+      { "jp": "いま ごはん を たべています。", "romaji": "Ima gohan o tabete imasu.", "en": "I am eating right now." },
+      { "jp": "まいにち じてんしゃ で かいしゃ に いっています。", "romaji": "Mainichi jitensha de kaisha ni itte imasu.", "en": "I go to work by bicycle every day." },
+      { "jp": "かれ は けっこん しています。", "romaji": "Kare wa kekkon shite imasu.", "en": "He is married. (state resulting from marriage)" }
+    ]
+  },
+  {
+    "lesson": 7,
+    "order": 1,
+    "title": "Counters for people: 〜人 (にん / り)",
+    "pattern": "ひとり (1) · ふたり (2) · さんにん (3) · よにん (4) … [number] + にん",
+    "explanation": "人 as a counter reads ひとり for one and ふたり for two; from three onward use the Sino-Japanese numbers + にん. These are common in talking about family, groups, and classrooms.",
+    "examples": [
+      { "jp": "かぞく は よにん います。", "romaji": "Kazoku wa yonin imasu.", "en": "There are four people in my family." },
+      { "jp": "クラス に にじゅうごにん います。", "romaji": "Kurasu ni nijuugonin imasu.", "en": "There are twenty-five people in the class." }
+    ]
+  },
+  {
+    "lesson": 7,
+    "order": 2,
+    "title": "〜ています for states (resulting state)",
+    "pattern": "[stative verb te-form] + います",
+    "explanation": "Some verbs describe a change of state (しる → しっている 'know', きる → きている 'be wearing', すむ → すんでいる 'live in'). Their ている form expresses the current state that resulted from the change, not an ongoing action.",
+    "examples": [
+      { "jp": "かれ は めがね を かけています。", "romaji": "Kare wa megane o kakete imasu.", "en": "He is wearing glasses. (a current state)" },
+      { "jp": "とうきょう に すんでいます。", "romaji": "Toukyou ni sunde imasu.", "en": "I live in Tokyo." },
+      { "jp": "あの ひと を しっていますか。", "romaji": "Ano hito o shitte imasu ka.", "en": "Do you know that person?" }
+    ]
+  },
+  {
+    "lesson": 7,
+    "order": 3,
+    "title": "〜てから (after doing…)",
+    "pattern": "[te-form] + から、[second action]",
+    "explanation": "てから expresses that one action is completed before the next begins: 'After doing A, do B'. The order is fixed — first the てから clause, then the result.",
+    "examples": [
+      { "jp": "しゅくだい を してから、テレビ を みます。", "romaji": "Shukudai o shite kara, terebi o mimasu.", "en": "After doing homework, I watch TV." },
+      { "jp": "てを あらってから たべます。", "romaji": "Te o aratte kara tabemasu.", "en": "I eat after washing my hands." }
+    ]
+  },
+  {
+    "lesson": 8,
+    "order": 1,
+    "title": "Plain (dictionary) forms — present",
+    "pattern": "Group 1: replace ます-stem + ます → dictionary form (e.g. たべます → たべる). Group 2 & 3 have their own patterns.",
+    "explanation": "Plain forms are the base form found in dictionaries. They are used in casual speech, embedded clauses, and many grammar patterns. Group 2 (ru-verbs): add る. Group 1 (u-verbs): stem + u-sound. Irregulars: する, くる.",
+    "examples": [
+      { "jp": "まいにち そうじ する。", "romaji": "Mainichi souji suru.", "en": "I clean every day. (casual)" },
+      { "jp": "かれ は コーヒー を のむ。", "romaji": "Kare wa koohii o nomu.", "en": "He drinks coffee. (plain)" }
+    ]
+  },
+  {
+    "lesson": 8,
+    "order": 2,
+    "title": "〜と思います (I think that…)",
+    "pattern": "[plain form] + と思います",
+    "explanation": "Use the plain form + と思います to express an opinion or belief. The plain form must precede と, even in polite speech. For negative beliefs use plain negative + と思います.",
+    "examples": [
+      { "jp": "あしたは あめ が ふると 思います。", "romaji": "Ashita wa ame ga furu to omoimasu.", "en": "I think it will rain tomorrow." },
+      { "jp": "かれ は こないと 思います。", "romaji": "Kare wa konai to omoimasu.", "en": "I think he won't come." }
+    ]
+  },
+  {
+    "lesson": 8,
+    "order": 3,
+    "title": "[verb/adj plain form] + の が 好き / 嫌い / 上手 / 下手",
+    "pattern": "[verb plain form] + の が 好き (like) / 嫌い (dislike) / 上手 (good at) / 下手 (bad at)",
+    "explanation": "の nominalises a verb phrase — turning a verb into a noun concept ('the act of doing X'). This lets verbs become the subject or object of a sentence, including with 好き, 嫌い, 上手, 下手.",
+    "examples": [
+      { "jp": "うたう の が すきです。", "romaji": "Utau no ga suki desu.", "en": "I like singing." },
+      { "jp": "りょうり する の が とくい です。", "romaji": "Ryouri suru no ga tokui desu.", "en": "I'm good at cooking." },
+      { "jp": "はやく はなす の が にがてです。", "romaji": "Hayaku hanasu no ga nigate desu.", "en": "I'm bad at speaking fast." }
+    ]
+  },
+  {
+    "lesson": 9,
+    "order": 1,
+    "title": "Potential form (〜られる / 〜える)",
+    "pattern": "Group 2: [stem] + られる (e.g. たべ → たべられる) | Group 1: change u → eru (e.g. かく → かける) | する → できる, くる → こられる",
+    "explanation": "The potential form means 'can / be able to'. Group 1 verbs change the final う-sound to the え-sound + る: のむ→のめる. Group 2 verbs add られる. The object of the potential verb typically takes が instead of を.",
+    "examples": [
+      { "jp": "かんじ が よめますか。", "romaji": "Kanji ga yomemasu ka.", "en": "Can you read kanji?" },
+      { "jp": "からい りょうり が たべられません。", "romaji": "Karai ryouri ga taberaremasen.", "en": "I can't eat spicy food." },
+      { "jp": "まだ じてんしゃ が のれません。", "romaji": "Mada jitensha ga noremasen.", "en": "I still can't ride a bicycle." }
+    ]
+  },
+  {
+    "lesson": 9,
+    "order": 2,
+    "title": "〜まで (until / as far as)",
+    "pattern": "[time/place] まで [verb]",
+    "explanation": "まで marks the end point of an action in time or space. It can translate as 'until', 'up to', or 'as far as' depending on context.",
+    "examples": [
+      { "jp": "ごご 10じ まで べんきょうします。", "romaji": "Gogo juuji made benkyou shimasu.", "en": "I study until 10 p.m." },
+      { "jp": "えき まで あるきました。", "romaji": "Eki made arukimashita.", "en": "I walked as far as the station." }
+    ]
+  },
+  {
+    "lesson": 9,
+    "order": 3,
+    "title": "〜てみる (try doing)",
+    "pattern": "[te-form] + みます / みました",
+    "explanation": "Attach みる to the te-form to express trying something to see the result. It often carries the nuance of 'give it a go' or 'see what happens'.",
+    "examples": [
+      { "jp": "あの レストラン に いってみました。", "romaji": "Ano resutoran ni itte mimashita.", "en": "I tried going to that restaurant." },
+      { "jp": "かんじ で かいてみてください。", "romaji": "Kanji de kaite mite kudasai.", "en": "Please try writing it in kanji." }
+    ]
+  },
+  {
+    "lesson": 10,
+    "order": 1,
+    "title": "Comparison: A は B より 〜",
+    "pattern": "A は B より [adjective/adverb] です。",
+    "explanation": "より marks the standard of comparison ('than'). The item being described (A) takes は; the thing it is compared against (B) takes より.",
+    "examples": [
+      { "jp": "なつ は ふゆ より あつい です。", "romaji": "Natsu wa fuyu yori atsui desu.", "en": "Summer is hotter than winter." },
+      { "jp": "バス より でんしゃ の ほう が はやい です。", "romaji": "Basu yori densha no hou ga hayai desu.", "en": "The train is faster than the bus." }
+    ]
+  },
+  {
+    "lesson": 10,
+    "order": 2,
+    "title": "〜の ほうが (the one that is more…)",
+    "pattern": "A と B と どちら / どっち の ほう が [adj]？ → A / B の ほう が [adj] です。",
+    "explanation": "のほうが singles out which of two options is more X. Use どちら (formal) or どっち (casual) to ask 'which is more'. Answer by stating the winner + のほうが + adjective.",
+    "examples": [
+      { "jp": "コーヒー と おちゃ と どちら が すきですか。", "romaji": "Koohii to ocha to dochira ga suki desu ka.", "en": "Which do you prefer, coffee or tea?" },
+      { "jp": "おちゃ の ほう が すきです。", "romaji": "Ocha no hou ga suki desu.", "en": "I prefer tea." }
+    ]
+  },
+  {
+    "lesson": 10,
+    "order": 3,
+    "title": "〜たら conditional (when / if … then)",
+    "pattern": "[plain past] + ら、[result clause]",
+    "explanation": "The たら conditional is formed by adding ら to the plain past form. It expresses 'when/if A happens/happened, then B'. It is often used for advice (〜たら いい), discovery, and natural sequence.",
+    "examples": [
+      { "jp": "うちに かえったら、でんわ してください。", "romaji": "Uchi ni kaettara, denwa shite kudasai.", "en": "Please call me when you get home." },
+      { "jp": "わからなかったら、せんせい に きいたら いいです。", "romaji": "Wakaranakattara, sensei ni kiitara ii desu.", "en": "If you don't understand, you should ask the teacher." }
+    ]
+  },
+  {
+    "lesson": 11,
+    "order": 1,
+    "title": "あげる / もらう / くれる (giving and receiving)",
+    "pattern": "[giver] は [receiver] に [thing] を あげます | [receiver] は [giver] に/から [thing] を もらいます | [giver] は [receiver] に [thing] を くれます",
+    "explanation": "These three verbs all relate to giving and receiving but differ in perspective. あげる: I/someone gives to another. もらう: I/someone receives from another (receiver-focused). くれる: someone gives to me/my in-group (always benefits me).",
+    "examples": [
+      { "jp": "ともだち に プレゼント を あげました。", "romaji": "Tomodachi ni purezento o agemashita.", "en": "I gave a present to a friend." },
+      { "jp": "せんせい に ほん を もらいました。", "romaji": "Sensei ni hon o moraimashita.", "en": "I received a book from the teacher." },
+      { "jp": "かあさん が おかし を くれました。", "romaji": "Kaasan ga okashi o kuremashita.", "en": "My mother gave me sweets." }
+    ]
+  },
+  {
+    "lesson": 11,
+    "order": 2,
+    "title": "〜てあげる / 〜てもらう / 〜てくれる (doing favours)",
+    "pattern": "[te-form] + あげる / もらう / くれる",
+    "explanation": "Attach the giving/receiving verbs to the te-form to express doing a favour. てあげる: I do something for someone. てもらう: I have someone do something for me. てくれる: someone does something for me (expresses gratitude or expectation).",
+    "examples": [
+      { "jp": "かれ の にもつ を はこんであげました。", "romaji": "Kare no nimotsu o hakonde agemashita.", "en": "I carried his luggage for him." },
+      { "jp": "ともだち に てつだってもらいました。", "romaji": "Tomodachi ni tetsudatte moraimashita.", "en": "I had a friend help me." },
+      { "jp": "かれ が ドア を あけてくれました。", "romaji": "Kare ga doa o akete kuremashita.", "en": "He opened the door for me." }
+    ]
+  },
+  {
+    "lesson": 11,
+    "order": 3,
+    "title": "〜たことがある (have done / past experience)",
+    "pattern": "[plain past] + ことがあります / ことがありません",
+    "explanation": "Use plain past + ことがある to express that you have had the experience of doing something at least once. Negate with ことがありません to say you have never done it.",
+    "examples": [
+      { "jp": "ふじさん に のぼった こと が あります。", "romaji": "Fujisan ni nobotta koto ga arimasu.", "en": "I have climbed Mt. Fuji." },
+      { "jp": "おすし を たべた こと が ありますか。", "romaji": "Osushi o tabeta koto ga arimasu ka.", "en": "Have you ever eaten sushi?" },
+      { "jp": "がいこく に いった こと が ありません。", "romaji": "Gaikoku ni itta koto ga arimasen.", "en": "I have never been abroad." }
+    ]
+  },
+  {
+    "lesson": 12,
+    "order": 1,
+    "title": "〜てしまう (finishing / doing unintentionally)",
+    "pattern": "[te-form] + しまいます / しまいました",
+    "explanation": "〜てしまう conveys either (1) completing an action fully ('finish doing'), or (2) doing something regrettably, by accident, or against one's will. Context indicates which meaning. In casual speech, contractions like ちゃう (for てしまう) and じゃう are common.",
+    "examples": [
+      { "jp": "しゅくだい を ぜんぶ やってしまいました。", "romaji": "Shukudai o zenbu yatte shimaimashita.", "en": "I finished all the homework. (completed)" },
+      { "jp": "さいふ を わすれてしまいました。", "romaji": "Saifu o wasurete shimaimashita.", "en": "I (regrettably) forgot my wallet." },
+      { "jp": "ケーキ を ぜんぶ たべてしまった。", "romaji": "Keeki o zenbu tabete shimatta.", "en": "I ate all the cake. (oops / done now)" }
+    ]
+  },
+  {
+    "lesson": 12,
+    "order": 2,
+    "title": "〜ておく (doing in advance / leaving as is)",
+    "pattern": "[te-form] + おきます / おきました",
+    "explanation": "〜ておく means to do something in preparation for a future purpose, or to leave something in a certain state intentionally. It carries the idea of purposeful action with a future effect in mind.",
+    "examples": [
+      { "jp": "パーティー の まえに へや を そうじしておきます。", "romaji": "Paatii no mae ni heya o souji shite okimasu.", "en": "I'll clean the room in advance of the party." },
+      { "jp": "りょこう の ために ホテル を よやく しておきました。", "romaji": "Ryokou no tame ni hoteru o yoyaku shite okimashita.", "en": "I booked the hotel in advance for the trip." }
+    ]
+  },
+  {
+    "lesson": 12,
+    "order": 3,
+    "title": "〜ていく / 〜てくる (going and coming, directional aspect)",
+    "pattern": "[te-form] + いく (moving away) | [te-form] + くる (moving toward speaker)",
+    "explanation": "〜ていく implies an action that progresses or moves away from the current point (in time or space). 〜てくる implies an action that approaches or has come from elsewhere toward the speaker's point.",
+    "examples": [
+      { "jp": "これから にほんご が むずかしく なっていく でしょう。", "romaji": "Korekara nihongo ga muzukashiku natte iku deshou.", "en": "Japanese will continue to get harder from here on." },
+      { "jp": "にほん から おみやげ を かってきました。", "romaji": "Nihon kara omiyage o katte kimashita.", "en": "I bought souvenirs and brought them back from Japan." }
+    ]
+  },
+  {
+    "lesson": 13,
+    "order": 1,
+    "title": "Short potential form (plain style)",
+    "pattern": "Group 1: final う-row → え-row + る (のむ→のめる) | Group 2: [stem] + られる | する→できる, くる→こられる",
+    "explanation": "The potential form in plain (casual) speech is exactly the same as the polite potential minus the ます ending. Group 2 can also use the shorter spoken form [stem] + れる (e.g. たべれる), though textbooks prefer たべられる.",
+    "examples": [
+      { "jp": "もう かんじ が かける よう に なった。", "romaji": "Mou kanji ga kakeru you ni natta.", "en": "Now I've become able to write kanji." },
+      { "jp": "さかな は たべられない。", "romaji": "Sakana wa taberarenai.", "en": "I can't eat fish." }
+    ]
+  },
+  {
+    "lesson": 13,
+    "order": 2,
+    "title": "〜し、〜し (listing multiple reasons)",
+    "pattern": "[reason 1] し、[reason 2] し、[conclusion]",
+    "explanation": "し connects multiple reasons or properties without ranking them. Each し clause lists one reason; the final clause gives the overall conclusion or decision. It is softer and more casual than で or から.",
+    "examples": [
+      { "jp": "あの カフェ は やすい し、おいしい し、よく いきます。", "romaji": "Ano kafe wa yasui shi, oishii shi, yoku ikimasu.", "en": "That café is cheap and delicious, so I go there often." },
+      { "jp": "かれ は しんせつ だ し、ゆうめい だ し、モテる。", "romaji": "Kare wa shinsetsu da shi, yuumei da shi, moteru.", "en": "He's kind, he's famous — no wonder he's popular." }
+    ]
+  },
+  {
+    "lesson": 13,
+    "order": 3,
+    "title": "〜そうです (looks like / seems)",
+    "pattern": "い-adj: [stem] + そうです | な-adj: [adj] + そうです | verb: [stem] + そうです",
+    "explanation": "そうです after adjective or verb stems expresses appearance based on direct visual evidence: 'it looks like / it seems'. Do not confuse with the reported-speech そうです (from plain form + そうだ).",
+    "examples": [
+      { "jp": "あの ケーキ は おいしそうです。", "romaji": "Ano keeki wa oishisou desu.", "en": "That cake looks delicious." },
+      { "jp": "かれ は つかれそうです。", "romaji": "Kare wa tsukare sou desu.", "en": "He looks tired." },
+      { "jp": "そと は さむそうです ね。", "romaji": "Soto wa samusou desu ne.", "en": "It looks cold outside, doesn't it." }
+    ]
+  },
+  {
+    "lesson": 14,
+    "order": 1,
+    "title": "ほしい (want something)",
+    "pattern": "[Person] は [thing] が ほしいです。",
+    "explanation": "ほしい is an い-adjective meaning 'want (something)'. The thing desired takes が. In polite speech use ほしいです; casual: ほしい. For wanting to do an action, use たい (verb stem + たい).",
+    "examples": [
+      { "jp": "あたらしい パソコン が ほしいです。", "romaji": "Atarashii pasokon ga hoshii desu.", "en": "I want a new computer." },
+      { "jp": "なに が ほしい？", "romaji": "Nani ga hoshii?", "en": "What do you want?" }
+    ]
+  },
+  {
+    "lesson": 14,
+    "order": 2,
+    "title": "〜かもしれません (might / maybe)",
+    "pattern": "[plain form] + かもしれません / かもしれない",
+    "explanation": "Expresses possibility or conjecture: 'might, may, perhaps'. The plain form immediately precedes かも. It is softer and less certain than でしょう.",
+    "examples": [
+      { "jp": "あした あめ が ふる かも しれません。", "romaji": "Ashita ame ga furu kamo shiremasen.", "en": "It might rain tomorrow." },
+      { "jp": "かれ は まだ ねている かも しれない。", "romaji": "Kare wa mada nete iru kamo shirenai.", "en": "He might still be sleeping." }
+    ]
+  },
+  {
+    "lesson": 14,
+    "order": 3,
+    "title": "〜でしょう (probably / I suppose)",
+    "pattern": "[plain form] + でしょう | [noun / na-adj] + でしょう",
+    "explanation": "でしょう expresses probability or seeks gentle confirmation ('isn't it?'). It is slightly more confident than かもしれない. When said with rising intonation it becomes a gentle confirmation question.",
+    "examples": [
+      { "jp": "かれ は もう うちに かえった でしょう。", "romaji": "Kare wa mou uchi ni kaetta deshou.", "en": "He has probably already gone home." },
+      { "jp": "あした も はれる でしょう。", "romaji": "Ashita mo hareru deshou.", "en": "It will probably be sunny tomorrow too." }
+    ]
+  },
+  {
+    "lesson": 15,
+    "order": 1,
+    "title": "〜たら conditional (revisited: counterfactual & discovery)",
+    "pattern": "[past plain] + ら → discovery or advice context",
+    "explanation": "Beyond future conditions, たら is used when an action happens and immediately produces an unexpected outcome ('when I did A, I discovered B'), and for giving advice ('you should do A').",
+    "examples": [
+      { "jp": "そのボタンを おしたら、でんきが きえた。", "romaji": "Sono botan o oshitara, denki ga kieta.", "en": "When I pressed that button, the light went off." },
+      { "jp": "つかれたら、すこし やすんだら どう？", "romaji": "Tsukaretara, sukoshi yasundara dou?", "en": "If you're tired, why not rest a bit?" }
+    ]
+  },
+  {
+    "lesson": 15,
+    "order": 2,
+    "title": "〜なくても いいです (don't have to)",
+    "pattern": "[negative te-form (〜なくて)] + も いいです",
+    "explanation": "〜なくてもいいです means 'you don't have to / it's okay not to'. Form: verb plain negative → drop い → add くて + もいいです. Contrast with 〜なければなりません (must do).",
+    "examples": [
+      { "jp": "むりに たべなくて も いいですよ。", "romaji": "Muri ni tabenakute mo ii desu yo.", "en": "You don't have to eat if you don't want to." },
+      { "jp": "スーツ は きなくて も いいです。", "romaji": "Suutsu wa kinakute mo ii desu.", "en": "You don't have to wear a suit." }
+    ]
+  },
+  {
+    "lesson": 15,
+    "order": 3,
+    "title": "〜みたいです (looks like / seems like — based on information)",
+    "pattern": "[noun / plain form] + みたいです / みたい",
+    "explanation": "みたいです expresses that something seems or appears a certain way, based on information or indirect perception. In meaning it overlaps with らしいです (based on hearsay) and ようです (more formal).",
+    "examples": [
+      { "jp": "かれ は にほんご が じょうず みたいです。", "romaji": "Kare wa nihongo ga jouzu mitai desu.", "en": "He seems to be good at Japanese." },
+      { "jp": "もう しあい は おわった みたい。", "romaji": "Mou shiai wa owatta mitai.", "en": "Looks like the match is already over." }
+    ]
+  },
+  {
+    "lesson": 16,
+    "order": 1,
+    "title": "〜ていただけませんか (could you please…)",
+    "pattern": "[te-form] + いただけませんか",
+    "explanation": "A highly polite request form, more formal than 〜てください or 〜てもらえませんか. Used when asking strangers, superiors, or in professional settings. Literally 'Would you be so kind as to (do)…?'",
+    "examples": [
+      { "jp": "みちを おしえて いただけませんか。", "romaji": "Michi o oshiete itadakemasen ka.", "en": "Could you please tell me the way?" },
+      { "jp": "もういちど せつめい して いただけませんか。", "romaji": "Mou ichido setsumei shite itadakemasen ka.", "en": "Could you please explain it once more?" }
+    ]
+  },
+  {
+    "lesson": 16,
+    "order": 2,
+    "title": "〜と conditional (natural consequence / always-true)",
+    "pattern": "[plain form] + と、[result]",
+    "explanation": "The と conditional expresses a natural, automatic, or habitual consequence: 'whenever/if A, then B always follows'. It cannot be used for requests, suggestions, or volitional actions in the result clause.",
+    "examples": [
+      { "jp": "みぎ に まがる と、えき が あります。", "romaji": "Migi ni magaru to, eki ga arimasu.", "en": "If you turn right, there is a station." },
+      { "jp": "はるに なる と、はな が さく。", "romaji": "Haru ni naru to, hana ga saku.", "en": "When spring comes, flowers bloom." }
+    ]
+  },
+  {
+    "lesson": 16,
+    "order": 3,
+    "title": "〜ば conditional (hypothetical / general condition)",
+    "pattern": "Group 1: final う-sound → え-sound + ば (のむ→のめば). Group 2: [stem] + れば. する→すれば, くる→くれば",
+    "explanation": "The ば conditional is often used for general 'if' statements and advice. It does not fix time order (unlike たら) and often pairs with いい ('it would be good if'). It cannot be used when the result has already occurred.",
+    "examples": [
+      { "jp": "もっと れんしゅう すれば、うまく なれます。", "romaji": "Motto renshuu sureba, umaku naremasu.", "en": "If you practice more, you can get better." },
+      { "jp": "はやく でれば まにあいます。", "romaji": "Hayaku dereba maniaimasu.", "en": "If you leave early, you'll make it in time." }
+    ]
+  },
+  {
+    "lesson": 17,
+    "order": 1,
+    "title": "〜なければなりません (must / have to)",
+    "pattern": "[plain negative] + なければなりません",
+    "explanation": "Expresses obligation: 'must do / have to do'. Form: verb plain negative (ない form) → drop い → add ければなりません. Casual shortening: 〜なきゃ or 〜なくちゃ.",
+    "examples": [
+      { "jp": "くすり を のまなければなりません。", "romaji": "Kusuri o nomanakere ba narimasen.", "en": "I must take the medicine." },
+      { "jp": "あした はやく おきなきゃ。", "romaji": "Ashita hayaku okinakya.", "en": "I've gotta wake up early tomorrow. (casual)" }
+    ]
+  },
+  {
+    "lesson": 17,
+    "order": 2,
+    "title": "Passive form — introduction (〜られる)",
+    "pattern": "Group 1: final う-sound → あ-sound + れる (のむ→のまれる). Group 2: [stem] + られる. する→される, くる→こられる",
+    "explanation": "The passive voice describes the subject as the recipient of an action. It is used for (1) direct passives ('the cake was eaten'), (2) adversative passives (the subject is negatively affected), and (3) formal description.",
+    "examples": [
+      { "jp": "その しょうせつ は たくさんの ひとに よまれています。", "romaji": "Sono shousetsu wa takusan no hito ni yomarete imasu.", "en": "That novel is read by many people." },
+      { "jp": "わたしは こどもに ケーキを たべられました。", "romaji": "Watashi wa kodomo ni keeki o taberaremashita.", "en": "My cake was eaten by the child. (adversative)" }
+    ]
+  },
+  {
+    "lesson": 18,
+    "order": 1,
+    "title": "Passive form — full coverage",
+    "pattern": "Direct passive: subject は agent に [passive verb]. Adversative: subject は agent に [thing を] [passive verb].",
+    "explanation": "In direct passives the subject receives the action. In adversative passives the subject is inconvenienced by someone else's action on a thing. The agent takes に; sometimes から marks the source.",
+    "examples": [
+      { "jp": "かれ は せんせい に ほめられました。", "romaji": "Kare wa sensei ni homeraremashita.", "en": "He was praised by the teacher." },
+      { "jp": "でんしゃ の なかで あしを ふまれました。", "romaji": "Densha no naka de ashi o fumaremashita.", "en": "Someone stepped on my foot in the train." },
+      { "jp": "この まちは えど じだい に つくられました。", "romaji": "Kono machi wa Edo jidai ni tsukuraremashita.", "en": "This town was built in the Edo period." }
+    ]
+  },
+  {
+    "lesson": 18,
+    "order": 2,
+    "title": "〜てほしい (want someone to do)",
+    "pattern": "[person] に [te-form] ほしい",
+    "explanation": "Expresses a desire for someone else to do something. The person you want the action from takes に. More direct than 〜ていただきたい.",
+    "examples": [
+      { "jp": "はやく かえってほしい。", "romaji": "Hayaku kaette hoshii.", "en": "I want you to come home soon." },
+      { "jp": "もっと れんらく してほしかった。", "romaji": "Motto renraku shite hoshikatta.", "en": "I wanted you to contact me more." }
+    ]
+  },
+  {
+    "lesson": 19,
+    "order": 1,
+    "title": "Honorific language — 尊敬語 (sonkeigo)",
+    "pattern": "お/ご + [verb stem] + になる | special honorific verbs: いらっしゃる, おっしゃる, なさる, くださる, めしあがる",
+    "explanation": "Sonkeigo raises the status of the subject (the person you're speaking about or to). Use お + verb stem + になる for most verbs. Memorise the most common irregular honorific verbs as they appear frequently in business and formal settings.",
+    "examples": [
+      { "jp": "先生は もう おかえりになりましたか。", "romaji": "Sensei wa mou okaeri ni narimashita ka.", "en": "Has the teacher already left for home?" },
+      { "jp": "しゃちょうは いま いらっしゃいません。", "romaji": "Shachou wa ima irasshaimasen.", "en": "The president is not in at the moment." }
+    ]
+  },
+  {
+    "lesson": 19,
+    "order": 2,
+    "title": "Humble language — 謙譲語 (kenjoogo)",
+    "pattern": "お/ご + [verb stem] + する | special humble verbs: まいる, おる, いたす, もうす, いただく, はいけんする",
+    "explanation": "Kenjoogo lowers the speaker's actions to show respect to the listener. Use お + verb stem + する for most verbs. Common irregular humble verbs must be memorised. Humble language is essential in business and formal correspondence.",
+    "examples": [
+      { "jp": "わたくしが ごあんない いたします。", "romaji": "Watakushi ga go-annai itashimasu.", "en": "I will guide you." },
+      { "jp": "わたしは 山田 と もうします。", "romaji": "Watashi wa Yamada to moushimasu.", "en": "I am called Yamada." }
+    ]
+  },
+  {
+    "lesson": 20,
+    "order": 1,
+    "title": "〜という (called / what they call)",
+    "pattern": "[word / phrase] という [noun]",
+    "explanation": "という connects a name or description to the noun it identifies. It means 'called', 'known as', 'what is called'. Used to introduce or define something by name.",
+    "examples": [
+      { "jp": "「もののけ姫」という えいが を みましたか。", "romaji": "\"Mononoke Hime\" to iu eiga o mimashita ka.", "en": "Have you seen the film called Princess Mononoke?" },
+      { "jp": "かれは ナオ という なまえ です。", "romaji": "Kare wa Nao to iu namae desu.", "en": "His name is Nao." }
+    ]
+  },
+  {
+    "lesson": 20,
+    "order": 2,
+    "title": "〜やすい / 〜にくい (easy / hard to do)",
+    "pattern": "[verb stem] + やすい (easy to) / にくい (hard to)",
+    "explanation": "Attach やすい or にくい to the verb stem (remove ます) to express how easy or difficult an action is. Both conjugate like い-adjectives.",
+    "examples": [
+      { "jp": "この えんぴつ は かきやすいです。", "romaji": "Kono enpitsu wa kakiyasui desu.", "en": "This pencil is easy to write with." },
+      { "jp": "この かんじ は おぼえにくいです。", "romaji": "Kono kanji wa oboenikui desu.", "en": "This kanji is hard to remember." }
+    ]
+  },
+  {
+    "lesson": 20,
+    "order": 3,
+    "title": "〜てみる (try doing — revisited with wider usage)",
+    "pattern": "[te-form] + みる / みます",
+    "explanation": "Revisited here in contexts of experimentation and curiosity: 'let me try', 'give it a go'. Also appears in suggestions: やってみたら どう？ (Why not give it a try?)",
+    "examples": [
+      { "jp": "いちど にほん に いってみたい。", "romaji": "Ichido Nihon ni itte mitai.", "en": "I want to try going to Japan at least once." },
+      { "jp": "あたらしい レシピ を つくってみました。", "romaji": "Atarashii reshipi o tsukutte mimashita.", "en": "I tried making a new recipe." }
+    ]
+  },
+  {
+    "lesson": 21,
+    "order": 1,
+    "title": "Causative form (〜させる)",
+    "pattern": "Group 1: final う-sound → あ-sound + せる (のむ→のませる). Group 2: [stem] + させる. する→させる, くる→こさせる",
+    "explanation": "The causative expresses making or letting someone do something. The causee (the person caused to act) takes を (when compelled) or に (when allowed). 〜させてください is used to ask permission to do something yourself.",
+    "examples": [
+      { "jp": "こども に やさい を たべさせました。", "romaji": "Kodomo ni yasai o tabesasemashita.", "en": "I made the child eat vegetables." },
+      { "jp": "わたしに はらわせてください。", "romaji": "Watashi ni harawasete kudasai.", "en": "Please let me pay." },
+      { "jp": "しゃちょうは ぶかを ざんぎょう させました。", "romaji": "Shachou wa buka o zangyou sasemashita.", "en": "The boss made the employees work overtime." }
+    ]
+  },
+  {
+    "lesson": 21,
+    "order": 2,
+    "title": "Causative-passive (〜させられる)",
+    "pattern": "causative stem + られる",
+    "explanation": "Combine causative and passive to express being made to do something against your will. Always expresses an adversarial/unwilling nuance ('I was forced to do...').",
+    "examples": [
+      { "jp": "こどもの ころ、まいにち ピアノ を れんしゅう させられました。", "romaji": "Kodomo no koro, mainichi piano o renshuu saseraremashita.", "en": "When I was a child, I was made to practise piano every day." }
+    ]
+  },
+  {
+    "lesson": 22,
+    "order": 1,
+    "title": "〜ていく / 〜てくる (directional / ongoing change)",
+    "pattern": "[te-form] + いく (progress away from now) | [te-form] + くる (progress toward now)",
+    "explanation": "Beyond literal movement, ていく and てくる express ongoing change or continuation. ていく: the situation will continue to unfold or change going forward. てくる: the situation has been developing up to now and continues.",
+    "examples": [
+      { "jp": "これから も にほんご を べんきょう していきます。", "romaji": "Korekara mo nihongo o benkyou shite ikimasu.", "en": "I will continue studying Japanese from now on." },
+      { "jp": "きおん が さがってきました。", "romaji": "Kion ga sagatte kimashita.", "en": "The temperature has been dropping (and continues to)." }
+    ]
+  },
+  {
+    "lesson": 22,
+    "order": 2,
+    "title": "〜てしまう revisited (regret / completion in narrative)",
+    "pattern": "[te-form] + しまった / ちゃった (casual)",
+    "explanation": "In narrative contexts, 〜てしまう often signals regret or an undesirable outcome. The casual contracted forms (ちゃった, じゃった for voiced sounds) are extremely common in everyday conversation.",
+    "examples": [
+      { "jp": "かぎを わすれてきてしまった！", "romaji": "Kagi o wasurete kite shimatta!", "en": "I've gone and forgotten my key!" },
+      { "jp": "さいごの ケーキ を たべちゃった。", "romaji": "Saigo no keeki o tabechatta.", "en": "I ate the last cake. (casual, with mild regret)" }
+    ]
+  },
+  {
+    "lesson": 23,
+    "order": 1,
+    "title": "〜ようになる (come to / reach the point of)",
+    "pattern": "[potential / negative + plain form] + ようになる",
+    "explanation": "Expresses a gradual change of state: 'come to be able to', 'reach the point where one does'. Often used with the potential form to describe acquired abilities, or with plain negative to describe habits that have stopped.",
+    "examples": [
+      { "jp": "にほんご が はなせる ようになりました。", "romaji": "Nihongo ga hanaseru you ni narimashita.", "en": "I've become able to speak Japanese." },
+      { "jp": "あまり テレビ を みない ようになりました。", "romaji": "Amari terebi o minai you ni narimashita.", "en": "I've gradually stopped watching much TV." }
+    ]
+  },
+  {
+    "lesson": 23,
+    "order": 2,
+    "title": "〜ようにする (make an effort to / try to)",
+    "pattern": "[plain form / negative plain] + ようにする / ようにしている",
+    "explanation": "Expresses a conscious, ongoing effort to do or not do something. 〜ようにしている means 'I make it a habit to / I always try to'. The difference from てみる: ようにする implies sustained effort.",
+    "examples": [
+      { "jp": "まいにち うんどう するようにしています。", "romaji": "Mainichi undou suru you ni shite imasu.", "en": "I make sure to exercise every day." },
+      { "jp": "かん食 を たべないようにしています。", "romaji": "Kanshou o tabenai you ni shite imasu.", "en": "I try not to eat snacks between meals." }
+    ]
+  },
+  {
+    "lesson": 23,
+    "order": 3,
+    "title": "〜ために (in order to / for the purpose of)",
+    "pattern": "[plain present / noun の] + ために + [volitional action]",
+    "explanation": "ために states the purpose or goal of a volitional action: 'in order to do X, I do Y'. The purpose clause must use plain present (not past or potential form here). Distinguish from the causal ので/から.",
+    "examples": [
+      { "jp": "にほんごの しけんに うかるために、まいにち べんきょう します。", "romaji": "Nihongo no shiken ni ukaru tame ni, mainichi benkyou shimasu.", "en": "In order to pass the Japanese exam, I study every day." },
+      { "jp": "けんこう の ために、はや ね、はや おき を します。", "romaji": "Kenkou no tame ni, hayane hayaoki o shimasu.", "en": "For the sake of my health, I keep early hours." }
+    ]
+  }
+]

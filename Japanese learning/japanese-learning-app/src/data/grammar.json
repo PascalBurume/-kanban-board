@@ -1,0 +1,192 @@
+[
+  {
+    "lesson": 1,
+    "order": 1,
+    "title": "A は B です (\"A is B\")",
+    "pattern": "[Topic] は [Noun] です。",
+    "explanation": "State \"A is B\" by naming the topic, marking it with the particle は (read 'wa'), and ending with です, a polite copula like 'is/am/are'. The topic comes first and です closes the sentence.",
+    "examples": [
+      { "jp": "わたし は がくせい です。", "romaji": "watashi wa gakusei desu.", "en": "I am a student." },
+      { "jp": "たなかさん は せんせい です。", "romaji": "Tanaka-san wa sensei desu.", "en": "Mr./Ms. Tanaka is a teacher." },
+      { "jp": "これ は みず です。", "romaji": "kore wa mizu desu.", "en": "This is water." }
+    ]
+  },
+  {
+    "lesson": 1,
+    "order": 2,
+    "title": "Yes/no questions with か",
+    "pattern": "[Statement] か。",
+    "explanation": "Turn a statement into a yes/no question by adding か at the end. Word order does not change. A question mark is optional because か already signals a question.",
+    "examples": [
+      { "jp": "あなた は がくせい です か。", "romaji": "anata wa gakusei desu ka.", "en": "Are you a student?" },
+      { "jp": "これ は ほん です か。", "romaji": "kore wa hon desu ka.", "en": "Is this a book?" },
+      { "jp": "はい、がくせい です。", "romaji": "hai, gakusei desu.", "en": "Yes, I am (a student)." }
+    ]
+  },
+  {
+    "lesson": 1,
+    "order": 3,
+    "title": "Noun の Noun (possession / connection)",
+    "pattern": "[Noun A] の [Noun B] = \"A's B\" / \"B of A\"",
+    "explanation": "The particle の links two nouns so the first describes or owns the second. The owner/descriptor comes first. Covers English \"'s\", \"of\", and noun-modifying-noun. の can be chained.",
+    "examples": [
+      { "jp": "わたし の くるま", "romaji": "watashi no kuruma", "en": "my car" },
+      { "jp": "にほんご の せんせい", "romaji": "nihongo no sensei", "en": "a teacher of Japanese" },
+      { "jp": "ともだち の おかあさん", "romaji": "tomodachi no okaasan", "en": "my friend's mother" }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 1,
+    "title": "これ / それ / あれ / どれ",
+    "pattern": "これ (near me) / それ (near you) / あれ (far) / どれ (which?)",
+    "explanation": "Pronouns that point at things without naming them, chosen by distance from speaker and listener. どれ asks 'which one' among three or more.",
+    "examples": [
+      { "jp": "これ は えんぴつ です。", "romaji": "kore wa enpitsu desu.", "en": "This is a pencil." },
+      { "jp": "それ は なん です か。", "romaji": "sore wa nan desu ka.", "en": "What is that (by you)?" },
+      { "jp": "あれ は えき です。", "romaji": "are wa eki desu.", "en": "That over there is a station." }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 2,
+    "title": "この / その / あの / どの + Noun",
+    "pattern": "この / その / あの / どの + [Noun]",
+    "explanation": "Use these forms directly before a noun to say 'this book', 'that bag', etc. Unlike これ/それ/あれ, they cannot stand alone — they must attach to a noun.",
+    "examples": [
+      { "jp": "この ほん は おもしろい です。", "romaji": "kono hon wa omoshiroi desu.", "en": "This book is interesting." },
+      { "jp": "どの かばん が あなた の です か。", "romaji": "dono kaban ga anata no desu ka.", "en": "Which bag is yours?" }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 3,
+    "title": "ここ / そこ / あそこ / どこ",
+    "pattern": "ここ (here) / そこ (there) / あそこ (over there) / どこ (where?)",
+    "explanation": "The same こ/そ/あ/ど series applied to places.",
+    "examples": [
+      { "jp": "トイレ は どこ です か。", "romaji": "toire wa doko desu ka.", "en": "Where is the bathroom?" },
+      { "jp": "ここ は きょうしつ です。", "romaji": "koko wa kyoushitsu desu.", "en": "This place is a classroom." }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 4,
+    "title": "だれ の (whose)",
+    "pattern": "だれ の [Noun]",
+    "explanation": "だれ means 'who'; combined with の it asks or states ownership.",
+    "examples": [
+      { "jp": "これ は だれ の かさ です か。", "romaji": "kore wa dare no kasa desu ka.", "en": "Whose umbrella is this?" },
+      { "jp": "やまださん の です。", "romaji": "Yamada-san no desu.", "en": "It's Mr./Ms. Yamada's." }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 5,
+    "title": "Noun + も (\"also / too\")",
+    "pattern": "[Noun] も [...] です。",
+    "explanation": "The particle も replaces は (or が) to mean 'also', signalling that what follows applies to this item as well as a previous one.",
+    "examples": [
+      { "jp": "たなかさん も がくせい です。", "romaji": "Tanaka-san mo gakusei desu.", "en": "Tanaka is a student too." }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 6,
+    "title": "Negative: じゃないです / ではありません",
+    "pattern": "[Noun] じゃないです。 / [Noun] ではありません。",
+    "explanation": "Negate です by replacing it with じゃないです (casual-polite) or ではありません (more formal). Both mean 'is not'.",
+    "examples": [
+      { "jp": "わたし は せんせい じゃないです。", "romaji": "watashi wa sensei janai desu.", "en": "I am not a teacher." },
+      { "jp": "それ は わたし の ではありません。", "romaji": "sore wa watashi no dewa arimasen.", "en": "That is not mine." }
+    ]
+  },
+  {
+    "lesson": 2,
+    "order": 7,
+    "title": "Sentence-final particles ね and よ",
+    "pattern": "[Sentence] ね。 / [Sentence] よ。",
+    "explanation": "ね seeks agreement or shared feeling ('…right?'). よ asserts or informs the listener of something new ('…you know').",
+    "examples": [
+      { "jp": "いい てんき です ね。", "romaji": "ii tenki desu ne.", "en": "Nice weather, isn't it?" },
+      { "jp": "この みせ は やすい です よ。", "romaji": "kono mise wa yasui desu yo.", "en": "This shop is cheap, you know." }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 1,
+    "title": "Verb groups",
+    "pattern": "Group 1 (Godan/u-verbs), Group 2 (Ichidan/ru-verbs), Group 3 (irregular: する, くる)",
+    "explanation": "Japanese verbs fall into three groups that determine conjugation. Group 1 ends in consonant+u; Group 2 typically ends in -iru/-eru; Group 3 is just する and くる. Knowing the group lets you predict every other form.",
+    "examples": []
+  },
+  {
+    "lesson": 3,
+    "order": 2,
+    "title": "Polite present/future tense (〜ます)",
+    "pattern": "[stem] + ます (affirmative) / [stem] + ません (negative)",
+    "explanation": "The 〜ます form covers both present habitual and future — context decides whether it means 'I eat' or 'I will eat'. It is the polite everyday default.",
+    "examples": [
+      { "jp": "まいにち コーヒー を のみます。", "romaji": "mainichi koohii o nomimasu.", "en": "I drink coffee every day." },
+      { "jp": "あした えいが を みます。", "romaji": "ashita eiga o mimasu.", "en": "I will watch a movie tomorrow." },
+      { "jp": "にく を たべません。", "romaji": "niku o tabemasen.", "en": "I do not eat meat." }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 3,
+    "title": "Particles を, で, に, へ",
+    "pattern": "を (object) · で (place of action / means) · に (destination, time, existence) · へ (direction)",
+    "explanation": "These mark each noun's role: を = direct object; で = where an action happens or the tool used; に = destination, point in time, or place of existence; へ = direction toward a destination (written へ, read 'e').",
+    "examples": [
+      { "jp": "カフェ で おちゃ を のみます。", "romaji": "kafe de ocha o nomimasu.", "en": "I drink tea at the cafe." },
+      { "jp": "あさ ろくじ に おきます。", "romaji": "asa rokuji ni okimasu.", "en": "I get up at six in the morning." },
+      { "jp": "うち へ かえります。", "romaji": "uchi e kaerimasu.", "en": "I return home." }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 4,
+    "title": "Time expressions",
+    "pattern": "specific time + に ; relative time (きょう, あした, まいにち) takes no particle",
+    "explanation": "Specific clock times and days take に. Relative time words usually take no particle and sit near the start of the sentence.",
+    "examples": [
+      { "jp": "まいにち うんどう を します。", "romaji": "mainichi undou o shimasu.", "en": "I exercise every day." },
+      { "jp": "どようび に ともだち に あいます。", "romaji": "doyoubi ni tomodachi ni aimasu.", "en": "I'll meet a friend on Saturday." }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 5,
+    "title": "Inviting: 〜ませんか",
+    "pattern": "[verb stem] + ませんか。",
+    "explanation": "Attaching 〜ませんか (the negative question form) makes a soft, polite invitation, like 'Would you like to…?'. The negative phrasing sounds friendlier than a direct request.",
+    "examples": [
+      { "jp": "いっしょ に ひるごはん を たべませんか。", "romaji": "issho ni hirugohan o tabemasen ka.", "en": "Won't you have lunch with me?" },
+      { "jp": "こんばん えいが を みませんか。", "romaji": "konban eiga o mimasen ka.", "en": "Shall we watch a movie tonight?" }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 6,
+    "title": "Frequency adverbs",
+    "pattern": "いつも / よく / ときどき / あまり (+ negative) / ぜんぜん (+ negative)",
+    "explanation": "Adverbs of frequency sit before the verb. あまり and ぜんぜん require a negative verb.",
+    "examples": [
+      { "jp": "よく おんがく を ききます。", "romaji": "yoku ongaku o kikimasu.", "en": "I often listen to music." },
+      { "jp": "あまり テレビ を みません。", "romaji": "amari terebi o mimasen.", "en": "I don't watch much TV." },
+      { "jp": "ぜんぜん おさけ を のみません。", "romaji": "zenzen osake o nomimasen.", "en": "I don't drink alcohol at all." }
+    ]
+  },
+  {
+    "lesson": 3,
+    "order": 7,
+    "title": "Word order and the topic particle は",
+    "pattern": "[Topic は] [time] [place で] [object を] [verb] — verb always last",
+    "explanation": "A typical sentence places the verb last; particles (not position) carry grammatical meaning, so order is flexible. The topic particle は raises something as the theme ('as for…'), which may differ from the grammatical subject.",
+    "examples": [
+      { "jp": "わたし は あさ うち で パン を たべます。", "romaji": "watashi wa asa uchi de pan o tabemasu.", "en": "As for me, I eat bread at home in the morning." },
+      { "jp": "にちようび は たいてい いえ に います。", "romaji": "nichiyoubi wa taitei ie ni imasu.", "en": "On Sundays I'm usually at home." }
+    ]
+  }
+]

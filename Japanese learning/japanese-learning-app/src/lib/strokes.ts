@@ -131,7 +131,7 @@ export function bbox(points: Point[]) {
   return { x: xMin, y: yMin, w: xMax - xMin, h: yMax - yMin };
 }
 
-export function bboxIoU(
+function bboxIoU(
   a: { x: number; y: number; w: number; h: number },
   b: { x: number; y: number; w: number; h: number }
 ) {
@@ -144,7 +144,7 @@ export function bboxIoU(
   return area > 0 ? inter / area : 0;
 }
 
-export function directionCosine(a: Point[], b: Point[]) {
+function directionCosine(a: Point[], b: Point[]) {
   if (a.length < 2 || b.length < 2) return 0;
   const av = { x: a[a.length - 1].x - a[0].x, y: a[a.length - 1].y - a[0].y };
   const bv = { x: b[b.length - 1].x - b[0].x, y: b[b.length - 1].y - b[0].y };

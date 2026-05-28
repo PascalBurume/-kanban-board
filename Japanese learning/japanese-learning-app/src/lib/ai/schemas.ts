@@ -23,7 +23,7 @@ export const correctionSchema = z.object({
   natural: z.string().optional(),
 });
 
-export const exampleSchema = z.object({
+const exampleSchema = z.object({
   jp: z.string(),
   romaji: z.string(),
   en: z.string(),
@@ -78,7 +78,7 @@ export const kanjiExplainerSchema = z.object({
     .max(4),
 });
 
-export const aiDeckCardSchema = z.object({
+const aiDeckCardSchema = z.object({
   kana: z.string(),
   kanji: z
     .string()

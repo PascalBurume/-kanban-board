@@ -161,6 +161,7 @@ function AiPracticeCard({
       </p>
 
       <textarea
+        aria-label="Write Japanese to be checked"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="日本語で書いてみよう..."

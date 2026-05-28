@@ -146,21 +146,21 @@ export function KaraokeReader({
             />
           ) : (
             <p className="jp text-center text-[26px] leading-relaxed md:text-[32px]">
-              {sentences[i].split("").map((ch, k) => (
-                <span
-                  key={`k-${k}`}
-                  onClick={() =>
-                    /[一-鿿]/.test(ch) ? clickWord(ch) : undefined
-                  }
-                  className={
-                    /[一-鿿]/.test(ch)
-                      ? "cursor-pointer hover:text-accent"
-                      : ""
-                  }
-                >
-                  {ch}
-                </span>
-              ))}
+              {sentences[i].split("").map((ch, k) => {
+                const isKanji = /[一-鿿]/.test(ch);
+                if (!isKanji) return <span key={`k-${k}`}>{ch}</span>;
+                return (
+                  <button
+                    key={`k-${k}`}
+                    type="button"
+                    onClick={() => clickWord(ch)}
+                    className="inline-block bg-transparent p-0 cursor-pointer hover:text-accent"
+                    aria-label={`Look up kanji ${ch}`}
+                  >
+                    {ch}
+                  </button>
+                );
+              })}
             </p>
           )}
           {popWord && (
@@ -197,7 +197,9 @@ export function KaraokeReader({
             onEnded={() => setPlaying(false)}
             className="mb-2 w-full"
             controls
-          />
+          >
+            <track kind="captions" />
+          </audio>
         )}
         <Waveform progress={elapsed / totalSec} bars={120} />
         <div className="mt-2 flex items-center justify-between">

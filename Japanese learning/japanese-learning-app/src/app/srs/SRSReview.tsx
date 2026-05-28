@@ -402,6 +402,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
               <>
                 <input
                   ref={inputRef}
+                  aria-label="Type the reading in romaji"
                   value={typed}
                   onChange={(e) => dispatch({ type: "TYPE", value: e.target.value })}
                   onKeyDown={(e) => { if (e.key === "Enter") dispatch({ type: "REVEAL" }); }}

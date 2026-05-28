@@ -235,11 +235,13 @@ export function KaraokeReader({
 }
 
 function Waveform({ progress, bars }: { progress: number; bars: number }) {
+  // Round to integer pixels — Math.sin precision can drift between Node and
+  // V8, which would otherwise cause a hydration mismatch on the bar heights.
   const arr = React.useMemo(
     () =>
       Array.from(
         { length: bars },
-        (_, i) => 10 + Math.abs(Math.sin(i * 1.7)) * 24 + (i % 7) * 1.5
+        (_, i) => Math.round(10 + Math.abs(Math.sin(i * 1.7)) * 24 + (i % 7) * 1.5)
       ),
     [bars]
   );

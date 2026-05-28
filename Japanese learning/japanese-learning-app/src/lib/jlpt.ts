@@ -102,7 +102,7 @@ export function isValidLevel(v: string | undefined | null): v is JLPTLevel {
   return !!v && (LEVELS as string[]).includes(v);
 }
 
-export const SECTION_KEYS: readonly SectionKey[] = ["vocab", "grammar", "reading", "listening"];
+const SECTION_KEYS: readonly SectionKey[] = ["vocab", "grammar", "reading", "listening"];
 
 export function isValidSection(v: string | undefined | null): v is SectionKey {
   return !!v && (SECTION_KEYS as readonly string[]).includes(v);

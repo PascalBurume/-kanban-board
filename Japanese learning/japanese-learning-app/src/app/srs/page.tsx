@@ -154,9 +154,9 @@ async function computeLeeches(userId: number, threshold: number) {
   const cards = await prisma.sRSCard.findMany({
     where: { id: { in: cardIds } },
   });
-  const vocabIds = cards
-    .filter((c) => c.itemType === "VOCABULARY")
-    .map((c) => c.itemId);
+  const vocabIds = cards.flatMap((c) =>
+    c.itemType === "VOCABULARY" ? [c.itemId] : [],
+  );
   const vocab = await prisma.vocabulary.findMany({
     where: { id: { in: vocabIds } },
   });

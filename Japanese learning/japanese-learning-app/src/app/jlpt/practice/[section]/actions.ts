@@ -18,10 +18,10 @@ export async function recordJlptAttempt(input: {
   answers: RecordedAnswer[];
   startedAtISO: string;
 }) {
-  const user = await getCurrentUser();
-
   if (!isValidLevel(input.level)) throw new Error("invalid level");
   if (!isValidSection(input.section)) throw new Error("invalid section");
+
+  const user = await getCurrentUser();
 
   const total = input.answers.length;
   const correct = input.answers.filter((a) => a.correct).length;

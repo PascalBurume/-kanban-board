@@ -84,9 +84,9 @@ export default async function JLPTPage({
   );
 
   // Overall % across all finished section attempts (excludes "full").
-  const sectionScores = attempts
-    .filter((a) => a.scorePct != null && a.section !== "full")
-    .map((a) => a.scorePct as number);
+  const sectionScores = attempts.flatMap((a) =>
+    a.scorePct != null && a.section !== "full" ? [a.scorePct] : [],
+  );
   const overallPct =
     sectionScores.length === 0
       ? null

@@ -44,7 +44,7 @@ export function OnboardingFlow() {
   function choose(v: PlacementAnswer) {
     const next = { ...answers, [q.id]: v };
     setAnswers(next);
-    if (step + 1 < total) setStep(step + 1);
+    if (step + 1 < total) setStep((s) => s + 1);
     else setDone(true);
   }
 

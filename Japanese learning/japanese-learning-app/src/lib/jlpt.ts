@@ -117,10 +117,16 @@ export function nextExamDate(from = new Date()): Date {
     candidates.push(firstSundayOf(year, 11)); // December (month index 11)
   }
   const fromDay = startOfDay(from).getTime();
-  const next = candidates
-    .map((d) => startOfDay(d))
-    .filter((d) => d.getTime() >= fromDay)
-    .sort((a, b) => a.getTime() - b.getTime())[0];
+  let earliestMs = Infinity;
+  let next: Date = candidates[0];
+  for (const c of candidates) {
+    const d = startOfDay(c);
+    const ms = d.getTime();
+    if (ms >= fromDay && ms < earliestMs) {
+      earliestMs = ms;
+      next = d;
+    }
+  }
   return next;
 }
 

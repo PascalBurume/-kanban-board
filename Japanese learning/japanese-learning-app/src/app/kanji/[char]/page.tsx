@@ -35,12 +35,13 @@ export default async function KanjiDetailPage({
     } catch {}
   }
 
-  const compounds = await prisma.vocabulary.findMany({
-    where: { kanji: { contains: char } },
-    take: 6,
-  });
-
-  const user = await getCurrentUser();
+  const [compounds, user] = await Promise.all([
+    prisma.vocabulary.findMany({
+      where: { kanji: { contains: char } },
+      take: 6,
+    }),
+    getCurrentUser(),
+  ]);
   const isJlpt = (l: string | null | undefined): l is JlptLevel =>
     (JLPT_LEVELS as readonly string[]).includes(l ?? "");
   // Default explainer to the kanji's own JLPT level so an N5 kanji opens at

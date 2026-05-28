@@ -84,9 +84,10 @@ export default async function LessonsPage({
     return true;
   }
 
-  const filteredCourses = courses
-    .map((c) => ({ ...c, lessons: c.lessons.filter(isValidLesson) }))
-    .filter((c) => c.lessons.length > 0);
+  const filteredCourses = courses.flatMap((c) => {
+    const lessons = c.lessons.filter(isValidLesson);
+    return lessons.length > 0 ? [{ ...c, lessons }] : [];
+  });
 
   // True when lessons exist for the active filter but all were hidden (grammar not yet seeded).
   // Distinct from "DB is empty" so we can show a better message.

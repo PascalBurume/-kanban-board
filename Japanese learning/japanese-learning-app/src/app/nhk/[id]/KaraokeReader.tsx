@@ -42,7 +42,7 @@ export function KaraokeReader({
     const ms = (timings[i] * 1000) / speed;
     const t = setTimeout(() => {
       if (loop) return;
-      if (i + 1 < total) setI(i + 1);
+      if (i + 1 < total) setI((cur) => cur + 1);
       else setPlaying(false);
     }, ms);
     return () => clearTimeout(t);
@@ -78,8 +78,7 @@ export function KaraokeReader({
     const chunks = bodyJpWithFuri
       .replace(/\r\n/g, "\n")
       .split(/(?<=。)|\n+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+      .flatMap((s) => { const t = s.trim(); return t ? [t] : []; });
     return chunks[i] ?? null;
   }, [bodyJpWithFuri, i]);
 

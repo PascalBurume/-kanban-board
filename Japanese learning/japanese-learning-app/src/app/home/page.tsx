@@ -25,14 +25,16 @@ export default async function HomePage() {
   const plan = await buildTodayPlan(user.level || "N4");
   const totalPlannedMin = plan.reduce((s, t) => s + t.minutes, 0);
 
-  const headlines = await prisma.nHKClip.findMany({
-    orderBy: { publishedAt: "desc" },
-    take: 5,
-  });
-  const featuredKanji = await prisma.kanji.findFirst({
-    where: { jlptLevel: user.level || "N4" },
-    orderBy: { strokes: "asc" },
-  });
+  const [headlines, featuredKanji] = await Promise.all([
+    prisma.nHKClip.findMany({
+      orderBy: { publishedAt: "desc" },
+      take: 5,
+    }),
+    prisma.kanji.findFirst({
+      where: { jlptLevel: user.level || "N4" },
+      orderBy: { strokes: "asc" },
+    }),
+  ]);
 
   const today = new Date();
   const goal = user.dailyGoalMin || 30;

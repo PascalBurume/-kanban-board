@@ -41,9 +41,9 @@ export default async function SRSPage({
   });
 
   // Hydrate vocab payload for each card (single batched query)
-  const vocabIds = dueCards
-    .filter((c) => c.itemType === "VOCABULARY")
-    .map((c) => c.itemId);
+  const vocabIds = dueCards.flatMap((c) =>
+    c.itemType === "VOCABULARY" ? [c.itemId] : [],
+  );
   const vocabRows = vocabIds.length
     ? await prisma.vocabulary.findMany({ where: { id: { in: vocabIds } } })
     : [];
@@ -67,14 +67,14 @@ export default async function SRSPage({
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .slice(0, SESSION_SIZE);
 
-  // Real 5-day forecast — count cards due each upcoming day.
-  const forecast = await computeForecast(user.id, FORECAST_DAYS);
-
-  // Real leeches — items repeatedly failed (rating < 3).
-  const leeches = await computeLeeches(user.id, LEECH_FAILS);
-
-  // Total card pool size (for an "X due of Y total" hint)
-  const totalCards = await prisma.sRSCard.count({ where: { userId: user.id } });
+  const [forecast, leeches, totalCards] = await Promise.all([
+    // Real 5-day forecast: count cards due each upcoming day.
+    computeForecast(user.id, FORECAST_DAYS),
+    // Real leeches: items repeatedly failed (rating < 3).
+    computeLeeches(user.id, LEECH_FAILS),
+    // Total card pool size (for an "X due of Y total" hint)
+    prisma.sRSCard.count({ where: { userId: user.id } }),
+  ]);
 
   // Next upcoming card so we can show "next review in" if nothing is due
   let nextDue: Date | null = null;

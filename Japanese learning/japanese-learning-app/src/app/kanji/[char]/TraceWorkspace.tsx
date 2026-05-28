@@ -412,8 +412,7 @@ export function TraceWorkspace({
             <div className="mt-2 flex flex-wrap gap-1.5">
               {radicals
                 .split(",")
-                .map((r) => r.trim())
-                .filter(Boolean)
+                .flatMap((r) => { const t = r.trim(); return t ? [t] : []; })
                 .map((r, i) => {
                   const glyph = RADICAL_GLYPHS[r];
                   return (
@@ -655,14 +654,12 @@ function MeaningsAndReadings({
 }) {
   const meanings = (meaning ?? "")
     .split(/[,;]/)
-    .map((m) => m.trim())
-    .filter(Boolean);
+    .flatMap((m) => { const t = m.trim(); return t ? [t] : []; });
   // Japanese reading lists may use Western commas, ideographic 、 or spaces.
   const splitReadings = (s: string) =>
     s
       .split(/[,、\s/]+/)
-      .map((r) => r.trim())
-      .filter(Boolean);
+      .flatMap((r) => { const t = r.trim(); return t ? [t] : []; });
   const on = onYomi ? splitReadings(onYomi) : [];
   const kun = kunYomi ? splitReadings(kunYomi) : [];
 

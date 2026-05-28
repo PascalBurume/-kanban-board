@@ -87,7 +87,7 @@ export function SectionPractice({
     if (idx + 1 >= total) {
       setDone(true);
     } else {
-      setIdx(idx + 1);
+      setIdx((i) => i + 1);
       setPicked(null);
       setRevealed(false);
     }

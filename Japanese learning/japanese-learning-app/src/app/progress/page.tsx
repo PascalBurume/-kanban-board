@@ -26,9 +26,11 @@ const TOP_WORDS = [
 ];
 
 export default async function ProgressPage() {
-  const user = await getCurrentUser();
-  const totalKanji = await prisma.kanji.count();
-  const totalVocab = await prisma.vocabulary.count();
+  const [user, totalKanji, totalVocab] = await Promise.all([
+    getCurrentUser(),
+    prisma.kanji.count(),
+    prisma.vocabulary.count(),
+  ]);
 
   return (
     <AppShell active="progress">

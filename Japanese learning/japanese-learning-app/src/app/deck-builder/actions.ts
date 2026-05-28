@@ -42,17 +42,17 @@ export async function commitAiDeck(
   level: string,
 ): Promise<{ created: number }> {
   const user = await getCurrentUser();
-  const clean = cards
-    .map((c) => ({
+  const clean = cards.flatMap((c) => {
+    const item = {
       kana: (c.kana ?? "").trim(),
       kanji: (c.kanji ?? "").trim(),
       english: (c.english ?? "").trim(),
       partOfSpeech: c.partOfSpeech?.trim() || null,
-    }))
-    .filter(
-      (c) =>
-        c.kana.length > 0 && c.kanji.length > 0 && c.english.length > 0,
-    );
+    };
+    return item.kana.length > 0 && item.kanji.length > 0 && item.english.length > 0
+      ? [item]
+      : [];
+  });
 
   if (clean.length === 0) return { created: 0 };
 

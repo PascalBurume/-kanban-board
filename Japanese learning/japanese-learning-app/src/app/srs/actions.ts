@@ -15,8 +15,10 @@ const INITIAL_DECK_SIZE = 40;
  * return the new state so the client can verify / refresh.
  */
 export async function gradeCard(cardId: number, rating: Rating) {
-  const user = await getCurrentUser();
-  const card = await prisma.sRSCard.findUnique({ where: { id: cardId } });
+  const [user, card] = await Promise.all([
+    getCurrentUser(),
+    prisma.sRSCard.findUnique({ where: { id: cardId } }),
+  ]);
   if (!card || card.userId !== user.id) {
     throw new Error("card not found");
   }

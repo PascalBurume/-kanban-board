@@ -165,7 +165,7 @@ function KanjiHeatmap() {
         else if (r < 70) cls = "bg-ink-3/60";
         return (
           <div
-            key={i}
+            key={`cell-${i}`}
             className={`aspect-square rounded-sm ${cls}`}
             title="hover tooltip placeholder"
           />

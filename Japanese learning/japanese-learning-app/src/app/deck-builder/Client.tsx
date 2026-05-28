@@ -299,7 +299,7 @@ export function DeckBuilderClient() {
                 const included = !excluded.has(i);
                 const kanjiSame = c.kana === c.kanji;
                 return (
-                  <li key={i}>
+                  <li key={`${c.kanji}|${c.kana}|${i}`}>
                     <button type="button"
                       disabled={commit.kind === "saving"}
                       onClick={() =>

@@ -143,7 +143,7 @@ export function WriteClient() {
 
             <div className="space-y-3">
               {issues.map((iss, i) => (
-                <Card key={i} tone="paper">
+                <Card key={`${iss?.span ?? ""}-${iss?.type ?? ""}-${i}`} tone="paper">
                   <div className="mb-2 flex items-center gap-2">
                     <Chip tone={ISSUE_TONE[iss.type] ?? "neutral"} className="capitalize">
                       {iss.type.replace("_", " ")}

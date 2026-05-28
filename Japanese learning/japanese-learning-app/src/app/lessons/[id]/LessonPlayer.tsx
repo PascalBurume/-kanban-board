@@ -128,9 +128,9 @@ export function LessonPlayer({
             <div>
               <div className="eyebrow">MORE EXAMPLES</div>
               <ul className="mt-2 space-y-2">
-                {p.examples.slice(1).map((ex, i) => (
+                {p.examples.slice(1).map((ex) => (
                   <li
-                    key={i}
+                    key={ex.jp}
                     className="rounded-md border border-ink-3/30 bg-paper p-3"
                   >
                     <div className="jp text-[17px]">{ex.jp}</div>
@@ -160,8 +160,8 @@ export function LessonPlayer({
           <Card tone="raised">
             <div className="eyebrow">VOCAB IN THIS LESSON</div>
             <ul className="mt-2 grid grid-cols-2 gap-1 text-sm">
-              {vocab.slice(0, 8).map((v, i) => (
-                <li key={i} className="flex justify-between gap-2 py-0.5">
+              {vocab.slice(0, 8).map((v) => (
+                <li key={`${v.kanji ?? ""}|${v.kana}`} className="flex justify-between gap-2 py-0.5">
                   <span className="jp">
                     {v.kanji ?? v.kana}{" "}
                     {v.kanji && (
@@ -198,9 +198,9 @@ export function LessonPlayer({
             <Card tone="raised">
               <div className="eyebrow">CULTURE TIPS</div>
               <div className="mt-2 space-y-3">
-                {cultureNotes.map((cn, i) => (
+                {cultureNotes.map((cn) => (
                   <details
-                    key={i}
+                    key={cn.titleJp}
                     className="rounded-md border border-ink-3/30 bg-paper p-3"
                   >
                     <summary className="cursor-pointer">
@@ -274,7 +274,7 @@ function DragBuilder({ pattern }: { pattern: string }) {
         )}
         {order.map((piece, i) => (
           <button type="button"
-            key={i}
+            key={`${piece}-${i}`}
             onClick={() => setOrder(order.filter((_, j) => j !== i))}
             className="mono rounded-sm border border-ink/60 bg-paper-3 px-2 py-1 text-xs hover:bg-accent-soft"
           >
@@ -285,7 +285,7 @@ function DragBuilder({ pattern }: { pattern: string }) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {remaining.map((p, i) => (
           <button type="button"
-            key={i}
+            key={`${p}-${i}`}
             onClick={() => setOrder([...order, p])}
             className="mono rounded-sm border border-ink-3/60 bg-paper px-2 py-1 text-xs hover:border-accent hover:text-accent"
           >

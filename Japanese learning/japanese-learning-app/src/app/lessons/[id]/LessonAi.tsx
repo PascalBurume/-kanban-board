@@ -99,9 +99,9 @@ function AiExamplesCard({
 
       {examples.length > 0 && (
         <ol className="mt-3 space-y-2">
-          {examples.map((ex, i) => (
+          {examples.map((ex) => (
             <li
-              key={i}
+              key={ex.jp}
               className="rounded-md border border-ink-3/30 bg-paper p-3"
             >
               <div className="jp text-[16px] leading-relaxed">{ex.jp}</div>
@@ -209,7 +209,7 @@ function AiPracticeCard({
         <ul className="mt-3 space-y-2">
           {issues.map((iss, i) => (
             <li
-              key={i}
+              key={`${iss?.span ?? ""}-${iss?.type ?? ""}-${i}`}
               className="rounded-md border border-ink-3/30 bg-paper p-2.5 text-xs"
             >
               <div className="mb-1 flex items-center gap-1.5">

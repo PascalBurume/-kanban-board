@@ -67,7 +67,7 @@ export function OnboardingFlow() {
         <div className="flex gap-1">
           {Array.from({ length: total }).map((_, i) => (
             <div
-              key={i}
+              key={`cell-${i}`}
               className={`h-1.5 w-6 rounded-sm border border-ink/60 transition-colors ${
                 i <= step ? "bg-accent" : "bg-transparent"
               }`}

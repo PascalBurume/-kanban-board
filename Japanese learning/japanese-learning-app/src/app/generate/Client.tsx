@@ -177,7 +177,7 @@ export function GenerateClient() {
 
         <ol className="space-y-3">
           {examples.map((ex, i) => (
-            <li key={i}>
+            <li key={`${ex.jp}-${i}`}>
               <Card tone="paper" className="flex gap-4">
                 <span className="mono shrink-0 select-none text-[11px] text-ink-3">
                   {String(i + 1).padStart(2, "0")}

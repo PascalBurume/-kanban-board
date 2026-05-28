@@ -16,9 +16,9 @@ export function RubyText({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         typeof p === "string" ? (
-          <span key={i}>{p}</span>
+          <span key={`cell-${i}`}>{p}</span>
         ) : (
-          <ruby key={i}>
+          <ruby key={`cell-${i}`}>
             {p.base}
             <rt>{p.rt}</rt>
           </ruby>

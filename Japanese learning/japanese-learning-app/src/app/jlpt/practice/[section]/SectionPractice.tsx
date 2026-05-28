@@ -144,7 +144,7 @@ export function SectionPractice({
               if (!qq) return null;
               return (
                 <div
-                  key={i}
+                  key={qq.id ?? i}
                   className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${
                     a.correct
                       ? "border-moss/40 bg-moss/5"

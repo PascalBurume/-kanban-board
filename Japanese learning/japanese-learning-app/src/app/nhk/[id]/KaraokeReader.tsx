@@ -149,7 +149,7 @@ export function KaraokeReader({
             <p className="jp text-center text-[26px] leading-relaxed md:text-[32px]">
               {sentences[i].split("").map((ch, k) => (
                 <span
-                  key={k}
+                  key={`k-${k}`}
                   onClick={() =>
                     /[一-鿿]/.test(ch) ? clickWord(ch) : undefined
                   }
@@ -248,7 +248,7 @@ function Waveform({ progress, bars }: { progress: number; bars: number }) {
         const passed = i / bars < progress;
         return (
           <div
-            key={i}
+            key={`cell-${i}`}
             className={`w-[2px] rounded-sm ${
               passed ? "bg-accent" : "bg-ink-3/40"
             }`}

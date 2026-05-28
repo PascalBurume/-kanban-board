@@ -307,6 +307,7 @@ function FillBlank({ example }: { example?: Example }) {
       <p className="jp mt-2 text-[18px]">{blanked}</p>
       <input
         type="text"
+        aria-label="Fill in the blank answer"
         value={val}
         onChange={(e) => setVal(e.target.value)}
         placeholder="type your answer"

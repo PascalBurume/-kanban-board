@@ -83,6 +83,7 @@ export function LibraryBrowser({ items }: { items: Resource[] }) {
       <section className="p-5 md:p-7">
         <div className="flex flex-wrap items-center gap-3">
           <input
+            aria-label="Search library"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="search by title, source, …"

@@ -443,7 +443,7 @@ export function TraceWorkspace({
           <ul className="mt-2 space-y-1.5 text-xs text-ink-2">
             <li>
               <span className="mono text-ink-3 mr-1">①</span>
-              Trace the ghost outline slowly without lifting — count strokes aloud.
+              Trace the ghost outline slowly without lifting, counting strokes aloud.
             </li>
             <li>
               <span className="mono text-ink-3 mr-1">②</span>
@@ -591,10 +591,10 @@ export function TraceWorkspace({
             )}
           </div>
           {scores.length === 0 ? (
-            <div className="mt-2 rounded-sm border border-dashed border-ink-3/40 px-3 py-3 text-center">
+            <div className="mt-2 rounded-sm border border-dashed border-ink-3/40 p-3 text-center">
               <div className="jp text-2xl leading-none text-ink-3/60">筆</div>
               <p className="mt-1 text-[11px] text-ink-3">
-                Draw a stroke on the canvas — order, direction, and
+                Draw a stroke on the canvas. Order, direction, and
                 bounding-box are scored against KanjiVG.
               </p>
             </div>

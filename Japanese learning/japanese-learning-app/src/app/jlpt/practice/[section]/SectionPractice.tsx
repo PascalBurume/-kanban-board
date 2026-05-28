@@ -220,7 +220,7 @@ export function SectionPractice({
               const isCorrect = revealed && c === q.correct;
               const isWrongPick = revealed && picked === c && c !== q.correct;
               return (
-                <button
+                <button type="button"
                   key={c + i}
                   onClick={() => choose(c)}
                   disabled={revealed}

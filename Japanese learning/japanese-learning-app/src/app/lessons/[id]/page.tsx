@@ -9,6 +9,20 @@ import { LessonPlayer } from "./LessonPlayer";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const id = parseInt(params.id, 10);
+  if (Number.isNaN(id)) return { title: "Lesson · Nihongo" };
+  const lesson = await prisma.lesson.findUnique({
+    where: { id },
+    select: { titleEn: true },
+  });
+  return { title: lesson ? `${lesson.titleEn} · Nihongo` : "Lesson · Nihongo" };
+}
+
 export default async function LessonPage({
   params,
 }: {

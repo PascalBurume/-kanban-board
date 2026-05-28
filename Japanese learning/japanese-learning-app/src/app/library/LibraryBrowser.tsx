@@ -175,7 +175,7 @@ function FilterGroup<T extends string | number>({
       {asChips ? (
         <div className="flex flex-wrap gap-1">
           {items.map((it) => (
-            <button
+            <button type="button"
               key={String(it)}
               onClick={() => onToggle(it)}
               className={`mono rounded-sm border px-2 py-0.5 text-[11px] ${

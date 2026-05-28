@@ -88,7 +88,7 @@ export default async function KanjiIndexPage({
                     <Link
                       key={k.character}
                       href={`/kanji/${encodeURIComponent(k.character)}`}
-                      className="group flex flex-col items-center rounded-md border border-ink-3/40 bg-paper px-2 py-2 text-center hover:border-accent hover:bg-accent-soft/30"
+                      className="group flex flex-col items-center rounded-md border border-ink-3/40 bg-paper p-2 text-center hover:border-accent hover:bg-accent-soft/30"
                       title={k.meaning ?? ""}
                     >
                       <div className="jp text-[38px] leading-none text-ink group-hover:text-accent">

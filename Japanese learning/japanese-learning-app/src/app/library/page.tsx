@@ -15,7 +15,7 @@ export default async function LibraryPage() {
         <div className="eyebrow">RESOURCE LIBRARY</div>
         <h1 className="font-serif text-2xl md:text-[28px]">Library</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-2">
-          Textbooks, podcasts, channels, and grammar references — searchable
+          Textbooks, podcasts, channels, and grammar references: searchable
           and shelveable. Open any item or add it to your shelf to track
           progress.
         </p>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Mock test · Nihongo" };
 
 // Section "mock" is the practice flow with `mode=mock` so the timer is active.
 // Centralising the redirect keeps a single source of MCQ logic.

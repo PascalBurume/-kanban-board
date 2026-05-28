@@ -57,7 +57,7 @@ export function OnboardingFlow() {
       {/* slim topbar */}
       <div className="flex items-center justify-between border-b border-ink-3/40 bg-paper-2 px-6 py-3 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent font-serif text-[13px] font-bold text-[#fff7ec]">
+          <div className="flex size-7 items-center justify-center rounded-md bg-accent font-serif text-[13px] font-bold text-[#fff7ec]">
             学
           </div>
           <div className="font-serif text-[15px] md:text-base">
@@ -76,7 +76,7 @@ export function OnboardingFlow() {
         </div>
         <span className="mono hidden text-xs text-ink-3 md:block">
           Q {step + 1} of {total} ·{" "}
-          <button
+          <button type="button"
             className="underline hover:text-ink"
             onClick={() => setDone(true)}
           >
@@ -89,7 +89,7 @@ export function OnboardingFlow() {
         {/* Sensei chat */}
         <div className="flex flex-1 flex-col gap-5 overflow-auto border-r border-dashed border-ink-3/40 p-6 md:p-10">
           <div className="flex items-end gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/70 bg-paper-3 font-serif text-[17px]">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-ink/70 bg-paper-3 font-serif text-[17px]">
               先
             </div>
             <Card tone="raised" className="max-w-[460px] p-4">
@@ -104,12 +104,12 @@ export function OnboardingFlow() {
 
           <div className="flex max-w-[480px] flex-col gap-2">
             {OPTIONS.map((o, i) => (
-              <button
+              <button type="button"
                 key={o.value}
                 onClick={() => choose(o.value)}
                 className="flex items-center gap-3 rounded-md border border-ink/40 bg-paper p-3 text-left transition-colors hover:border-accent hover:bg-accent-soft/40 focus:outline-none focus:ring-2 focus:ring-accent/50"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-ink-2/60 jp text-base text-ink-2">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-ink-2/60 jp text-base text-ink-2">
                   {o.mark}
                 </span>
                 <div className="flex-1">
@@ -150,14 +150,14 @@ export function OnboardingFlow() {
               return (
                 <div
                   key={lvl.code}
-                  className={`flex items-center gap-3 px-1.5 py-1.5 ${
+                  className={`flex items-center gap-3 p-1.5 ${
                     i < LEVELS.length - 1
                       ? "border-b border-dotted border-ink-3/40"
                       : ""
                   } ${on ? "bg-accent/10" : ""}`}
                 >
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-sm border text-xs ${
+                    className={`flex size-8 items-center justify-center rounded-sm border text-xs ${
                       on
                         ? "border-accent bg-accent text-[#fff7ec]"
                         : "border-ink-3/60 bg-paper text-ink-2"
@@ -196,7 +196,7 @@ function Result({ level, confidence }: { level: string; confidence: number }) {
         You&apos;re around <span className="text-accent">{level}</span>
       </h1>
       <p className="mt-3 max-w-md text-center text-base text-ink-2">
-        Confidence: {confidence}%. We&apos;ll tune your plan as you study —
+        Confidence: {confidence}%. We&apos;ll tune your plan as you study;
         you can adjust anytime in settings.
       </p>
 

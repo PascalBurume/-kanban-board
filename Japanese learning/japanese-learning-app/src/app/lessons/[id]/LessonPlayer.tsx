@@ -184,7 +184,7 @@ export function LessonPlayer({
                   <Link
                     key={k.character}
                     href={`/kanji/${encodeURIComponent(k.character)}`}
-                    className="jp flex h-12 w-12 items-center justify-center rounded-md border border-ink-3/40 bg-paper text-[26px] hover:border-accent hover:text-accent"
+                    className="jp flex size-12 items-center justify-center rounded-md border border-ink-3/40 bg-paper text-[26px] hover:border-accent hover:text-accent"
                     title={k.meaning ?? ""}
                   >
                     {k.character}
@@ -273,7 +273,7 @@ function DragBuilder({ pattern }: { pattern: string }) {
           </span>
         )}
         {order.map((piece, i) => (
-          <button
+          <button type="button"
             key={i}
             onClick={() => setOrder(order.filter((_, j) => j !== i))}
             className="mono rounded-sm border border-ink/60 bg-paper-3 px-2 py-1 text-xs hover:bg-accent-soft"
@@ -284,7 +284,7 @@ function DragBuilder({ pattern }: { pattern: string }) {
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {remaining.map((p, i) => (
-          <button
+          <button type="button"
             key={i}
             onClick={() => setOrder([...order, p])}
             className="mono rounded-sm border border-ink-3/60 bg-paper px-2 py-1 text-xs hover:border-accent hover:text-accent"

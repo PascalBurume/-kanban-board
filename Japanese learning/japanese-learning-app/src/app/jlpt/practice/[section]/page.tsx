@@ -8,6 +8,7 @@ import { isValidLevel, JLPT, type JLPTLevel, type SectionKey } from "@/lib/jlpt"
 import { SectionPractice } from "./SectionPractice";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "JLPT practice · Nihongo" };
 
 const VALID_SECTIONS = new Set<SectionKey>(["vocab", "grammar", "reading", "listening"]);
 const QUESTIONS_PER_ROUND = 12;

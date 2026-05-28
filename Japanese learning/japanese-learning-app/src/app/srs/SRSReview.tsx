@@ -229,7 +229,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
             <div className="inline-flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-wider text-ink-3">JLPT</span>
               <div className="inline-flex overflow-hidden rounded-md border border-ink-3/30">
-                <button
+                <button type="button"
                   onClick={() => setLevel(null)}
                   className={`px-2.5 py-1 text-[11px] font-medium transition ${
                     selectedLevel === null ? "bg-ink text-paper" : "bg-paper text-ink-2 hover:bg-paper-2"
@@ -238,7 +238,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   All
                 </button>
                 {levels.map((lv) => (
-                  <button
+                  <button type="button"
                     key={lv}
                     onClick={() => setLevel(lv)}
                     className={`border-l border-ink-3/30 px-2.5 py-1 font-mono text-[11px] font-medium transition ${
@@ -274,7 +274,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
             <div className="inline-flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-wider text-ink-3">JLPT</span>
               <div className="inline-flex overflow-hidden rounded-md border border-ink-3/30">
-                <button
+                <button type="button"
                   onClick={() => setLevel(null)}
                   className={`px-2.5 py-1 text-[11px] font-medium transition ${
                     selectedLevel === null
@@ -285,7 +285,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   All
                 </button>
                 {levels.map((lv) => (
-                  <button
+                  <button type="button"
                     key={lv}
                     onClick={() => setLevel(lv)}
                     className={`border-l border-ink-3/30 px-2.5 py-1 font-mono text-[11px] font-medium transition ${
@@ -305,7 +305,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   type="checkbox"
                   checked={showFurigana}
                   onChange={() => dispatch({ type: "TOGGLE_FURIGANA" })}
-                  className="h-3.5 w-3.5 accent-accent"
+                  className="size-3.5 accent-accent"
                 />
                 <span>Show furigana <span className="jp text-ink-3">（ふりがな）</span></span>
               </label>
@@ -314,7 +314,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   type="checkbox"
                   checked={showMeaning}
                   onChange={() => dispatch({ type: "TOGGLE_MEANING" })}
-                  className="h-3.5 w-3.5 accent-accent"
+                  className="size-3.5 accent-accent"
                 />
                 <span>Show meaning</span>
               </label>
@@ -340,7 +340,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   {idx > 0 && (
                     <span className="text-ink-3/40 select-none">·</span>
                   )}
-                  <button
+                  <button type="button"
                     onClick={() => dispatch({ type: "SET_MODE", mode: m })}
                     title={m === "type" ? "Write the answer from memory" : "Pick from multiple choices"}
                     className={`relative inline-flex items-center gap-1 text-[11px] font-medium leading-none transition-colors duration-150 ${
@@ -430,7 +430,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   const correctOpt = mcAnswered && opt === c.meaningEn;
                   const wrongChosen = mcAnswered && chosen && !correctOpt;
                   return (
-                    <button
+                    <button type="button"
                       key={i}
                       disabled={mcAnswered}
                       onClick={() => answerMC(opt)}
@@ -444,7 +444,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                           : "border-ink-3/35 bg-paper text-ink hover:border-accent hover:bg-accent/5"
                       }`}
                     >
-                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border font-mono text-[12px] font-bold leading-none ${
+                      <span className={`flex size-7 shrink-0 items-center justify-center rounded-md border font-mono text-[12px] font-bold leading-none ${
                         correctOpt ? "border-moss/50 bg-moss/20 text-moss"
                           : wrongChosen ? "border-red-300 bg-red-100 text-red-600"
                           : "border-ink-3/40 bg-paper-2 text-ink-2 group-hover:border-accent/60 group-hover:text-accent"
@@ -498,7 +498,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
           {revealed ? (
             <div className="grid grid-cols-4 gap-2">
               {RATINGS.map((r, i) => (
-                <button
+                <button type="button"
                   key={r}
                   disabled={pending}
                   onClick={() => rate(r)}
@@ -517,14 +517,14 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
           ) : (
             <div className="flex gap-2">
               {mode === "type" && (
-                <button
+                <button type="button"
                   onClick={() => dispatch({ type: "REVEAL" })}
                   className="flex-1 rounded-lg bg-ink px-4 py-3 text-sm font-medium text-paper transition hover:bg-ink/80"
                 >
                   Check answer
                 </button>
               )}
-              <button
+              <button type="button"
                 onClick={() => dispatch({ type: "REVEAL" })}
                 className="flex-1 rounded-lg border border-ink-3/35 bg-paper px-4 py-3 text-sm text-ink-2 transition hover:bg-paper-2"
               >

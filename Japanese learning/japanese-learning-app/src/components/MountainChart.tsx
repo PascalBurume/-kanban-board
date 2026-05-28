@@ -99,7 +99,7 @@ export function MountainChart({
       {points.map((p, i) => {
         const isCurrent = i === points.length - 1;
         return (
-          <g key={i}>
+          <g key={`cell-${i}`}>
             <line
               x1={xs[i]}
               y1={ys[i]}

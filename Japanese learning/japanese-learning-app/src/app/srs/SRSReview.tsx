@@ -431,7 +431,7 @@ export function SRSReview({ cards, forecast, leeches, totalCards, nextDueISO, se
                   const wrongChosen = mcAnswered && chosen && !correctOpt;
                   return (
                     <button type="button"
-                      key={i}
+                      key={opt}
                       disabled={mcAnswered}
                       onClick={() => answerMC(opt)}
                       className={`group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition ${

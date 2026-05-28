@@ -139,9 +139,9 @@ export function AiExplainer({
                 (c): c is { kanji: string; kana: string; en: string } =>
                   !!c && !!c.kanji,
               )
-              .map((c, i) => (
+              .map((c) => (
                 <li
-                  key={i}
+                  key={c.kanji}
                   className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 py-1"
                 >
                   <span className="jp min-w-0 text-sm">
@@ -167,8 +167,8 @@ export function AiExplainer({
               .filter(
                 (e): e is { jp: string; en: string } => !!e && !!e.jp,
               )
-              .map((e, i) => (
-                <li key={i} className="rounded-sm bg-paper-2 px-2 py-1.5">
+              .map((e) => (
+                <li key={e.jp} className="rounded-sm bg-paper-2 px-2 py-1.5">
                   <p className="jp text-sm">
                     <RubyText text={e.jp} />
                   </p>

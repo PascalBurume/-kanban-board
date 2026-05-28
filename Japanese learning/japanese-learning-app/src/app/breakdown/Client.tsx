@@ -171,7 +171,7 @@ export function BreakdownClient() {
                   <tbody>
                     {tokens.map((t, i) => (
                       <tr
-                        key={i}
+                        key={`${t.surface}-${i}`}
                         className="border-t border-ink-3/20 align-top"
                       >
                         <td className="jp px-4 py-2 text-[17px]">{t.surface}</td>
@@ -200,7 +200,7 @@ export function BreakdownClient() {
             <Card tone="raised">
               <ul className="space-y-2">
                 {grammar.map((g, i) => (
-                  <li key={i} className="flex gap-3 text-sm text-ink-2">
+                  <li key={`${g}-${i}`} className="flex gap-3 text-sm text-ink-2">
                     <span className="mono shrink-0 text-[11px] text-ink-3">
                       {String(i + 1).padStart(2, "0")}
                     </span>

@@ -246,7 +246,7 @@ export function TraceWorkspace({
             >
               {strokes.paths.map((d, i) => (
                 <path
-                  key={i}
+                  key={`stroke-${i}`}
                   d={d}
                   fill="none"
                   stroke="var(--ink-3)"
@@ -355,7 +355,7 @@ export function TraceWorkspace({
                   : "var(--ink)";
                 return (
                   <div
-                    key={i}
+                    key={`cell-${i}`}
                     className={`relative aspect-square rounded-sm border ${stateClass} p-1`}
                     title={`stroke ${i + 1}${
                       isDone ? ` · ${score?.score ?? "done"}` : ""
@@ -418,7 +418,7 @@ export function TraceWorkspace({
                   const glyph = RADICAL_GLYPHS[r];
                   return (
                     <span
-                      key={i}
+                      key={`${r}-${i}`}
                       className="inline-flex items-baseline gap-1.5 rounded border border-ink-3/40 bg-paper px-2 py-0.5"
                     >
                       {glyph && (
@@ -484,7 +484,7 @@ export function TraceWorkspace({
             <ul className="mt-2 divide-y divide-ink-3/20">
               {compounds.map((c, i) => (
                 <li
-                  key={i}
+                  key={`${c.surface}-${i}`}
                   className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-1.5"
                 >
                   <span className="jp min-w-0 text-base">
@@ -555,7 +555,7 @@ export function TraceWorkspace({
                   pct > 75 ? "bg-moss" : pct > 50 ? "bg-gold" : "bg-accent/60";
                 return (
                   <div
-                    key={i}
+                    key={`bar-${i}`}
                     className={`w-full rounded-t-sm ${tone}`}
                     style={{ height: `${pct}%` }}
                     title={`day -${12 - i} · ${pct}%`}
@@ -616,7 +616,7 @@ export function TraceWorkspace({
                 const mark = s.score === "great" ? "✓" : s.score === "okay" ? "~" : "×";
                 return (
                   <li
-                    key={i}
+                    key={`${s.score}-${i}`}
                     className="flex items-center justify-between gap-2 rounded-sm border border-ink-3/30 bg-paper-2 px-2 py-1"
                   >
                     <span className="mono tabular-nums text-ink-3">
@@ -678,7 +678,7 @@ function MeaningsAndReadings({
             <ul className="mt-1.5 flex flex-wrap gap-1.5">
               {meanings.map((m, i) => (
                 <li
-                  key={i}
+                  key={`${m}-${i}`}
                   className="rounded-full border border-ink-3/40 bg-paper px-2.5 py-0.5 text-xs text-ink-2"
                 >
                   {m}
@@ -699,7 +699,7 @@ function MeaningsAndReadings({
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {on.map((r, i) => (
                     <span
-                      key={i}
+                      key={`on-${r}-${i}`}
                       className="jp rounded border border-ink-3/40 bg-paper px-2 py-0.5 text-sm text-ink"
                     >
                       {r}
@@ -717,7 +717,7 @@ function MeaningsAndReadings({
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {kun.map((r, i) => (
                     <span
-                      key={i}
+                      key={`kun-${r}-${i}`}
                       className="jp rounded border border-ink-3/40 bg-paper px-2 py-0.5 text-sm text-ink"
                     >
                       {r}

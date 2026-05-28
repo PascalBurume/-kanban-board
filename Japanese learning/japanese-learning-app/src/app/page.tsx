@@ -160,8 +160,8 @@ export default function MarketingPage() {
                 "FSRS scheduler (modern SM-2 replacement)",
                 "Server-authoritative streaks, with a bedtime grace window",
                 "Genki, Tobira, Shin Kanzen: content cross-referenced",
-              ].map((p, i) => (
-                <li key={i} className="flex items-start gap-2">
+              ].map((p) => (
+                <li key={p} className="flex items-start gap-2">
                   <span className="mt-0.5 text-accent">·</span>
                   <span>{p}</span>
                 </li>
@@ -180,9 +180,9 @@ export default function MarketingPage() {
                 ["課", "Lesson · ても form", "even if / even though", "9m", true],
                 ["漢", "学 · learn, study", "trace + 3 compounds", "5m", false],
                 ["報", "NHK · Tokyo cherry blossoms", "1 clip · loop sentence", "4m", false],
-              ].map(([k, t, s, m, cur], i) => (
+              ].map(([k, t, s, m, cur]) => (
                 <li
-                  key={i}
+                  key={t as string}
                   className={`flex items-center gap-3 rounded-md border p-2.5 ${
                     cur
                       ? "border-accent bg-accent-soft/40"
@@ -239,8 +239,8 @@ export default function MarketingPage() {
                 who: "Priya K.",
                 where: "Bengaluru · N2",
               },
-            ].map((t, i) => (
-              <Card key={i} tone="paper" className="flex h-full flex-col">
+            ].map((t) => (
+              <Card key={t.who} tone="paper" className="flex h-full flex-col">
                 <p className="font-serif text-[15px] italic leading-relaxed">
                   &ldquo;{t.quote}&rdquo;
                 </p>

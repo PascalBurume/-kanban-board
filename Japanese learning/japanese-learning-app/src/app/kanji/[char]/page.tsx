@@ -10,6 +10,15 @@ import { TraceWorkspace } from "./TraceWorkspace";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: { char: string };
+}) {
+  const char = decodeURIComponent(params.char);
+  return { title: `${char} · Nihongo` };
+}
+
 export default async function KanjiDetailPage({
   params,
 }: {

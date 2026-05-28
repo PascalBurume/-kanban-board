@@ -35,8 +35,8 @@ export default async function FullMockPage({
             <Pill tone="gold">section-by-section</Pill>
           </div>
           <p className="mt-3 text-base text-ink-2">
-            The end-to-end full mock — locked papers, a single submit, scaled
-            scoring — is on the roadmap. Until then, run the sections back-to-back
+            The end-to-end full mock (locked papers, a single submit, scaled
+            scoring) is on the roadmap. Until then, run the sections back-to-back
             yourself: each section mock writes its own attempt, so your trend chart
             still reflects the climb.
           </p>

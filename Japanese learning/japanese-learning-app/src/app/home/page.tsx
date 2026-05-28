@@ -101,7 +101,7 @@ export default async function HomePage() {
               >
                 <span
                   aria-hidden="true"
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                  className={`flex size-4 shrink-0 items-center justify-center rounded-sm border ${
                     t.done
                       ? "border-moss bg-moss text-[10px] text-[#fff7ec]"
                       : "border-ink-3/60 bg-paper"
@@ -110,7 +110,7 @@ export default async function HomePage() {
                   {t.done ? "✓" : ""}
                 </span>
                 <div
-                  className={`jp flex h-9 w-9 shrink-0 items-center justify-center rounded-md border text-base ${
+                  className={`jp flex size-9 shrink-0 items-center justify-center rounded-md border text-base ${
                     t.current
                       ? "border-accent bg-accent text-[#fff7ec]"
                       : "border-ink-3/60 text-ink-2"
@@ -161,7 +161,7 @@ export default async function HomePage() {
             <ul className="mt-2 divide-y divide-ink-3/30 rounded-md border border-ink-3/40 bg-paper">
               {headlines.length === 0 && (
                 <li className="p-3 text-sm text-ink-3">
-                  No clips yet — run <span className="mono">db:seed:extended</span>.
+                  No clips yet. Run <span className="mono">db:seed:extended</span>.
                 </li>
               )}
               {headlines.map((c) => (
@@ -232,7 +232,7 @@ function PathWidget({ level }: { level: string }) {
                 style={{ marginTop: ["54px", "30px", "12px", "54px", "30px"][nodes.indexOf(n)] }}
               >
                 <div
-                  className={`jp flex h-10 w-10 items-center justify-center rounded-full border text-[15px] ${tone}`}
+                  className={`jp flex size-10 items-center justify-center rounded-full border text-[15px] ${tone}`}
                 >
                   {n.kanji}
                 </div>

@@ -25,7 +25,7 @@ export default function MarketingPage() {
       <header className="sticky top-0 z-30 border-b border-ink/70 bg-paper/90 backdrop-blur supports-[backdrop-filter]:bg-paper/75">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <span className="hanko h-7 w-7 text-[13px]">学</span>
+            <span className="hanko size-7 text-[13px]">学</span>
             <span className="font-serif text-lg">
               nihongo<span className="text-accent">.</span>app
             </span>
@@ -96,7 +96,7 @@ export default function MarketingPage() {
             </div>
 
             <div className="relative">
-              <div className="hanko mx-auto flex h-44 w-44 items-center justify-center text-[88px] md:h-52 md:w-52 md:text-[112px]">
+              <div className="hanko mx-auto flex size-44 items-center justify-center text-[88px] md:h-52 md:w-52 md:text-[112px]">
                 学
               </div>
               <div className="mono mt-3 text-center text-[11px] uppercase tracking-wider text-ink-3">
@@ -152,14 +152,14 @@ export default function MarketingPage() {
               Every morning Nihongo assembles a 20–40 minute plan from your
               due SRS, the next grammar pattern, a kanji to trace, and one
               short NHK clip. You finish on time, or come back tomorrow with
-              the rest — no penalty.
+              the rest, with no penalty.
             </p>
             <ul className="mt-5 space-y-2 text-sm text-ink-2">
               {[
-                "Adaptive placement at sign-up — no level shopping",
+                "Adaptive placement at sign-up: no level shopping",
                 "FSRS scheduler (modern SM-2 replacement)",
                 "Server-authoritative streaks, with a bedtime grace window",
-                "Genki, Tobira, Shin Kanzen — content cross-referenced",
+                "Genki, Tobira, Shin Kanzen: content cross-referenced",
               ].map((p, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="mt-0.5 text-accent">·</span>
@@ -190,7 +190,7 @@ export default function MarketingPage() {
                   }`}
                 >
                   <span
-                    className={`jp flex h-8 w-8 items-center justify-center rounded-md border text-base ${
+                    className={`jp flex size-8 items-center justify-center rounded-md border text-base ${
                       cur
                         ? "border-accent bg-accent text-[#fff7ec]"
                         : "border-ink-3/60 text-ink-2"
@@ -311,7 +311,7 @@ export default function MarketingPage() {
         <div className="mx-auto max-w-7xl px-5 py-8 md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <span className="hanko h-7 w-7 text-[13px]">学</span>
+              <span className="hanko size-7 text-[13px]">学</span>
               <span className="font-serif text-base">
                 nihongo<span className="text-accent">.</span>app
               </span>

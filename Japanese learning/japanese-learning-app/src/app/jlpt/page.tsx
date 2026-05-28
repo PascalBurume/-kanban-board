@@ -193,7 +193,7 @@ export default async function JLPTPage({
                     </>
                   ) : (
                     <>
-                      <div className="font-serif text-3xl text-ink-3">—</div>
+                      <div className="font-serif text-3xl text-ink-3">·</div>
                       <div className="mono mt-1 text-[10px] text-ink-3">
                         no attempts yet
                       </div>

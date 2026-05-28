@@ -92,7 +92,7 @@ function AiExamplesCard({
 
       {isLoading && examples.length === 0 && (
         <Pill className="mono mt-3">
-          <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+          <span className="inline-block size-1.5 animate-pulse rounded-full bg-accent" />
           streaming…
         </Pill>
       )}
@@ -112,7 +112,7 @@ function AiExamplesCard({
                 <div className="mt-0.5 text-sm text-ink-2">{ex.en}</div>
               )}
               {ex.note && (
-                <div className="mt-1.5 rounded-sm border-l-2 border-gold/60 bg-gold/5 px-2 py-1 text-[11px] italic text-ink-2">
+                <div className="mt-1.5 rounded-sm bg-gold/10 p-2 text-[11px] italic text-ink-2">
                   {ex.note}
                 </div>
               )}
@@ -148,7 +148,7 @@ function AiPracticeCard({
         <div className="eyebrow">AI · TRY WRITING ONE</div>
         {isLoading && (
           <Pill className="mono">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+            <span className="inline-block size-1.5 animate-pulse rounded-full bg-accent" />
             checking…
           </Pill>
         )}
@@ -234,7 +234,7 @@ function AiPracticeCard({
         <div className="mt-3 rounded-md border border-moss/40 bg-moss/10 p-3 text-center">
           <span className="jp text-base text-moss">完璧</span>
           <p className="mt-0.5 text-xs text-ink-2">
-            No issues found — nicely written.
+            No issues found. Nicely written.
           </p>
         </div>
       )}

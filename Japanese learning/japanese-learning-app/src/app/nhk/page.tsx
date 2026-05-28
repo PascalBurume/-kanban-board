@@ -26,7 +26,7 @@ export default async function NHKIndex() {
         {clips.length === 0 && (
           <Card tone="raised">
             <p className="text-sm">
-              No clips yet — run{" "}
+              No clips yet. Run{" "}
               <code className="mono">npm run db:seed:extended</code>.
             </p>
           </Card>

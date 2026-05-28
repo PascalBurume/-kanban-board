@@ -88,12 +88,12 @@ export function KaraokeReader({
       {/* top chips */}
       <div className="flex flex-wrap items-center gap-2 border-b border-dashed border-ink-3/40 px-6 py-3 md:px-8">
         <Pill className="mono">
-          <button onClick={() => setSpeed(speed === 1 ? 0.75 : speed === 0.75 ? 0.5 : 1)}>
+          <button type="button" onClick={() => setSpeed(speed === 1 ? 0.75 : speed === 0.75 ? 0.5 : 1)}>
             speed {speed}×
           </button>
         </Pill>
         <Pill tone={loop ? "accent" : "neutral"} className="mono">
-          <button onClick={() => setLoop((l) => !l)}>
+          <button type="button" onClick={() => setLoop((l) => !l)}>
             loop sentence {loop ? "ON" : "OFF"}
           </button>
         </Pill>
@@ -103,7 +103,7 @@ export function KaraokeReader({
             tone={showSummary ? "accent" : "neutral"}
             className="mono"
           >
-            <button onClick={() => setShowSummary((s) => !s)}>
+            <button type="button" onClick={() => setShowSummary((s) => !s)}>
               summary {showSummary ? "ON" : "OFF"}
             </button>
           </Pill>

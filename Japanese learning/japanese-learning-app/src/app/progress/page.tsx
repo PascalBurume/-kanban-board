@@ -178,7 +178,7 @@ function KanjiHeatmap() {
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1">
-      <span className={`inline-block h-2.5 w-2.5 rounded-sm ${color}`} />
+      <span className={`inline-block size-2.5 rounded-sm ${color}`} />
       {label}
     </span>
   );

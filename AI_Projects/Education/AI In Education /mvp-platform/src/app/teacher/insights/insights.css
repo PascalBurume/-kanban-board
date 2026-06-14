@@ -1,0 +1,49 @@
+.ins-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.ins-top h1 { font-size: 26px; }
+.ins-top .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.select-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: 9px 14px; font-size: 13.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+.select-pill svg { width: 15px; height: 15px; color: var(--text-muted); }
+
+.ins-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 22px; align-items: start; }
+@media (max-width: 1080px) { .ins-grid { grid-template-columns: 1fr; } }
+
+/* misconception clusters */
+.cluster { padding: 18px; display: flex; flex-direction: column; gap: 12px; border-left: 3px solid var(--warning); }
+.cluster.high { border-left-color: var(--danger); }
+.cluster.low { border-left-color: var(--success); }
+.cluster .ctop { display: flex; align-items: flex-start; gap: 12px; }
+.cluster .cic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; background: var(--warning-bg); color: var(--warning-fg); }
+.cluster.high .cic { background: var(--danger-bg); color: var(--danger-fg); }
+.cluster.low .cic { background: var(--success-bg); color: var(--success-fg); }
+.cluster .cic svg { width: 20px; height: 20px; }
+.cluster h3 { font-size: 16px; }
+.cluster .cmeta { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+.cluster .cbody { font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+.cluster .cfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cluster .who { display: flex; align-items: center; }
+.cluster .who .avatar { width: 28px; height: 28px; font-size: 11px; margin-left: -8px; border: 2px solid var(--surface); }
+.cluster .who .avatar:first-child { margin-left: 0; }
+.cluster .who .more { width: 28px; height: 28px; border-radius: 50%; background: var(--slate-200); color: var(--slate-600); font-size: 11px; font-weight: 700; display: grid; place-items: center; margin-left: -8px; border: 2px solid var(--surface); }
+
+/* top questions */
+.q-row { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.q-row:last-child { border-bottom: 0; }
+.q-row .qrank { width: 24px; height: 24px; border-radius: 7px; background: var(--slate-100); color: var(--text-soft); font-weight: 700; font-size: 12px; display: grid; place-items: center; flex: none; margin-top: 1px; }
+.q-row .qtext { flex: 1; font-size: 14px; line-height: 1.45; }
+.q-row .qtext .qm { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.q-row .qcount { font-weight: 700; font-size: 13.5px; white-space: nowrap; color: var(--indigo-700); background: var(--indigo-50); padding: 3px 10px; border-radius: 999px; }
+
+/* heatmap */
+.heat { display: grid; grid-template-columns: 180px 1fr; gap: 4px 8px; align-items: center; }
+.heat .hlabel { font-size: 12.5px; font-weight: 600; color: var(--text-soft); text-align: right; padding-right: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.heat .hcells { display: flex; gap: 5px; }
+.heat .hcell { flex: 1; height: 30px; border-radius: 6px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; transition: transform .1s; }
+.heat .hcell:hover { transform: scale(1.08); }
+.heat .hcell.empty { background: var(--slate-100); color: var(--slate-400); }
+.heat-head { display: grid; grid-template-columns: 180px 1fr; gap: 8px; margin-bottom: 8px; }
+.heat-head .hh-cells { display: flex; gap: 5px; }
+.heat-head .hh { flex: 1; font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: center; text-transform: uppercase; letter-spacing: .03em; }
+.heat-legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); margin-top: 14px; justify-content: flex-end; }
+.heat-legend .scale { display: flex; gap: 3px; }
+.heat-legend .sc { width: 22px; height: 12px; border-radius: 3px; }
+

@@ -1,0 +1,13 @@
+{
+  "name": "Mwalimu — Manuels 5e & 6e (RDC)",
+  "short_name": "Mwalimu",
+  "description": "Manuels numérisés de mathématiques et sciences, 5e et 6e secondaire (RD Congo).",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

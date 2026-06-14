@@ -1,0 +1,318 @@
+// Mwalimu — offline learning platform data model (SYSTEM_DESIGN §4).
+// SQLite single-file DB. Enum-like fields are stored as String (SQLite has no
+// native enums); allowed values are noted in comments next to each field.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  role               String // STUDENT | TEACHER | ADMIN
+  firstName          String
+  lastName           String
+  avatarColor        String?
+  email              String?   @unique
+  passwordHash       String? // staff
+  pinHash            String? // students (4-digit, bcrypt)
+  locale             String    @default("fr") // fr | en
+  isActive           Boolean   @default(true)
+  pending            Boolean   @default(false) // self-registered, awaiting admin approval
+  mustChangePassword Boolean   @default(false)
+  failedAttempts     Int       @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+
+  enrollment         Enrollment?
+  teacherAssignments TeacherAssignment[]
+  progress           Progress[]
+  quizAttempts       QuizAttempt[]
+  sessionLogs        SessionLog[]
+  copilotThreads     CopilotThread[]
+  copilotPolicies    CopilotPolicy[]
+  badgeAwards        BadgeAward[]
+  lessonFeedbacks    LessonFeedback[]
+}
+
+model ClassGroup {
+  id         String   @id @default(cuid())
+  name       String   @unique // "5e Scientifique A"
+  level      String // "5e" | "6e"
+  field      String? // "Scientifique", "Math-Physique"...
+  year       Int?
+  isArchived Boolean  @default(false)
+  inviteCode String?  @unique // student self-enrollment code
+  createdAt  DateTime @default(now())
+
+  enrollments        Enrollment[]
+  teacherAssignments TeacherAssignment[]
+  assignments        Assignment[]
+  copilotPolicies    CopilotPolicy[]
+  moduleLocks        ModuleLock[]
+}
+
+model Enrollment {
+  id        String     @id @default(cuid())
+  studentId String     @unique // one class per student
+  classId   String
+  createdAt DateTime   @default(now())
+  student   User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class     ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+model TeacherAssignment {
+  id          String     @id @default(cuid())
+  teacherId   String
+  classId     String
+  subjectSlug String
+  isLead      Boolean    @default(false)
+  teacher     User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  class       ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classId, subjectSlug])
+}
+
+model Subject {
+  slug    String   @id // mirrors content bundle
+  name    String
+  color   String?
+  icon    String?
+  order   Int      @default(0)
+  modules Module[]
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  subjectSlug String
+  classLevel  String // "5e" | "6e"
+  title       String
+  order       Int      @default(0)
+  subject     Subject  @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
+  lessons     Lesson[]
+  locks       ModuleLock[]
+}
+
+// Teacher-controlled per-class module lock. Modules are accessible to students
+// by DEFAULT (no row = unlocked). A teacher locks a module for a class by
+// creating a row here; unlocking deletes it.
+model ModuleLock {
+  id         String     @id @default(cuid())
+  classId    String
+  moduleId   String
+  lockedById String? // teacher User id (audit-style, no FK)
+  createdAt  DateTime   @default(now())
+  class      ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+  module     Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, moduleId])
+}
+
+model Lesson {
+  id        String @id @default(cuid())
+  moduleId  String
+  slug      String
+  title     String
+  order     Int    @default(0)
+  status    String @default("PUBLISHED") // DRAFT | PUBLISHED
+  contentMd String @default("")
+  estMinutes Int   @default(15)
+  sourceRef String? // bundle path
+
+  module        Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  versions      LessonVersion[]
+  quizzes       Quiz[]
+  assignments   Assignment[]
+  progress      Progress[]
+  sessionLogs   SessionLog[]
+  copilotThreads CopilotThread[]
+  copilotTopics CopilotTopic[]
+  feedbacks     LessonFeedback[]
+
+  @@unique([moduleId, slug])
+}
+
+// Per-lesson self-assessment: how well the student understood (0/25/50/75/100),
+// with an optional message to the teacher when below 100.
+model LessonFeedback {
+  id            String   @id @default(cuid())
+  studentId     String
+  lessonId      String
+  understanding Int // 0 | 25 | 50 | 75 | 100
+  message       String?
+  resolved      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+model LessonVersion {
+  id         String   @id @default(cuid())
+  lessonId   String
+  version    Int
+  contentMd  String
+  editedById String? // User id (no FK relation — audit-style)
+  createdAt  DateTime @default(now())
+  lesson     Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, version])
+}
+
+model Quiz {
+  id        String        @id @default(cuid())
+  lessonId  String
+  title     String
+  lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions Question[]
+  attempts  QuizAttempt[]
+}
+
+model Question {
+  id            String @id @default(cuid())
+  quizId        String
+  type          String // MCQ | TF | SHORT
+  promptMd      String
+  optionsJson   String? // JSON array of options (MCQ)
+  answerJson    String // JSON: correct answer(s)
+  explanationMd String?
+  order         Int    @default(0)
+  quiz          Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model Assignment {
+  id          String     @id @default(cuid())
+  classId     String
+  lessonId    String
+  dueDate     DateTime?
+  createdById String?
+  createdAt   DateTime   @default(now())
+  class       ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+  lesson      Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, lessonId])
+}
+
+model Progress {
+  id           String    @id @default(cuid())
+  studentId    String
+  lessonId     String
+  status       String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | COMPLETED
+  completedAt  DateTime?
+  totalSeconds Int       @default(0)
+  updatedAt    DateTime  @updatedAt
+  student      User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  studentId   String
+  quizId      String
+  score       Int // 0-100
+  answersJson String
+  durationS   Int      @default(0)
+  createdAt   DateTime @default(now())
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model SessionLog {
+  id        String    @id @default(cuid())
+  studentId String
+  lessonId  String?
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  seconds   Int       @default(0)
+  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson    Lesson?   @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+}
+
+model CopilotPolicy {
+  id        String      @id @default(cuid())
+  scope     String // CLASS | STUDENT
+  classId   String?
+  studentId String?
+  enabled   Boolean     @default(true)
+  setById   String? // User id (audit-style, no FK)
+  reason    String?
+  updatedAt DateTime    @updatedAt
+  class     ClassGroup? @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User?       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([scope, classId, studentId])
+}
+
+model CopilotThread {
+  id        String          @id @default(cuid())
+  studentId String
+  lessonId  String
+  startedAt DateTime        @default(now())
+  student   User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson    Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  messages  CopilotMessage[]
+}
+
+model CopilotMessage {
+  id        String        @id @default(cuid())
+  threadId  String
+  role      String // user | assistant
+  content   String
+  tokens    Int?
+  createdAt DateTime      @default(now())
+  thread    CopilotThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+}
+
+model CopilotTopic {
+  id       String @id @default(cuid())
+  lessonId String
+  label    String
+  count    Int    @default(0)
+  weekKey  String // ISO week, e.g. "2026-W24"
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id     String       @id @default(cuid())
+  slug   String       @unique
+  name   String
+  icon   String
+  rule   String
+  awards BadgeAward[]
+}
+
+model BadgeAward {
+  id        String   @id @default(cuid())
+  studentId String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, badgeId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorName  String? // denormalised for display
+  action     String
+  targetType String?
+  targetId   String?
+  metaJson   String?
+  createdAt  DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}

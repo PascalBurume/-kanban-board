@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <path d="M128 150h120c26 0 48 22 48 48v176c0-18-14-32-32-32H128z" fill="#ccfbf1"/>
+  <path d="M384 150H264c-26 0-48 22-48 48v176c0-18 14-32 32-32h136z" fill="#5eead4"/>
+  <text x="256" y="430" font-family="Segoe UI,system-ui,sans-serif" font-size="64" font-weight="700" fill="#ffffff" text-anchor="middle">Mwalimu</text>
+</svg>

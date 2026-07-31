@@ -11,3 +11,9 @@ npm-debug.log*
 *.db-journal
 prisma/dev.db*
 backups/
+
+# Raw OCR book dumps (339KB-1.39MB each). Pipeline inputs for the inject-*/
+# build-*-grounding scripts, but too large for gbrain to embed, so they are
+# kept out of the index. Embeddable split copies live in the mwalimu-books
+# gbrain source (see ~/.gbrain/tools/split-mwalimu-books.mjs).
+content/sources/

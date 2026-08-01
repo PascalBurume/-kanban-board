@@ -1,0 +1,284 @@
+@import "tailwindcss";
+
+/* Rejista design system — Google/Material structure, West-African warmth.
+   Token values are taken directly from the spec §3.2 table. */
+
+:root {
+  --rj-indigo: #1a3a8f;
+  --rj-blue: #1a73e8;
+  --rj-blue-dark: #1557b0;
+  --rj-clay: #c1521f;
+  --rj-gold: #e8a33d;
+  --rj-green: #1e8e3e;
+  --rj-yellow: #fbbc04;
+  --rj-red: #d93025;
+  --rj-ink: #202124;
+  --rj-grey: #5f6368;
+  --rj-line: #dadce0;
+  --rj-sand: #fbf7f1;
+  --rj-sand-deep: #f4ece0;
+  --rj-white: #ffffff;
+
+  --rj-shadow-1: 0 1px 2px rgba(32, 33, 36, 0.08), 0 1px 3px rgba(32, 33, 36, 0.06);
+  --rj-shadow-2: 0 2px 6px rgba(32, 33, 36, 0.1), 0 6px 18px rgba(32, 33, 36, 0.07);
+  --rj-shadow-3: 0 8px 28px rgba(26, 58, 143, 0.16);
+
+  --rj-r-sm: 8px;
+  --rj-r-md: 12px;
+  --rj-r-lg: 18px;
+
+  /* 4dp grid */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px;
+  --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px; --s20: 80px;
+
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* The site commits to one warm light world on purpose (spec §3.2: the sand
+   ground IS the identity — "something made here" rather than a foreign
+   portal). No dark inversion: a dark market-paper ground reads as a different
+   product. This is a deliberate single-theme choice, not an omission. */
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--rj-sand);
+  color: var(--rj-ink);
+  font-family: var(--font-body);
+  /* Minimum 16px: the audience reads in bright sun (spec §3.2). */
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--rj-ink);
+}
+
+a { color: var(--rj-blue); }
+
+:focus-visible {
+  outline: 3px solid var(--rj-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- the adire lattice: texture, never decoration (spec §3.2) ------ */
+
+.rj-lattice {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--rj-lattice-img);
+  background-size: 68px 68px;
+  opacity: 0.03;
+}
+.rj-lattice--divider { opacity: 0.045; }
+/* The one place it appears at full strength: the ID card's woven band. */
+.rj-lattice--band {
+  opacity: 1;
+  background-size: 26px 26px;
+}
+
+/* ---------- layout ---------- */
+
+.rj-wrap {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding-inline: var(--s5);
+}
+.rj-narrow { max-width: 760px; }
+
+.rj-section { padding-block: var(--s16); position: relative; }
+.rj-section--sand { background: var(--rj-sand-deep); }
+.rj-section--white { background: var(--rj-white); }
+
+.rj-eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rj-clay);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.rj-eyebrow::after {
+  content: "";
+  height: 2px;
+  width: 26px;
+  background: var(--rj-clay);
+  opacity: 0.5;
+}
+
+.rj-h2 { font-size: clamp(26px, 3.6vw, 38px); margin-block: var(--s3) var(--s4); }
+.rj-lede { color: var(--rj-grey); max-width: 62ch; font-size: 17px; }
+
+/* ---------- buttons: 48px+ touch target ---------- */
+
+.rj-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 52px;
+  padding: 0 var(--s6);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+.rj-btn--primary {
+  background: var(--rj-blue);
+  color: #fff;
+  box-shadow: var(--rj-shadow-1);
+}
+.rj-btn--primary:hover { background: var(--rj-blue-dark); box-shadow: var(--rj-shadow-2); }
+.rj-btn--ghost {
+  background: transparent;
+  color: var(--rj-white);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.rj-btn--ghost:hover { background: rgba(255, 255, 255, 0.12); }
+.rj-btn--outline {
+  background: var(--rj-white);
+  color: var(--rj-ink);
+  border-color: var(--rj-line);
+}
+.rj-btn--outline:hover { background: var(--rj-sand); }
+.rj-btn--clay { background: var(--rj-clay); color: #fff; }
+.rj-btn--clay:hover { background: #a5441a; }
+.rj-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* ---------- cards ---------- */
+
+.rj-card {
+  background: var(--rj-white);
+  border-radius: var(--rj-r-md);
+  box-shadow: var(--rj-shadow-1);
+  padding: var(--s6);
+  border: 1px solid rgba(218, 220, 224, 0.7);
+}
+
+.rj-grid { display: grid; gap: var(--s5); }
+@media (min-width: 720px) {
+  .rj-grid--2 { grid-template-columns: repeat(2, 1fr); }
+  .rj-grid--3 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 980px) { .rj-grid--4 { grid-template-columns: repeat(4, 1fr); } }
+
+/* ---------- status badges (spec §5.3: honest availability) ---------- */
+
+.rj-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.rj-badge--live { background: #e6f4ea; color: #15672c; }
+.rj-badge--soon { background: #fef7e0; color: #7a5612; }
+.rj-badge--partner { background: #fce8e6; color: #a5251c; }
+.rj-badge--dot::before {
+  content: "";
+  width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor;
+}
+
+/* ---------- forms (spec §5.2) ---------- */
+
+.rj-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s5); }
+.rj-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--rj-ink);
+}
+.rj-input,
+.rj-select,
+.rj-textarea {
+  min-height: 52px;
+  /* 16px specifically prevents iOS zoom-on-focus (spec §5.2). */
+  font-size: 16px;
+  font-family: var(--font-body);
+  color: var(--rj-ink);
+  background: var(--rj-white);
+  border: 1.5px solid var(--rj-line);
+  border-radius: var(--rj-r-sm);
+  padding: 0 var(--s4);
+  width: 100%;
+}
+.rj-textarea { padding: var(--s3) var(--s4); min-height: 96px; line-height: 1.5; }
+.rj-input:focus, .rj-select:focus { border-color: var(--rj-blue); }
+.rj-help { font-size: 13.5px; color: var(--rj-grey); }
+.rj-error { font-size: 13.5px; color: var(--rj-red); font-weight: 600; }
+.rj-hint-ok { font-size: 13.5px; color: var(--rj-green); font-weight: 600; }
+
+.rj-checkrow {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  padding: var(--s4);
+  border: 1.5px solid var(--rj-line);
+  border-radius: var(--rj-r-sm);
+  background: var(--rj-white);
+}
+.rj-checkrow input { width: 22px; height: 22px; margin-top: 2px; flex-shrink: 0; }
+
+/* ---------- notes / disclosure ---------- */
+
+.rj-note { font-size: 13px; color: var(--rj-grey); line-height: 1.5; }
+.rj-flag {
+  border-left: 3px solid var(--rj-yellow);
+  background: #fffdf5;
+  padding: var(--s3) var(--s4);
+  border-radius: 0 var(--rj-r-sm) var(--rj-r-sm) 0;
+  font-size: 13.5px;
+  color: #6b5310;
+}
+
+.rj-tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- print: certificate only (spec §6.1) ---------- */
+
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  body { background: #fff; }
+  body * { visibility: hidden; }
+  #rj-certificate, #rj-certificate * { visibility: visible; }
+  #rj-certificate {
+    position: absolute;
+    left: 0; top: 0;
+    width: 297mm;
+    height: 210mm;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .rj-noprint { display: none !important; }
+}

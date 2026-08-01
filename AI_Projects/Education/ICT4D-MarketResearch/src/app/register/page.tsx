@@ -24,6 +24,7 @@ export default async function RegisterPage({
     <RegisterFlow
       initialLang={lang}
       copy={t.register}
+      cert={t.cert}
       trades={t.trades}
       stages={t.filingStages}
     />

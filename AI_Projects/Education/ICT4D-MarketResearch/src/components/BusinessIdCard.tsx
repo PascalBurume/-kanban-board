@@ -1,6 +1,7 @@
 "use client";
 
 import { LATTICE_GOLD } from "@/lib/motif";
+import type { Copy } from "@/lib/copy";
 import { STATES } from "@/lib/nigeria";
 import RejistaMark from "./RejistaMark";
 
@@ -23,9 +24,11 @@ export interface CardData {
 export default function BusinessIdCard({
   data,
   qrSvg,
+  t,
 }: {
   data: CardData;
   qrSvg?: string;
+  t: Copy["cert"];
 }) {
   const state = STATES.find((s) => s.id === data.stateId);
 
@@ -85,10 +88,10 @@ export default function BusinessIdCard({
                 overflowWrap: "anywhere",
               }}
             >
-              {data.bizName || "Your business name"}
+              {data.bizName || t.cardBizPlaceholder}
             </h3>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>
-              {data.trade || "Line of business"}
+              {data.trade || t.cardTradePlaceholder}
             </p>
           </div>
           <span
@@ -108,23 +111,24 @@ export default function BusinessIdCard({
               flexShrink: 0,
             }}
           >
-            ✓ Verified
+            ✓ {t.cardVerified}
           </span>
         </div>
 
         <div style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
           <div style={{ minWidth: 0 }}>
-            <Field label="Owner" value={data.ownerName || "—"} />
-            <Field label="Rejista ID" value={data.rejistaId} mono />
+            <Field label={t.owner} value={data.ownerName || "—"} />
+            <Field label={t.rejistaId} value={data.rejistaId} mono />
             <Field
-              label="CAC number"
-              value={data.cacNumber ?? "Pending — issued by CAC"}
+              label={t.cacNumber}
+              value={data.cacNumber ?? t.cacPending}
               mono
               dim={!data.cacNumber}
             />
             <p style={{ fontSize: 10.5, color: "rgba(255,255,255,0.6)", marginTop: 6 }}>
               {state?.name}
-              {data.market ? ` · ${data.market}` : ""} · Issued {data.issued}
+              {data.market ? ` · ${data.market}` : ""} · {t.cardIssued}{" "}
+              {data.issued}
             </p>
           </div>
 

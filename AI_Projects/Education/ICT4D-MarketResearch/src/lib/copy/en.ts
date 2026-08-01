@@ -440,6 +440,44 @@ export const en = {
 
      /privacy and /terms are deliberately absent: those pages are English by
      design, so an English title is the consistent thing. */
+  /* The business card and the printable record. Both are translated: the card
+     is the artefact people photograph and forward, and the record is what goes
+     on a wall. The one thing that stays fixed is the DEMONSTRATION stamp —
+     see cert.demoStamp. */
+  cert: {
+    cardEyebrow: "Business",
+    cardBizPlaceholder: "Your business name",
+    cardTradePlaceholder: "Line of business",
+    cardVerified: "Verified",
+    cardIssued: "Issued",
+    owner: "Owner",
+    rejistaId: "Rejista ID",
+    cacNumber: "CAC number",
+    cacPending: "Pending — issued by CAC",
+    eyebrow: "Rejista · Business Registration Service",
+    title: "Record of Business Registration",
+    lede:
+      "This record confirms that the business below was submitted for registration through Rejista.",
+    bizNameLabel: "Business name",
+    tradeLabel: "Line of business",
+    stateLabel: "State",
+    issuedLabel: "Date issued",
+    refLabel: "Rejista reference",
+    cacRegLabel: "CAC registration number",
+    marketLabel: "Market / area",
+    statusLabel: "Status",
+    statusValue: "Submitted for filing",
+    disclaimer:
+      "The certificate of incorporation itself is issued by the Corporate Affairs Commission (CAC), the government office that registers Nigerian businesses. This document is a service record issued by Rejista and is not a government document.",
+    specimen: "Specimen only. This demonstration record confers no legal status.",
+    agent: "Rejista · Authorised filing agent",
+    verify: "Verify this record",
+    /* Not translated, in either bundle. This stamp is the one mark that stops
+       a forwarded screenshot being mistaken for a real registration, so it
+       reads the same to everyone regardless of the language the record was
+       produced in. */
+    demoStamp: "DEMONSTRATION",
+  },
   meta: {
     home: {
       title: "Rejista — Your business. Registered in minutes.",

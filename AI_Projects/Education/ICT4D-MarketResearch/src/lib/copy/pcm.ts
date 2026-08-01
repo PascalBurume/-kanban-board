@@ -440,6 +440,38 @@ export const pcm: Copy = {
     { q: "I go pay tax immediately?", a: "No. Say you get Tax Identification Number (TIN) no mean say you owe tax. Small business wey never reach di threshold go file return but dem no go pay anything." },
   ],
 
+  cert: {
+    cardEyebrow: "Business",
+    cardBizPlaceholder: "Di name of your business",
+    cardTradePlaceholder: "Wetin di business dey do",
+    cardVerified: "We don check am",
+    cardIssued: "Dem give am",
+    owner: "Oga",
+    rejistaId: "Rejista ID",
+    cacNumber: "CAC number",
+    cacPending: "E never ready — na CAC go give am",
+    // The eyebrow stays as-is: it is the service's own name, not a sentence.
+    eyebrow: "Rejista · Business Registration Service",
+    title: "Record Say Di Business Don Register",
+    lede:
+      "Dis record dey confirm say di business wey dey below don enter for registration through Rejista.",
+    bizNameLabel: "Name of di business",
+    tradeLabel: "Wetin di business dey do",
+    stateLabel: "State",
+    issuedLabel: "Day wey dem give am",
+    refLabel: "Rejista reference",
+    cacRegLabel: "CAC registration number",
+    marketLabel: "Market abi area",
+    statusLabel: "How e dey",
+    statusValue: "We don send am go file",
+    disclaimer:
+      "Na Corporate Affairs Commission (CAC), di government office wey dey register Nigerian business, dey give di certificate of incorporation itself. Dis paper na service record wey Rejista give, e no be government paper.",
+    specimen: "Na sample. Dis demonstration record no get any power for law.",
+    agent: "Rejista · Filing agent wey get permission",
+    verify: "Check dis record",
+    // Same in both bundles on purpose — see the note in en.ts.
+    demoStamp: "DEMONSTRATION",
+  },
   meta: {
     home: {
       title: "Rejista — Your business. Registered for small time.",

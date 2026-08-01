@@ -33,11 +33,13 @@ const TOTAL_STEPS = 4;
 export default function RegisterFlow({
   initialLang,
   copy,
+  cert,
   trades,
   stages,
 }: {
   initialLang?: string;
   copy: Copy["register"];
+  cert: Copy["cert"];
   trades: Copy["trades"];
   stages: Copy["filingStages"];
 }) {
@@ -156,7 +158,7 @@ export default function RegisterFlow({
 
         <div style={{ display: "grid", gap: "var(--s8)", marginTop: "var(--s8)" }} className="rj-result-grid">
           <div>
-            <BusinessIdCard data={result} qrSvg={qrSvg} />
+            <BusinessIdCard data={result} qrSvg={qrSvg} t={cert} />
             <div style={{ display: "flex", gap: "var(--s3)", marginTop: "var(--s5)", flexWrap: "wrap" }}>
               <button
                 type="button"
@@ -223,7 +225,7 @@ export default function RegisterFlow({
           <h2 style={{ fontSize: 22, marginBottom: "var(--s4)" }}>
             {copy.recordTitle}
           </h2>
-          <Certificate data={result} qrSvg={qrSvg} />
+          <Certificate data={result} qrSvg={qrSvg} t={cert} />
         </div>
 
         <p style={{ marginTop: "var(--s8)" }}>

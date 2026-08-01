@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { setLocale } from "@/app/actions/locale";
 import { LOCALES, LOCALE_LABEL, type Locale } from "@/lib/i18n";
 import type { Copy } from "@/lib/copy";
@@ -28,6 +28,13 @@ export default function SiteHeader({
   // two is what made the old header switcher look broken.
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  // `locale` only changes after the server action writes the cookie and the
+  // tree re-renders. Binding the <select> straight to it meant that for the
+  // whole round-trip the control snapped back to the language you just moved
+  // away from — on a slow connection it reads as "the switcher is broken", and
+  // people gave up before it ever landed. useOptimistic shows the chosen value
+  // immediately and yields to the server value once it arrives.
+  const [shownLocale, setShownLocale] = useOptimistic(locale);
 
   return (
     <header
@@ -109,11 +116,11 @@ export default function SiteHeader({
             {nav.siteLangLabel}
           </span>
           <select
-            value={locale}
-            disabled={pending}
+            value={shownLocale}
             onChange={(e) => {
               const next = e.target.value;
               startTransition(() => {
+                setShownLocale(next as Locale);
                 setLocale(next);
               });
             }}
@@ -126,7 +133,11 @@ export default function SiteHeader({
               padding: "0 12px",
               background: "var(--rj-white)",
               fontFamily: "var(--font-body)",
-              opacity: pending ? 0.6 : 1,
+              // Stays interactive while the change is in flight. A disabled,
+              // half-faded control during a multi-second round-trip is what
+              // made this look dead on a slow connection.
+              opacity: pending ? 0.85 : 1,
+              cursor: pending ? "progress" : "pointer",
             }}
           >
             {LOCALES.map((l) => (

@@ -88,8 +88,13 @@ export const en = {
     email: "Email address",
     emailHelp: "Where we send your certificate",
     emailErr: "Enter an email address, like adaeze@example.com.",
-    langLabel: "Language",
-    langHelp: "The language we'll contact you in",
+    // Named for what it actually controls. It used to read just "Language",
+    // which people reasonably took for a second site-language switcher — they
+    // changed it, the page stayed as it was, and concluded the site was broken.
+    langLabel: "Language for us to contact you in",
+    langHelp:
+      "This is how we'll message you. The site itself is in English and Pidgin only.",
+    langConfirm: "{greeting} — we'll message you in {lang}.",
     s2Title: "Your business",
     s2Lede: "The name you want on your certificate, and what you do.",
     bizName: "Business name (first choice)",

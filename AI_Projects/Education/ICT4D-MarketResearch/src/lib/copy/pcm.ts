@@ -97,8 +97,10 @@ export const pcm: Copy = {
     email: "Email address",
     emailHelp: "Na here we go send your certificate",
     emailErr: "Put email address, like adaeze@example.com.",
-    langLabel: "Language",
-    langHelp: "Di language wey we go take talk to you",
+    langLabel: "Language wey we go take talk to you",
+    langHelp:
+      "Na so we go message you. Di site sef dey only for English and Pidgin.",
+    langConfirm: "{greeting} — we go message you for {lang}.",
     s2Title: "Your business",
     s2Lede: "Di name wey you want for your certificate, and wetin you dey do.",
     bizName: "Business name (di one you want pass)",

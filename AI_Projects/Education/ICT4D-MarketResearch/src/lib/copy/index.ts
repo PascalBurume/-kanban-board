@@ -19,11 +19,7 @@ export async function getCopy(): Promise<Copy> {
   return BUNDLES[await getLocale()];
 }
 
-/** Fill {placeholders}. Deliberately tiny — the alternative is pulling in an
- *  ICU message formatter for what is, across the whole site, a handful of
- *  interpolations (fee, minutes, phone, service counts). */
-export function fill(template: string, vars: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (m, k) =>
-    k in vars ? String(vars[k]) : m,
-  );
-}
+// Re-exported so server components keep a single import site. The
+// implementation lives in ./fill because client components need it too and
+// this file imports next/headers.
+export { fill } from "./fill";

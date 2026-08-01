@@ -5,6 +5,9 @@ import Link from "next/link";
 import { STATES } from "@/lib/nigeria";
 import { BRAND, LANGUAGES } from "@/lib/content";
 import type { Copy } from "@/lib/copy";
+// From ./copy/fill, not ./copy — the index imports next/headers, which cannot
+// be reached from a client component.
+import { fill } from "@/lib/copy/fill";
 import {
   EMPTY,
   FEE_GOVERNMENT,
@@ -349,6 +352,15 @@ export default function RegisterFlow({
                   </option>
                 ))}
               </select>
+              {/* Answers back in the language just chosen. Without this the
+                  control changed nothing on screen, so it read as broken —
+                  the greeting is the proof that the choice registered. */}
+              <p aria-live="polite" className="rj-note" style={{ marginTop: "var(--s2)" }}>
+                {fill(copy.langConfirm, {
+                  greeting: LANGUAGES.find((l) => l.code === data.lang)?.greeting ?? "Welcome",
+                  lang: LANGUAGES.find((l) => l.code === data.lang)?.label ?? "English",
+                })}
+              </p>
             </div>
           </div>
         </>

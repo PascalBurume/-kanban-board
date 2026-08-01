@@ -4,6 +4,7 @@ import { LATTICE_INK } from "@/lib/motif";
 import { STATES } from "@/lib/nigeria";
 import { BRAND } from "@/lib/content";
 import type { CardData } from "./BusinessIdCard";
+import type { Copy } from "@/lib/copy";
 
 /**
  * A4 landscape record for the wall. Laid out entirely in container-query units
@@ -25,9 +26,11 @@ import type { CardData } from "./BusinessIdCard";
 export default function Certificate({
   data,
   qrSvg,
+  t,
 }: {
   data: CardData;
   qrSvg?: string;
+  t: Copy["cert"];
 }) {
   const state = STATES.find((s) => s.id === data.stateId);
 
@@ -91,7 +94,7 @@ export default function Certificate({
           pointerEvents: "none",
         }}
       >
-        DEMONSTRATION
+        {t.demoStamp}
       </div>
 
       <div
@@ -114,7 +117,7 @@ export default function Certificate({
             color: "#C1521F",
           }}
         >
-          Rejista · Business Registration Service
+          {t.eyebrow}
         </p>
 
         <h2
@@ -125,12 +128,11 @@ export default function Certificate({
             letterSpacing: "-0.01em",
           }}
         >
-          Record of Business Registration
+          {t.title}
         </h2>
 
         <p style={{ fontSize: "1.45cqw", color: "#5F6368", marginTop: "0.7cqw" }}>
-          This record confirms that the business below was submitted for
-          registration through Rejista.
+          {t.lede}
         </p>
 
         <div style={{ marginTop: "3.4cqw" }}>
@@ -142,7 +144,7 @@ export default function Certificate({
               color: "#5F6368",
             }}
           >
-            Business name
+            {t.bizNameLabel}
           </p>
           <p
             style={{
@@ -177,18 +179,18 @@ export default function Certificate({
             textAlign: "left",
           }}
         >
-          <Cell label="Owner" value={data.ownerName || "—"} />
-          <Cell label="Line of business" value={data.trade || "—"} />
-          <Cell label="State" value={state?.name ?? "—"} />
-          <Cell label="Date issued" value={data.issued} />
-          <Cell label="Rejista reference" value={data.rejistaId} mono />
+          <Cell label={t.owner} value={data.ownerName || "—"} />
+          <Cell label={t.tradeLabel} value={data.trade || "—"} />
+          <Cell label={t.stateLabel} value={state?.name ?? "—"} />
+          <Cell label={t.issuedLabel} value={data.issued} />
+          <Cell label={t.refLabel} value={data.rejistaId} mono />
           <Cell
-            label="CAC registration number"
-            value={data.cacNumber ?? "Pending — issued by CAC"}
+            label={t.cacRegLabel}
+            value={data.cacNumber ?? t.cacPending}
             mono
           />
-          <Cell label="Market / area" value={data.market || "—"} />
-          <Cell label="Status" value="Submitted for filing" />
+          <Cell label={t.marketLabel} value={data.market || "—"} />
+          <Cell label={t.statusLabel} value={t.statusValue} />
         </div>
 
         <div
@@ -203,10 +205,7 @@ export default function Certificate({
         >
           <div style={{ maxWidth: "46cqw" }}>
             <p style={{ fontSize: "1.15cqw", color: "#5F6368", lineHeight: 1.45 }}>
-              The certificate of incorporation itself is issued by the Corporate
-              Affairs Commission (CAC), the government office that registers
-              Nigerian businesses. This document is a service record issued by
-              Rejista and is not a government document.
+              {t.disclaimer}
             </p>
             <p
               style={{
@@ -216,7 +215,7 @@ export default function Certificate({
                 marginTop: "0.7cqw",
               }}
             >
-              Specimen only. This demonstration record confers no legal status.
+              {t.specimen}
             </p>
           </div>
 
@@ -232,7 +231,7 @@ export default function Certificate({
                 minWidth: "22cqw",
               }}
             >
-              Rejista · Authorised filing agent
+              {t.agent}
             </p>
             <p style={{ fontSize: "1.05cqw", color: "#5F6368", marginTop: "0.35cqw" }}>
               {BRAND.address}
@@ -246,7 +245,7 @@ export default function Certificate({
                 dangerouslySetInnerHTML={{ __html: qrSvg }}
               />
               <p style={{ fontSize: "0.95cqw", color: "#5F6368", marginTop: "0.4cqw" }}>
-                Verify this record
+                {t.verify}
               </p>
             </div>
           )}

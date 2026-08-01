@@ -149,7 +149,20 @@ export const pcm: Copy = {
     copied: "Link don copy",
     copyManual: "Copy dis link:",
     share: "Share am",
+    sumLang: "Language",
+    statusDone: "E don ready",
+    statusPending: "E dey go",
+    statusPartner: "We need partner",
+    demoLabel: "Na demonstration be dis.",
     unlocked: "Wetin you don open",
+    unlockedCac: "CAC certificate",
+    unlockedCacNote:
+      "Na Corporate Affairs Commission go give am once di filing don finish.",
+    unlockedTin: "Tax Identification Number (TIN)",
+    unlockedTinNote: "We dey request am together with your filing.",
+    unlockedBank: "Business bank account",
+    unlockedBankNote:
+      "No bank partner never sign, so we no dey promise dis one. Your certificate and TIN don do to open one yourself.",
     recordTitle: "Your record — you fit print am, A4",
     s5Demo:
       "Nothing go CAC, we no collect money, and no tax number comot. Di record wey dey below na sample.",

@@ -143,7 +143,20 @@ export const en = {
     copied: "Link copied",
     copyManual: "Copy this link:",
     share: "Share",
+    sumLang: "Language",
+    statusDone: "Ready",
+    statusPending: "In progress",
+    statusPartner: "Partner needed",
+    demoLabel: "This is a demonstration.",
     unlocked: "What you have unlocked",
+    unlockedCac: "CAC certificate",
+    unlockedCacNote:
+      "Issued by the Corporate Affairs Commission once filing completes.",
+    unlockedTin: "Tax Identification Number (TIN)",
+    unlockedTinNote: "Requested with your filing.",
+    unlockedBank: "Business bank account",
+    unlockedBankNote:
+      "No bank partner is signed yet, so we do not promise this. Your certificate and TIN are enough to open one yourself.",
     recordTitle: "Your record — printable, A4",
     s5Demo:
       "Nothing was filed with CAC, no payment was taken, and no tax number was issued. The record below is a specimen.",

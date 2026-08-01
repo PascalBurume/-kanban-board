@@ -81,6 +81,11 @@ export default function RegisterFlow({
   const hint = useMemo(() => availabilityHint(data.bizName), [data.bizName]);
   const state = STATES.find((s) => s.id === data.stateId);
   const langLabel = LANGUAGES.find((l) => l.code === data.lang)?.label ?? "English";
+  const badgeLabels = {
+    done: copy.statusDone,
+    pending: copy.statusPending,
+    partner: copy.statusPartner,
+  };
 
   const step1Ok = validName(data.fullName) && validPhone(data.phone);
   const step2Ok =
@@ -139,13 +144,14 @@ export default function RegisterFlow({
   if (step === 5 && result) {
     return (
       <div className="rj-wrap" style={{ paddingBlock: "var(--s12)" }}>
-        <p className="rj-eyebrow">Step 5 of 5 · Done</p>
+        <p className="rj-eyebrow">
+          {copy.step} 5 {copy.of} 5 · {copy.done}
+        </p>
         <h1 tabIndex={-1} ref={headingRef} style={{ fontSize: "clamp(28px,4.2vw,40px)", marginTop: "var(--s3)" }}>
-          {data.bizName} is on its way to the register.
+          {data.bizName} {copy.s5Title}
         </h1>
         <p className="rj-lede" style={{ marginTop: "var(--s3)" }}>
-          Here is your business card. Save it, print the record for your wall,
-          and send it to whoever needs to see it.
+          {copy.s5Lede}
         </p>
 
         <div style={{ display: "grid", gap: "var(--s8)", marginTop: "var(--s8)" }} className="rj-result-grid">
@@ -169,7 +175,7 @@ export default function RegisterFlow({
                     .catch(() => setCopied(false));
                 }}
               >
-                {copied ? "Link copied" : "Copy verification link"}
+                {copied ? copy.copied : copy.copyLink}
               </button>
               <a
                 className="rj-btn rj-btn--outline"
@@ -179,7 +185,7 @@ export default function RegisterFlow({
                 target="_blank"
                 rel="noreferrer"
               >
-                Send to WhatsApp
+                {copy.share}
               </a>
             </div>
           </div>
@@ -188,26 +194,27 @@ export default function RegisterFlow({
             <h2 style={{ fontSize: 22 }}>{copy.unlocked}</h2>
             <ul style={{ listStyle: "none", display: "grid", gap: "var(--s3)", marginTop: "var(--s4)" }}>
               <Unlocked
-                title="CAC certificate"
-                note="Issued by the Corporate Affairs Commission once filing completes."
+                title={copy.unlockedCac}
+                note={copy.unlockedCacNote}
                 status="pending"
+                labels={badgeLabels}
               />
               <Unlocked
-                title="Tax Identification Number (TIN)"
-                note="Requested with your filing."
+                title={copy.unlockedTin}
+                note={copy.unlockedTinNote}
                 status="pending"
+                labels={badgeLabels}
               />
               <Unlocked
-                title="Business bank account"
-                note="No bank partner is signed yet, so we do not promise this. Your certificate and TIN are enough to open one yourself."
+                title={copy.unlockedBank}
+                note={copy.unlockedBankNote}
                 status="partner"
+                labels={badgeLabels}
               />
             </ul>
 
             <div className="rj-flag" style={{ marginTop: "var(--s5)" }}>
-              <strong>This is a demonstration.</strong> Nothing was filed with
-              CAC, no payment was taken, and no tax number was issued. The
-              record below is a specimen.
+              <strong>{copy.demoLabel}</strong> {copy.s5Demo}
             </div>
           </div>
         </div>
@@ -234,7 +241,7 @@ export default function RegisterFlow({
   if (step === 4) {
     return (
       <div className="rj-wrap rj-narrow" style={{ paddingBlock: "var(--s12)" }}>
-        <Progress step={4} />
+        <Progress step={4} stepWord={copy.step} ofWord={copy.of} />
         <h1 tabIndex={-1} ref={headingRef} style={{ fontSize: 30, marginTop: "var(--s4)" }}>
           {copy.s4Title}
         </h1>
@@ -287,10 +294,7 @@ export default function RegisterFlow({
         </ul>
 
         <div className="rj-flag" style={{ marginTop: "var(--s6)" }}>
-          <strong>Demonstration.</strong> These stages are simulated on a timer.
-          Nothing is being submitted to CAC. In the real product, a stage that
-          takes hours or days says so and hands you to WhatsApp rather than
-          pretending to finish.
+          <strong>{copy.demoLabel}</strong> {copy.s4Demo}
         </div>
       </div>
     );
@@ -299,7 +303,7 @@ export default function RegisterFlow({
   /* --------------------------- steps 1 – 3 ---------------------------- */
   return (
     <div className="rj-wrap rj-narrow" style={{ paddingBlock: "var(--s12)" }}>
-      <Progress step={step} />
+      <Progress step={step} stepWord={copy.step} ofWord={copy.of} />
 
       {step === 1 && (
         <>
@@ -394,9 +398,7 @@ export default function RegisterFlow({
                 className={hint === "likely" ? "rj-hint-ok" : "rj-error"}
                 style={{ marginTop: -12, marginBottom: "var(--s5)" }}
               >
-                {hint === "likely"
-                  ? "Looks available — this is a hint, not a guarantee."
-                  : "This may already be taken — try adding a word. This is a hint, not a guarantee."}
+                {hint === "likely" ? copy.hintLikely : copy.hintRisky}
               </p>
             )}
             <Field
@@ -406,6 +408,7 @@ export default function RegisterFlow({
               value={data.bizAlt}
               onChange={(v) => set("bizAlt", v)}
               optional
+              optionalLabel={copy.optional}
             />
 
             <div className="rj-field">
@@ -433,10 +436,10 @@ export default function RegisterFlow({
 
             <div className="rj-field">
               <label className="rj-label" htmlFor="state">
-                State
+                {copy.state}
               </label>
               <span className="rj-help" id="state-help">
-                Where the business operates
+                {copy.stateHelp}
               </span>
               <select
                 id="state"
@@ -457,11 +460,12 @@ export default function RegisterFlow({
 
             <Field
               id="market"
-              label="Market or area"
-              help="Helps us find you if we need to"
+              label={copy.market}
+              help={copy.marketHelp}
               value={data.market}
               onChange={(v) => set("market", v)}
               optional
+              optionalLabel={copy.optional}
             />
           </div>
         </>
@@ -478,14 +482,14 @@ export default function RegisterFlow({
 
           <dl className="rj-card" style={{ marginTop: "var(--s6)", display: "grid", gap: "var(--s3)" }}>
             {[
-              ["Full name", data.fullName, 1],
-              ["Phone", data.phone, 1],
-              ["Language", langLabel, 1],
-              ["Business name", data.bizName, 2],
-              ["Second choice", data.bizAlt || "—", 2],
-              ["Business does", data.trade, 2],
-              ["State", state?.name ?? "—", 2],
-              ["Market / area", data.market || "—", 2],
+              [copy.fullName, data.fullName, 1],
+              [copy.phone, data.phone, 1],
+              [copy.sumLang, langLabel, 1],
+              [copy.bizName, data.bizName, 2],
+              [copy.bizAlt, data.bizAlt || "—", 2],
+              [copy.trade, data.trade, 2],
+              [copy.state, state?.name ?? "—", 2],
+              [copy.market, data.market || "—", 2],
             ].map(([k, v, s]) => (
               <div
                 key={k as string}
@@ -508,24 +512,26 @@ export default function RegisterFlow({
                     padding: "6px 4px",
                   }}
                 >
-                  Edit
+                  {copy.edit}
                 </button>
               </div>
             ))}
           </dl>
 
           <div className="rj-card" style={{ marginTop: "var(--s5)" }}>
-            <h2 style={{ fontSize: 18 }}>What it costs</h2>
+            <h2 style={{ fontSize: 18 }}>{copy.costTitle}</h2>
             <div style={{ display: "grid", gap: 8, marginTop: "var(--s4)" }}>
-              <Row k="Rejista service fee" v={naira(FEE_SERVICE)} />
-              <Row k="Government (CAC) fee" v={naira(FEE_GOVERNMENT)} note="Paid to the government, not to us" />
+              <Row k={copy.costService} v={naira(FEE_SERVICE)} />
+              <Row k={copy.costGov} v={naira(FEE_GOVERNMENT)} note={copy.costGovNote} />
               <div style={{ borderTop: "1px solid var(--rj-line)", paddingTop: 10 }}>
-                <Row k="Total" v={naira(FEE_SERVICE + FEE_GOVERNMENT)} strong />
+                <Row k={copy.costTotal} v={naira(FEE_SERVICE + FEE_GOVERNMENT)} strong />
               </div>
             </div>
+            {/* copy.costNote, not a hardcoded agent price. The hardcoded line
+                claimed a specific agent range, which contradicted the "comparable
+                all-in" figure on the model card elsewhere on the site. */}
             <p className="rj-note" style={{ marginTop: "var(--s4)" }}>
-              An agent typically charges {BRAND.agentRange} for the same thing.
-              The CAC fee is indicative and confirmed before you pay.
+              {copy.costNote}
             </p>
           </div>
 
@@ -537,9 +543,8 @@ export default function RegisterFlow({
                 onChange={(e) => set("consent", e.target.checked)}
               />
               <span>
-                I agree that Rejista can use my personal details to register my
-                business with the Corporate Affairs Commission (CAC). I have read{" "}
-                <Link href="/privacy">how my data is used</Link>.
+                {copy.consent}{" "}
+                <Link href="/privacy">{copy.consentLink}</Link>.
               </span>
             </label>
             {/* Marketing consent is separate and optional — never bundled. */}
@@ -549,15 +554,9 @@ export default function RegisterFlow({
                 checked={data.marketing}
                 onChange={(e) => set("marketing", e.target.checked)}
               />
-              <span>
-                Optional: send me messages about services like loans, insurance
-                and payments. You can say no and still register.
-              </span>
+              <span>{copy.marketing}</span>
             </label>
-            <p className="rj-note">
-              Consent is never pre-ticked. The time you agreed and the wording
-              you agreed to are recorded with your case.
-            </p>
+            <p className="rj-note">{copy.consentNote}</p>
           </div>
         </>
       )}
@@ -565,7 +564,7 @@ export default function RegisterFlow({
       <div style={{ display: "flex", gap: "var(--s3)", marginTop: "var(--s8)", flexWrap: "wrap" }}>
         {step > 1 && (
           <button type="button" className="rj-btn rj-btn--outline" onClick={() => setStep(step - 1)}>
-            Back
+            {copy.back}
           </button>
         )}
         <button
@@ -581,33 +580,41 @@ export default function RegisterFlow({
             }
           }}
         >
-          {step === 3 ? "{copy.submit}" : "Continue"}
+          {step === 3 ? copy.submit : copy.continue}
         </button>
         <Link
           href="/faq"
           className="rj-btn rj-btn--outline"
           style={{ marginLeft: "auto" }}
         >
-          Stuck? Call {BRAND.phone}
+          {copy.stuck} {BRAND.phone}
         </Link>
       </div>
     </div>
   );
 }
 
-function Progress({ step }: { step: number }) {
+function Progress({
+  step,
+  stepWord,
+  ofWord,
+}: {
+  step: number;
+  stepWord: string;
+  ofWord: string;
+}) {
   const pct = (step / TOTAL_STEPS) * 100;
   return (
     <div>
       <p className="rj-eyebrow">
-        Step {step} of {TOTAL_STEPS}
+        {stepWord} {step} {ofWord} {TOTAL_STEPS}
       </p>
       <div
         role="progressbar"
         aria-valuenow={step}
         aria-valuemin={1}
         aria-valuemax={TOTAL_STEPS}
-        aria-label={`Step ${step} of ${TOTAL_STEPS}`}
+        aria-label={`${stepWord} ${step} ${ofWord} ${TOTAL_STEPS}`}
         style={{
           height: 6,
           background: "var(--rj-line)",
@@ -633,6 +640,7 @@ function Field({
   inputMode,
   autoComplete,
   optional,
+  optionalLabel,
 }: {
   id: string;
   label: string;
@@ -644,6 +652,7 @@ function Field({
   inputMode?: "tel" | "text" | "numeric";
   autoComplete?: string;
   optional?: boolean;
+  optionalLabel?: string;
 }) {
   return (
     <div className="rj-field">
@@ -652,7 +661,9 @@ function Field({
       <label className="rj-label" htmlFor={id}>
         {label}
         {optional && (
-          <span style={{ color: "var(--rj-grey)", fontWeight: 400 }}> (optional)</span>
+          <span style={{ color: "var(--rj-grey)", fontWeight: 400 }}>
+            {" "}({optionalLabel})
+          </span>
         )}
       </label>
       <span className="rj-help" id={`${id}-help`}>
@@ -700,17 +711,19 @@ function Unlocked({
   title,
   note,
   status,
+  labels,
 }: {
   title: string;
   note: string;
   status: "done" | "pending" | "partner";
+  labels: { done: string; pending: string; partner: string };
 }) {
   const badge =
     status === "done"
-      ? { cls: "rj-badge--live", text: "Issued" }
+      ? { cls: "rj-badge--live", text: labels.done }
       : status === "pending"
-        ? { cls: "rj-badge--soon", text: "In progress" }
-        : { cls: "rj-badge--partner", text: "Partner needed" };
+        ? { cls: "rj-badge--soon", text: labels.pending }
+        : { cls: "rj-badge--partner", text: labels.partner };
   return (
     <li className="rj-card" style={{ padding: "var(--s4)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>

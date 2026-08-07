@@ -49,6 +49,59 @@ export async function classScope(user: SessionUser, classId: string): Promise<Cl
   return { classId: cls.id, level: cls.level, subjectSlugs: [...new Set(tas.map((t) => t.subjectSlug))] };
 }
 
+/**
+ * One of the teacher's own lessons, summarised for a list.
+ *
+ * The excerpt and the count are computed HERE rather than shipping contentMd: an
+ * admin's library is every authored lesson in the school, and sending each one's full
+ * markdown to draw a card is a page that gets slower every term.
+ *
+ * `untitled` matters more than it looks. Every new lesson is created as « Nouvelle
+ * leçon », so a teacher with three of them sees the same name three times and cannot
+ * tell which is which — the flag lets the list say so instead of repeating itself.
+ */
+function libCard(
+  l: { id: string; title: string; status: string; moduleId: string | null; contentMd: string },
+  editedAt: number | null,
+) {
+  // Strip the things that are markup rather than prose, so the excerpt reads like the
+  // lesson: headings' hashes, formulas, figure blocks, raw SVG.
+  const prose = (l.contentMd || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/<figure[\s\S]*?<\/figure>/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\$\$[\s\S]*?\$\$/g, " ")
+    .replace(/\$[^$\n]*\$/g, " ")
+    // A whole table reads as noise in one line of preview — "Classe Effectif --- ---
+    // [0;5[ 4" is not a sentence. Drop the delimiter row and the rows of cells; the
+    // heading above the table is what tells the teacher what this lesson is.
+    .replace(/^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/gm, " ")
+    .replace(/^\s*\|.*\|\s*$/gm, " ")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[*_`~>|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = prose ? prose.split(" ").filter(Boolean).length : 0;
+  return {
+    id: l.id,
+    title: l.title,
+    status: l.status,
+    moduleId: l.moduleId,
+    untitled: l.title.trim() === "Nouvelle leçon",
+    blank: isBlank(l.contentMd || ""),
+    words,
+    excerpt: prose.slice(0, 140),
+    editedAt,
+  };
+}
+
+/** A lesson still holding nothing but the starter skeleton. */
+function isBlank(md: string): boolean {
+  const strip = (s: string) => s.replace(/\s+/g, " ").trim();
+  return strip(md) === "" || strip(md) === strip(BLANK_CONTENT);
+}
+
 // classId scopes the tree to that class's books, with modules narrowed to its
 // level. Omitted (admin "tous les manuels") → every editable subject, unfiltered.
 // Returns null when classId is set but not viewable by this user.
@@ -80,14 +133,28 @@ export async function studioTree(user: SessionUser, classId?: string | null) {
   // "Ma bibliothèque" panel and the connector canvas (cards + their current module link).
   const authored = await prisma.lesson.findMany({
     where: { authorId: user.role === "ADMIN" ? { not: null } : user.userId, subjectSlug: { in: slugs } },
-    select: { id: true, title: true, status: true, moduleId: true, subjectSlug: true },
+    select: { id: true, title: true, status: true, moduleId: true, subjectSlug: true, contentMd: true },
     orderBy: { title: "asc" },
   });
-  const libBySubject = new Map<string, typeof authored>();
+
+  // When a lesson was last written to. Lesson has no updatedAt — rather than migrate
+  // for it, take the newest snapshot, which is exactly "the last writing session".
+  // Since the churn fix those are ~10 minutes apart at worst, which is well inside the
+  // precision of "modifiée il y a 2 h".
+  const lastEdits = authored.length
+    ? await prisma.lessonVersion.groupBy({
+        by: ["lessonId"],
+        where: { lessonId: { in: authored.map((l) => l.id) } },
+        _max: { createdAt: true },
+      })
+    : [];
+  const editedAt = new Map(lastEdits.map((e) => [e.lessonId, e._max.createdAt?.getTime() ?? null]));
+
+  const libBySubject = new Map<string, ReturnType<typeof libCard>[]>();
   for (const l of authored) {
     const key = l.subjectSlug ?? "";
     if (!libBySubject.has(key)) libBySubject.set(key, []);
-    libBySubject.get(key)!.push(l);
+    libBySubject.get(key)!.push(libCard(l, editedAt.get(l.id) ?? null));
   }
   return {
     subjects: subjects.map((s) => ({
@@ -101,7 +168,7 @@ export async function studioTree(user: SessionUser, classId?: string | null) {
         order: m.order,
         lessons: m.lessons,
       })),
-      library: (libBySubject.get(s.slug) ?? []).map((l) => ({ id: l.id, title: l.title, status: l.status, moduleId: l.moduleId })),
+      library: libBySubject.get(s.slug) ?? [],
     })),
     classLevel,
   };

@@ -204,23 +204,59 @@
 .rd-empty svg { width: 22px; height: 22px; }
 
 /* ---- start screen (reached from the sidebar, no lesson chosen yet) ---- */
-.rd-start { max-width: 640px; margin: 0 auto; padding: 48px 24px 60px; }
-.rd-start h1 { font: 600 24px var(--font-head); margin: 0 0 6px; }
-.rd-start-sub { font-size: 14px; color: var(--text-muted); margin: 0 0 32px; line-height: 1.6; }
-.rd-start section { margin-bottom: 28px; }
-.rd-start h2 { font: 600 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
-.rd-start-row { display: flex; gap: 8px; flex-wrap: wrap; }
+/* ---- start screen ----
+   Wider than the 640px column it was: two "Nouvelle leçon" rows carrying nothing but a
+   name told a teacher nothing about which was which, so each lesson is now a card with
+   the things that actually distinguish them — what it says, how long it is, when it was
+   last touched — and cards need room to sit side by side. */
+.rd-start { max-width: 1040px; margin: 0 auto; padding: 40px 28px 72px; }
+.rd-start-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+.rd-start h1 { font: 600 25px var(--font-head); margin: 0 0 6px; }
+.rd-start-sub { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6; max-width: 56ch; }
+.rd-start-back { display: inline-flex; align-items: center; gap: 5px; flex: none; padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text-soft); white-space: nowrap; }
+.rd-start-back:hover { color: var(--text); border-color: var(--border-strong); }
+.rd-start-back svg { width: 14px; height: 14px; }
+
+.rd-start section { margin-bottom: 34px; }
+.rd-start h2 { font: 600 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+.rd-start-h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.rd-start-h2 h2 { margin: 0; }
+.rd-start-count { font: 600 10.5px var(--font-ui); color: var(--text-muted); background: var(--surface-2); border-radius: 999px; padding: 2px 8px; }
+.rd-start-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .rd-start-none { font-size: 13px; color: var(--text-muted); margin: 0; }
-.rd-start-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
-.rd-start-list li + li { border-top: 1px solid var(--border); }
-.rd-start-list a { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--surface); }
-.rd-start-list a:hover { background: var(--surface-2); }
-.rd-start-list .t { font-weight: 600; font-size: 13.5px; color: var(--text); flex: 1; }
-.rd-start-list .s { font-size: 12px; color: var(--text-muted); }
-.rd-start-list .st { font: 600 10.5px var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); background: var(--surface-2); border-radius: 999px; padding: 2px 8px; }
-.rd-start-list .st.pub { background: var(--indigo-50); color: var(--indigo-700); }
-.rd-start-back { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--text-muted); }
-.rd-start-back:hover { color: var(--text); }
+
+/* « Commencer » is one card per subject rather than a row of buttons: a teacher with
+   three subjects is choosing which lesson to write, not pressing a control. */
+.rd-newcard { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 190px; padding: 14px 16px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); background: var(--surface); cursor: pointer; text-align: left; transition: border-color .12s, background .12s, transform .12s; }
+.rd-newcard:hover { border-color: var(--indigo-400); background: var(--indigo-50); transform: translateY(-1px); }
+.rd-newcard-i { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-bottom: 6px; border-radius: var(--r-sm); background: var(--indigo-600, var(--indigo-700)); color: #fff; }
+.rd-newcard-i svg { width: 15px; height: 15px; }
+.rd-newcard-t { font: 600 13.5px var(--font-ui); color: var(--text); }
+.rd-newcard-h { font: 400 11.5px var(--font-ui); color: var(--text-muted); }
+
+.rd-start-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.rd-card { display: flex; flex-direction: column; gap: 8px; height: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); transition: border-color .12s, box-shadow .12s, transform .12s; }
+.rd-card:hover { border-color: var(--indigo-400); box-shadow: 0 2px 10px rgba(0,0,0,.06); transform: translateY(-1px); }
+.rd-card-hd { display: flex; align-items: flex-start; gap: 10px; }
+.rd-card-t { flex: 1; min-width: 0; font: 600 14px var(--font-ui); color: var(--text); overflow-wrap: anywhere; }
+/* Named for what it is — an absence — rather than repeating « Nouvelle leçon ». */
+.rd-card-t.untitled { font-weight: 500; font-style: italic; color: var(--text-muted); }
+.rd-card-st { flex: none; font: 600 10px var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); background: var(--surface-2); border-radius: 999px; padding: 3px 8px; }
+.rd-card-st.pub { background: var(--indigo-50); color: var(--indigo-700); }
+/* Two lines of the lesson's own prose: the fastest way to recognise your own work. */
+/* -webkit-box for the clamp, so NOT flex:1 — as a stretching flex item the box grew to
+   fill the card and the clamp stopped biting, leaving a third line sliced in half.
+   The footer is pushed down with margin-top:auto instead. */
+.rd-card-x { font: 400 12.5px/1.55 var(--font-ui); color: var(--text-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; min-height: calc(2 * 1.55em); }
+.rd-card-x i { color: var(--text-muted); }
+.rd-card-ft { margin-top: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font: 400 11.5px var(--font-ui); color: var(--text-muted); }
+.rd-card-dot { opacity: .55; }
+
+@media (max-width: 700px) {
+  .rd-start { padding: 28px 18px 56px; }
+  .rd-start-hd { flex-direction: column; gap: 14px; }
+  .rd-start-grid { grid-template-columns: 1fr; }
+}
 
 /* ---- tablet drawers ---- */
 .rd-drawer { display: flex; flex-direction: column; }

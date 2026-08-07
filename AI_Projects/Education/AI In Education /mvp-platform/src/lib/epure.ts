@@ -439,9 +439,10 @@ export function epureProblems(spec: EpureSpec): string[] {
   return [...new Set(out)];
 }
 
-export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: EpureSpec }[] = [
+export const EPURE_TEMPLATES: { id: string; icon: string; label: string; hint: string; spec: EpureSpec }[] = [
   {
     id: "triangle",
+    icon: "geoTriangle",
     label: "Triangle ABC",
     hint: "trois sommets nommés",
     spec: {
@@ -452,6 +453,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "rectangle-tri",
+    icon: "geoRightTriangle",
     label: "Triangle rectangle",
     hint: "angle droit marqué en B",
     spec: {
@@ -463,6 +465,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "median",
+    icon: "geoMedian",
     label: "Triangle et médiane",
     hint: "sommet, milieu, médiane",
     spec: {
@@ -476,6 +479,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "circumcircle",
+    icon: "geoCircumcircle",
     label: "Cercle circonscrit",
     hint: "triangle inscrit dans un cercle",
     spec: {
@@ -487,6 +491,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "thales",
+    icon: "geoThales",
     label: "Configuration de Thalès",
     hint: "deux sécantes, deux parallèles",
     spec: {
@@ -503,6 +508,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "parallelogram",
+    icon: "geoParallelogram",
     label: "Parallélogramme",
     hint: "quatre sommets et les diagonales",
     spec: {
@@ -516,6 +522,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "inscribed",
+    icon: "geoInscribed",
     label: "Angle inscrit et angle au centre",
     hint: "cercle, corde, deux angles",
     spec: {
@@ -528,6 +535,7 @@ export const EPURE_TEMPLATES: { id: string; label: string; hint: string; spec: E
   },
   {
     id: "axes",
+    icon: "geoAxes",
     label: "Repère et point",
     hint: "deux axes et un point placé",
     spec: {

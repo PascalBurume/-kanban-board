@@ -571,7 +571,7 @@ export default function RedigerClient() {
           { id: "rule", icon: "rule", label: "Trait horizontal", disabled: noVisual },
           { id: "codeblock", icon: "code", label: "Bloc de code", disabled: noVisual },
           { type: "sep" },
-          ...EPURE_TEMPLATES.map((t) => ({ id: `epure:${t.id}`, icon: "compass", label: t.label, hint: t.hint, disabled: noVisual })),
+          ...EPURE_TEMPLATES.map((t) => ({ id: `epure:${t.id}`, icon: t.icon, label: t.label, hint: t.hint, disabled: noVisual })),
           { type: "sep" },
           ...FIGURE_KINDS.map((k) => ({ id: `figure:${k.kind}`, icon: k.icon, label: k.label, hint: k.hint, disabled: noVisual })),
           { id: "catalogue", icon: "grid", label: "Catalogue de figures…", hint: "76 figures prêtes à insérer", disabled: off },

@@ -814,6 +814,19 @@ export default function RedigerClient() {
     <div className={`rd-page teacher-page${narrow ? " rd-narrow" : ""}`}>
       <header className="rd-titlebar">
         <a className="rd-appicon" href="/teacher/studio/" title="Retour au studio"><Icon name="grid" /></a>
+        {/* Mirrors the Copilot toggle at the far right: each panel's switch sits on the
+            side that panel opens from. Without this the outline's ✕ removed the panel
+            AND every trace of it, leaving the menu bar as the only way back — a close
+            button that erases its own way back is a control you have to be taught. */}
+        <button
+          className={`rd-railtoggle${outlineOpen ? " on" : ""}`}
+          onClick={() => setOutlineOpen((o) => !o)}
+          aria-expanded={outlineOpen}
+          aria-label={outlineOpen ? "Masquer le plan du document" : "Afficher le plan du document"}
+          title="Plan du document"
+        >
+          <Icon name="list" />
+        </button>
         <input
           className="rd-title"
           value={title}
@@ -848,6 +861,7 @@ export default function RedigerClient() {
           className={`rd-railtoggle${railOpen ? " on" : ""}`}
           onClick={() => setRailOpen((o) => !o)}
           aria-expanded={railOpen}
+          aria-label={railOpen ? "Masquer Copilot" : "Afficher Copilot"}
           title="Copilot"
         >
           <Icon name="sparkles" />

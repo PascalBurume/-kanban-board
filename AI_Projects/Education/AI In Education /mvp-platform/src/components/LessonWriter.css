@@ -162,11 +162,19 @@
 
 /* ---- figure insert menu ---- */
 .lw-figwrap { position: relative; display: inline-flex; }
-.lw-figmenu { position: absolute; z-index: 25; top: 34px; left: 0; width: 250px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 24px rgba(0,0,0,.14); padding: 5px; }
-.lw-figmenu button { display: block; width: 100%; text-align: left; border: 0; background: transparent; border-radius: var(--r-sm); padding: 7px 9px; cursor: pointer; }
+/* A little wider than before: an icon column plus a two-line label needs the room, and
+   the list is scrollable because 20 entries do not fit above the fold. */
+.lw-figmenu { position: absolute; z-index: 25; top: 34px; left: 0; width: 276px; max-height: min(560px, calc(100vh - 180px)); overflow-y: auto; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 24px rgba(0,0,0,.14); padding: 5px; }
+/* Grid, so the icon sits in its own column and BOTH text lines align to it — with the
+   icon inline the hint would wrap back under the picture. */
+.lw-figmenu button { display: grid; grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 9px; width: 100%; text-align: left; border: 0; background: transparent; border-radius: var(--r-sm); padding: 7px 9px; cursor: pointer; }
 .lw-figmenu button:hover { background: var(--indigo-50); }
-.lw-figmenu-t { display: block; font: 600 12.5px var(--font-ui); color: var(--text); }
-.lw-figmenu-h { display: block; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+/* Spans both rows and sits on the first line of the label, not floating between them. */
+.lw-figmenu-i { grid-column: 1; grid-row: 1 / span 2; display: flex; align-items: flex-start; justify-content: center; padding-top: 1px; color: var(--text-muted); }
+.lw-figmenu button:hover .lw-figmenu-i { color: var(--indigo-700); }
+.lw-figmenu-i svg { width: 18px; height: 18px; }
+.lw-figmenu-t { grid-column: 2; font: 600 12.5px var(--font-ui); color: var(--text); }
+.lw-figmenu-h { grid-column: 2; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
 /* ---- figure editing panel ---- */
 .fp { position: absolute; z-index: 30; width: min(440px, calc(100% - 28px)); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 10px; }

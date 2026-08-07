@@ -407,6 +407,7 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
                 <p className="lw-figmenu-s">Géométrie</p>
                 {EPURE_TEMPLATES.map((t) => (
                   <button key={t.id} role="menuitem" onClick={() => { setFigMenu(false); ed.insertEpure(t.spec); }}>
+                    <span className="lw-figmenu-i"><Icon name={t.icon} /></span>
                     <span className="lw-figmenu-t">{t.label}</span>
                     <span className="lw-figmenu-h">{t.hint}</span>
                   </button>
@@ -414,6 +415,7 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
                 <p className="lw-figmenu-s">Graphiques</p>
                 {FIGURE_KINDS.map((k) => (
                   <button key={k.kind} role="menuitem" onClick={() => { setFigMenu(false); ed.insertFigure(k.kind); }}>
+                    <span className="lw-figmenu-i"><Icon name={k.icon} /></span>
                     <span className="lw-figmenu-t">{k.label}</span>
                     <span className="lw-figmenu-h">{k.hint}</span>
                   </button>

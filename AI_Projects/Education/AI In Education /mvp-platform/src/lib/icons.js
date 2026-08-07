@@ -4,7 +4,31 @@
 // Icons are inline SVG strings; stroke/fill use currentColor.
 // ============================================================
 
+// ── geometry templates ──
+// One per configuration in EPURE_TEMPLATES, drawn as the figure itself in miniature.
+// A single shared compass icon repeated eight times is decoration; a teacher scanning
+// the menu should be able to find "the one with the circle round it" without reading.
+// Thinner strokes than the rest of the set (1.6): these carry more lines in the same
+// 24px, and at 2 they close up into a blob.
+const GEO = (body) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+
 export const ICONS = {
+  geoTriangle: GEO('<path d="M12 4 20 19 4 19Z"/>'),
+  geoRightTriangle: GEO('<path d="M5 19h14V6Z"/><path d="M16 19v-3h3"/>'),
+  geoMedian: GEO('<path d="M12 4 20 19 4 19Z"/><path d="M12 4v15" stroke-dasharray="2.5 2"/><circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/>'),
+  geoCircumcircle: GEO('<circle cx="12" cy="12" r="8.5" stroke-dasharray="2.5 2"/><path d="M12 3.5 19.4 16 4.6 16Z"/>'),
+  // Two rays from one vertex, cut by two PARALLEL transversals — the configuration
+  // itself. The first attempt drew the parallels as stubs hanging off the ray ends and
+  // read as a scribble; what makes this figure recognisable is the two cross-cuts.
+  geoThales: GEO('<path d="M4 20 21 11M4 20 16 3"/><path d="M10.8 16.4 8.8 13.2"/><path d="M18.5 12.4 14.2 5.6"/>'),
+  geoParallelogram: GEO('<path d="M3 19 8.5 5H21l-5.5 14Z"/><path d="M3 19 21 5M8.5 5 15.5 19" stroke-dasharray="2.5 2"/>'),
+  // BOTH angles, which is what the entry is about — one at the circumference, one at
+  // the centre. Without the centre lines it was a triangle in a circle, i.e. the
+  // circumcircle icon two rows above with a different dash pattern.
+  geoInscribed: GEO('<circle cx="12" cy="12" r="8.5"/><path d="M5.2 16.5h13.6"/><path d="M12 3.5 5.2 16.5M12 3.5 18.8 16.5"/><path d="M12 12 5.2 16.5M12 12 18.8 16.5" stroke-dasharray="2.5 2"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>'),
+  geoAxes: GEO('<path d="M4 20V4M4 20h16"/><path d="M14 20v-7h-10" stroke-dasharray="2.5 2"/><circle cx="14" cy="13" r="1.6" fill="currentColor" stroke="none"/>'),
+
   columns: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1.5"/><line x1="12" y1="4" x2="12" y2="20"/></svg>',
   chartFunction: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c4-1 5-11 9-11s5 6 7 7"/></svg>',
   chartLine: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><polyline points="4,15 9,9 13,12 20,5"/></svg>',

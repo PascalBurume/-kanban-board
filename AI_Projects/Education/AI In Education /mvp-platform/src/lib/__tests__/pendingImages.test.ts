@@ -167,3 +167,23 @@ describe("flushing the queue", () => {
     expect(out.remaining).toBe(0);
   });
 });
+
+// The flake that exposed a real weakness: two pictures queued in the same millisecond
+// shared a createdAt, so "oldest first" came down to how the sort broke the tie — and
+// it broke it differently on different runs. A loop over a multi-select hits this every
+// time, so the queue's ordering promise had to be made true rather than assumed.
+describe("ordering is deterministic even within one millisecond", () => {
+  it("keeps insertion order for a burst queued back to back", async () => {
+    const keys: string[] = [];
+    for (let i = 0; i < 12; i++) keys.push(await queueImage("burst", png(), `${i}.png`));
+    const rows = await listPendingImages("burst");
+    expect(rows.map((r) => r.key)).toEqual(keys);
+  });
+
+  it("gives every entry a strictly increasing stamp", async () => {
+    const rows = await listPendingImages("burst");
+    const stamps = rows.map((r) => r.createdAt);
+    expect(stamps).toEqual([...stamps].sort((a, b) => a - b));
+    expect(new Set(stamps).size).toBe(stamps.length);
+  });
+});

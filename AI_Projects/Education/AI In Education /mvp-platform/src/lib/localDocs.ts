@@ -230,13 +230,28 @@ function runBlobs<T>(mode: IDBTransactionMode, fn: (store: IDBObjectStore) => ID
  * for a key that only has to be unique within one device's queue.
  */
 export function pendingKey(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${stamp().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * A strictly increasing timestamp.
+ *
+ * Date.now() is not enough on its own: inserting two pictures in the same millisecond
+ * — which a loop over a multi-select does easily — gives them the same createdAt, and
+ * "oldest first" then depends on however the sort happens to break the tie. The queue
+ * promises an order, so it has to have one.
+ */
+let lastStamp = 0;
+function stamp(): number {
+  const now = Date.now();
+  lastStamp = now > lastStamp ? now : lastStamp + 1;
+  return lastStamp;
 }
 
 /** Queue a picture for upload. Returns the key the markdown should point at. */
 export async function queueImage(lessonId: string, blob: Blob, name: string): Promise<string> {
   const key = pendingKey();
-  await runBlobs("readwrite", (s) => s.put({ key, lessonId, blob, name, createdAt: Date.now() } satisfies PendingImage));
+  await runBlobs("readwrite", (s) => s.put({ key, lessonId, blob, name, createdAt: stamp() } satisfies PendingImage));
   return key;
 }
 

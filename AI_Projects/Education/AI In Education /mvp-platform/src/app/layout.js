@@ -31,16 +31,32 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  // In production, register the offline service worker at its absolute root path
+  // (a relative "sw.js" resolved to /login/sw.js, /student/sw.js … → 404, so it
+  // never registered correctly). In development we actively UNREGISTER any
+  // previously-installed worker and drop its caches — a stale cache-first worker
+  // intercepts Next.js assets/RSC and is what forced the "click twice" behavior.
+  const swScript =
+    process.env.NODE_ENV === "production"
+      ? "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}"
+      : // DEV: unregister any stale worker + clear its caches, then force ONE reload
+        // if the page is still controlled by an old worker (it keeps intercepting
+        // navigations until the tab is reloaded — this is what caused 'click twice').
+        // A sessionStorage flag prevents a reload loop.
+        "if('serviceWorker' in navigator){" +
+        "Promise.all([" +
+        "navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))})," +
+        "(self.caches?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}):Promise.resolve())" +
+        "]).then(function(){" +
+        "if(navigator.serviceWorker.controller && !sessionStorage.getItem('sw-evicted')){" +
+        "sessionStorage.setItem('sw-evicted','1');location.reload()}" +
+        "});}";
+
   return (
     <html lang="en" className={`${lexend.variable} ${inter.variable}`}>
       <body>
         {children}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}",
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: swScript }} />
       </body>
     </html>
   );

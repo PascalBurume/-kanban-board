@@ -2,29 +2,26 @@
 import { useState, useEffect, useCallback } from "react";
 import "./admin.css";
 import Icon from "@/components/ui/Icon";
-import { BrandMark, OfflinePill, Avatar } from "@/components/ui/chrome";
+import { OfflinePill, Avatar } from "@/components/ui/chrome";
 import { avatarColor, initials } from "@/lib/icons";
 import { toast } from "@/lib/toast";
+import AdminContentPanel, { BookClassLinks } from "@/components/admin/AdminContentPanel";
+import AdminSidebar, { ADMIN_TABS as TABS } from "@/components/admin/AdminSidebar";
 
 const TAB_NAMES = {
   overview: "Vue d’ensemble",
   approvals: "Approbations",
   assign: "Affectations",
+  supervisors: "Titulaires",
+  teachers: "Enseignants",
+  pedagogy: "Pédagogie",
+  content: "Contenu",
+  offerings: "Liaisons",
   classes: "Classes",
   students: "Élèves",
   system: "État du système",
   audit: "Journal d’audit",
 };
-
-const TABS = [
-  { tab: "overview", ic: "grid", lbl: "Vue d’ensemble" },
-  { tab: "approvals", ic: "check", lbl: "Approbations" },
-  { tab: "assign", ic: "layers", lbl: "Affectations" },
-  { tab: "classes", ic: "folder", lbl: "Classes" },
-  { tab: "students", ic: "users", lbl: "Élèves" },
-  { tab: "system", ic: "server", lbl: "État du système" },
-  { tab: "audit", ic: "history", lbl: "Journal d’audit" },
-];
 
 // Static presentation for KPI cards; values come from the API.
 const KPI_DEFS = [
@@ -104,6 +101,7 @@ const ACTION_LABELS = {
   CLASS_CREATE: "Création de classe", CLASS_UPDATE: "Modification de classe",
   CLASS_DELETE: "Suppression de classe", STUDENT_IMPORT: "Import d’élèves",
   STUDENT_CREATE: "Ajout d’élève", STUDENT_DELETE: "Suppression d’élève",
+  TEACHER_CREATE: "Ajout d’enseignant",
   ASSIGNMENT_SET: "Affectation", BACKUP: "Sauvegarde",
 };
 const TARGET_LABELS = {
@@ -137,9 +135,70 @@ function AuditRow({ a }) {
   );
 }
 
+// Class create/edit form. Level and filière are picked from the Offering table
+// rather than typed: a pair that isn't offered resolves to no books, and the
+// teacher assignment then silently falls back to an arbitrary subject.
+function ClassForm({ cls, mode, offerings, onSubmit, onCancel }) {
+  const levels = [...new Set(offerings.map((o) => o.level))];
+  const [level, setLevel] = useState(cls?.level || levels[0] || "");
+  const fieldsForLevel = offerings.filter((o) => o.level === level);
+  // Keep the filière valid whenever the level changes.
+  const [field, setField] = useState(cls?.field || "");
+  const currentField = fieldsForLevel.some((o) => o.field === field) ? field : fieldsForLevel[0]?.field || "";
+  const books = fieldsForLevel.find((o) => o.field === currentField)?.subjects || [];
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const name = e.target.name.value.trim();
+        if (!name || !level || !currentField) return;
+        onSubmit({ name, level, field: currentField });
+      }}
+    >
+      <label className="tiny muted">Nom</label>
+      <input className="input" name="name" defaultValue={cls?.name || ""} autoFocus />
+
+      <label className="tiny muted" style={{ marginTop: "10px", display: "block" }}>Niveau</label>
+      <select className="input" value={level} onChange={(e) => setLevel(e.target.value)}>
+        {levels.map((l) => (
+          <option key={l} value={l}>{l}</option>
+        ))}
+      </select>
+
+      <label className="tiny muted" style={{ marginTop: "10px", display: "block" }}>Filière</label>
+      <select className="input" value={currentField} onChange={(e) => setField(e.target.value)}>
+        {fieldsForLevel.map((o) => (
+          <option key={o.field} value={o.field}>{o.field}</option>
+        ))}
+      </select>
+
+      <div className="cls-books">
+        <span className="muted tiny">
+          {books.length ? `Manuels étudiés : ${books.join(" · ")}` : "Aucun manuel pour cette combinaison"}
+        </span>
+      </div>
+
+      <div className="row-actions" style={{ marginTop: "18px", justifyContent: "flex-end", gap: "10px" }}>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Annuler</button>
+        <button type="submit" className="btn btn-primary btn-sm" disabled={!currentField}>
+          {mode === "edit" ? "Enregistrer" : "Créer"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function AdminConsole() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // left menu auto-hides to a rail; burger pins it open
   const [tab, setTab] = useState("overview");
+
+  // Deep-link support: /admin?tab=content opens that tab directly. Lets the
+  // shared AdminSidebar (used in the Studio) link back to a specific tab.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && TABS.some((x) => x.tab === t)) setTab(t);
+  }, []);
 
   // ---- Overview ----
   const [overview, setOverview] = useState(null);
@@ -150,9 +209,20 @@ export default function AdminConsole() {
   // ---- Assignments ----
   const [assignData, setAssignData] = useState(null);
 
+  // ---- Supervisors (titulaires) ----
+  const [supervisors, setSupervisors] = useState(null);
+
+  // ---- Teacher directory (Enseignants tab) ----
+  const [teacherDir, setTeacherDir] = useState(null);
+
+  // ---- Pedagogy (oversight) ----
+  const [pedagogy, setPedagogy] = useState(null);
+
   // ---- Classes ----
   const [classes, setClasses] = useState([]);
   const [classesLoaded, setClassesLoaded] = useState(false);
+  // Valid (level, field) pairs + the books each studies — constrains the class form.
+  const [offerings, setOfferings] = useState([]);
   const [clsFilter, setClsFilter] = useState("");
 
   // ---- Students ----
@@ -198,10 +268,31 @@ export default function AdminConsole() {
       .catch(() => {});
   }, []);
 
+  const loadSupervisors = useCallback(() => {
+    api("/api/admin/supervisors/")
+      .then((d) => d && setSupervisors(d))
+      .catch(() => {});
+  }, []);
+
+  const loadTeachers = useCallback(() => {
+    api("/api/admin/teachers/")
+      .then((d) => d && setTeacherDir(d))
+      .catch(() => {});
+  }, []);
+
+  const loadPedagogy = useCallback(() => {
+    api("/api/admin/pedagogy/")
+      .then((d) => d && setPedagogy(d))
+      .catch(() => {});
+  }, []);
+
   const loadClasses = useCallback(() => {
     api("/api/admin/classes/")
       .then((d) => {
-        if (d) setClasses(d.classes || []);
+        if (d) {
+          setClasses(d.classes || []);
+          setOfferings(d.offerings || []);
+        }
       })
       .catch(() => {})
       .finally(() => setClassesLoaded(true));
@@ -246,6 +337,9 @@ export default function AdminConsole() {
   useEffect(() => {
     if (tab === "approvals") loadApprovals();
     if (tab === "assign" && !assignData) loadAssignments();
+    if (tab === "supervisors" && !supervisors) loadSupervisors();
+    if (tab === "teachers" && !teacherDir) loadTeachers();
+    if (tab === "pedagogy" && !pedagogy) loadPedagogy();
     if (tab === "classes" && !classesLoaded) loadClasses();
     if (tab === "students" && !studentsLoaded) loadStudents("", "");
     if (tab === "system" && !health) loadHealth();
@@ -253,33 +347,91 @@ export default function AdminConsole() {
   }, [
     tab,
     assignData,
+    supervisors,
+    loadSupervisors,
+    teacherDir,
+    loadTeachers,
+    pedagogy,
     classesLoaded,
     studentsLoaded,
     health,
     auditLoaded,
     loadApprovals,
     loadAssignments,
+    loadPedagogy,
     loadClasses,
     loadStudents,
     loadHealth,
     loadAudit,
   ]);
 
-  // --- Approvals: approve/reject pending teachers ---
-  const decideTeacher = (t, decision) => {
-    api(`/api/admin/users/${t.id}/approve/`, {
+  // --- Create a teacher account (super admin only; teachers never self-register) ---
+  const emptyTeacher = { firstName: "", lastName: "", email: "", password: "", disciplines: [] };
+  const [newTeacher, setNewTeacher] = useState(emptyTeacher);
+  const [creatingTeacher, setCreatingTeacher] = useState(false);
+  const [teacherErr, setTeacherErr] = useState("");
+  // Credentials of the just-created teacher, shown once so the admin can pass them on.
+  const [createdTeacher, setCreatedTeacher] = useState(null);
+  const setNT = (k) => (e) => setNewTeacher((s) => ({ ...s, [k]: e.target.value }));
+  const toggleNewTeacherDisc = (key) =>
+    setNewTeacher((s) => ({
+      ...s,
+      disciplines: s.disciplines.includes(key) ? s.disciplines.filter((d) => d !== key) : [...s.disciplines, key],
+    }));
+
+  const TEACHER_ERRORS = {
+    EMAIL_TAKEN: "Un compte avec cette adresse e-mail existe déjà.",
+    BAD_EMAIL: "Adresse e-mail invalide.",
+    WEAK_PASSWORD: "Le mot de passe doit comporter au moins 8 caractères.",
+    MISSING_FIELDS: "Prénom, nom et e-mail sont obligatoires.",
+  };
+
+  const submitNewTeacher = () => {
+    if (creatingTeacher) return;
+    setTeacherErr("");
+    setCreatingTeacher(true);
+    api("/api/admin/teachers/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ decision }),
+      body: JSON.stringify(newTeacher),
     })
       .then((r) => {
-        if (r) {
-          toast(`${t.name} ${decision === "reject" ? "rejeté(e)" : "approuvé(e)"}`, { icon: decision === "reject" ? "x" : "check" });
-          loadApprovals();
-          loadOverview();
-        }
+        if (!r) return;
+        setCreatedTeacher({ ...r.teacher, password: r.password });
+        setNewTeacher(emptyTeacher);
+        toast(`Compte créé : ${r.teacher.name}`, { icon: "check" });
+        loadOverview();
+        loadTeachers();
       })
-      .catch(() => toast("Impossible de mettre à jour la demande", { icon: "alert" }));
+      .catch((e) => setTeacherErr(TEACHER_ERRORS[e.message] || "Impossible de créer le compte."))
+      .finally(() => setCreatingTeacher(false));
+  };
+
+  // --- Enseignants: assignment editor (PUTs to /assign, refreshes the directory) ---
+  const putTeacherAssign = (payload) =>
+    api("/api/admin/teachers/assign/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((r) => { if (r) setTeacherDir(r); return r; })
+      .catch(() => { toast("Impossible de mettre à jour l’affectation", { icon: "alert" }); loadTeachers(); });
+
+  const toggleTeacherSubject = (teacher, cls, subject, on) =>
+    putTeacherAssign({ teacherId: teacher.id, classId: cls.id, subjectSlug: subject.slug, on }).then((r) => {
+      if (r) toast(`${on ? "Affecté" : "Retiré"} : ${teacher.name} · ${cls.name} · ${subject.name}`, { icon: on ? "check" : "x" });
+    });
+
+  const toggleTeacherLead = (teacher, cls, isLead) =>
+    putTeacherAssign({ classId: cls.id, teacherId: isLead ? null : teacher.id, lead: true }).then((r) => {
+      if (r) toast(isLead ? `Titulaire retiré · ${cls.name}` : `Titulaire : ${teacher.name} · ${cls.name}`, { icon: isLead ? "x" : "check" });
+    });
+
+  const toggleTeacherDiscipline = (teacher, key) => {
+    const next = teacher.disciplines.includes(key) ? teacher.disciplines.filter((d) => d !== key) : [...teacher.disciplines, key];
+    putTeacherAssign({ teacherId: teacher.id, disciplines: next }).then((r) => {
+      if (r) toast(`Matières mises à jour : ${teacher.name}`, { icon: "check" });
+    });
   };
 
   // --- Invite codes: generate/regenerate a class self-enrollment code ---
@@ -329,6 +481,49 @@ export default function AdminConsole() {
       });
   };
 
+  // --- Supervisors: set/clear a class's single titulaire ---
+  const setSupervisor = (cls, teacherId) => {
+    api("/api/admin/supervisors/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId: cls.id, teacherId: teacherId || null }),
+    })
+      .then((r) => {
+        if (r) {
+          setSupervisors(r);
+          const name = teacherId ? r.teachers.find((t) => t.id === teacherId)?.name || "" : null;
+          toast(teacherId ? `Titulaire défini : ${name} · ${cls.name}` : `Titulaire retiré · ${cls.name}`, {
+            icon: teacherId ? "check" : "x",
+          });
+        }
+      })
+      .catch(() => {
+        toast("Impossible de mettre à jour le titulaire", { icon: "alert" });
+        loadSupervisors();
+      });
+  };
+
+  // --- Set what a teacher teaches (discipline) → re-resolves their books ---
+  const toggleDiscipline = (teacher, key) => {
+    const cur = teacher.disciplines || [];
+    const next = cur.includes(key) ? cur.filter((d) => d !== key) : [...cur, key];
+    api("/api/admin/assignments/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ teacherId: teacher.id, disciplines: next }),
+    })
+      .then((r) => {
+        if (r) {
+          setAssignData(r);
+          toast(`Matière mise à jour : ${teacher.firstName} ${teacher.lastName}`, { icon: "check" });
+        }
+      })
+      .catch(() => {
+        toast("Impossible de mettre à jour la matière", { icon: "alert" });
+        loadAssignments();
+      });
+  };
+
   // --- Classes CRUD ---
   const submitAddClass = (name, level, field) => {
     api("/api/admin/classes/", {
@@ -346,6 +541,8 @@ export default function AdminConsole() {
       .catch((e) => {
         if (e.status === 409 || (e.body && e.body.error === "DUPLICATE"))
           toast("Une classe portant ce nom existe déjà", { icon: "alert" });
+        else if (e.body?.error === "BAD_OFFERING")
+          toast("Cette combinaison niveau / filière n’étudie aucun manuel", { icon: "alert" });
         else toast("Impossible de créer la classe", { icon: "alert" });
       });
   };
@@ -363,7 +560,11 @@ export default function AdminConsole() {
           loadClasses();
         }
       })
-      .catch(() => toast("Impossible de mettre à jour la classe", { icon: "alert" }));
+      .catch((e) => {
+        if (e.body?.error === "BAD_OFFERING")
+          toast("Cette combinaison niveau / filière n’étudie aucun manuel", { icon: "alert" });
+        else toast("Impossible de mettre à jour la classe", { icon: "alert" });
+      });
   };
 
   const deleteClass = (c) => {
@@ -513,7 +714,7 @@ export default function AdminConsole() {
   };
 
   // --- Derived ---
-  const pendingCount = (approvals?.teachers?.length || 0) + (approvals?.pinResets?.length || 0);
+  const pendingCount = approvals?.pinResets?.length || 0;
   const kpis = overview?.kpis || {};
   const ovHealth = overview?.health || {};
   const recent = overview?.recent || [];
@@ -535,45 +736,8 @@ export default function AdminConsole() {
   };
 
   return (
-    <div className={`t-app admin-page ${collapsed ? "collapsed" : ""}`.trim()}>
-      <aside className="t-side">
-        <div className="t-side-top">
-          <BrandMark />
-          <span className="nm">Mwalimu</span>
-        </div>
-        <nav className="t-nav">
-          <span className="grouplabel">Administration</span>
-          {TABS.map((n) => (
-            <a
-              key={n.tab}
-              href="#"
-              className={tab === n.tab ? "active" : ""}
-              onClick={(e) => {
-                e.preventDefault();
-                showTab(n.tab);
-              }}
-            >
-              <Icon name={n.ic} />
-              <span className="lbl">{n.lbl}</span>
-              {n.tab === "approvals" && pendingCount > 0 ? (
-                <span className="nav-badge">{pendingCount}</span>
-              ) : null}
-            </a>
-          ))}
-        </nav>
-        <div className="t-side-foot">
-          <div className="t-userbox">
-            <Avatar name="Super administrateur" size="avatar-sm" />
-            <a className="meta" href="/profile/" style={{ textDecoration: "none", color: "inherit" }}>
-              <div className="un">Super administrateur</div>
-              <div className="ur">Super administrateur</div>
-            </a>
-            <a className="lo" href="/api/auth/logout/" title="Se déconnecter">
-              <Icon name="logout" />
-            </a>
-          </div>
-        </div>
-      </aside>
+    <div className={`t-app teacher-page admin-page ${collapsed ? "collapsed" : ""}`.trim()}>
+      <AdminSidebar active={tab} onSelect={showTab} pendingCount={pendingCount} />
 
       <div className="t-main">
         <header className="t-top">
@@ -599,15 +763,21 @@ export default function AdminConsole() {
         </header>
 
         <div className="t-content">
-          <div className="adm-tabs">
+          <div className="adm-tabs" role="tablist">
             {TABS.map((t) => (
-              <div
+              <button
                 key={t.tab}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.tab}
+                title={t.lbl}
                 className={`adm-tab ${tab === t.tab ? "active" : ""}`.trim()}
                 onClick={() => showTab(t.tab)}
               >
-                <Icon name={t.ic} /> {t.lbl}
-              </div>
+                <Icon name={t.ic} />
+                <span className="adm-tab-lbl">{t.lbl}</span>
+                {t.tab === "approvals" && pendingCount > 0 ? <span className="adm-tab-badge">{pendingCount}</span> : null}
+              </button>
             ))}
           </div>
 
@@ -718,42 +888,11 @@ export default function AdminConsole() {
           <div className={`adm-panel ${tab === "approvals" ? "active" : ""}`.trim()}>
             <div className="sec-h">
               <div>
-                <h2>Approbations en attente</h2>
+                <h2>Approbations</h2>
                 <div className="sub">
-                  Approuvez les enseignants inscrits eux-mêmes et répondez aux demandes de réinitialisation du code PIN des élèves.
+                  Répondez aux demandes de réinitialisation du code PIN des élèves. Les comptes enseignants se gèrent dans l’onglet « Enseignants ».
                 </div>
               </div>
-            </div>
-
-            <div className="card panel" style={{ marginBottom: "22px" }}>
-              <div className="panel-head">
-                <h3><Icon name="user" /> Inscriptions des enseignants</h3>
-              </div>
-              {(approvals?.teachers || []).length === 0 ? (
-                <p className="muted" style={{ padding: "20px", textAlign: "center" }}>
-                  {approvals ? "Aucun enseignant en attente d’approbation" : "Chargement…"}
-                </p>
-              ) : (
-                approvals.teachers.map((t) => (
-                  <div className="hrow" key={t.id}>
-                    <span className="hl">
-                      <span className="avatar avatar-sm" style={{ background: avatarColor(t.name), marginRight: 10 }}>
-                        {initials(t.name)}
-                      </span>
-                      {t.name} <span className="muted" style={{ marginLeft: 6 }}>{t.email}</span>
-                    </span>
-                    <span className="row" style={{ gap: "8px" }}>
-                      <span className="muted tiny">{relTime(t.createdAt)}</span>
-                      <button className="btn btn-primary btn-sm" onClick={() => decideTeacher(t, "approve")}>
-                        <Icon name="check" /> Approuver
-                      </button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => decideTeacher(t, "reject")}>
-                        <Icon name="x" /> Rejeter
-                      </button>
-                    </span>
-                  </div>
-                ))
-              )}
             </div>
 
             <div className="card panel">
@@ -783,6 +922,128 @@ export default function AdminConsole() {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+
+          {/* ENSEIGNANTS — create teachers + assign their subjects/classes */}
+          <div className={`adm-panel ${tab === "teachers" ? "active" : ""}`.trim()}>
+            <div className="sec-h">
+              <div>
+                <h2>Enseignants</h2>
+                <div className="sub">Créez les comptes enseignants et affectez-leur leurs matières et classes.</div>
+              </div>
+            </div>
+
+            <div className="card panel" style={{ marginBottom: "22px" }}>
+              <div className="panel-head">
+                <h3><Icon name="user" /> Créer un enseignant</h3>
+              </div>
+              {createdTeacher ? (
+                <div className="new-teacher-done">
+                  <p>Compte créé pour <b>{createdTeacher.name}</b> ({createdTeacher.email}).</p>
+                  <p className="muted tiny">
+                    Mot de passe temporaire — notez-le maintenant, il ne sera plus affiché. L’enseignant devra le changer à sa première connexion.
+                  </p>
+                  <div className="temp-pass"><code>{createdTeacher.password}</code></div>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setCreatedTeacher(null)}>Créer un autre enseignant</button>
+                </div>
+              ) : (
+                <div className="new-teacher-form">
+                  <div className="nt-grid">
+                    <input className="input" placeholder="Prénom" value={newTeacher.firstName} onChange={setNT("firstName")} />
+                    <input className="input" placeholder="Nom" value={newTeacher.lastName} onChange={setNT("lastName")} />
+                    <input className="input" type="email" placeholder="nom@mwalimu.school" value={newTeacher.email} onChange={setNT("email")} />
+                    <input
+                      className="input"
+                      type="text"
+                      placeholder="Mot de passe (laisser vide = généré)"
+                      value={newTeacher.password}
+                      onChange={setNT("password")}
+                      onKeyDown={(e) => { if (e.key === "Enter") submitNewTeacher(); }}
+                    />
+                  </div>
+                  <div className="ht-disc">
+                    <span className="muted tiny">Matière enseignée :</span>
+                    <div className="disc-chips">
+                      {(teacherDir?.disciplines || []).map((d) => (
+                        <button
+                          key={d.key}
+                          className={`disc-chip ${newTeacher.disciplines.includes(d.key) ? "on" : ""}`.trim()}
+                          onClick={() => toggleNewTeacherDisc(d.key)}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {teacherErr && <p className="muted tiny" style={{ color: "var(--red-600, #dc2626)" }}>{teacherErr}</p>}
+                  <button className="btn btn-primary btn-sm" onClick={submitNewTeacher} disabled={creatingTeacher}>
+                    <Icon name="check" /> {creatingTeacher ? "Création…" : "Créer l’enseignant"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Enseignant</th>
+                    <th>Matières</th>
+                    <th>Classes &amp; affectations</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(teacherDir?.teachers || []).map((t) => (
+                    <tr key={t.id}>
+                      <td>
+                        <div className="cell-name">
+                          <span className="avatar avatar-sm" style={{ background: t.avatarColor || avatarColor(t.name) }}>{initials(t.name)}</span>
+                          <div>
+                            <span className="nm">{t.name}{t.isActive ? "" : " (désactivé)"}</span>
+                            <div className="muted tiny">{t.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="disc-chips">
+                          {t.disciplines.length
+                            ? t.disciplines.map((key) => {
+                                const d = (teacherDir?.disciplines || []).find((x) => x.key === key);
+                                return <span key={key} className="disc-chip on">{d?.label || key}</span>;
+                              })
+                            : <span className="muted tiny">—</span>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="sup-teachers">
+                          {t.assignments.length
+                            ? t.assignments.map((a) => (
+                                <span key={a.classId} className={`sup-chip ${a.isLead ? "lead" : ""}`.trim()}>
+                                  {a.isLead ? <Icon name="check" /> : null}
+                                  {a.className}{a.subjects.length ? ` · ${a.subjects.map((s) => s.name).join(", ")}` : ""}
+                                </span>
+                              ))
+                            : <span className="muted tiny">Aucune affectation</span>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <button className="btn btn-secondary btn-sm" onClick={() => setModal({ type: "teacherAssign", teacherId: t.id })}>
+                            <Icon name="layers" /> Affecter
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {teacherDir && teacherDir.teachers.length === 0 ? (
+                    <tr>
+                      <td className="muted" colSpan={4} style={{ textAlign: "center", padding: "20px" }}>Aucun enseignant — créez-en un ci-dessus.</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -821,7 +1082,21 @@ export default function AdminConsole() {
                             </span>
                             <div>
                               <div className="nm">{tName}</div>
-                              <div className="sj">Enseignant</div>
+                              <div className="disc-chips">
+                                {(assignData?.disciplines || []).map((d) => {
+                                  const active = (t.disciplines || []).includes(d.key);
+                                  return (
+                                    <button
+                                      key={d.key}
+                                      className={`disc-chip ${active ? "on" : ""}`.trim()}
+                                      onClick={() => toggleDiscipline(t, d.key)}
+                                      title={active ? `Retirer ${d.label}` : `Enseigne ${d.label}`}
+                                    >
+                                      {d.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -855,6 +1130,105 @@ export default function AdminConsole() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* TITULAIRES — class-centric supervisor management */}
+          <div className={`adm-panel ${tab === "supervisors" ? "active" : ""}`.trim()}>
+            <div className="sec-h">
+              <div>
+                <h2>Titulaires de classe</h2>
+                <div className="sub">
+                  Chaque classe a un enseignant titulaire (superviseur). Seules les classes avec un titulaire apparaissent à la connexion des élèves.
+                </div>
+              </div>
+            </div>
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Élèves</th>
+                    <th>Titulaire</th>
+                    <th>Connexion élèves</th>
+                    <th>Enseignants</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(supervisors?.classes || []).map((c) => (
+                    <tr key={c.id}>
+                      <td>
+                        <div className="cell-name"><span className="nm">{c.name}</span></div>
+                        <div className="muted" style={{ fontSize: "12px" }}>
+                          {[c.level, c.field].filter(Boolean).join(" · ") || "—"}
+                        </div>
+                      </td>
+                      <td><span className="badge">{c.studentCount ?? 0}</span></td>
+                      <td>
+                        <select
+                          className="input sup-select"
+                          value={c.supervisorId || ""}
+                          onChange={(e) => setSupervisor(c, e.target.value)}
+                        >
+                          <option value="">— Aucun —</option>
+                          {(supervisors?.teachers || []).map((t) => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        {c.supervisorId ? (
+                          <span className="sup-status ok"><Icon name="check" /> Visible</span>
+                        ) : (
+                          <span className="sup-status off"><Icon name="eye" /> Masquée</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="sup-teachers">
+                          {c.teachers.length ? (
+                            c.teachers.map((t) => (
+                              <span key={t.id} className={`sup-chip ${t.id === c.supervisorId ? "lead" : ""}`.trim()}>
+                                {t.id === c.supervisorId ? <Icon name="check" /> : null}
+                                {t.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="muted">Aucun</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {supervisors && supervisors.classes.length === 0 ? (
+                    <tr>
+                      <td className="muted" colSpan={5} style={{ textAlign: "center", padding: "20px" }}>
+                        Aucune classe
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* CONTENU — books/subjects/modules/lessons authoring */}
+          <div className={`adm-panel ${tab === "content" ? "active" : ""}`.trim()}>
+            <AdminContentPanel active={tab === "content"} />
+          </div>
+
+          {/* LIAISONS — book ↔ class-section links (Offerings) */}
+          <div className={`adm-panel ${tab === "offerings" ? "active" : ""}`.trim()}>
+            {tab === "offerings" && (
+              <div className="acp teacher-page">
+                <div className="acp-banner">
+                  <Icon name="info" />
+                  <span>
+                    Reliez chaque livre aux sections (niveau · filière) qui l’étudient. Chaque classe hérite des livres de sa section.
+                    Avant de détacher un livre, vérifiez les enseignants déjà affectés.
+                  </span>
+                </div>
+                <BookClassLinks />
+              </div>
+            )}
           </div>
 
           {/* CLASSES */}
@@ -1360,6 +1734,10 @@ export default function AdminConsole() {
               </div>
             </div>
           </div>
+
+          <div className={`adm-panel ${tab === "pedagogy" ? "active" : ""}`.trim()}>
+            <PedagogyPanel data={pedagogy} />
+          </div>
         </div>
       </div>
 
@@ -1370,37 +1748,16 @@ export default function AdminConsole() {
             <div className="modal-head">
               <h2>{modal.mode === "edit" ? "Modifier la classe" : "Nouvelle classe"}</h2>
             </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const f = e.target;
-                const name = f.name.value.trim();
-                const level = f.level.value.trim();
-                const field = f.field.value.trim();
-                if (!name) return;
+            <ClassForm
+              cls={modal.cls}
+              mode={modal.mode}
+              offerings={offerings}
+              onCancel={() => setModal(null)}
+              onSubmit={({ name, level, field }) => {
                 if (modal.mode === "edit") submitEditClass(modal.cls.id, name, level, field);
                 else submitAddClass(name, level, field);
               }}
-            >
-              <label className="tiny muted">Nom</label>
-              <input className="input" name="name" defaultValue={modal.cls?.name || ""} autoFocus />
-              <label className="tiny muted" style={{ marginTop: "10px", display: "block" }}>
-                Niveau
-              </label>
-              <input className="input" name="level" defaultValue={modal.cls?.level || ""} />
-              <label className="tiny muted" style={{ marginTop: "10px", display: "block" }}>
-                Filière
-              </label>
-              <input className="input" name="field" defaultValue={modal.cls?.field || ""} />
-              <div className="row-actions" style={{ marginTop: "18px", justifyContent: "flex-end", gap: "10px" }}>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setModal(null)}>
-                  Annuler
-                </button>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  {modal.mode === "edit" ? "Enregistrer" : "Créer"}
-                </button>
-              </div>
-            </form>
+            />
           </div>
         </div>
       ) : null}
@@ -1507,6 +1864,181 @@ export default function AdminConsole() {
           </div>
         </div>
       ) : null}
+
+      {modal?.type === "teacherAssign" ? (() => {
+        const t = (teacherDir?.teachers || []).find((x) => x.id === modal.teacherId);
+        if (!t) return null;
+        const assignedByClass = new Map(
+          t.assignments.map((a) => [a.classId, { subjects: new Set(a.subjects.map((s) => s.slug)), isLead: a.isLead }]),
+        );
+        const discSet = new Set(t.disciplines);
+        const rows = (teacherDir?.classes || [])
+          .map((c) => ({ ...c, teach: c.subjects.filter((s) => discSet.has(s.family)) }))
+          .filter((c) => c.teach.length > 0);
+        return (
+          <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
+            <div className="modal" style={{ width: "min(560px, 100%)" }}>
+              <div className="modal-head">
+                <div>
+                  <h2>Affecter {t.name}</h2>
+                  <div className="sub">{t.email}</div>
+                </div>
+                <button className="icon-x" onClick={() => setModal(null)}><Icon name="x" /></button>
+              </div>
+
+              <div className="field" style={{ marginTop: "6px" }}>
+                <label>Matières enseignées</label>
+                <div className="disc-chips">
+                  {(teacherDir?.disciplines || []).map((d) => (
+                    <button
+                      key={d.key}
+                      className={`disc-chip ${t.disciplines.includes(d.key) ? "on" : ""}`.trim()}
+                      onClick={() => toggleTeacherDiscipline(t, d.key)}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="ta-list">
+                {rows.length === 0 ? (
+                  <p className="muted tiny">Choisissez au moins une matière ci-dessus pour voir les classes concernées.</p>
+                ) : (
+                  rows.map((c) => {
+                    const cur = assignedByClass.get(c.id) || { subjects: new Set(), isLead: false };
+                    return (
+                      <div className="ta-row" key={c.id}>
+                        <div className="ta-head">
+                          <span className="ta-cls">
+                            {c.name} <span className="muted tiny">{[c.level, c.field].filter(Boolean).join(" · ")}</span>
+                          </span>
+                          <button
+                            className={`ta-lead ${cur.isLead ? "on" : ""}`.trim()}
+                            onClick={() => toggleTeacherLead(t, c, cur.isLead)}
+                            title="Titulaire de la classe"
+                          >
+                            <Icon name="check" /> Titulaire
+                          </button>
+                        </div>
+                        <div className="ta-subjects">
+                          {c.teach.map((s) => (
+                            <label key={s.slug} className={`ta-subj ${cur.subjects.has(s.slug) ? "on" : ""}`.trim()}>
+                              <input
+                                type="checkbox"
+                                checked={cur.subjects.has(s.slug)}
+                                onChange={(e) => toggleTeacherSubject(t, c, s, e.target.checked)}
+                              />
+                              {s.name}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="row-actions" style={{ justifyContent: "flex-end", marginTop: "16px" }}>
+                <button className="btn btn-primary btn-sm" onClick={() => setModal(null)}>Terminé</button>
+              </div>
+            </div>
+          </div>
+        );
+      })() : null}
     </div>
+  );
+}
+
+// ── Pédagogie (super-admin oversight): teacher progression, course coverage, projects ──
+const PROJ_STATUS = { PUBLISHED: { l: "Publié", c: "ok" }, DRAFT: { l: "Brouillon", c: "neutral" } };
+const barColor = (p) => (p >= 60 ? "var(--success)" : p >= 30 ? "var(--warning)" : "var(--danger)");
+
+function PedagogyPanel({ data }) {
+  if (!data) return <p className="muted" style={{ padding: 24, textAlign: "center" }}>Chargement…</p>;
+  const { teachers, programme, projects, summary } = data;
+  return (
+    <>
+      <div className="ped-summary">
+        <div className="card ped-stat"><span className="ped-stat-ic" style={{ background: "var(--indigo-100)", color: "var(--indigo-700)" }}><Icon name="user" /></span><div><div className="ped-stat-v">{summary.teacherCount}</div><div className="ped-stat-l">Enseignants actifs</div></div></div>
+        <div className="card ped-stat"><span className="ped-stat-ic" style={{ background: "var(--success-bg)", color: "var(--success-fg)" }}><Icon name="trend" /></span><div><div className="ped-stat-v">{summary.avgProgress}%</div><div className="ped-stat-l">Progression moyenne</div></div></div>
+        <div className="card ped-stat"><span className="ped-stat-ic" style={{ background: "var(--sptic-bg)", color: "var(--sptic)" }}><Icon name="layers" /></span><div><div className="ped-stat-v">{summary.projectCount}</div><div className="ped-stat-l">Projets créés</div></div></div>
+        <div className="card ped-stat"><span className="ped-stat-ic" style={{ background: "var(--warning-bg)", color: "var(--warning-fg)" }}><Icon name="check" /></span><div><div className="ped-stat-v">{summary.publishedProjects}</div><div className="ped-stat-l">Projets publiés</div></div></div>
+      </div>
+
+      <div className="ped-grid">
+        <div className="ped-col">
+          <h2 className="ped-h">Progression des enseignants</h2>
+          {teachers.length === 0 ? <div className="card panel muted">Aucun enseignant.</div> : teachers.map((t) => (
+            <div className="card ped-teacher" key={t.id}>
+              <div className="ped-teacher-head">
+                <Avatar name={t.name} size="avatar-sm" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="ped-teacher-n">{t.name}</div>
+                  <div className="ped-teacher-e">{t.email || "—"}</div>
+                </div>
+                <div className="ped-teacher-pct" style={{ color: barColor(t.avgProgress) }}>{t.avgProgress}%</div>
+              </div>
+              {t.classes.length === 0 ? <div className="ped-noclass">Aucune classe affectée</div> : (
+                <div className="ped-classes">
+                  {t.classes.map((c) => (
+                    <div className="ped-class" key={c.id}>
+                      <span className="ped-class-n">{c.name}</span>
+                      <span className="ped-bar"><span style={{ width: `${c.avgProgress}%`, background: barColor(c.avgProgress) }} /></span>
+                      <span className="ped-class-v">{c.avgProgress}%</span>
+                      <span className="ped-class-meta">{c.activeWeek}/{c.studentCount} actifs</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <h2 className="ped-h" style={{ marginTop: 22 }}>Couverture du programme</h2>
+          {programme.map((s) => (
+            <div className="card ped-subj" key={s.slug}>
+              <div className="ped-subj-head">
+                <span className="subject-tile" style={{ background: s.color ? `${s.color}1f` : "var(--indigo-50)", color: s.color || "var(--indigo-600)" }}><Icon name={s.icon || "book"} /></span>
+                <h3>{s.name}</h3>
+                <span className="ped-subj-count">{s.coveredCount}/{s.moduleCount} modules acquis · {s.studentTotal} élèves</span>
+              </div>
+              <div className="ped-mods">
+                {s.modules.map((m) => (
+                  <div className="ped-mod" key={m.id}>
+                    <span className="ped-mod-n">{m.order}</span>
+                    <span className="ped-mod-t">{m.title}</span>
+                    <span className="ped-bar"><span style={{ width: `${m.completionPct}%`, background: barColor(m.completionPct) }} /></span>
+                    <span className="ped-mod-v">{m.studentsCompleted}/{m.studentTotal}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <aside className="ped-rail">
+          <div className="card panel">
+            <div className="panel-head"><h3><Icon name="layers" /> Projets créés</h3></div>
+            {projects.length === 0 ? <p className="muted" style={{ fontSize: 13 }}>Aucun projet pour le moment.</p> : projects.map((p) => {
+              const st = PROJ_STATUS[p.status] || PROJ_STATUS.DRAFT;
+              return (
+                <div className="ped-proj" key={p.id}>
+                  <div className="ped-proj-top">
+                    <span className="ped-proj-title">{p.title}</span>
+                    <span className={`pj-pill ${st.c}`}>{st.l}</span>
+                  </div>
+                  <div className="ped-proj-meta">{p.subjectName} · {p.classLevel}{p.author ? ` · ${p.author}` : ""}</div>
+                  <div className="ped-proj-stats">
+                    <span title="Étapes"><Icon name="list" /> {p.stepCount}</span>
+                    <span title="Classes assignées"><Icon name="users" /> {p.assignedCount}</span>
+                    <span title="Rendus (notés)"><Icon name="check" /> {p.gradedCount}/{p.submissionCount}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </aside>
+      </div>
+    </>
   );
 }

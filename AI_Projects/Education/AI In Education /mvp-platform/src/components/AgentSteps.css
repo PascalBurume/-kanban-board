@@ -1,0 +1,36 @@
+/* Agent panel chrome + visible "thinking" step checklist.
+   Shared by the projects agent panel and the exercises advisor panel. */
+.ag-panel { display: flex; flex-direction: column; min-height: 100%; }
+.ag-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.ag-tabs button { flex: 1; border: 0; background: transparent; font: 600 12.5px var(--font-ui); color: var(--text-soft); padding: 11px 8px; cursor: pointer; border-bottom: 2px solid transparent; }
+.ag-tabs button.active { color: var(--indigo-700); border-bottom-color: var(--indigo-600); }
+.ag-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.ag-intro { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+/* Icons used inline in prose have no intrinsic size otherwise. */
+.ag-intro .icon svg { width: 13px; height: 13px; color: var(--indigo-600); vertical-align: -2px; }
+/* Wraps instead of pushing the long project name past the panel edge. */
+.ag-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ag-row label { font: 600 12px var(--font-ui); color: var(--text-soft); flex: none; }
+.ag-row select { flex: 1 1 120px; min-width: 0; max-width: 100%; padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 600 12.5px var(--font-ui); background: var(--surface); }
+.ag-steps { display: flex; flex-direction: column; gap: 7px; margin: 4px 0; }
+.ag-step { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text-soft); }
+.ag-step .ag-ic { width: 16px; height: 16px; flex: none; display: grid; place-items: center; margin-top: 1px; }
+.ag-step.running .ag-ic svg { width: 13px; height: 13px; color: var(--indigo-600); animation: ag-spin 0.9s linear infinite; }
+.ag-step.done .ag-ic { color: var(--success-fg, var(--success)); }
+.ag-step.done .ag-ic svg { width: 13px; height: 13px; }
+.ag-step.error .ag-ic { color: var(--danger-fg); }
+.ag-step.error .ag-ic svg { width: 13px; height: 13px; }
+.ag-step-l { font-weight: 600; color: var(--text); }
+.ag-step-d { color: var(--text-muted); font-size: 11.5px; }
+@keyframes ag-spin { to { transform: rotate(360deg); } }
+.ag-fallback { display: inline-flex; align-items: center; gap: 5px; font: 700 10px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; background: var(--warning-bg); color: var(--warning-fg); border-radius: var(--r-pill); padding: 3px 9px; align-self: flex-start; }
+.ag-group { border: 1px solid var(--border); border-radius: var(--r-md); padding: 9px 11px; background: var(--surface-2); }
+.ag-group-t { font: 600 12.5px var(--font-ui); color: var(--text); display: flex; align-items: center; gap: 6px; }
+.ag-group-m { font-size: 12px; color: var(--text-soft); margin-top: 3px; }
+.ag-group-r { font-size: 11.5px; color: var(--text-muted); font-style: italic; margin-top: 3px; }
+.ag-risk { border-left: 3px solid var(--warning-fg); }
+.ag-risk.high { border-left-color: var(--danger-fg); }
+.ag-risk-pill { font: 700 9.5px var(--font-ui); text-transform: uppercase; border-radius: var(--r-pill); padding: 2px 7px; background: var(--warning-bg); color: var(--warning-fg); }
+.ag-risk.high .ag-risk-pill { background: var(--danger-bg); color: var(--danger-fg); }
+.ag-action { font-size: 12px; color: var(--text-soft); margin-top: 4px; }
+.ag-acts { display: flex; gap: 8px; flex-wrap: wrap; }

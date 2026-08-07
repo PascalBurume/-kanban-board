@@ -1,8 +1,80 @@
 /* ============================================================
    Mwalimu — Teacher / Admin app shell
    ============================================================ */
+
+/* ---- Warm "paper" theme — scoped to the teacher area only ----
+   Re-tints the neutral ramp toward warm paper (per the teacher design
+   handoff) while leaving the indigo brand + semantic status colours
+   untouched. Student-facing pages keep the cool slate palette. */
+.teacher-page {
+  --bg: #f7f6f2;
+  --bg-soft: #f1efe8;
+  --surface: #ffffff;
+  --surface-2: #faf9f5;
+  --border: #e7e4dc;
+  --border-strong: #d8d4ca;
+
+  --text: #1c1c1e;
+  --text-soft: #5b5852;
+  --text-muted: #908c83;
+
+  /* Warm the slate ramp the shell/table/hover states pull from so they
+     read as paper, not cool grey. */
+  --slate-50:  #faf9f5;
+  --slate-100: #f1efe8;
+  --slate-200: #e7e4dc;
+  --slate-300: #dcd8cf;
+
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* Sidebar reads as a warm panel, not white. */
+.teacher-page .t-side { background: #f1efe8; border-right-color: #e6e2d8; }
+.teacher-page .t-nav a.active { background: #ecebfb; color: var(--indigo-700); }
+.teacher-page .t-nav a:hover { background: #e9e6dd; }
+.teacher-page .t-userbox:hover { background: #e9e6dd; }
+.teacher-page .t-side-foot { border-top-color: #e6e2d8; }
+
+/* Top bar over warm paper. */
+.teacher-page .t-top { background: rgba(247,246,242,.85); border-bottom-color: #e7e4dc; }
+
+/* KPI/stat cards take the subtle cream surface from the handoff. */
+.teacher-page .kpi { background: var(--surface-2); border-color: #e9e7e0; }
+.teacher-page .kpi:hover { background: var(--surface); border-color: var(--border-strong); }
+
+/* Table header band + row hover on the warm ramp. */
+.teacher-page table.tbl th { background: #faf9f5; }
+.teacher-page table.tbl tbody tr:hover { background: #faf9f5; }
+.teacher-page table.tbl tbody tr.selected { background: #f7f6ff; }
+
 .t-app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
 .t-app.collapsed { grid-template-columns: 76px 1fr; }
+
+/* ---- Auto-hide left menu ----
+   When collapsed, the sidebar becomes a slim icon rail that expands on hover as
+   an OVERLAY. The shell switches from grid to block + padding-left so the main
+   content keeps its place (the fixed rail is out of flow — grid columns would
+   otherwise swallow .t-main into the 76px track). Burger pins it open.
+   Shared by every shell using .t-app/.t-side (teacher + admin). */
+.t-app.collapsed { display: block; padding-left: 76px; }
+.t-app.collapsed .t-side {
+  position: fixed; top: 0; left: 0; width: 76px; height: 100vh;
+  z-index: 50; overflow: hidden;
+  border-right: 1px solid var(--border);
+  transition: width .2s cubic-bezier(.4, 0, .2, 1), box-shadow .2s ease;
+}
+.t-app.collapsed .t-side:hover { width: 248px; box-shadow: 0 18px 50px rgba(20, 20, 40, .18); }
+/* reveal the full menu while hovering the rail (overrides the collapsed hides) */
+.t-app.collapsed .t-side:hover .t-side-top .nm,
+.t-app.collapsed .t-side:hover .t-nav .grouplabel,
+.t-app.collapsed .t-side:hover .t-nav a span.lbl,
+.t-app.collapsed .t-side:hover .t-nav a .pill,
+.t-app.collapsed .t-side:hover .t-userbox .meta,
+.t-app.collapsed .t-side:hover .t-userbox .lo { display: revert; }
+.t-app.collapsed .t-side:hover .t-nav a { justify-content: flex-start; }
+/* keep rows from wrapping mid-transition */
+.t-app.collapsed .t-side .t-nav a, .t-app.collapsed .t-side .t-side-top { white-space: nowrap; }
 
 /* ---- Sidebar ---- */
 .t-side { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
@@ -35,17 +107,67 @@
 /* ---- Main ---- */
 .t-main { display: flex; flex-direction: column; min-width: 0; }
 .t-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 28px; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 30; }
-.t-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.t-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1 1 auto; }
 .t-burger { background: none; border: 1px solid var(--border); border-radius: var(--r-sm); width: 38px; height: 38px; display: grid; place-items: center; cursor: pointer; color: var(--text-soft); flex: none; }
 .t-burger:hover { background: var(--slate-50); }
 .t-burger svg { width: 18px; height: 18px; }
-.t-crumb { font-size: 13px; color: var(--text-muted); }
-.t-crumb b { color: var(--text); font-family: var(--font-head); font-weight: 600; font-size: 19px; display: block; letter-spacing: -.01em; }
-.t-top-right { display: flex; align-items: center; gap: 12px; }
+.t-crumb { font-size: 13px; color: var(--text-muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-crumb-eyebrow { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-crumb b { color: var(--text); font-family: var(--font-head); font-weight: 600; font-size: 19px; display: block; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-top-right { display: flex; align-items: center; gap: 12px; flex: none; }
 .t-iconbtn { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; color: var(--text-soft); }
 .t-iconbtn:hover { background: var(--slate-50); color: var(--text); }
 .t-iconbtn svg { width: 19px; height: 19px; }
 .t-iconbtn .dot-badge { position: absolute; top: 7px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid var(--surface); }
+
+/* Narrow widths: the status pill is decorative, drop it so the crumb and
+   actions never collide; tighten header padding to buy room. */
+@media (max-width: 960px) {
+  .t-top { padding: 12px 18px; gap: 12px; }
+  .t-top .offline-pill { display: none; }
+}
+
+/* Scrim behind the mobile drawer (hidden on desktop). */
+.t-scrim { display: none; }
+
+/* ---------- Mobile: the sidebar becomes an off-canvas drawer ----------
+   A 248px (or even 76px) rail wastes a phone screen. Below 860px the shell is a
+   single full-width column and the sidebar slides over it, toggled by the burger.
+   The shell starts collapsed on phones (set in TeacherShell), so collapsed = hidden
+   and not-collapsed = open. */
+@media (max-width: 860px) {
+  .t-app, .t-app.collapsed { display: block; padding-left: 0; }
+  .t-side, .t-app.collapsed .t-side {
+    position: fixed; top: 0; left: 0; width: min(286px, 84vw); height: 100dvh;
+    z-index: 80; overflow-y: auto; transform: translateX(-100%);
+    transition: transform .25s cubic-bezier(.4, 0, .2, 1);
+    box-shadow: 0 20px 60px rgba(20, 20, 40, .28);
+  }
+  .t-app:not(.collapsed) .t-side { transform: translateX(0); }
+  /* Disable the desktop hover-rail; always show full labels inside the drawer. */
+  .t-app.collapsed .t-side:hover { width: min(286px, 84vw); }
+  .t-app .t-side-top .nm,
+  .t-app .t-nav .grouplabel,
+  .t-app .t-nav a span.lbl,
+  .t-app .t-nav a .pill,
+  .t-app .t-userbox .meta,
+  .t-app .t-userbox .lo { display: revert; }
+  .t-app .t-nav a { justify-content: flex-start; }
+
+  .t-app:not(.collapsed) .t-scrim { display: block; position: fixed; inset: 0; z-index: 70; background: rgba(15, 23, 42, .42); }
+
+  .t-top { padding: 10px 14px; gap: 10px; }
+  .t-top .lang-toggle { display: none; }
+  .t-crumb b { font-size: 16px; }
+  /* Page action buttons in the top bar → icon-only squares so the bar never
+     overflows (their labels would otherwise push the crumb/burger off-screen). */
+  .t-top-right .btn {
+    font-size: 0; gap: 0; padding: 0;
+    width: 40px; min-width: 40px; height: 40px; justify-content: center; flex: none;
+  }
+  .t-top-right .btn svg { width: 19px; height: 19px; }
+  .t-content { padding: 18px 16px 56px; }
+}
 
 .t-content { padding: 26px 28px 60px; max-width: 1320px; width: 100%; margin: 0 auto; }
 
@@ -53,13 +175,13 @@
 .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
 @media (max-width: 1180px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 720px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
-.kpi { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
-.kpi .kt { display: flex; align-items: center; gap: 9px; }
-.kpi .kic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
-.kpi .kic svg { width: 19px; height: 19px; }
-.kpi .klabel { font-size: 12.5px; color: var(--text-soft); font-weight: 600; }
-.kpi .kval { font-family: var(--font-head); font-weight: 700; font-size: 30px; letter-spacing: -.02em; line-height: 1; }
-.kpi .kdelta { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.kpi { padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 11px; transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+.kpi .kt { display: flex; align-items: center; gap: 10px; }
+.kpi .kic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.kpi .kic svg { width: 20px; height: 20px; }
+.kpi .klabel { font-size: 12px; color: var(--text-soft); font-weight: 700; letter-spacing: .01em; }
+.kpi .kval { font-family: var(--font-head); font-weight: 700; font-size: 34px; letter-spacing: -.02em; line-height: 1; }
+.kpi .kdelta { font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 .kpi .kdelta.up { color: var(--success-fg); }
 .kpi .kdelta.down { color: var(--danger-fg); }
 .kpi .kdelta svg { width: 13px; height: 13px; }
@@ -114,8 +236,8 @@ table.tbl tbody tr.selected { background: var(--indigo-50); }
 .tg.on::after { transform: translateX(16px); }
 
 /* bulk action bar */
-.bulkbar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%); z-index: 70; background: var(--slate-900); color: #fff; border-radius: var(--r-pill); padding: 10px 12px 10px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--sh-xl); transition: transform .22s cubic-bezier(.3,.9,.3,1.2); }
-.bulkbar.show { transform: translateX(-50%) translateY(0); }
+.bulkbar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(calc(100% + 40px)); opacity: 0; pointer-events: none; z-index: 70; background: var(--slate-900); color: #fff; border-radius: var(--r-pill); padding: 10px 12px 10px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--sh-xl); transition: transform .22s cubic-bezier(.3,.9,.3,1.2), opacity .18s ease; }
+.bulkbar.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
 .bulkbar .bcount { font-weight: 600; font-size: 14px; }
 .bulkbar .bcount b { background: rgba(255,255,255,.18); border-radius: 999px; padding: 2px 9px; margin-right: 6px; }
 .bulkbar .bsep { width: 1px; height: 22px; background: rgba(255,255,255,.2); }

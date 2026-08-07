@@ -1,6 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import "../login/login.css";
 import "./register.css";
 import Icon from "@/components/ui/Icon";
@@ -12,90 +11,6 @@ function Field({ label, children }) {
       <label>{label}</label>
       {children}
     </div>
-  );
-}
-
-/* ---- Teacher sign-up ---- */
-function TeacherForm() {
-  const [f, setF] = useState({ firstName: "", lastName: "", email: "", password: "" });
-  const [err, setErr] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
-  const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
-
-  async function submit() {
-    if (busy) return;
-    setErr("");
-    setBusy(true);
-    try {
-      const res = await fetch("/api/auth/register-teacher/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(f),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) {
-        setDone(true);
-        return;
-      }
-      const map = {
-        EMAIL_TAKEN: "Un compte avec cette adresse e-mail existe déjà.",
-        WEAK_PASSWORD: "Le mot de passe doit comporter au moins 8 caractères.",
-        BAD_EMAIL: "Veuillez saisir une adresse e-mail valide.",
-        MISSING_FIELDS: "Veuillez remplir tous les champs.",
-      };
-      setErr(map[data.error] || "Impossible de créer votre compte. Réessayez.");
-    } catch {
-      setErr("Problème de connexion. Réessayez.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (done) {
-    return (
-      <div className="reg-done">
-        <div className="ok-ring"><Icon name="check" /></div>
-        <h2>Demande reçue</h2>
-        <p className="muted">
-          Votre compte enseignant est en attente d’approbation par l’administrateur. Vous pourrez
-          vous connecter une fois qu’il sera approuvé.
-        </p>
-        <a className="btn btn-primary btn-block btn-lg" href="/login/">Retour à la connexion</a>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="step-head">
-        <div className="step-eyebrow">Enseignants</div>
-        <h2>Créez votre compte enseignant</h2>
-        <p>Un administrateur approuve les nouveaux comptes enseignants avant la première connexion.</p>
-      </div>
-      <div className="reg-grid">
-        <Field label="Prénom">
-          <input className="input" value={f.firstName} onChange={set("firstName")} autoComplete="given-name" />
-        </Field>
-        <Field label="Nom">
-          <input className="input" value={f.lastName} onChange={set("lastName")} autoComplete="family-name" />
-        </Field>
-      </div>
-      <Field label="E-mail">
-        <input className="input" type="email" placeholder="nom@mwalimu.school" value={f.email} onChange={set("email")} autoComplete="email" />
-      </Field>
-      <Field label="Mot de passe">
-        <input className="input" type="password" placeholder="Au moins 8 caractères" value={f.password} onChange={set("password")} autoComplete="new-password"
-          onKeyDown={(e) => { if (e.key === "Enter") submit(); }} />
-      </Field>
-      {err && <div className="reg-err"><Icon name="alert" /> {err}</div>}
-      <button className="btn btn-primary btn-block btn-lg" style={{ marginTop: 16 }} onClick={submit} disabled={busy}>
-        {busy ? "Création…" : <>Demander un compte <Icon name="arrowR" /></>}
-      </button>
-      <div className="reg-foot">
-        Vous avez déjà un compte ? <a href="/login/">Se connecter</a>
-      </div>
-    </>
   );
 }
 
@@ -178,10 +93,8 @@ function StudentForm() {
   );
 }
 
-function RegisterInner() {
-  const params = useSearchParams();
-  const role = params.get("role") === "teacher" ? "teacher" : "student";
-
+// Only students self-enroll; teacher accounts are created by the super admin.
+export default function RegisterPage() {
   return (
     <div className="login-page">
       <div className="login-root" data-layout="split">
@@ -205,26 +118,14 @@ function RegisterInner() {
         <section className="content-side">
           <div className="content-top">
             <div className="mini-brand"><BrandMark /> Mwalimu</div>
-            <div className="reg-switch">
-              <a className={role === "student" ? "active" : ""} href="/register/?role=student">Élève</a>
-              <a className={role === "teacher" ? "active" : ""} href="/register/?role=teacher">Enseignant</a>
-            </div>
           </div>
           <div className="content-stage">
             <div className="step-card">
-              {role === "teacher" ? <TeacherForm /> : <StudentForm />}
+              <StudentForm />
             </div>
           </div>
         </section>
       </div>
     </div>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense fallback={null}>
-      <RegisterInner />
-    </Suspense>
   );
 }

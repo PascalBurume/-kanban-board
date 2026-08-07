@@ -41,6 +41,9 @@ export default function ProfilePage() {
   }, []);
 
   const isStudent = user?.role === "STUDENT";
+  // Teachers cannot change their own password — it is set and reset by the
+  // administrator. Students manage their PIN and admins their own password.
+  const canChangeCredential = user?.role !== "TEACHER";
 
   async function saveProfile() {
     if (saving) return;
@@ -102,7 +105,7 @@ export default function ProfilePage() {
       <div className="profile-top">
         <a className="back-link" href={homeFor(user.role)}><Icon name="chevL" /> Retour</a>
         <div className="mini-brand"><BrandMark /> Mwalimu</div>
-        <a className="back-link" href="/api/auth/logout/">Se déconnecter <Icon name="logout" /></a>
+        <a className="logout-link" href="/api/auth/logout/"><Icon name="logout" /> Se déconnecter</a>
       </div>
 
       <div className="profile-wrap">
@@ -154,6 +157,7 @@ export default function ProfilePage() {
           </button>
         </section>
 
+        {canChangeCredential && (
         <section className="profile-card">
           <h2>{isStudent ? "Changer votre code PIN" : "Changer votre mot de passe"}</h2>
           <div className="field">
@@ -192,6 +196,13 @@ export default function ProfilePage() {
             {credBusy ? "Mise à jour…" : isStudent ? "Mettre à jour le code PIN" : "Mettre à jour le mot de passe"}
           </button>
         </section>
+        )}
+
+        {user.role === "TEACHER" && (
+          <p className="profile-note">
+            <Icon name="lock" /> Votre mot de passe est géré par l’administrateur. Contactez-le pour le réinitialiser.
+          </p>
+        )}
       </div>
     </div>
   );

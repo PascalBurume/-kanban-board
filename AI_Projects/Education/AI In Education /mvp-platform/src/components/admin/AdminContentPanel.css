@@ -1,0 +1,147 @@
+/* Admin « Contenu » — teacher warm-paper theme (matches .teacher-page in
+   src/styles/teacher.css) applied inside the cool admin console. */
+
+.acp { background: transparent; min-height: auto; }
+
+/* info banner — same warm treatment as the studio's .ed-readonly */
+.acp-banner { display: flex; align-items: flex-start; gap: 10px; padding: 11px 16px; background: #faf9f5; border: 1px solid #e7e4dc; border-radius: var(--r-md); color: #5b5852; font-size: 13px; line-height: 1.45; margin-bottom: 18px; }
+.acp-banner svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--indigo-600); }
+
+/* ── « Livres ↔ Classes » — Offering links diagram ── */
+.acp-links { background: #fff; border: 1px solid #e7e4dc; border-radius: var(--r-lg); padding: 16px 20px 18px; box-shadow: var(--sh-xs); margin-bottom: 18px; }
+.acp-links-diagram { display: grid; grid-template-columns: 280px 1fr 280px; gap: 0; }
+.acp-links-col { display: flex; flex-direction: column; gap: 8px; }
+.acp-links-node { display: flex; align-items: center; gap: 10px; height: 56px; background: #faf9f5; border: 1px solid #e7e4dc; border-radius: var(--r-md); padding: 8px 12px; }
+.acp-links-node.sec { justify-content: space-between; }
+.acp-links-node .acp-book-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; display: block; }
+.acp-links-svg { width: 100%; display: block; }
+.acp-links-svg path:hover { stroke-opacity: 1; }
+.acp-links-attach { display: inline-flex; gap: 8px; align-items: center; text-transform: none; letter-spacing: normal; }
+.acp-links-attach select { padding: 6px 8px; border: 1px solid #e7e4dc; border-radius: var(--r-sm); font: 600 12.5px var(--font-ui); background: #fff; max-width: 200px; }
+.acp-links-detail { margin-top: 14px; border-top: 1px dashed #e7e4dc; padding-top: 12px; }
+.acp-links-detail-h { display: flex; align-items: center; gap: 8px; font-size: 14px; flex-wrap: wrap; }
+.acp-links-detail-h .danger { color: var(--danger-fg); border-color: var(--danger-bg); }
+.acp-links-detail-h .danger:hover { background: var(--danger-bg); }
+.acp-links-teachers { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.acp-links-warn { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; font-size: 12.5px; color: var(--danger-fg); background: var(--danger-bg); border-radius: var(--r-sm); padding: 8px 12px; }
+.acp-links-warn svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+@media (max-width: 980px) { .acp-links-diagram { grid-template-columns: 1fr 60px 1fr; } .acp-links-node .acp-book-meta { max-width: 120px; } }
+
+.acp-grid { display: grid; grid-template-columns: 330px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 980px) { .acp-grid { grid-template-columns: 1fr; } }
+
+.acp-col-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; font: 700 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: #908c83; margin-bottom: 10px; }
+.acp-count { background: #f1efe8; color: #5b5852; border-radius: var(--r-pill); padding: 1px 8px; font: 700 11px var(--font-ui); }
+.acp-empty { font-size: 13px; color: #908c83; font-style: italic; }
+.acp-empty-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 16px; border: 1.5px dashed #d8d4ca; border-radius: var(--r-md); color: #908c83; text-align: center; background: #faf9f5; }
+.acp-empty-card svg { width: 22px; height: 22px; }
+.acp-empty-card p { font-size: 13px; margin: 0; max-width: 320px; }
+
+/* ── book cards (left) — teacher class-card look ── */
+.acp-books { display: flex; flex-direction: column; gap: 8px; }
+.acp-book { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border: 1px solid #e7e4dc; border-radius: var(--r-md); padding: 12px 14px; cursor: pointer; box-shadow: var(--sh-xs); transition: box-shadow .15s, border-color .15s, transform .12s; }
+.acp-book:hover { border-color: #d8d4ca; box-shadow: var(--sh-sm); transform: translateY(-1px); }
+.acp-book.active { border-color: var(--indigo-400); box-shadow: 0 0 0 3px var(--indigo-100), var(--sh-sm); }
+.acp-tile { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: var(--r-md); font: 700 17px var(--font-head); }
+.acp-tile.lg { width: 52px; height: 52px; font-size: 22px; }
+.acp-book-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.acp-book-name { font: 600 14px var(--font-ui); color: #1c1c1e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acp-book-meta { font-size: 12px; color: #908c83; }
+.acp-book-meta .ok { color: var(--success-fg, var(--success)); font-weight: 700; }
+
+.acp-new-subject, .acp-new-module { display: flex; gap: 8px; align-items: center; background: #faf9f5; border: 1px solid #e7e4dc; border-radius: var(--r-md); padding: 10px 12px; margin-bottom: 10px; }
+.acp-new-subject input, .acp-new-module input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid #e7e4dc; border-radius: var(--r-sm); font: 500 13.5px var(--font-ui); background: #fff; }
+.acp-new-module select { padding: 7px 8px; border: 1px solid #e7e4dc; border-radius: var(--r-sm); font: 600 13px var(--font-ui); background: #fff; }
+
+/* ── detail (right) ── */
+.acp-detail { background: #fff; border: 1px solid #e7e4dc; border-radius: var(--r-lg); padding: 18px 20px; box-shadow: var(--sh-xs); }
+.acp-detail-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.acp-detail-t { flex: 1; min-width: 0; }
+.acp-detail-t h2 { margin: 0 0 3px; font: 700 20px var(--font-head); color: #1c1c1e; }
+.acp-x { border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 6px; border-radius: var(--r-sm); flex: none; }
+.acp-x:hover { background: var(--danger-bg); }
+.acp-x svg { width: 15px; height: 15px; }
+
+/* module accordion — warm ramp */
+.acp-module { border: 1px solid #e7e4dc; border-radius: var(--r-md); margin-bottom: 10px; overflow: hidden; background: #fff; }
+.acp-module.open { border-color: #d8d4ca; box-shadow: var(--sh-xs); }
+.acp-module-h { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #faf9f5; cursor: pointer; user-select: none; }
+.acp-module-h:hover { background: #f1efe8; }
+.acp-module-chev { display: flex; color: #908c83; }
+.acp-module-chev svg { width: 15px; height: 15px; }
+.acp-module-title { flex: 1; font: 600 14px var(--font-ui); color: #1c1c1e; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acp-level { font: 700 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; background: var(--indigo-50); color: var(--indigo-700); border-radius: var(--r-pill); padding: 2px 8px; flex: none; }
+.acp-module-tools, .acp-lesson-tools { display: inline-flex; gap: 4px; align-items: center; flex: none; }
+.acp-module-tools button, .acp-lesson-tools button { border: 0; background: transparent; color: #908c83; cursor: pointer; padding: 3px 6px; border-radius: var(--r-sm); font: 700 12px var(--font-ui); display: grid; place-items: center; }
+.acp-module-tools button:hover:not(:disabled), .acp-lesson-tools button:hover:not(:disabled) { background: #f1efe8; color: #1c1c1e; }
+.acp-module-tools button:disabled, .acp-lesson-tools button:disabled { opacity: .35; cursor: default; }
+.acp-module-tools button.danger, .acp-lesson-tools button.danger { color: var(--danger-fg); }
+.acp-module-tools button.danger:hover:not(:disabled), .acp-lesson-tools button.danger:hover:not(:disabled) { background: var(--danger-bg); }
+.acp-module-tools svg, .acp-lesson-tools svg { width: 13px; height: 13px; }
+
+/* lesson rows */
+.acp-lessons { padding: 6px 14px 12px; }
+.acp-lesson { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--r-sm); }
+.acp-lesson:hover { background: #faf9f5; }
+.acp-lnum { width: 20px; text-align: center; font: 700 11px var(--font-ui); color: #908c83; flex: none; }
+.acp-ltitle { flex: 1; min-width: 0; font-size: 13.5px; color: #1c1c1e; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acp-ltitle:hover { color: var(--indigo-700); text-decoration: underline; }
+.acp-chip { display: inline-flex; color: var(--indigo-600); }
+.acp-chip svg { width: 13px; height: 13px; }
+.acp-pill { font: 700 10px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; padding: 2px 8px; border-radius: var(--r-pill); flex: none; }
+.acp-pill.pub { background: var(--success-bg); color: var(--success-fg); }
+.acp-pill.draft { background: #f1efe8; color: #5b5852; }
+.acp-edit { display: grid; place-items: center; color: #908c83; padding: 3px 6px; border-radius: var(--r-sm); }
+.acp-edit:hover { background: #f1efe8; color: var(--indigo-700); }
+.acp-edit svg { width: 13px; height: 13px; }
+.acp-add-lesson { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 2px 28px; border: 1.5px dashed #d8d4ca; background: transparent; color: #5b5852; font: 600 12.5px var(--font-ui); padding: 7px 14px; border-radius: var(--r-md); cursor: pointer; }
+.acp-add-lesson:hover { border-color: var(--indigo-400); color: var(--indigo-700); background: var(--indigo-50); }
+.acp-add-lesson svg { width: 13px; height: 13px; }
+
+/* ── import modal ── */
+.acp-modal-overlay { position: fixed; inset: 0; background: rgba(28,28,30,.45); z-index: 60; display: grid; place-items: center; padding: 20px; }
+.acp-modal { width: min(640px, 96vw); max-height: 88vh; overflow: auto; background: #fff; border-radius: var(--r-lg); box-shadow: var(--sh-lg, 0 20px 50px rgba(0,0,0,.25)); padding: 18px 20px; }
+.acp-modal-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.acp-modal-h h3 { margin: 0; font: 700 17px var(--font-head); display: inline-flex; align-items: center; gap: 8px; }
+.acp-modal-h svg { width: 17px; height: 17px; color: var(--indigo-600); }
+.acp-file { display: flex; align-items: center; gap: 10px; border: 1.5px dashed #d8d4ca; border-radius: var(--r-md); padding: 16px 14px; cursor: pointer; background: #faf9f5; margin-bottom: 12px; font: 600 13.5px var(--font-ui); color: #5b5852; }
+.acp-file:hover { border-color: var(--indigo-400); color: var(--indigo-700); }
+.acp-file input { display: none; }
+.acp-file svg { width: 18px; height: 18px; flex: none; }
+.acp-import-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.acp-import-row label { font: 600 12.5px var(--font-ui); color: #5b5852; }
+.acp-import-row select, .acp-import-row input { padding: 7px 9px; border: 1px solid #e7e4dc; border-radius: var(--r-sm); font: 500 13px var(--font-ui); background: #fff; }
+.acp-import-row input { flex: 1; min-width: 160px; }
+.acp-import-hint { font-size: 12.5px; color: #908c83; line-height: 1.5; margin: 0 0 12px; }
+.acp-import-err { font-size: 13px; color: var(--danger-fg); margin: 10px 0 0; }
+.acp-modal-acts { display: flex; justify-content: flex-end; gap: 8px; }
+.acp-review { margin-top: 14px; border-top: 1px solid #e7e4dc; padding-top: 12px; }
+.acp-review-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; font-size: 13.5px; }
+
+/* step checklist (mirror of the teacher agent styles, warm-scoped) */
+.acp .ag-steps, .acp-modal .ag-steps { display: flex; flex-direction: column; gap: 7px; margin: 10px 0 4px; }
+.acp .ag-step, .acp-modal .ag-step { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #5b5852; }
+.acp .ag-step .ag-ic, .acp-modal .ag-step .ag-ic { width: 16px; height: 16px; flex: none; display: grid; place-items: center; margin-top: 1px; }
+.acp-modal .ag-step.running .ag-ic svg { width: 13px; height: 13px; color: var(--indigo-600); animation: acp-spin .9s linear infinite; }
+.acp-modal .ag-step.done .ag-ic { color: var(--success-fg, var(--success)); }
+.acp-modal .ag-step.done .ag-ic svg { width: 13px; height: 13px; }
+.acp-modal .ag-step.error .ag-ic { color: var(--danger-fg); }
+.acp-modal .ag-step.error .ag-ic svg { width: 13px; height: 13px; }
+.acp-modal .ag-step-l { font-weight: 600; color: #1c1c1e; }
+.acp-modal .ag-step-d { color: #908c83; font-size: 11.5px; }
+@keyframes acp-spin { to { transform: rotate(360deg); } }
+
+/* ── RAG index control in the banner ── */
+.acp-rag { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; flex: none; }
+.acp-rag-stats { display: inline-flex; align-items: center; gap: 5px; font: 600 12px var(--font-ui); color: #908c83; white-space: nowrap; }
+.acp-rag-stats svg { width: 13px; height: 13px; }
+.acp-rag-warn { color: var(--warning-fg); }
+
+/* ── similar lessons (authoring assistant) ── */
+.acp-similar { margin-top: 12px; border: 1px solid #e7e4dc; border-radius: var(--r-md); background: #faf9f5; padding: 10px 12px; }
+.acp-similar-h { display: inline-flex; align-items: center; gap: 6px; font: 700 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: #908c83; margin-bottom: 6px; }
+.acp-similar-h svg { width: 13px; height: 13px; color: var(--indigo-600); }
+.acp-similar-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; text-decoration: none; border-radius: var(--r-sm); }
+.acp-similar-row:hover { background: #f1efe8; }
+.acp-similar-t { font: 600 13px var(--font-ui); color: #1c1c1e; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acp-pill.warn { background: var(--warning-bg); color: var(--warning-fg); }

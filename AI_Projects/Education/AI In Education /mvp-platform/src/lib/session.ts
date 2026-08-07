@@ -16,15 +16,25 @@ export interface SessionData {
   user?: SessionUser;
 }
 
-const password =
-  process.env.SESSION_PASSWORD || "dev-only-mwalimu-session-secret-change-me-32+";
+const DEV_FALLBACK = "dev-only-mwalimu-session-secret-change-me-32+";
+const password = process.env.SESSION_PASSWORD || DEV_FALLBACK;
+
+// The session cookie is encrypted with this secret — anyone who knows it can
+// mint an ADMIN session. The fallback above ships in the repo, so a production
+// build must never run with it (or with a weak one): fail the boot instead.
+if (process.env.NODE_ENV === "production" && (password === DEV_FALLBACK || password.length < 32)) {
+  throw new Error("SESSION_PASSWORD must be set to a unique secret of at least 32 characters in production.");
+}
 
 export const sessionOptions: SessionOptions = {
   password,
   cookieName: "mwalimu_session",
   cookieOptions: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Offline school servers often run production builds over plain-HTTP LAN,
+    // where a Secure cookie would never be stored and login would silently
+    // break — SESSION_SECURE=0 opts out for those deployments.
+    secure: process.env.NODE_ENV === "production" && process.env.SESSION_SECURE !== "0",
     sameSite: "lax",
     maxAge: 60 * 60 * 8, // 8h hard cap
     path: "/",

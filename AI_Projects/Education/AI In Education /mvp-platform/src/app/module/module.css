@@ -82,3 +82,26 @@
 .md-navbtn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); font-size: 13.5px; font-weight: 600; text-decoration: none; }
 .md-navbtn:hover { color: var(--primary); border-color: var(--indigo-300); }
 .md-navbtn svg { width: 15px; height: 15px; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 680px) {
+  .module-page .app-header { padding: 11px 14px; gap: 8px; }
+  .back-pill { white-space: nowrap; padding: 8px 12px; }
+  .module-wrap { padding: 18px 16px 72px; }
+
+  /* Hero stacks: ring on top, full-width title / description / CTAs below. */
+  .md-hero { flex-direction: column; align-items: flex-start; gap: 16px; padding: 22px 20px; }
+  .md-hero-body { width: 100%; }
+  .md-hero-body h1 { font-size: 22px; line-height: 1.2; }
+  .md-hero-body p { font-size: 13.5px; }
+  .md-cta { flex-direction: column; align-items: stretch; width: 100%; }
+  .md-cta .btn { width: 100%; justify-content: center; }
+
+  /* Lesson rows: tighter, and drop the small duration so the title has room. */
+  .md-lesson-row { gap: 10px; padding: 11px 12px; }
+  .md-lmin { display: none; }
+
+  /* Prev/next module buttons → icon-only chevrons so both fit. */
+  .md-navbtn { font-size: 0; gap: 0; padding: 10px; }
+  .md-navbtn svg { width: 18px; height: 18px; }
+}

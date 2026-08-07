@@ -52,11 +52,30 @@ for (const f of mdFiles(join(ROOT, "modules"))) {
     flush();
   } else {
     const lines = body.split("\n");
+    const MAX = 6000;
+    const isCue = (s) => /^\s*Exercices(\s+r[ée]solus)?\s*$/i.test(s);
     for (let i = 0; i < lines.length; i++) {
-      if (/^\s*Exercices(\s+r[ée]solus)?\s*$/i.test(lines[i])) {
-        const snippet = lines.slice(i + 1, i + 14).join("\n").trim();
-        if (snippet.length > 80) {
-          exercises.push({ id: ++id, ...base, n: null, section: lines[i].trim(), quality: "ocr", text: snippet.slice(0, 1200) });
+      if (isCue(lines[i])) {
+        // Capture the WHOLE exercise block — from this cue to the next heading or
+        // the next cue — so questions and their answer keys (Rép:, Réponse) are
+        // not cut mid-way. The old fixed 13-line / 1200-char window truncated
+        // exercises, which led the refiner to invent the missing parts. `MAX`
+        // guards a runaway block (e.g. no following heading); `truncated` flags it.
+        // Stop at the next section boundary so we don't bleed following theory
+        // into the exercises: a markdown heading, another cue, or an OCR-style
+        // multi-level section header ("3.2." / "3.2.1." — exercise items are
+        // single-level "1." and sub-questions "a)", so those are not matched).
+        const isBoundary = (s) => /^##+\s/.test(s) || isCue(s) || /^\s*\d+\.\d+\.?\s+\S/.test(s);
+        const block = [];
+        for (let j = i + 1; j < lines.length; j++) {
+          if (isBoundary(lines[j])) break;
+          block.push(lines[j]);
+        }
+        let text = block.join("\n").trim();
+        const truncated = text.length > MAX;
+        if (truncated) text = text.slice(0, MAX);
+        if (text.length > 80) {
+          exercises.push({ id: ++id, ...base, n: null, section: lines[i].trim(), quality: "ocr", text, truncated });
         }
       }
     }

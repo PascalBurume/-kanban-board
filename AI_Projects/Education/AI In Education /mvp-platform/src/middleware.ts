@@ -3,12 +3,16 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, type SessionData, type Role, STUDENT_IDLE_MS, homeForRole } from "@/lib/session";
 
 // Which role each protected route-group requires. `null` = any signed-in role.
-const RULES: { prefix: string; role: Role | null }[] = [
+// `roles` allows several. /teacher/studio also admits ADMIN: the content studio
+// is where the administrator edits lessons (teachers use it for quizzes only).
+const RULES: { prefix: string; role?: Role | null; roles?: Role[] }[] = [
   { prefix: "/admin", role: "ADMIN" },
+  { prefix: "/teacher/studio", roles: ["TEACHER", "ADMIN"] },
   { prefix: "/teacher", role: "TEACHER" },
   { prefix: "/lesson", role: "STUDENT" },
   { prefix: "/student", role: "STUDENT" },
   { prefix: "/practice", role: "STUDENT" },
+  { prefix: "/projects", role: "STUDENT" },
   { prefix: "/module", role: "STUDENT" },
   { prefix: "/profile", role: null },
 ];
@@ -38,8 +42,9 @@ export async function middleware(req: NextRequest) {
     return redirect(req, "/login/");
   }
 
-  // Wrong role → send to their own home. (role:null = any signed-in user.)
-  if (rule.role !== null && user.role !== rule.role) return redirect(req, homeForRole(user.role));
+  // Wrong role → send to their own home. (role:null / omitted = any signed-in user.)
+  const allowed = rule.roles ?? (rule.role == null ? null : [rule.role]);
+  if (allowed && !allowed.includes(user.role)) return redirect(req, homeForRole(user.role));
 
   // Sliding activity timestamp (keeps idle window fresh).
   user.lastActivity = Date.now();
@@ -48,5 +53,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/student/:path*", "/lesson/:path*", "/practice/:path*", "/module/:path*", "/teacher/:path*", "/admin/:path*", "/profile/:path*"],
+  matcher: ["/student/:path*", "/lesson/:path*", "/practice/:path*", "/projects/:path*", "/module/:path*", "/teacher/:path*", "/admin/:path*", "/profile/:path*"],
 };

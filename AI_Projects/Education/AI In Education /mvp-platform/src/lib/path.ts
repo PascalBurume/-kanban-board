@@ -1,13 +1,22 @@
 import { prisma } from "./db";
 import { BADGE_HINTS } from "./badges";
 
-// Subjects a class actually studies (driven by teacher assignments).
+// Subjects a class actually studies — driven by the curriculum (Offering:
+// level + field → books), the SAME source the admin studio uses, so the
+// admin/curriculum view and what students see can never disagree.
+// (Previously this read TeacherAssignment, which silently hid any offered book
+// that had no teacher yet — e.g. maths-6-scientifique in 6e Scientifique A.)
 export async function accessibleSubjectSlugs(classId: string): Promise<string[]> {
-  const tas = await prisma.teacherAssignment.findMany({
-    where: { classId },
+  const cls = await prisma.classGroup.findUnique({
+    where: { id: classId },
+    select: { level: true, field: true },
+  });
+  if (!cls) return [];
+  const offerings = await prisma.offering.findMany({
+    where: { level: cls.level, field: cls.field ?? "" },
     select: { subjectSlug: true },
   });
-  return [...new Set(tas.map((t) => t.subjectSlug))];
+  return [...new Set(offerings.map((o) => o.subjectSlug))];
 }
 
 export async function getStudentClass(userId: string) {
@@ -125,10 +134,14 @@ export async function buildStudentPath(userId: string) {
 
   let total = 0;
   let done = 0;
-  let cont: { lessonId: string; title: string; subjectName: string; icon: string | null; color: string | null; hasQuiz: boolean } | null = null;
+  type ContMeta = { lessonId: string; title: string; subjectName: string; icon: string | null; color: string | null; hasQuiz: boolean };
+  let cont: ContMeta | null = null;
 
   const outSubjects: PathSubject[] = [];
-  let sawCurrent = false; // first not-done lesson in an unlocked module
+  // Flat lesson sequence (subject → module → lesson order) used to resume from the
+  // student's last activity rather than always the first gap.
+  const flat: { id: string; meta: ContMeta; done: boolean; locked: boolean }[] = [];
+  let firstNotDone: ContMeta | null = null;
   for (const subj of subjects) {
     const lessons: PathLesson[] = [];
     let subjDone = 0;
@@ -138,6 +151,7 @@ export async function buildStudentPath(userId: string) {
       for (const l of m.lessons) {
         total++;
         const completed = pmap.get(l.id)?.status === "COMPLETED";
+        const meta: ContMeta = { lessonId: l.id, title: l.title, subjectName: subj.name, icon: subj.icon, color: subj.color, hasQuiz: l.quizzes.length > 0 };
         let status: NodeStatus;
         if (completed) {
           status = "done";
@@ -145,13 +159,11 @@ export async function buildStudentPath(userId: string) {
           done++;
         } else if (modLocked) {
           status = "locked";
-        } else if (!sawCurrent) {
-          status = "current";
-          sawCurrent = true;
-          cont = { lessonId: l.id, title: l.title, subjectName: subj.name, icon: subj.icon, color: subj.color, hasQuiz: l.quizzes.length > 0 };
         } else {
           status = "available";
+          if (!firstNotDone) firstNotDone = meta;
         }
+        flat.push({ id: l.id, meta, done: completed, locked: modLocked });
         lessons.push({ id: l.id, title: l.title, status, durationMin: l.estMinutes, hasQuiz: l.quizzes.length > 0 });
       }
     }
@@ -168,6 +180,30 @@ export async function buildStudentPath(userId: string) {
     });
   }
 
+  // "Reprendre" resumes where the student was LAST ACTIVE (most recent Progress),
+  // not just the earliest gap — so a student deep in "Statistiques" returns there
+  // instead of being thrown back near the start. Fall back to the first not-done
+  // lesson for a brand-new student with no activity yet.
+  cont = firstNotDone;
+  const accessible = new Set(flat.filter((f) => !f.locked).map((f) => f.id));
+  const lastActive = progressRows
+    .filter((p) => accessible.has(p.lessonId))
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+  if (lastActive) {
+    const idx = flat.findIndex((f) => f.id === lastActive.lessonId);
+    if (idx >= 0) {
+      if (lastActive.status !== "COMPLETED") cont = flat[idx].meta;               // resume the in-progress lesson
+      else { const nxt = flat.slice(idx + 1).find((f) => !f.locked && !f.done); if (nxt) cont = nxt.meta; } // else continue forward
+    }
+  }
+
+  // Mark the resume target as the path's "current" node (was: the first gap).
+  if (cont) {
+    for (const s of outSubjects) for (const l of s.lessons) {
+      if (l.id === cont.lessonId && l.status === "available") { l.status = "current"; break; }
+    }
+  }
+
   // XP: 50 per completed lesson + best score per quiz attempted.
   const quizBest = await prisma.quizAttempt.groupBy({
     by: ["quizId"],
@@ -175,7 +211,17 @@ export async function buildStudentPath(userId: string) {
     _max: { score: true },
   });
   const quizXp = quizBest.reduce((s, q) => s + (q._max.score ?? 0), 0);
-  const xp = done * 50 + quizXp;
+  // Projects: a submitted/graded capstone adds a flat 150 bonus + its grade.
+  // Group submissions credit every member.
+  const projectSubs = await prisma.projectSubmission.findMany({
+    where: {
+      status: { in: ["SUBMITTED", "RETURNED", "GRADED"] },
+      OR: [{ studentId: userId }, { group: { members: { some: { studentId: userId } } } }],
+    },
+    select: { grade: true },
+  });
+  const projectXp = projectSubs.reduce((s, p) => s + 150 + (p.grade ?? 0), 0);
+  const xp = done * 50 + quizXp + projectXp;
   const level = Math.floor(xp / 500) + 1;
 
   // Streak + weekly activity from session + completion days.
@@ -245,8 +291,10 @@ export async function getAccessibleLesson(userId: string, lessonId: string) {
   if (!lesson) return null;
   // Block lessons whose module the teacher has locked for this class.
   const locked = await lockedModuleIds(cls.id);
-  if (locked.has(lesson.moduleId)) return null;
-  return lesson;
+  if (lesson.moduleId && locked.has(lesson.moduleId)) return null;
+  // The query filters on `module.subjectSlug`, so a returned lesson always has a module —
+  // narrow it for callers (unattached library lessons never reach here).
+  return lesson as typeof lesson & { module: NonNullable<(typeof lesson)["module"]> };
 }
 
 // Ordered lessons of a subject (all lessons, module → lesson order) — for

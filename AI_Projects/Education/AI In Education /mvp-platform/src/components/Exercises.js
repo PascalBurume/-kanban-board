@@ -56,13 +56,24 @@ function ExCard({ e, index, linked, onOpenLesson, onActiveExercise }) {
           <span className="ex-title">{e.n ? `Exercice ${e.n}` : e.section || "Exercice"}</span>
           <span className="ex-src">{e.subject}{e.moduleTitle ? ` · ${e.moduleTitle}` : ""}</span>
         </div>
-        <span className={`ex-tag${isOcr ? " draft" : ""}`}>
-          <Icon name={isOcr ? "alert" : "check"} /> {isOcr ? "Brouillon" : "Vérifié"}
-        </span>
+        {e.origin === "prof" ? (
+          <span className="ex-tag prof" title={e.authorName ? `Proposé par ${e.authorName}` : undefined}>
+            <Icon name="sparkles" /> Prof
+          </span>
+        ) : isOcr ? (
+          <span className="ex-tag draft"><Icon name="alert" /> Brouillon</span>
+        ) : e.reconstructed ? (
+          // Rebuilt by the Copilot from an unreadable scan — never claim "Vérifié".
+          <span className="ex-tag ai" title="Reconstruit par l'IA à partir d'un scan — peut différer du manuel">
+            <Icon name="sparkles" /> Reconstruit par IA
+          </span>
+        ) : (
+          <span className="ex-tag"><Icon name="check" /> Vérifié</span>
+        )}
       </div>
 
       <div className="ex-body">
-        {isOcr ? <pre className="ex-pre">{tidy(q)}</pre> : <Markdown>{q}</Markdown>}
+        {isOcr ? <pre className="ex-pre">{tidy(q)}</pre> : <Markdown breaks>{q}</Markdown>}
       </div>
 
       {(rep || (!linked && onOpenLesson)) && (
@@ -83,7 +94,7 @@ function ExCard({ e, index, linked, onOpenLesson, onActiveExercise }) {
       {rep && showRep && (
         <div className="ex-sol">
           <span className="ex-sol-tag"><Icon name="check" /> Solution</span>
-          {isOcr ? <pre className="ex-pre sol">{tidy(rep)}</pre> : <div className="ex-sol-md"><Markdown>{rep}</Markdown></div>}
+          {isOcr ? <pre className="ex-pre sol">{tidy(rep)}</pre> : <div className="ex-sol-md"><Markdown breaks>{rep}</Markdown></div>}
         </div>
       )}
     </article>

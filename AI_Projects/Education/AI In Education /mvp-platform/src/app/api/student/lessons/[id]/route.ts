@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { getAccessibleLesson, subjectLessonOrder } from "@/lib/path";
+import { getAccessibleLesson, subjectLessonOrder, getStudentClass } from "@/lib/path";
+import { companionsForStudent } from "@/lib/studio";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     where: { lessonId: lesson.id },
     include: { questions: { orderBy: { order: "asc" } } },
   });
+
+  // Teacher "compléments" attached to this book lesson, scoped to the student's class.
+  const cls = await getStudentClass(u.userId);
+  const companions = cls ? await companionsForStudent(lesson.id, cls.id) : [];
 
   const order = await subjectLessonOrder(lesson.module.subjectSlug);
   const idx = order.indexOf(lesson.id);
@@ -54,6 +59,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     },
     progress: { status: progress?.status ?? "NOT_STARTED", totalSeconds: progress?.totalSeconds ?? 0 },
     quiz: quizOut,
+    companions,
     nav: { prevId, nextId, index: idx, total: order.length, completed: !!completed },
   });
 }

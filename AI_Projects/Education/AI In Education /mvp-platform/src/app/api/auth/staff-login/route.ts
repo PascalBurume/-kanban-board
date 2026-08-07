@@ -22,21 +22,18 @@ export async function POST(req: Request) {
   const user = await prisma.user.findFirst({
     where: { email, role: { in: ["TEACHER", "ADMIN"] } },
   });
-  // Constant-ish behaviour: same response whether email exists or password wrong.
-  if (!user) return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 401 });
+  // Constant-ish behaviour: same response whether email exists or password is
+  // wrong — including the bcrypt cost, or the fast unknown-email path would
+  // leak which staff emails exist through response timing.
+  if (!user) {
+    verifySecret(password, "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
+    return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 401 });
+  }
 
   if (user.lockedUntil && user.lockedUntil > new Date()) {
     return NextResponse.json({ error: "LOCKED", until: user.lockedUntil }, { status: 423 });
   }
 
-  // Self-registered teachers must be approved by an admin before first sign-in.
-  if (user.pending) {
-    // Only reveal this once the password is correct, to avoid account probing.
-    if (verifySecret(password, user.passwordHash)) {
-      return NextResponse.json({ error: "PENDING_APPROVAL" }, { status: 403 });
-    }
-    return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 401 });
-  }
   if (!user.isActive) {
     if (verifySecret(password, user.passwordHash)) {
       return NextResponse.json({ error: "DEACTIVATED" }, { status: 403 });

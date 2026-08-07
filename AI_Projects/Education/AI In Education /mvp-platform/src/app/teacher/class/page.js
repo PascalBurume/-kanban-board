@@ -2,7 +2,8 @@
 import "./class-detail.css";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Icon from "@/components/ui/Icon";
-import { BrandMark, OfflinePill, LangToggle, Avatar } from "@/components/ui/chrome";
+import { Avatar } from "@/components/ui/chrome";
+import TeacherShell from "@/components/ui/TeacherShell";
 import { toast } from "@/lib/toast";
 
 const STATUS = {
@@ -11,11 +12,12 @@ const STATUS = {
   inactive: { l: "Inactif", c: "inactive" },
 };
 
-const NAV = [
-  { href: "/teacher/", ic: "grid", lbl: "Tableau de bord" },
-  { href: "/teacher/class/", ic: "users", lbl: "Mes classes", active: true },
-  { href: "/teacher/insights/", ic: "sparkles", lbl: "Analyses Copilot", pill: "14" },
-  { href: "/teacher/studio/", ic: "edit", lbl: "Studio de contenu" },
+// Quick-filter chips mirroring the watchlist semantics. "quiz" = quiz avg < 50.
+const STATUS_CHIPS = [
+  { k: "all", l: "Tous" },
+  { k: "inactive", l: "Inactifs" },
+  { k: "behind", l: "En difficulté" },
+  { k: "quiz", l: "Quiz faible" },
 ];
 
 function fmtTime(m) {
@@ -54,12 +56,14 @@ const fullName = (s) => `${s.firstName} ${s.lastName}`;
 export default function ClassDetailPage() {
   const [loading, setLoading] = useState(true);
   const [classId, setClassId] = useState(null);
+  const [classList, setClassList] = useState([]); // all of the teacher's classes (for the switcher)
+  const [switchOpen, setSwitchOpen] = useState(false);
   const [classInfo, setClassInfo] = useState(null); // { id, name, level, field }
   const [totalLessons, setTotalLessons] = useState(0);
   const [students, setStudents] = useState([]);
 
-  const [collapsed, setCollapsed] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusChip, setStatusChip] = useState("all");
   const [sortKey, setSortKey] = useState("progressPct");
   const [sortDir, setSortDir] = useState(-1);
   const [selected, setSelected] = useState(() => new Set());
@@ -133,7 +137,13 @@ export default function ClassDetailPage() {
         r.status === 403 ? ((window.location.href = "/login/"), null) : r.json()
       );
       if (!list) return;
-      const qid = new URLSearchParams(window.location.search).get("class");
+      setClassList(list.classes || []);
+      const params = new URLSearchParams(window.location.search);
+      // Deep-link from the dashboard ("élèves à relancer" etc.) — pre-apply the
+      // matching roster filter so the page reflects what the teacher clicked.
+      const filter = params.get("filter");
+      if (filter && STATUS_CHIPS.some((c) => c.k === filter)) setStatusChip(filter);
+      const qid = params.get("class");
       const id = qid && list.classes.some((c) => c.id === qid) ? qid : list.classes[0]?.id;
       if (!id) {
         setLoading(false);
@@ -143,6 +153,22 @@ export default function ClassDetailPage() {
       await loadClass(id);
     })();
   }, [loadClass]);
+
+  // Switch to another class without a full navigation: reset view state, update
+  // the URL (so a refresh keeps the class), and reload.
+  async function switchClass(id) {
+    setSwitchOpen(false);
+    if (!id || id === classId) return;
+    window.history.replaceState(null, "", `?class=${id}`);
+    setClassId(id);
+    setSearch("");
+    setStatusChip("all");
+    setSelected(new Set());
+    setDrawerId(null);
+    setModOpen(false);
+    setLoading(true);
+    await loadClass(id);
+  }
 
   // Load drawer data when a row is opened.
   useEffect(() => {
@@ -187,7 +213,13 @@ export default function ClassDetailPage() {
 
   const list = useMemo(() => {
     const q = search.toLowerCase();
-    const filtered = students.filter((s) => fullName(s).toLowerCase().includes(q));
+    const filtered = students.filter((s) => {
+      if (!fullName(s).toLowerCase().includes(q)) return false;
+      if (statusChip === "inactive") return s.status === "inactive";
+      if (statusChip === "behind") return s.status === "behind";
+      if (statusChip === "quiz") return s.avgQuiz != null && s.avgQuiz < 50;
+      return true;
+    });
     return [...filtered].sort((a, b) => {
       let av;
       let bv;
@@ -204,7 +236,7 @@ export default function ClassDetailPage() {
       const bn = bv == null ? -Infinity * sortDir : bv;
       return (an - bn) * sortDir;
     });
-  }, [students, search, sortKey, sortDir]);
+  }, [students, search, statusChip, sortKey, sortDir]);
 
   function applyCopilotLocal(ids, val) {
     setStudents((prev) =>
@@ -332,90 +364,43 @@ export default function ClassDetailPage() {
   const lvlText = [classInfo?.level, classInfo?.field].filter(Boolean).join(" · ") || "—";
 
   return (
-    <div className={`t-app teacher-page ${collapsed ? "collapsed" : ""}`.trim()}>
-      <aside className="t-side">
-        <div className="t-side-top">
-          <BrandMark />
-          <span className="nm">Mwalimu</span>
-        </div>
-        <nav className="t-nav">
-          <span className="grouplabel">Enseignement</span>
-          {NAV.map((n) => (
-            <a key={n.href} href={n.href} className={n.active ? "active" : undefined}>
-              <Icon name={n.ic} />
-              <span className="lbl">{n.lbl}</span>
-              {n.pill && <span className="pill">{n.pill}</span>}
-            </a>
-          ))}
-          <span className="grouplabel">Compte</span>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              toast("Paramètres — version démo", { icon: "info" });
-            }}
-          >
-            <Icon name="settings" />
-            <span className="lbl">Paramètres</span>
-          </a>
-        </nav>
-        <div className="t-side-foot">
-          <div className="t-userbox">
-            <Avatar name="Grâce Mukendi" size="avatar-sm" />
-            <a className="meta" href="/profile/" style={{textDecoration:"none",color:"inherit"}}>
-              <div className="un">Mme Grâce Mukendi</div>
-              <div className="ur">Enseignante · Mathématiques</div>
-            </a>
-            <a className="lo" href="/api/auth/logout/" title="Se déconnecter">
-              <Icon name="logout" />
-            </a>
-          </div>
-        </div>
-      </aside>
-
-      <div className="t-main">
-        <header className="t-top">
-          <div className="t-top-left">
-            <button className="t-burger" onClick={() => setCollapsed((c) => !c)}>
-              <Icon name="grid" />
-            </button>
-            <div className="t-crumb">
-              <a href="/teacher/" style={{ color: "var(--text-muted)" }}>
-                Classes
-              </a>{" "}
-              / <b>{className}</b>
-            </div>
-          </div>
-          <div className="t-top-right">
-            <OfflinePill label="Serveur local connecté" />
-            <LangToggle
-              onNotice={() =>
-                toast(
-                  "Le français complet arrive — interface en anglais pour cette revue.",
-                  { icon: "info" }
-                )
-              }
-            />
-            <button
-              className="t-iconbtn"
-              onClick={() =>
-                toast("3 nouvelles alertes — 2 élèves sont devenus inactifs", { icon: "bell" })
-              }
-            >
-              <Icon name="bell" />
-              <span className="dot-badge" />
-            </button>
-          </div>
-        </header>
-
-        <div className="t-content">
+    <>
+    <TeacherShell active="/teacher/class/" crumbGroup="Mes classes" crumbPage={className}>
+        <div className="class-content">
           <div className="class-hero">
             <span className="subject-tile subj-math">
               <Icon name="math" />
             </span>
-            <div>
-              <h1>{className}</h1>
-              <div className="lvl">{lvlText}</div>
+            <div className="class-switch-wrap">
+              {classList.length > 1 ? (
+                <button className="class-switch" onClick={() => setSwitchOpen((o) => !o)} aria-expanded={switchOpen} title="Changer de classe">
+                  <h1>{className}<span className={`cs-chev ${switchOpen ? "open" : ""}`.trim()}><Icon name="chevD" /></span></h1>
+                  <div className="lvl">{lvlText}</div>
+                </button>
+              ) : (
+                <div>
+                  <h1>{className}</h1>
+                  <div className="lvl">{lvlText}</div>
+                </div>
+              )}
+              {switchOpen && (
+                <>
+                  <div className="cs-backdrop" onClick={() => setSwitchOpen(false)} />
+                  <div className="class-switch-menu">
+                    <div className="cs-menu-label">Changer de classe</div>
+                    {classList.map((c) => (
+                      <button key={c.id} className={`class-switch-item ${c.id === classId ? "active" : ""}`.trim()} onClick={() => switchClass(c.id)}>
+                        <span className="csi-tile">{c.level}</span>
+                        <span className="csi-info">
+                          <span className="csi-name">{c.name}</span>
+                          <span className="csi-sub">{[c.level, c.field].filter(Boolean).join(" · ")} · {c.studentCount} élèves</span>
+                        </span>
+                        {c.id === classId && <Icon name="check" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
             <div className="master">
               <div className="ml">
@@ -505,12 +490,17 @@ export default function ClassDetailPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => toast("Filtre par statut — version démo", { icon: "filter" })}
-            >
-              <Icon name="filter" /> Tous les statuts
-            </button>
+            <div className="status-chips">
+              {STATUS_CHIPS.map((c) => (
+                <button
+                  key={c.k}
+                  className={`schip ${statusChip === c.k ? "on" : ""}`.trim()}
+                  onClick={() => setStatusChip(c.k)}
+                >
+                  {c.l}
+                </button>
+              ))}
+            </div>
             <span className="grow" />
             <span className="muted tiny">
               {list.length} sur {students.length} élèves
@@ -638,7 +628,7 @@ export default function ClassDetailPage() {
             </table>
           </div>
         </div>
-      </div>
+    </TeacherShell>
 
       {/* bulk bar */}
       <div className={`bulkbar ${selected.size > 0 ? "show" : ""}`.trim()}>
@@ -835,14 +825,6 @@ export default function ClassDetailPage() {
 
                   <div className="row" style={{ gap: "10px" }}>
                     <button
-                      className="btn btn-secondary grow"
-                      onClick={() =>
-                        toast("Ouverture de l’éditeur de message…", { icon: "message" })
-                      }
-                    >
-                      <Icon name="message" /> Envoyer un message à l’élève
-                    </button>
-                    <button
                       className={`btn ${s.copilotEnabled ? "btn-secondary" : "btn-primary"} grow`}
                       onClick={() => toggleCop(s.id)}
                     >
@@ -907,6 +889,6 @@ export default function ClassDetailPage() {
             </div>
           );
         })()}
-    </div>
+    </>
   );
 }

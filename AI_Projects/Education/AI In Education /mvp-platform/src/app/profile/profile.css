@@ -10,6 +10,24 @@
   font-size: 13.5px; font-weight: 600; text-decoration: none; background: none; border: 0; cursor: pointer;
 }
 .profile-top .back-link:hover { color: var(--primary); }
+.profile-top .logout-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  color: var(--text-muted); padding: 8px 14px; border-radius: var(--r-md, 10px);
+  border: 1px solid var(--border, #e2e8f0); background: #fff;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+.profile-top .logout-link:hover {
+  color: var(--danger, #e11d48); border-color: var(--danger, #e11d48);
+  background: var(--danger-bg, #fff1f2);
+}
+.profile-top .logout-link .icon svg { width: 16px; height: 16px; }
+
+.profile-note {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-muted); margin: -4px 2px 0;
+}
+.profile-note .icon svg { width: 15px; height: 15px; flex: none; }
 
 .profile-wrap { max-width: 720px; margin: 0 auto; padding: 28px 20px 64px; }
 

@@ -198,3 +198,38 @@
 .cc-lessons { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 
 @media (max-width: 640px) { .mod-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Mobile / tablet: header cluster + dashboard layout ---------- */
+@media (max-width: 820px) {
+  .user-chip { padding: 3px; gap: 0; }                 /* avatar only — name lives on Profil */
+  .user-chip .col { display: none; }
+  .user-chip .avatar-sm { width: 34px; height: 34px; }
+}
+@media (max-width: 600px) {
+  .dash-page { overflow-x: hidden; }
+  .practice-nav {                                      /* icon-only round buttons */
+    padding: 0; gap: 0; font-size: 0;
+    width: 42px; height: 42px; justify-content: center;
+  }
+  .practice-nav svg { width: 18px; height: 18px; }
+
+  .wrap-main { padding: 18px 16px 84px; }
+  .greet { margin-bottom: 16px; gap: 12px; }
+  .greet h1 { font-size: 23px; }
+  .greet p { font-size: 14px; margin-top: 4px; }
+  .stats { flex-wrap: wrap; gap: 8px; }
+
+  /* Hero: keep ring + text side by side, wrap the CTA to a full-width row below
+     so it is never clipped by the card's overflow. */
+  .hero { gap: 14px 16px; padding: 20px 18px; margin-bottom: 20px; flex-wrap: wrap; }
+  .hero-body { min-width: 0; }
+  .hero-body h2 { font-size: 19px; }
+  .hero-body .meta { flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+  .hero .btn-light { flex-basis: 100%; justify-content: center; }
+
+  .sec-head { flex-wrap: wrap; gap: 4px 8px; }
+
+  /* Copilot FAB: drop the always-on label (it overlaps content), tuck to corner. */
+  .fab { right: 16px; bottom: 16px; }
+  .fab-label { display: none; }
+}

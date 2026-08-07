@@ -1,0 +1,59 @@
+/* ---- Retours (student feedback, grouped by lesson) ---- */
+
+.fb-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+.fb-top h1 { font-family: var(--font-head); font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+
+.fb-filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fb-select { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 10px 0 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-pill); color: var(--text-muted); }
+.fb-select svg { width: 15px; height: 15px; }
+.fb-select select { border: 0; background: transparent; color: var(--text); font: 600 13px var(--font-ui); cursor: pointer; outline: none; }
+
+.fb-seg { display: inline-flex; background: var(--slate-100); border-radius: var(--r-pill); padding: 3px; }
+.fb-seg button { border: 0; background: transparent; color: var(--text-soft); font: 600 13px var(--font-ui); padding: 7px 15px; border-radius: var(--r-pill); cursor: pointer; }
+.fb-seg button.active { background: var(--surface); color: var(--indigo-700); box-shadow: var(--sh-xs); }
+
+/* Summary strip */
+.fb-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+@media (max-width: 720px) { .fb-summary { grid-template-columns: 1fr; } }
+.fb-kpi { display: flex; align-items: center; gap: 13px; padding: 16px 18px; }
+.fbk-ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.fbk-ic svg { width: 20px; height: 20px; }
+.fbk-val { font-family: var(--font-head); font-size: 24px; font-weight: 600; line-height: 1; }
+.fbk-lbl { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+.fb-kpi.tone-warn .fbk-ic { background: var(--warning-bg); color: var(--warning-fg); }
+.fb-kpi.tone-indigo .fbk-ic { background: var(--indigo-100); color: var(--indigo-700); }
+.fb-kpi.tone-slate .fbk-ic { background: var(--slate-100); color: var(--text-soft); }
+
+/* Lesson group cards */
+.fbg-list { display: flex; flex-direction: column; gap: 16px; }
+.fbg-card { padding: 0; overflow: hidden; }
+.fbg-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--slate-50), transparent); }
+.fbg-title { min-width: 0; }
+.fbg-title h3 { font-family: var(--font-head); font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fbg-subj { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 2px 9px; }
+.fbg-aside { display: flex; align-items: center; gap: 14px; flex: none; }
+.fbg-openbadge { font-size: 11.5px; font-weight: 700; color: var(--warning-fg); background: var(--warning-bg); border-radius: var(--r-pill); padding: 4px 10px; white-space: nowrap; }
+
+.fbg-meter { display: flex; align-items: center; gap: 9px; }
+.fbm-track { width: 88px; height: 7px; border-radius: 999px; background: var(--slate-100); overflow: hidden; }
+.fbm-fill { height: 100%; border-radius: 999px; }
+.fbm-fill.u100 { background: var(--success); }
+.fbm-fill.u75 { background: var(--indigo-500, var(--indigo-600)); }
+.fbm-fill.u50 { background: var(--warning-fg); }
+.fbm-fill.u25 { background: var(--danger); }
+.fbm-val { font-size: 12.5px; font-weight: 700; color: var(--text-soft); min-width: 34px; text-align: right; }
+
+.fbg-body { padding: 6px 18px 10px; }
+
+/* Row tweaks specific to this page (base .fb-row lives in teacher.css) */
+.fbg-body .fb-pct { display: inline-flex; align-items: center; }
+.fb-class { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; color: var(--indigo-700); background: var(--indigo-50); border: 1px solid var(--indigo-100); border-radius: var(--r-pill); padding: 2px 8px; }
+.fb-nomsg { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.fb-ok-tag { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--success-bg); color: var(--success-fg); display: grid; place-items: center; }
+.fb-ok-tag svg { width: 15px; height: 15px; }
+.fb-resolve:disabled { opacity: .5; cursor: default; }
+
+/* Empty / loading */
+.fb-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+.fb-empty-ic { width: 46px; height: 46px; border-radius: 50%; background: var(--success-bg); color: var(--success-fg); display: grid; place-items: center; }
+.fb-empty-ic svg { width: 22px; height: 22px; }

@@ -6,31 +6,51 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
-    "build:content": "node scripts/build-content.mjs && node scripts/build-exercises.mjs",
-    "predev": "node scripts/build-content.mjs && node scripts/build-exercises.mjs && prisma generate",
+    "build:content": "node scripts/build-content.mjs && node scripts/build-exercises.mjs && node scripts/inject-geo-figures.mjs && node scripts/inject-maths5-figures.mjs && node scripts/inject-chimie6-figures.mjs && node scripts/fix-content-latex.mjs && node scripts/fix-exercises-latex.mjs && node scripts/check-exercises.mjs",
+    "predev": "node scripts/build-content.mjs && node scripts/build-exercises.mjs && node scripts/inject-geo-figures.mjs && node scripts/inject-maths5-figures.mjs && node scripts/inject-chimie6-figures.mjs && node scripts/fix-content-latex.mjs && node scripts/fix-exercises-latex.mjs && node scripts/check-exercises.mjs && prisma generate",
     "dev": "next dev",
-    "prebuild": "node scripts/build-content.mjs && node scripts/build-exercises.mjs && prisma generate",
+    "prebuild": "node scripts/build-content.mjs && node scripts/build-exercises.mjs && node scripts/inject-geo-figures.mjs && node scripts/inject-maths5-figures.mjs && node scripts/inject-chimie6-figures.mjs && node scripts/fix-content-latex.mjs && node scripts/fix-exercises-latex.mjs && node scripts/check-exercises.mjs && prisma generate",
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "predb:seed": "node scripts/inject-geo-figures.mjs && node scripts/inject-maths5-figures.mjs && node scripts/inject-chimie6-figures.mjs && node scripts/fix-content-latex.mjs && node scripts/fix-exercises-latex.mjs && node scripts/check-exercises.mjs",
     "db:seed": "tsx prisma/seed.ts",
+    "predb:reset": "node scripts/inject-geo-figures.mjs && node scripts/inject-maths5-figures.mjs && node scripts/inject-chimie6-figures.mjs && node scripts/fix-content-latex.mjs && node scripts/fix-exercises-latex.mjs && node scripts/check-exercises.mjs",
     "db:reset": "prisma migrate reset --force && tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "uploads:prune": "node scripts/prune-uploads.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
+    "@tiptap/extension-highlight": "^3.29.2",
+    "@tiptap/extension-list": "^3.29.2",
+    "@tiptap/extension-subscript": "^3.29.2",
+    "@tiptap/extension-superscript": "^3.29.2",
+    "@tiptap/extension-table": "^3.29.2",
+    "@tiptap/extension-text-align": "^3.29.2",
+    "@tiptap/extension-text-style": "^3.29.2",
+    "@tiptap/extensions": "^3.29.2",
+    "@tiptap/pm": "^3.29.2",
+    "@tiptap/react": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
     "bcryptjs": "2.4.3",
     "iron-session": "8.0.4",
     "katex": "0.16.11",
     "next": "14.2.5",
+    "pdf-parse": "^1.1.1",
     "prisma": "5.22.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-markdown": "9.0.1",
     "rehype-katex": "7.0.1",
+    "rehype-raw": "^7.0.0",
     "remark-gfm": "4.0.0",
-    "remark-math": "6.0.0"
+    "remark-math": "6.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "2.4.6",
@@ -38,9 +58,12 @@
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.20",
+    "fake-indexeddb": "^6.2.5",
+    "hast-util-from-html": "^2.0.3",
     "postcss": "8.4.41",
     "tailwindcss": "3.4.10",
     "tsx": "4.19.1",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "vitest": "^4.1.10"
   }
 }

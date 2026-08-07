@@ -1,0 +1,217 @@
+/* Atelier LaTeX — Copilot | source | rendu.
+   Same chrome vocabulary as the lesson editor (rediger.css); the difference is that
+   the render pane is permanent rather than a tab, because on this page the point IS
+   seeing the maths. */
+
+/* Taken out of flow on purpose.
+
+   This is a fixed-viewport shell: the three panes scroll, the page never does. Sizing
+   it with height:100vh looked equivalent and was not — the docked palette's grid still
+   contributed its full unclipped height to the PAGE's scroll extent, even though
+   .lxp-pal clips it and it measures 240px on screen. The result was ~840px of empty
+   grey below the app that you could scroll into, with the real content left above it.
+
+   position:fixed removes the shell from flow entirely, so the body has no scrollable
+   content and the phantom space cannot exist. height:100vh is kept as a fallback for
+   the stacked layout below, which deliberately does scroll. */
+.lxp { position: fixed; inset: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+.lxp-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.lxp-back { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text-soft); }
+.lxp-back:hover { color: var(--text); border-color: var(--border-strong); }
+.lxp-back svg { width: 16px; height: 16px; }
+.lxp-title { flex: 1; min-width: 120px; height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: var(--r-sm); background: transparent; font: 600 15px var(--font-ui); color: var(--text); }
+.lxp-title:hover:not(:disabled) { border-color: var(--border); }
+.lxp-title:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); background: var(--surface); }
+.lxp-subject { flex: none; font: 500 12px var(--font-ui); color: var(--text-muted); }
+.lxp-server { display: inline-flex; align-items: center; gap: 6px; font: 500 11.5px var(--font-ui); color: var(--text-muted); }
+.lxp-server .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success-fg, #16a34a); }
+.lxp-server.bad { color: var(--danger-fg); }
+.lxp-server.bad .dot { background: var(--danger-fg); }
+.lxp-save { font: 500 11.5px var(--font-ui); color: var(--text-muted); }
+
+.lxp-draft, .lxp-savefail { flex: none; display: flex; align-items: center; gap: 10px; padding: 9px 14px; font: 400 12.5px var(--font-ui); }
+.lxp-draft { background: var(--indigo-50); color: var(--text); border-bottom: 1px solid var(--border); }
+.lxp-savefail { background: var(--warning-bg); color: var(--warning-fg); border-bottom: 1px solid var(--warning-fg); }
+.lxp-draft svg, .lxp-savefail svg { flex: none; width: 15px; height: 15px; }
+.lxp-draft span, .lxp-savefail span { flex: 1; }
+
+/* Three columns. The source and the render share the space; Copilot is a rail.
+   overflow:hidden on the grid itself, or a tall pane pushes the grid past the flex
+   item and the window scrolls instead of the pane. */
+/* The rail's width is the teacher's, not a constant: --rail is set from React and
+   dragged by .lxp-grip. No fixed fraction was ever right — writing a prompt or reading
+   the agent's steps wants a wide rail, typing LaTeX wants it out of the way. */
+.lxp-body { flex: 1; min-height: 0; overflow: hidden; display: grid; grid-template-columns: var(--rail, 320px) 7px minmax(0, 1fr) minmax(0, 1fr); }
+/* While dragging, nothing else may take the pointer or flash a selection. */
+.lxp-body.dragging { cursor: col-resize; user-select: none; }
+.lxp-body.dragging * { pointer-events: none; }
+.lxp-body.dragging .lxp-grip { pointer-events: auto; }
+
+.lxp-body > * { min-width: 0; display: flex; flex-direction: column; overflow: hidden; padding: 10px 12px; }
+.lxp-ai { border-right: 0; background: var(--surface-2); overflow-y: auto; }
+.lxp-out { border-left: 1px solid var(--border); background: var(--surface-2); padding: 0; }
+
+/* Declared AFTER `.lxp-body > *` on purpose: that rule sets a padding and a column
+   flow on every child, and at equal specificity the later declaration is the one that
+   wins. Put the grip first and it silently became a padded 7px column with no thumb. */
+.lxp-grip { padding: 0; flex-direction: row; align-items: center; justify-content: center; background: var(--surface-2); border-right: 1px solid var(--border); cursor: col-resize; touch-action: none; }
+.lxp-grip:hover, .lxp-grip:focus-visible { background: var(--indigo-50); }
+.lxp-grip:focus-visible { outline: 2px solid var(--indigo-400); outline-offset: -2px; }
+/* The visible thumb — a grip with no affordance is one nobody finds. */
+.lxp-grip span { display: block; width: 3px; height: 34px; border-radius: 2px; background: var(--border-strong); }
+.lxp-grip:hover span, .lxp-grip:focus-visible span { background: var(--indigo-400); }
+.lxp-body.dragging .lxp-grip span { background: var(--indigo-600, var(--indigo-700)); }
+
+.lxp-l { display: flex; align-items: center; gap: 5px; margin: 0 0 6px; font: 600 10.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.lxp-l svg { width: 13px; height: 13px; }
+
+/* ---- Copilot rail ----
+   The prompt box takes whatever height the rail has left over. Everything else in the
+   column keeps its natural size (flex:none), so the textarea is the single thing that
+   absorbs the slack — the empty grey under a four-row box is space the teacher could
+   be writing in. It gives that space back the moment a proposal or the agent's steps
+   need it, down to a floor of 96px. */
+.lxp-ai-in { flex: 1 1 auto; min-height: 96px; width: 100%; padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); font: 400 13px/1.5 var(--font-ui); color: var(--text); resize: none; }
+.lxp-ai-in:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+/* Chrome around the prompt: fixed, so none of it steals the slack. */
+.lxp-ai > .lxp-l, .lxp-mode, .lxp-ai-go, .lxp-hint, .lxp-prop, .lxp-starters, .lxp-ai .ag-steps, .lxp-err, .lxp-warn { flex: none; }
+.lxp-ai-go { width: 100%; margin-top: 7px; justify-content: center; }
+.lxp-hint { margin: 7px 0 0; font: 400 11px/1.45 var(--font-ui); color: var(--text-muted); }
+.lxp-err, .lxp-warn { display: flex; align-items: flex-start; gap: 6px; margin: 9px 0 0; padding: 8px 10px; border-radius: var(--r-sm); font: 400 12px/1.45 var(--font-ui); }
+.lxp-err { background: var(--danger-bg); color: var(--danger-fg); }
+.lxp-warn { background: var(--warning-bg); color: var(--warning-fg); }
+.lxp-err svg, .lxp-warn svg { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+
+.lxp-prop { margin-top: 12px; padding: 10px; border: 1px solid var(--indigo-400); border-radius: var(--r-md); background: var(--surface); }
+.lxp-prop-r { overflow-x: auto; padding: 6px 0; }
+.lxp-prop-s { display: block; margin: 7px 0; padding: 6px 8px; border-radius: var(--r-sm); background: var(--surface-2); font: 400 11.5px var(--font-mono, ui-monospace, monospace); color: var(--text-soft); white-space: pre-wrap; word-break: break-word; }
+.lxp-prop-a { display: flex; gap: 7px; }
+.lxp-note { margin: 4px 0; font: 400 12px/1.45 var(--font-ui); color: var(--text-soft); }
+.lxp-disclaim { margin: 8px 0 0; font: 400 11px var(--font-ui); color: var(--text-muted); }
+
+/* ---- source ---- */
+/* The source box keeps a floor and the palette gives ground first. With the palette
+   at flex:none the textarea (min-height:0) collapsed to about three visible lines on a
+   1000px-tall window — you cannot scroll away a box that has no room to show text,
+   but you can always scroll a palette. */
+.lxp-ta { flex: 1 1 auto; min-height: 150px; width: 100%; padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); font: 400 13.5px/1.7 var(--font-mono, ui-monospace, monospace); color: var(--text); resize: none; tab-size: 2; }
+.lxp-ta:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.lxp-pal { flex: 0 1 auto; max-height: 240px; min-height: 92px; display: flex; flex-direction: column; margin-top: 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.lxp-pal .sp-body { flex: 1; min-height: 0; }
+/* The figure catalogue is a browsable list, not a grid of keys. */
+.lxp-pal.tall { max-height: 420px; }
+.lxp-palopen { align-self: flex-start; margin-top: 8px; }
+
+/* ---- render / audit ---- */
+.lxp-tabs { flex: none; display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--border); }
+.lxp-tab { position: relative; padding: 7px 12px 9px; border: 0; background: transparent; font: 500 12.5px var(--font-ui); color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.lxp-tab:hover { color: var(--text); }
+.lxp-tab.active { color: var(--indigo-700); border-bottom-color: var(--indigo-600, var(--indigo-700)); }
+.lxp-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; margin-left: 5px; padding: 0 5px; border-radius: 9px; font: 600 10.5px var(--font-ui); background: var(--surface-2); color: var(--text-muted); }
+.lxp-badge.warn { background: var(--warning-bg); color: var(--warning-fg); }
+
+.lxp-pane { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 40px; background: var(--surface); }
+.lxp-none { display: flex; align-items: center; gap: 6px; font: 400 12.5px var(--font-ui); color: var(--text-muted); }
+.lxp-none svg { width: 14px; height: 14px; }
+
+.lxp-f { margin-bottom: 12px; padding: 10px 12px; border: 1px solid var(--border); border-left-width: 3px; border-radius: var(--r-sm); background: var(--surface-2); }
+.lxp-f.bad { border-left-color: var(--danger-fg); }
+.lxp-f.suspect { border-left-color: var(--warning-fg); }
+.lxp-f-n { font: 600 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.lxp-f code { display: block; margin: 5px 0; font: 400 12px var(--font-mono, ui-monospace, monospace); color: var(--text-soft); white-space: pre-wrap; word-break: break-word; }
+.lxp-f-e { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font: 400 11.5px/1.45 var(--font-ui); color: var(--danger-fg); }
+.lxp-f-e svg { flex: none; width: 13px; height: 13px; margin-top: 1px; }
+.lxp-f.suspect .lxp-f-e { color: var(--warning-fg); }
+
+.lxp-plan { margin: 0; padding: 0; list-style: none; }
+.lxp-plan li { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--border); font: 400 13px var(--font-ui); color: var(--text); }
+.lxp-plan li b { margin-left: auto; font: 500 11px var(--font-ui); color: var(--text-muted); }
+.lxp-plan li.l2 { padding-left: 14px; }
+.lxp-plan li.l3 { padding-left: 28px; font-size: 12.5px; color: var(--text-soft); }
+.lxp-plan li.l4 { padding-left: 42px; font-size: 12px; color: var(--text-muted); }
+
+.lxp-stats { margin: 0; padding: 0; list-style: none; max-width: 320px; }
+.lxp-stats li { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); font: 400 13px var(--font-ui); color: var(--text-soft); }
+.lxp-stats li b { font: 600 15px var(--font-ui); color: var(--text); }
+.lxp-stats li b.warn { color: var(--warning-fg); }
+
+/* ---- start / empty screens ---- */
+.lxp-start { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
+.lxp-start h1 { margin: 0 0 6px; font: 600 24px var(--font-ui); color: var(--text); }
+.lxp-start-sub { margin: 0 0 28px; font: 400 14px/1.6 var(--font-ui); color: var(--text-soft); }
+.lxp-start h2 { margin: 0 0 10px; font: 600 15px var(--font-ui); color: var(--text); }
+.lxp-start section { margin-bottom: 28px; }
+.lxp-start-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.lxp-start-none { font: 400 13px var(--font-ui); color: var(--text-muted); }
+.lxp-start-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.lxp-start-list a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+.lxp-start-list a:hover { border-color: var(--indigo-400); background: var(--indigo-50); }
+.lxp-start-list .t { flex: 1; font: 500 13.5px var(--font-ui); color: var(--text); }
+.lxp-start-list .s { font: 400 12px var(--font-ui); color: var(--text-muted); }
+.lxp-start-back { display: inline-block; font: 500 13px var(--font-ui); color: var(--text-muted); }
+
+.lxp-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 80px 20px; color: var(--text-muted); font: 400 14px var(--font-ui); }
+.lxp-empty svg { width: 22px; height: 22px; }
+
+/* Three columns hold down to ~1040px: 210 for the rail plus two ~400px panes is still
+   comfortably readable, and side-by-side source and render is the entire point of the
+   page. The breakpoint used to be 1200px, which threw away the third column on a
+   1119px window that had room for it — and the two-column fallback then spent a
+   full-height column on a rail with four controls in it while capping the render at
+   42vh, so a 360px figure landed in a box too short to show it. */
+@media (max-width: 1040px) {
+  .lxp-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  /* The rail becomes a short banner across the top rather than a tall empty column,
+     so there is no vertical edge left to drag. */
+  .lxp-ai { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--border); max-height: 32vh; }
+  .lxp-grip { display: none; }
+  .lxp-out { border-top: 1px solid var(--border); }
+  .lxp-ta { min-height: 160px; }
+}
+
+/* One column: the panes stack and the page itself scrolls. Each gets a floor tall
+   enough to be worth reading — a figure is 360px, so a render pane shorter than that
+   shows a slice of a chart and nothing else. */
+@media (max-width: 760px) {
+  /* Back into flow: on a phone the panes stack and the PAGE is the scroller, so the
+     shell must be as tall as its content rather than pinned to the viewport. */
+  .lxp { position: static; inset: auto; height: auto; min-height: 100vh; overflow: visible; }
+  .lxp-body { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow: visible; }
+  .lxp-body > * { overflow: visible; }
+  .lxp-ai { grid-column: auto; max-height: none; }
+  .lxp-grip { display: none; }
+  .lxp-out { border-left: 0; }
+  .lxp-pane { overflow-y: visible; min-height: 420px; }
+  .lxp-ta { min-height: 300px; }
+  .lxp-head { flex-wrap: wrap; }
+}
+
+/* ---- assistance mode: one-shot vs agent ---- */
+.lxp-mode { display: inline-flex; width: 100%; margin-top: 7px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); overflow: hidden; }
+.lxp-mode button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 0; border-right: 1px solid var(--border); background: var(--surface); padding: 6px 8px; font: 600 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.lxp-mode button:last-child { border-right: 0; }
+.lxp-mode button:hover { background: var(--surface-2); color: var(--text); }
+.lxp-mode button.on { background: var(--indigo-600, var(--indigo-700)); color: #fff; }
+.lxp-mode svg { width: 13px; height: 13px; }
+
+/* The agent's steps sit in a narrow rail, so they wrap rather than clip. */
+.lxp-ai .ag-steps { margin-top: 10px; }
+.lxp-ai .ag-step { align-items: flex-start; }
+.lxp-ai .ag-step-l, .lxp-ai .ag-step-d { word-break: break-word; }
+
+/* ---- starter blocks: what the rail shows when Copilot has nothing to say ---- */
+.lxp-starters { margin-top: 16px; display: grid; gap: 5px; }
+.lxp-starter { display: grid; gap: 1px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); text-align: left; cursor: pointer; }
+.lxp-starter:hover:not(:disabled) { border-color: var(--indigo-400); background: var(--indigo-50); }
+.lxp-starter:disabled { opacity: .5; cursor: default; }
+.lxp-starter b { font: 600 12.5px var(--font-ui); color: var(--text); }
+.lxp-starter span { font: 400 11px var(--font-ui); color: var(--text-muted); }
+.lxp-starters-note { margin: 10px 0 0; font: 400 11px/1.5 var(--font-ui); color: var(--text-muted); }
+.lxp-starters-note b { font-weight: 600; color: var(--text-soft); }
+
+.lxp-w { margin-left: auto; font: 600 10.5px var(--font-mono, ui-monospace, monospace); color: var(--indigo-700); letter-spacing: 0; text-transform: none; }
+
+.lxp-toolong { flex: none; display: flex; align-items: flex-start; gap: 6px; margin: 7px 0 0; padding: 7px 9px; border-radius: var(--r-sm); background: var(--warning-bg); font: 400 11px/1.45 var(--font-ui); color: var(--warning-fg); }
+.lxp-toolong svg { flex: none; width: 13px; height: 13px; margin-top: 1px; }
+.lxp-toolong b { font-weight: 700; }

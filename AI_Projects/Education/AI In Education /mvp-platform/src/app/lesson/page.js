@@ -539,6 +539,21 @@ export default function LessonPage() {
               <TocBar contentMd={lesson.contentMd} scrollRef={scrollRef} />
               <Markdown>{lesson.contentMd}</Markdown>
 
+              {data.companions?.length > 0 && (
+                <section className="lesson-companions">
+                  <div className="lc-head"><Icon name="sparkles" /> Compléments du prof</div>
+                  {data.companions.map((c) => (
+                    <article className="lc-card" key={c.id}>
+                      <div className="lc-card-head">
+                        <h3>{c.title}</h3>
+                        {c.authorName && <span className="lc-by">par {c.authorName}</span>}
+                      </div>
+                      <div className="lc-body"><Markdown>{c.contentMd}</Markdown></div>
+                    </article>
+                  ))}
+                </section>
+              )}
+
               {quiz && (
                 <div className="quiz-cta">
                   <div className="qc-ic"><Icon name="target" /></div>

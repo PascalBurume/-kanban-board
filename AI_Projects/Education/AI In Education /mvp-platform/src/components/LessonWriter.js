@@ -487,7 +487,7 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
       )}
 
       {palette && (
-        <div className={`lw-palette${palTab === "figures" ? " figs" : ""}`} role="dialog" aria-label="Symboles" onMouseDown={keepSelection}>
+        <div className="lw-palette" role="dialog" aria-label="Symboles et figures" onMouseDown={keepSelection}>
           <SymbolPalette
             tab={palTab}
             onTab={setPalTab}

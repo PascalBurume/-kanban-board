@@ -28,32 +28,37 @@
    Only the popover SHELL lives here; the palette's own styles moved to
    components/editor/SymbolPalette.css when the LaTeX editor and the LaTeX workspace
    started showing the same component. */
-.lw-palette { position: absolute; z-index: 20; top: 44px; right: 10px; width: min(560px, calc(100% - 20px)); max-height: min(560px, calc(100vh - 150px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 28px rgba(0,0,0,.14); overflow: hidden; }
-/* The figure catalogue needs far more room than a symbol grid: one open entry is a
-   360×240 drawing, then the rendered relation, then its LaTeX, then four buttons. At
-   the symbol palette's height that stack was clipped mid-equation, so the teacher
-   could not read the formula they were about to insert — and the insert buttons sat
-   below the fold entirely.
-
-   It is also CENTRED ON THE VIEWPORT rather than anchored in the document column, the
-   way the symbol popover is. Browsing 76 classified figures is a dialog task, not a
-   dropdown one — and the column is only ~460px wide once the outline and the Copilot
-   rail have taken their share, which is narrower than the 360px drawing plus padding.
-   position:fixed is safe here: nothing above it transforms or filters. */
-.lw-palette.figs {
-  position: fixed; top: 50%; left: 50%; right: auto; transform: translate(-50%, -50%);
-  width: min(920px, calc(100vw - 48px)); max-height: min(820px, calc(100vh - 64px));
-  z-index: 60; box-shadow: 0 18px 60px rgba(0,0,0,.24);
+/* ONE window, whatever tab is showing.
+ *
+ * It is a centred dialog rather than a popover anchored in the document column,
+ * because the column is only ~460px wide once the outline and the Copilot rail have
+ * taken their share — narrower than the five tabs plus the search field, which is why
+ * the header used to clip, and narrower than the 360px figure drawing.
+ *
+ * The size no longer depends on the tab. It did, and switching from Symboles to Figures
+ * resized and re-positioned the window under the teacher's cursor mid-click. A dialog
+ * that moves when you change tab inside it is a dialog you stop trusting.
+ *
+ * position:fixed is safe here: nothing above it transforms or filters. */
+.lw-palette {
+  position: fixed; z-index: 60; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  /* A fixed height, not a max-height. With max-height the dialog shrank to fit a short
+     tab (Chimie has far fewer symbols than Mathématiques), and because it is centred,
+     shrinking moved its top edge — so the tab strip slid up under the cursor that had
+     just clicked it. Empty space below a short tab is the cheaper cost. */
+  width: min(920px, calc(100vw - 48px)); height: min(820px, calc(100vh - 64px));
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  box-shadow: 0 18px 60px rgba(0,0,0,.24); overflow: hidden;
 }
-/* With that width, an open entry reads side by side: the drawing on the left, and the
+/* At that width an open figure reads side by side: the drawing on the left, and the
    relation, its LaTeX and the insert buttons on the right. Stacked, the entry ran ~580px
    and the buttons fell below the fold on a 800px-tall laptop — the teacher saw the
-   figure but not the control that inserts it. Two columns roughly halve that, so every
-   entry shows its buttons without scrolling.
-   Only here: the LaTeX editor's palette is ~460px wide and must stay single-column. */
-.lw-palette.figs .fc-detail { display: flex; align-items: flex-start; gap: 18px; }
-.lw-palette.figs .fc-detail > .fc-fig { flex: 0 0 380px; }
-.lw-palette.figs .fc-detail > .fc-side { flex: 1; min-width: 0; }
+   figure but not the control that inserts it.
+   Scoped to this shell: the LaTeX editor's palette is ~460px and stays single-column. */
+.lw-palette .fc-detail { display: flex; align-items: flex-start; gap: 18px; }
+.lw-palette .fc-detail > .fc-fig { flex: 0 0 380px; }
+.lw-palette .fc-detail > .fc-side { flex: 1; min-width: 0; }
 /* TexPreview's default class, still used by surfaces that do not pass their own. */
 .lw-tex { font-size: 15px; color: var(--text); min-height: 20px; display: flex; align-items: center; }
 
@@ -145,7 +150,9 @@
    a wrapped ribbon steals a whole line of the document on every narrow laptop. */
 @media (max-width: 900px) {
   .lw-ribbon { flex-wrap: nowrap; overflow-x: auto; }
-  .lw-palette { right: 8px; left: 8px; width: auto; }
+  /* No .lw-palette override here any more: it is centred with a transform, and setting
+     left/right on top of that pushes it off its own centre. Its width already tracks
+     the viewport (100vw - 48px). */
   .fe { width: calc(100% - 16px); left: 8px !important; }
 }
 

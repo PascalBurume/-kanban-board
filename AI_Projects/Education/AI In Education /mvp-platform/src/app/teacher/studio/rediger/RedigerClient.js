@@ -69,6 +69,24 @@ function quizToApi(q) {
 const SAVE_IDLE_MS = 5000;
 const SAVE_MAX_MS = 30000;
 
+/**
+ * « il y a 2 h », « hier », « le 3 août ».
+ *
+ * Relative near the present and absolute once it stops being useful: "il y a 34 jours"
+ * is a number a teacher has to do arithmetic on, where a date is one they recognise.
+ */
+function sinceLabel(ms) {
+  const mins = Math.round((Date.now() - ms) / 60000);
+  if (mins < 1) return "à l'instant";
+  if (mins < 60) return `il y a ${mins} min`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `il y a ${hours} h`;
+  const days = Math.round(hours / 24);
+  if (days === 1) return "hier";
+  if (days < 7) return `il y a ${days} jours`;
+  return `le ${new Date(ms).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`;
+}
+
 const num = (key, fallback) => {
   if (typeof window === "undefined") return fallback;
   const v = Number(window.localStorage.getItem(key));
@@ -142,21 +160,49 @@ export default function RedigerClient() {
   }, []);
 
   // ---- load ----
+
+  /** Fetch the "reprendre" list. Newest first: the lesson you were just in is the one
+   *  you are most likely coming back for. */
+  const loadStart = useCallback(async () => {
+    const t = await fetch("/api/studio/tree/", { credentials: "same-origin", cache: "no-store" }).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    setStart({
+      subjects: (t?.subjects || []).map((s) => ({ slug: s.slug, name: s.name })),
+      drafts: (t?.subjects || [])
+        .flatMap((s) => (s.library || []).map((l) => ({ ...l, subjectName: s.name })))
+        .sort((a, b) => (b.editedAt ?? 0) - (a.editedAt ?? 0)),
+    });
+  }, []);
+
+  /**
+   * Re-fetch whenever this page comes back into view.
+   *
+   * Editing a lesson and pressing Back restores this page from the browser's cache with
+   * the React state it had on the way out — so a lesson you just renamed or published
+   * still showed its old title and its old badge, which read as the app not saving.
+   * `pageshow`/`persisted` is the bfcache restore; `visibilitychange` covers coming
+   * back to a tab that was left open on this screen.
+   */
+  useEffect(() => {
+    if (!start) return undefined;
+    const refresh = () => { if (!document.hidden) loadStart(); };
+    const onShow = (e) => { if (e.persisted) refresh(); };
+    window.addEventListener("pageshow", onShow);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("pageshow", onShow);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [start, loadStart]);
+
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("id");
     if (!id) {
-      (async () => {
-        const t = await fetch("/api/studio/tree/", { credentials: "same-origin" }).then((x) => (x.ok ? x.json() : null)).catch(() => null);
-        setStart({
-          subjects: (t?.subjects || []).map((s) => ({ slug: s.slug, name: s.name })),
-          drafts: (t?.subjects || []).flatMap((s) => (s.library || []).map((l) => ({ ...l, subjectName: s.name }))),
-        });
-      })();
+      loadStart();
       return;
     }
     setLessonId(id);
     (async () => {
-      const r = await fetch(`/api/studio/lessons/${id}/`, { credentials: "same-origin" });
+      const r = await fetch(`/api/studio/lessons/${id}/`, { credentials: "same-origin", cache: "no-store" });
       if (!r.ok) {
         setLoadError(r.status === 404 ? "Leçon introuvable." : "Accès refusé.");
         return;
@@ -169,7 +215,7 @@ export default function RedigerClient() {
       setSourceId(d.lesson.companionOfId || "");
       setBookLessons(d.bookLessons || []);
       setQuiz((d.quiz?.questions || []).map(quizFromApi));
-      const t = await fetch(`/api/studio/tree/?lesson=${id}`, { credentials: "same-origin" }).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+      const t = await fetch(`/api/studio/tree/?lesson=${id}`, { credentials: "same-origin", cache: "no-store" }).then((x) => (x.ok ? x.json() : null)).catch(() => null);
       if (t?.classLevel) setClassLevel(t.classLevel);
 
       requestPersistence();
@@ -681,38 +727,68 @@ export default function RedigerClient() {
   if (start) {
     return (
       <div className="rd-start teacher-page">
-        <h1>Rédiger une leçon</h1>
-        <p className="rd-start-sub">Votre espace de rédaction : écrivez, mettez en forme, insérez vos formules, puis reliez la leçon au manuel.</p>
-        <section>
-          <h2>Commencer une nouvelle leçon</h2>
-          <div className="rd-start-row">
-            {start.subjects.map((s) => (
-              <button key={s.slug} className="btn btn-primary btn-sm" onClick={() => createLesson(s.slug)}>
-                <Icon name="plus" /> {s.name}
-              </button>
-            ))}
-            {start.subjects.length === 0 && <p className="rd-start-none">Aucune matière ne vous est attribuée.</p>}
+        <header className="rd-start-hd">
+          <div>
+            <h1>Rédiger une leçon</h1>
+            <p className="rd-start-sub">Écrivez, mettez en forme, insérez vos formules et vos figures, puis reliez la leçon au manuel.</p>
           </div>
-        </section>
-        <section>
-          <h2>Reprendre une leçon</h2>
-          {start.drafts.length === 0 ? (
-            <p className="rd-start-none">Vous n'avez pas encore de leçon personnelle.</p>
+          <a className="rd-start-back" href="/teacher/studio/"><Icon name="chevL" /> Studio de contenu</a>
+        </header>
+
+        <section className="rd-start-new">
+          <h2>Commencer une nouvelle leçon</h2>
+          {start.subjects.length === 0 ? (
+            <p className="rd-start-none">Aucune matière ne vous est attribuée. Voyez avec la direction.</p>
           ) : (
-            <ul className="rd-start-list">
+            <div className="rd-start-row">
+              {start.subjects.map((s) => (
+                <button key={s.slug} className="rd-newcard" onClick={() => createLesson(s.slug)}>
+                  <span className="rd-newcard-i"><Icon name="plus" /></span>
+                  <span className="rd-newcard-t">{s.name}</span>
+                  <span className="rd-newcard-h">Page blanche</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <div className="rd-start-h2">
+            <h2>Reprendre une leçon</h2>
+            {start.drafts.length > 0 && <span className="rd-start-count">{start.drafts.length}</span>}
+          </div>
+          {start.drafts.length === 0 ? (
+            <p className="rd-start-none">Vous n'avez pas encore de leçon personnelle. Commencez-en une ci-dessus.</p>
+          ) : (
+            <ul className="rd-start-grid">
               {start.drafts.map((d) => (
                 <li key={d.id}>
-                  <a href={`/teacher/studio/rediger/?id=${d.id}`}>
-                    <span className="t">{d.title}</span>
-                    <span className="s">{d.subjectName}</span>
-                    <span className={`st ${d.status === "PUBLISHED" ? "pub" : ""}`}>{d.status === "PUBLISHED" ? "Publiée" : "Brouillon"}</span>
+                  <a href={`/teacher/studio/rediger/?id=${d.id}`} className="rd-card">
+                    <span className="rd-card-hd">
+                      {/* Every lesson is created as « Nouvelle leçon », so repeating that
+                          name tells a teacher with three of them nothing. */}
+                      <span className={`rd-card-t${d.untitled ? " untitled" : ""}`}>
+                        {d.untitled ? "Sans titre" : d.title}
+                      </span>
+                      <span className={`rd-card-st${d.status === "PUBLISHED" ? " pub" : ""}`}>
+                        {d.status === "PUBLISHED" ? "Publiée" : "Brouillon"}
+                      </span>
+                    </span>
+                    <span className="rd-card-x">
+                      {d.blank ? <i>Page encore vide</i> : d.excerpt || <i>Sans texte</i>}
+                    </span>
+                    <span className="rd-card-ft">
+                      <span>{d.subjectName}</span>
+                      <span className="rd-card-dot">·</span>
+                      <span>{d.blank ? "à écrire" : `${d.words} mot${d.words > 1 ? "s" : ""}`}</span>
+                      {d.editedAt && <><span className="rd-card-dot">·</span><span>{sinceLabel(d.editedAt)}</span></>}
+                    </span>
                   </a>
                 </li>
               ))}
             </ul>
           )}
         </section>
-        <a className="rd-start-back" href="/teacher/studio/">← Retour au studio de contenu</a>
       </div>
     );
   }

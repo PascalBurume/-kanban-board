@@ -14,7 +14,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (!u) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   const data = await lessonForEdit(u, params.id);
   if (!data) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
-  return NextResponse.json(data);
+  // Same reason as the tree route, with a sharper edge: a cached lesson served on a
+  // back-navigation opens the editor on stale content, and the first autosave writes
+  // that stale content back over the real one.
+  return NextResponse.json(data, { headers: { "Cache-Control": "no-store, must-revalidate" } });
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {

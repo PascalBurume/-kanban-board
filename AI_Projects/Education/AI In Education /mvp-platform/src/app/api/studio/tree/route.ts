@@ -25,5 +25,13 @@ export async function GET(req: Request) {
   const tree = await studioTree(u, selected);
   if (tree === null) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-  return NextResponse.json({ ...tree, classes, selectedClassId: selected ?? null });
+  // no-store, said out loud. `dynamic = "force-dynamic"` only stops NEXT caching the
+  // route — it sends no cache headers, so the BROWSER applies heuristic caching and
+  // re-serves this from its own cache on a back-navigation. That is how a teacher could
+  // rename a lesson, press Back, and be shown the old name: it reads as the app having
+  // thrown the edit away.
+  return NextResponse.json(
+    { ...tree, classes, selectedClassId: selected ?? null },
+    { headers: { "Cache-Control": "no-store, must-revalidate" } },
+  );
 }

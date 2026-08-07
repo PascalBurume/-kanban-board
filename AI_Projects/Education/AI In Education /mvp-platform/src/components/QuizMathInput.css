@@ -1,0 +1,16 @@
+/* LaTeX-aware text field: snippet toolbar + live KaTeX preview.
+   Owned by the component so every page that renders it is styled — these rules
+   used to live in the Studio's stylesheet, leaving the field unstyled (and the
+   textarea at its default 20-column width) everywhere else. */
+.qmi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.qmi-top { display: flex; align-items: center; gap: 6px; min-height: 0; }
+.qmi-toolbar { display: flex; gap: 3px; flex-wrap: wrap; }
+.qmi-toolbar button { border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); font: 600 11.5px var(--font-ui); padding: 2px 8px; border-radius: var(--r-sm); cursor: pointer; }
+.qmi-toolbar button:hover { background: var(--indigo-50); color: var(--indigo-700); border-color: var(--indigo-200); }
+.qmi-fx { border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font: 700 11px var(--font-ui); font-style: italic; padding: 2px 7px; border-radius: var(--r-sm); cursor: pointer; margin-left: auto; }
+.qmi-fx.on, .qmi-fx:hover { background: var(--indigo-50); color: var(--indigo-700); border-color: var(--indigo-200); }
+.qmi input, .qmi textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 500 13.5px var(--font-ui); color: var(--text); background: var(--surface); resize: vertical; }
+.qmi input:focus, .qmi textarea:focus { outline: 2px solid var(--indigo-200); border-color: var(--indigo-400); }
+.qmi.compact input, .qmi.compact textarea { padding: 6px 9px; font-size: 13px; }
+.qmi-preview { border: 1px dashed var(--indigo-200); background: var(--indigo-50); border-radius: var(--r-sm); padding: 6px 10px; font-size: 13.5px; overflow-x: auto; }
+.qmi-preview .prose-reader p { margin: 0; }

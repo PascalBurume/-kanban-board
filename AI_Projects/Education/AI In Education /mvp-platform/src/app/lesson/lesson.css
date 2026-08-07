@@ -1,7 +1,10 @@
 /* Full-screen app shell, out of document flow so the page itself never scrolls
    — only .content-scroll and the Copilot's .cop-msgs scroll internally. */
 .lesson-page { position: fixed; inset: 0; overflow: hidden; }
-.lesson-shell { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+/* Explicit minmax(0,…) column: without it the grid's implicit column sizes to
+   max-content and a wide child (footer buttons, math) pushes the shell past the
+   viewport on phones. */
+.lesson-shell { display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); height: 100%; }
 .lesson-body { display: grid; grid-template-columns: 1fr 380px; min-height: 0; transition: grid-template-columns .25s ease; }
 .lesson-body.collapsed { grid-template-columns: 1fr 0px; }
 
@@ -203,7 +206,9 @@
 /* Tablet: Copilot becomes a slide-over drawer (toggled by the existing
    collapse button / reopen FAB), content takes the full width. */
 @media (max-width: 1024px) {
-  .lesson-body, .lesson-body.collapsed { grid-template-columns: 1fr; }
+  /* minmax(0,…) lets the single column shrink to the viewport instead of being
+     stretched wider by a nowrap child (footer buttons, steps label, wide math). */
+  .lesson-body, .lesson-body.collapsed { grid-template-columns: minmax(0, 1fr); }
   .copilot {
     position: fixed; top: 0; right: 0; width: min(370px, 92vw); height: 100dvh;
     z-index: 60; box-shadow: var(--sh-lg); transition: transform .25s ease;
@@ -310,3 +315,34 @@
   .quiz-cta .qc-body { flex: 1 1 60%; }
   .quiz-cta .btn { width: 100%; justify-content: center; margin-top: 4px; }
 }
+
+/* Footer + steps bar: the three full-text buttons (Précédent / Marquer terminé /
+   Suivant) overflow a phone, clipping "Suivant". Collapse Précédent + Suivant to
+   icon buttons so the mark-complete action keeps its label and nothing is cut. */
+@media (max-width: 700px) {
+  .steps-bar { padding: 10px 14px; gap: 10px; }
+  .steps-label { font-size: 11.5px; }
+
+  .lesson-foot .inner { gap: 8px; }
+  .lesson-foot .btn-secondary,
+  .lesson-foot .btn-primary {
+    font-size: 0; gap: 0; padding: 0;
+    width: 46px; min-width: 46px; height: 44px;
+    justify-content: center; flex: none;
+  }
+  .lesson-foot .btn-secondary svg,
+  .lesson-foot .btn-primary svg { width: 20px; height: 20px; }
+  .lesson-foot .btn-ghost { font-size: 13px; padding: 9px 12px; }
+}
+
+/* ── teacher compléments shown under the book lesson ── */
+.lesson-companions { margin-top: 30px; padding-top: 22px; border-top: 2px dashed var(--border); display: flex; flex-direction: column; gap: 16px; }
+.lc-head { display: inline-flex; align-items: center; gap: 8px; font: 700 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--indigo-700); }
+.lc-head svg { width: 16px; height: 16px; }
+.lc-card { border: 1px solid var(--indigo-200, var(--border)); border-left: 3px solid var(--indigo-500); border-radius: var(--r-md); background: var(--indigo-50); padding: 16px 20px; }
+.lc-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.lc-card-head h3 { margin: 0; font: 700 16px var(--font-head); color: var(--text); }
+.lc-by { font: 600 12px var(--font-ui); color: var(--text-muted); }
+.lc-body { font-size: 15px; line-height: 1.6; }
+.lc-body :first-child { margin-top: 0; }
+.lc-body :last-child { margin-bottom: 0; }

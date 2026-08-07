@@ -1,0 +1,129 @@
+/* Project assignment canvas — students → groups → projects.
+   Same visual vocabulary as ModuleConnector (mc-*), pc-* namespace. */
+
+.pc-wrap { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-height: 560px; }
+
+.pc-bar { flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+.pc-bar-title { display: inline-flex; align-items: center; gap: 8px; font: 600 15px var(--font-head); }
+.pc-bar-title svg { width: 17px; height: 17px; color: var(--indigo-600); }
+.pc-class-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 600 13px var(--font-ui); color: var(--text); }
+.pc-bar-hint { font-size: 12.5px; color: var(--text-muted); margin-left: auto; }
+.pc-dot-inline { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--indigo-500); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--indigo-400); vertical-align: middle; }
+
+.pc-body { display: flex; flex: 1; min-height: 0; }
+.pc-scroll { flex: 1; min-width: 0; min-height: 0; overflow: auto; container-type: inline-size; }
+/* Each lane keeps a floor and a ceiling, and the gap tracks the *container*
+   (cqi), not the viewport — opening the 320px agent panel shrinks the canvas
+   without the viewport changing. Previously the middle `1fr` lane absorbed the
+   whole deficit and collapsed to ~90px while the grid still overflowed. */
+.pc-inner { position: relative; display: grid; grid-template-columns: minmax(190px, 220px) minmax(180px, 1fr) minmax(250px, 300px); gap: clamp(24px, 3.4cqi, 56px); padding: 20px 24px 40px; min-height: 100%; align-content: start; }
+
+.pc-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.pc-edge { fill: none; stroke: var(--indigo-400); stroke-width: 2; }
+.pc-edge.dragging { stroke: var(--indigo-500); stroke-dasharray: 5 5; }
+
+.pc-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; align-content: start; height: max-content; }
+.pc-col-h { font: 700 11px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+.pc-count { background: var(--slate-200); color: var(--slate-600); border-radius: var(--r-pill); padding: 1px 8px; font: 700 11px var(--font-ui); }
+.pc-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 4px 2px; }
+.pc-empty.sm { font-size: 12px; padding: 6px 4px; }
+.pc-empty-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 16px; border: 1.5px dashed var(--border-strong, var(--border)); border-radius: var(--r-md); color: var(--text-muted); text-align: center; }
+.pc-empty-card svg { width: 22px; height: 22px; }
+.pc-empty-card p { font-size: 13px; margin: 0; }
+
+/* ── student chips ── */
+.pc-chip { position: relative; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 6px 10px; box-shadow: var(--sh-xs); cursor: grab; user-select: none; touch-action: none; transition: box-shadow .12s, border-color .12s, opacity .12s; }
+.pc-chip:hover { border-color: var(--indigo-200); box-shadow: var(--sh-sm); }
+.pc-chip:active { cursor: grabbing; }
+.pc-chip.grouped { opacity: .55; }
+.pc-chip.lifting { opacity: .35; }
+.pc-chip.in-group { padding: 4px 8px; box-shadow: none; }
+.pc-av { width: 24px; height: 24px; border-radius: 50%; background: var(--indigo-500); color: #fff; display: grid; place-items: center; font: 700 10px var(--font-ui); flex: none; }
+.pc-chip-name { flex: 1; font: 600 12.5px var(--font-ui); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc-chip-g { font: 700 10px var(--font-ui); color: var(--indigo-700); background: var(--indigo-50); border-radius: var(--r-pill); padding: 2px 7px; flex: none; }
+.pc-solo { border: 0; background: transparent; color: var(--indigo-700); font: 600 11px var(--font-ui); cursor: pointer; padding: 2px 4px; border-radius: var(--r-sm); flex: none; opacity: 0; transition: opacity .12s; }
+.pc-chip:hover .pc-solo { opacity: 1; }
+.pc-solo:hover { background: var(--indigo-50); }
+
+/* ghost chip following the pointer */
+.pc-ghost { position: absolute; z-index: 4; transform: translate(-50%, -130%); background: var(--indigo-600); color: #fff; font: 600 12px var(--font-ui); padding: 4px 10px; border-radius: var(--r-pill); pointer-events: none; box-shadow: var(--sh-md); }
+
+/* ── group cards ── */
+.pc-group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-xs); transition: outline-color .12s, background .12s; }
+.pc-group.targetable { outline: 1px dashed var(--indigo-300); outline-offset: -1px; }
+.pc-group.hover { outline: 2px solid var(--indigo-500); outline-offset: -2px; background: var(--indigo-50); }
+.pc-group-h { position: relative; display: flex; align-items: center; gap: 8px; padding: 10px 24px 10px 12px; border-bottom: 1px solid var(--border); }
+.pc-group-ic { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: var(--r-sm); background: var(--indigo-50); color: var(--indigo-600); }
+.pc-group-ic svg { width: 15px; height: 15px; }
+.pc-group-name { border: 0; background: transparent; font: 600 13.5px var(--font-ui); color: var(--text); cursor: text; padding: 2px 4px; border-radius: var(--r-sm); text-align: left; }
+.pc-group-name:hover { background: var(--indigo-50); }
+.pc-rename { font: 600 13.5px var(--font-ui); border: 1px solid var(--indigo-300); border-radius: var(--r-sm); padding: 2px 6px; width: 140px; }
+.pc-x { border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 3px; border-radius: var(--r-sm); flex: none; opacity: 0; transition: opacity .12s; }
+.pc-group:hover .pc-x { opacity: 1; }
+.pc-x:hover { background: var(--danger-bg); }
+.pc-x svg { width: 13px; height: 13px; }
+.pc-handle { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--indigo-500); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--indigo-300); cursor: grab; z-index: 3; touch-action: none; }
+.pc-handle:hover { background: var(--indigo-600); transform: translateY(-50%) scale(1.12); }
+.pc-handle:active { cursor: grabbing; }
+.pc-group-members { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; min-height: 44px; }
+.pc-group-links { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; }
+.pc-link-pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11px var(--font-ui); color: var(--indigo-700); background: var(--indigo-50); border-radius: var(--r-pill); padding: 3px 9px; }
+.pc-link-pill svg { width: 11px; height: 11px; }
+.pc-sub-status { font-weight: 800; color: var(--success-fg, var(--success)); }
+
+/* ── project cards ── */
+.pc-project { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; box-shadow: var(--sh-xs); transition: outline-color .12s, background .12s; }
+.pc-project.targetable { outline: 1px dashed var(--indigo-300); outline-offset: -1px; }
+.pc-project.hover { outline: 2px solid var(--indigo-500); outline-offset: -2px; background: var(--indigo-50); }
+.pc-anchor { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--indigo-300); }
+.pc-project-h { display: flex; align-items: flex-start; gap: 10px; }
+.pc-project-t { flex: 1; min-width: 0; }
+.pc-project-title { font: 600 13.5px var(--font-ui); color: var(--text); line-height: 1.3; }
+.pc-project-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; }
+.pc-prereqs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.pc-prereq { font: 600 10.5px var(--font-ui); color: var(--text-soft); background: var(--slate-100); border-radius: var(--r-pill); padding: 2px 8px; }
+.pc-connected { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pc-conn-pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px var(--font-ui); color: var(--indigo-700); background: var(--indigo-50); border: 1px solid var(--indigo-100, var(--border)); border-radius: var(--r-pill); padding: 3px 6px 3px 10px; }
+.pc-conn-pill i { font-style: normal; color: var(--text-muted); font-weight: 500; }
+.pc-conn-pill button { border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 2px; border-radius: 50%; }
+.pc-conn-pill button:hover { background: var(--danger-bg); }
+.pc-conn-pill button svg { width: 11px; height: 11px; }
+.pc-class-note { margin-top: 8px; font-size: 11.5px; color: var(--text-muted); }
+
+/* due-date popover on a project card */
+.pc-popover { margin-top: 10px; border: 1px solid var(--indigo-200); border-radius: var(--r-md); background: var(--indigo-50); padding: 10px 12px; }
+.pc-popover-t { font: 600 12.5px var(--font-ui); color: var(--text); margin-bottom: 8px; }
+.pc-popover-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pc-popover-row label { font: 600 11.5px var(--font-ui); color: var(--text-soft); }
+.pc-popover-row input { padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 500 12.5px var(--font-ui); background: var(--surface); }
+.pc-popover-acts { display: flex; justify-content: flex-end; gap: 8px; }
+.pc-warn { display: flex; align-items: flex-start; gap: 6px; font-size: 11.5px; color: var(--warning-fg); background: var(--warning-bg); border-radius: var(--r-sm); padding: 7px 9px; margin-bottom: 8px; }
+.pc-warn svg { width: 13px; height: 13px; flex: none; margin-top: 1px; }
+
+/* ── side agent panel (collapsible) ── */
+/* Grows into whatever the canvas can spare (its three lanes need ~730px at
+   their floors), so wide screens get a roomier assistant and narrow ones keep
+   the canvas intact. `.wide` overrides that budget on demand: the assistant
+   takes 55% and the canvas scrolls horizontally instead of shrinking. */
+.pc-side { flex: none; width: clamp(320px, calc(100% - 730px), 440px); border-left: 1px solid var(--border); background: var(--surface); overflow: auto; min-height: 0; transition: width .18s ease; }
+.pc-side.wide { width: clamp(420px, 55%, 720px); }
+.pc-side-acts { display: inline-flex; align-items: center; gap: 2px; }
+.pc-side-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.pc-side-title { display: inline-flex; align-items: center; gap: 6px; font: 700 11px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-soft); }
+.pc-side-title svg { width: 14px; height: 14px; color: var(--indigo-600); }
+.pc-side-toggle { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; padding: 4px; border-radius: var(--r-sm); }
+.pc-side-toggle:hover { background: var(--slate-100); color: var(--text); }
+.pc-side-toggle svg { width: 16px; height: 16px; }
+
+/* collapsed → a thin vertical rail that reopens the panel */
+.pc-side-reopen { flex: none; align-self: stretch; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 0; border-left: 1px solid var(--border); background: var(--surface); color: var(--indigo-700); cursor: pointer; padding: 14px 8px; transition: background .12s; }
+.pc-side-reopen:hover { background: var(--indigo-50); }
+.pc-side-reopen svg { width: 15px; height: 15px; }
+.pc-side-reopen span { writing-mode: vertical-rl; font: 700 11px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; }
+
+@media (max-width: 1100px) {
+  .pc-body { flex-direction: column; }
+  .pc-side { width: auto; border-left: 0; border-top: 1px solid var(--border); max-height: none; }
+  .pc-inner { grid-template-columns: 1fr; gap: 24px; }
+  .pc-edges { display: none; }
+}

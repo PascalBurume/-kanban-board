@@ -34,10 +34,18 @@ const PUBLIC = path.join(APP, "public");
 const CONTENT = path.join(PUBLIC, "content");
 const REFINED = path.join(CONTENT, "refined");
 
+// Real per-chapter OCR text extracted from the scanned books' full text, keyed
+// by "book/module-slug". When present for an ocr-raw module, lessons are GROUNDED
+// in the book excerpt (cleaned, not invented) instead of generated from the title.
+const GROUNDING = (() => {
+  try { return JSON.parse(fs.readFileSync(path.join(CONTENT, "grounding.json"), "utf8")); }
+  catch { return {}; }
+})();
+
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
-const MODEL = process.env.OLLAMA_MODEL || "gemma3n:e4b";
+const MODEL = process.env.OLLAMA_MODEL || "gemma4:e2b";
 const MODEL_MATH = process.env.OLLAMA_MODEL_MATH || MODEL;
-const PROMPT_VERSION = 4; // bump to invalidate all cached artifacts
+const PROMPT_VERSION = 8; // bump to invalidate all cached artifacts
 
 const LIMIT = Number(process.env.REFINE_LIMIT || 0) || Infinity;
 const ONLY_BOOKS = (process.env.REFINE_BOOKS || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -111,6 +119,33 @@ function cleanOllama(text) {
     .replace(/[ \t]{3,}/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+// A lesson that ran out of tokens stops mid-sentence and/or mid-formula. Both
+// are silent failures: the artifact looks fine, the page renders, the detail is
+// simply gone. Reject such output instead of caching it.
+export function looksComplete(md) {
+  const s = String(md || "").trim();
+  if (s.length < 200) return false;
+  const inline = s.replace(/\$\$[\s\S]*?\$\$/g, "");
+  if ((inline.split("$").length - 1) % 2) return false; // truncated mid-formula
+  if ((s.split("$$").length - 1) % 2) return false;
+  // Must land on a sentence terminator. A trailing bullet is NOT a pass: the
+  // clipped lessons end exactly that way ("- Comprendre les règles de …, de").
+  return /[.!?:»)\]}]\s*$/.test(s) || /\|\s*$/.test(s.split("\n").pop() || "");
+}
+
+// Last-resort repair for prose that is still clipped after every retry: walk
+// back to the last complete line and drop any half-written formula, preserving
+// the grounded content instead of regenerating a different lesson.
+export function trimToComplete(md) {
+  const lines = String(md || "").trimEnd().split("\n");
+  while (lines.length) {
+    const candidate = lines.join("\n").trimEnd();
+    if (looksComplete(candidate)) return candidate;
+    lines.pop();
+  }
+  return "";
 }
 
 async function ollamaRetry(prompt, opts, tries = 2) {
@@ -190,7 +225,40 @@ function buildLessonContent(title, objectives, bodyMd) {
   return `## Objectifs\n\n${obj}\n\n${bodyMd.trim()}\n`;
 }
 
+// Repair LaTeX/Markdown defects the local model emits so KaTeX renders cleanly:
+// fix aligned-environment typos, flatten single-equation aligned blocks, and
+// drop any dangling unclosed math delimiter (from a truncated tail) so an open
+// $$ / $ can't bleed math-mode into the rest of the document.
+function sanitizeMarkdown(md) {
+  let s = String(md || "");
+  // 1) "\begin{aligneed}" / "alignned" / "aligend" → "aligned".
+  s = s.replace(/\\(begin|end)\s*\{\s*align[a-z]*\s*\}/gi, (_m, kw) => `\\${kw.toLowerCase()}{aligned}`);
+  // 2) Single-equation aligned block (no "\\" row break) → plain display math.
+  s = s.replace(/\$\$\s*\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}\s*\$\$/g,
+    (m, inner) => (inner.includes("\\\\") ? m : `$$ ${inner.trim()} $$`));
+  // 3) Drop a dangling unclosed display block ($$ opened, never closed).
+  if (((s.match(/\$\$/g) || []).length) % 2 !== 0) {
+    s = s.slice(0, s.lastIndexOf("$$")).replace(/[\s:]*$/, "").trimEnd();
+  }
+  // 4) Drop a dangling unclosed inline $ (ignore the now-balanced $$ pairs).
+  if (((s.replace(/\$\$/g, "").match(/\$/g) || []).length) % 2 !== 0) {
+    s = s.slice(0, s.lastIndexOf("$")).replace(/[\s:]*$/, "").trimEnd();
+  }
+  return s.trim();
+}
+
 // ---------- prompts ----------
+// Impératif LaTeX partagé — le petit modèle applique mal LaTeX (surtout dans les
+// exemples résolus) et casse les environnements `aligned`. Règles fermes + exemples.
+const LATEX_RULES = [
+  `RÈGLE LaTeX (IMPÉRATIVE) — écris TOUTE expression mathématique en LaTeX, jamais en texte brut :`,
+  `- variables, nombres d'un calcul, symboles et formules entre $...$ : « la norme $\\lVert u\\rVert$ », « $\\sqrt{5}$ », « $x^2$ », « $f(x)=\\frac{1}{x-1}$ » ;`,
+  `- dans « Exemple résolu », CHAQUE étape de calcul est en LaTeX, ex. $\\lVert u\\rVert=\\sqrt{2^2+(-1)^2}=\\sqrt{5}$ — jamais « ||u|| = √(2² + (-1)²) » ;`,
+  `- convertis tout symbole Unicode : √→\\sqrt{}, x²→x^2, x³→x^3, ≠→\\neq, ≤→\\leq, ≥→\\geq, ∞→\\infty, ×→\\times, ·→\\cdot, ±→\\pm, →→\\to, Σ→\\sum, ∈→\\in ;`,
+  `- une formule affichée seule va entre $$...$$ sur UNE SEULE LIGNE ;`,
+  `- INTERDIT : \\begin{aligned}, \\end{aligned} ou tout environnement ; blocs de code (\\\`\\\`\\\`) ; art ASCII (division posée avec « | », « ---- »).`,
+].join("\n");
+
 function prosePromptGenerate({ subject, classe, moduleTitle, topic }) {
   return [
     `Tu es un professeur de ${subject} pour la classe de ${classe} en République Démocratique du Congo.`,
@@ -199,17 +267,14 @@ function prosePromptGenerate({ subject, classe, moduleTitle, topic }) {
     `Format Markdown. Structure EXACTE :`,
     `1) "## Objectifs" suivi de 3 puces commençant par un verbe d'action.`,
     `2) "## Introduction" : 2 à 3 phrases qui motivent le thème.`,
-    `3) "## Notions clés" : définitions essentielles (utilise des **gras** et des formules LaTeX entre $...$ si utile).`,
-    `4) "## Exemple résolu" : un exemple concret entièrement résolu, étape par étape.`,
+    `3) "## Notions clés" : définitions essentielles (utilise des **gras** et des formules LaTeX).`,
+    `4) "## Exemple résolu" : un exemple concret entièrement résolu, chaque étape de calcul en LaTeX.`,
     `5) "## À retenir" : 2 ou 3 puces de synthèse.`,
     ``,
-    `MATHÉMATIQUES — RÈGLE ABSOLUE : écris TOUTES les expressions et TOUS les calculs en LaTeX.`,
-    `- inline avec $...$ (ex. $x^2 - 5x + 6$) ;`,
-    `- calculs sur plusieurs lignes avec $$\\begin{aligned} ... \\end{aligned}$$ alignés sur le signe = ;`,
-    `- n'utilise JAMAIS de blocs de code (\`\`\`), NI d'art ASCII : pas de division posée avec des « | » et des « ---- », pas de tableaux dessinés en texte.`,
-    `- Une division polynomiale se présente comme une factorisation, ex. : $$x^3 - 6x^2 + 11x - 6 = (x-1)(x^2 - 5x + 6) = (x-1)(x-2)(x-3).$$`,
+    LATEX_RULES,
+    `Une division polynomiale se présente comme une factorisation, ex. $x^3-6x^2+11x-6=(x-1)(x-2)(x-3)$.`,
     ``,
-    `Règles : n'invente pas de fausses données ; reste au niveau du secondaire ; 250 à 450 mots ; commence directement par "## Objectifs" (pas de titre #).`,
+    `Règles : n'invente pas de fausses données ; reste au niveau du secondaire ; 300 à 500 mots ; commence directement par "## Objectifs" (pas de titre #) ; termine TOUJOURS par "## À retenir".`,
   ].join("\n");
 }
 
@@ -226,6 +291,64 @@ function prosePromptPolish({ subject, moduleTitle, sectionTitle, sectionText }) 
     sectionText.slice(0, 6000),
     `"""`,
   ].join("\n");
+}
+
+// Grounded lesson: write the sub-topic lesson using ONLY the provided book
+// excerpt (raw OCR of the actual chapter). Clean the OCR, restructure, convert
+// garbled math to LaTeX — but stay faithful to the book and do not invent.
+function prosePromptGround({ subject, classe, moduleTitle, topic, sourceExcerpt }) {
+  return [
+    `Tu es un professeur de ${subject} (classe de ${classe}, RD Congo).`,
+    `Ci-dessous, un EXTRAIT BRUT (OCR imparfait) du manuel scolaire pour le chapitre « ${moduleTitle} ».`,
+    `Rédige la leçon sur le sous-thème « ${topic} » en te basant UNIQUEMENT sur le contenu de cet extrait :`,
+    `- restitue les définitions, propriétés, formules et exemples RÉELS du manuel qui concernent « ${topic} » ;`,
+    `- corrige les fautes d'OCR (accents, indices, exposants) et reconstruis les formules en LaTeX ;`,
+    `- n'invente AUCUNE donnée, valeur ou exemple absent de l'extrait ; ignore le bruit d'OCR (numéros de page, « Scanned by CamScanner », artefacts) ;`,
+    `- si l'extrait ne couvre pas « ${topic} », rédige une leçon complète et fidèle au niveau du chapitre sans inventer d'exemples chiffrés.`,
+    ``,
+    LATEX_RULES,
+    ``,
+    `Format Markdown, structure EXACTE : "## Objectifs" (3 puces, verbes d'action) ; "## Introduction" (2-3 phrases) ; "## Notions clés" (définitions du manuel, **gras**, LaTeX) ; "## Exemple résolu" (un exemple du manuel, résolu étape par étape, chaque calcul en LaTeX) ; "## À retenir" (2-3 puces).`,
+    `Commence directement par "## Objectifs" (pas de titre #). 300 à 500 mots. Termine TOUJOURS la section "## À retenir".`,
+    ``,
+    `EXTRAIT DU MANUEL :`,
+    `"""`,
+    sourceExcerpt,
+    `"""`,
+  ].join("\n");
+}
+
+// Strip the worst OCR noise so the small model isn't overwhelmed: page markers,
+// scanner footers, and lines that are mostly symbols/gibberish (garbled figures).
+function cleanExcerpt(s) {
+  return String(s || "")
+    .replace(/=====\s*PDF page\s*\d+\s*=====/gi, " ")
+    .replace(/Scanned by CamScanner/gi, " ")
+    .split(/\n/)
+    .filter((ln) => {
+      const t = ln.trim();
+      if (t.length < 2) return false;
+      const letters = (t.match(/[A-Za-zÀ-ÿ]/g) || []).length;
+      return letters >= t.length * 0.4; // drop lines <40% letters (figure gibberish)
+    })
+    .join("\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+// Slice a chapter excerpt into one overlapping window per sub-topic. Sub-topics
+// follow the book's order, so window i ≈ the region of the chapter that covers
+// sub-topic i. Overlap avoids losing content at window boundaries. Kept small so
+// the local model stays reliable on noisy OCR.
+function groundingWindow(text, index, count, cap = 3800) {
+  const clean = cleanExcerpt(text);
+  if (!clean) return "";
+  if (clean.length <= cap || count <= 1) return clean.slice(0, cap);
+  const span = clean.length / count;
+  const pad = span * 0.3;
+  const start = Math.max(0, Math.floor(index * span - pad));
+  const end = Math.min(clean.length, Math.ceil((index + 1) * span + pad));
+  return clean.slice(start, end).slice(0, cap);
 }
 
 function quizPrompt({ lessonTitle, subject, lessonText }) {
@@ -322,7 +445,47 @@ async function refineModule(meta) {
   if (!FORCE && fs.existsSync(outFile)) {
     try {
       const prev = JSON.parse(fs.readFileSync(outFile, "utf8"));
-      if (prev.sourceHash === sourceHash) return { cached: true, lessons: prev.lessons.length };
+      // A matching hash is not enough: artifacts written before the completeness
+      // check can hold lessons truncated mid-sentence. Re-refine those.
+      const clipped = (prev.lessons || []).filter((l) => !looksComplete(l.contentMd));
+      if (prev.sourceHash === sourceHash && clipped.length === 0) {
+        return { cached: true, lessons: prev.lessons.length };
+      }
+      if (clipped.length) {
+        console.log(`  ↻ ${moduleTitle}: ${clipped.length} leçon(s) tronquée(s) → régénération (${clipped.map((l) => l.title).join(", ")})`);
+      }
+    } catch { /* re-refine */ }
+  }
+
+  // Real book text for this module (if extracted): grounds ocr-raw lessons in
+  // the manual instead of generating them from the title alone. Tolerate the
+  // padded/unpadded module-number mismatch (source files use "module-06",
+  // refined slugs use "module-6").
+  const gkeyUnpadded = `${book}/${moduleSlug}`;
+  const gkeyPadded = `${book}/${moduleSlug.replace(/^module-(\d)-/, "module-0$1-")}`;
+  const groundText = GROUNDING[gkeyUnpadded] || GROUNDING[gkeyPadded] || "";
+
+  // REFINE_GROUNDED_ONLY=1 → only (re)process modules that have book grounding.
+  if (process.env.REFINE_GROUNDED_ONLY === "1" && !groundText) {
+    return { skipped: true, reason: "not-grounded" };
+  }
+
+  // REFINE_BROKEN_ONLY=1 → only (re)process modules whose current artifact has a
+  // truncated or LaTeX-broken lesson; leave already-clean modules untouched.
+  if (process.env.REFINE_BROKEN_ONLY === "1" && fs.existsSync(outFile)) {
+    try {
+      const prev = JSON.parse(fs.readFileSync(outFile, "utf8"));
+      const polish = (prev.status || status) === "complete";
+      const broken = (prev.lessons || []).some((l) => {
+        const c = l.contentMd || "";
+        const noRet = !polish && !/##\s*À\s*retenir/i.test(c);
+        const ddOdd = ((c.match(/\$\$/g) || []).length) % 2 !== 0;
+        const inlineOdd = ((c.replace(/\$\$/g, "").match(/\$/g) || []).length) % 2 !== 0;
+        const envTypo = /aligneed|alignned|aligend/.test(c);
+        const bareMath = (c.match(/[√≠≥≤∞²³·×±÷]/g) || []).length >= 2; // LaTeX not applied
+        return noRet || ddOdd || inlineOdd || envTypo || bareMath;
+      });
+      if (!broken) return { skipped: true, reason: "already-clean" };
     } catch { /* re-refine */ }
   }
 
@@ -330,13 +493,22 @@ async function refineModule(meta) {
   const model = isMath(subject) ? MODEL_MATH : MODEL;
 
   // Decide the lesson units.
-  let units; // [{title, sourceText?}]
+  let units; // [{title, sourceText?, ground?}]
+  let mode; // "polish" | "ground" | "generate"
   if (complete) {
+    mode = "polish";
     const sections = getSections(body);
     units = sections.length ? sections.map((s) => ({ title: s.title, sourceText: s.text })) : [{ title: moduleTitle, sourceText: body.slice(0, 6000) }];
   } else {
     const topics = getPlanTopics(body);
-    units = (topics.length ? topics : [moduleTitle]).map((t) => ({ title: t }));
+    const titles = topics.length ? topics : [moduleTitle];
+    if (groundText) {
+      mode = "ground";
+      units = titles.map((t, i) => ({ title: t, sourceText: groundingWindow(groundText, i, titles.length) }));
+    } else {
+      mode = "generate";
+      units = titles.map((t) => ({ title: t }));
+    }
   }
 
   const lessons = [];
@@ -347,19 +519,44 @@ async function refineModule(meta) {
     let contentMd;
     let degraded = false;
 
+    const genFromTitle = () => prosePromptGenerate({ subject, classe, moduleTitle, topic: lessonTitle });
     try {
-      const prompt = complete
+      const primary = mode === "polish"
         ? prosePromptPolish({ subject, moduleTitle, sectionTitle: lessonTitle, sectionText: unit.sourceText })
-        : prosePromptGenerate({ subject, classe, moduleTitle, topic: lessonTitle });
-      const prose = cleanOllama(await ollamaRetry(prompt, { model, num_predict: 800, temperature: complete ? 0.2 : 0.5 }));
+        : mode === "ground" && unit.sourceText
+        ? prosePromptGround({ subject, classe, moduleTitle, topic: lessonTitle, sourceExcerpt: unit.sourceText })
+        : genFromTitle();
+      // Enough tokens for a full 5-section lesson incl. worked example + LaTeX;
+      // 800 truncated ~half the lessons mid-formula (broke KaTeX + dropped
+      // detail). 2000 still clipped ~9% — LaTeX-dense French runs well past it —
+      // so escalate the budget until the lesson actually finishes.
+      let prose = "";
+      for (const budget of [3000, 4200]) {
+        prose = cleanOllama(await ollamaRetry(primary, { model, num_predict: budget, temperature: mode === "generate" ? 0.5 : 0.2 }));
+        if (looksComplete(prose)) break;
+      }
+      // If grounding/polish returns thin (garbled OCR overwhelms the small model),
+      // fall back to a CLEAN generated lesson from the title — never dump raw OCR.
+      // Fall back to a title-only lesson ONLY when the grounded prose is thin.
+      // Never on truncation alone: genFromTitle() ignores the source, so a
+      // clipped "Opérations" lesson came back as generic derivative prose with
+      // the product/quotient/chain rules gone. Losing the topic is worse than
+      // losing the last sentence.
+      if ((!prose || wordCount(prose) < 40) && mode !== "generate") {
+        prose = cleanOllama(await ollamaRetry(genFromTitle(), { model, num_predict: 3000, temperature: 0.5 }));
+        if (prose && wordCount(prose) >= 40) degraded = true; // grounded → generated
+      }
+      if (!prose || wordCount(prose) < 40) throw new Error("thin-prose");
+      // Still clipped after both budgets: keep the on-topic prose, drop the
+      // dangling tail so the lesson at least ends cleanly.
+      if (!looksComplete(prose)) prose = trimToComplete(prose);
       if (!prose || wordCount(prose) < 40) throw new Error("thin-prose");
       // The lesson page renders the title itself — strip any leading title/H1 the
       // model emitted so the rendered lesson shows the title only once.
-      contentMd = `${stripLeadingTitle(prose, lessonTitle)}\n`;
+      contentMd = `${sanitizeMarkdown(stripLeadingTitle(prose, lessonTitle))}\n`;
     } catch {
       degraded = true;
-      const fallbackBody = complete && unit.sourceText ? unit.sourceText : `*(Leçon en préparation. Thème : ${lessonTitle}.)*`;
-      contentMd = buildLessonContent(lessonTitle, null, fallbackBody);
+      contentMd = buildLessonContent(lessonTitle, null, `*(Leçon en préparation. Thème : ${lessonTitle}.)*`);
     }
 
     // Quiz.

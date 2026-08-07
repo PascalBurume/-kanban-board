@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { getAccessibleLesson } from "@/lib/path";
+import { getAccessibleLesson, accessibleSubjectSlugs } from "@/lib/path";
 import { resolveCopilotEnabled } from "@/lib/teacher";
 import { buildMessages, streamChat, acquireSlot, releaseSlot, ollamaOnline } from "@/lib/ollama";
+import { retrieveChunks } from "@/lib/rag";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -61,6 +62,17 @@ export async function POST(req: Request) {
   const history = thread.messages.map((m) => ({ role: m.role, content: m.content }));
   await prisma.copilotMessage.create({ data: { threadId: thread.id, role: "user", content } });
 
+  // RAG grounding: pull the most relevant passages from OTHER lessons in the
+  // student's subjects. Silent no-op when the embedding index/model is absent.
+  let ragExcerpts: { title: string; text: string }[] = [];
+  try {
+    const slugs = await accessibleSubjectSlugs(classId);
+    const hits = await retrieveChunks(content, { k: 3, excludeLessonId: lesson.id, subjectSlugs: slugs });
+    ragExcerpts = hits.filter((h) => h.score > 0.5).map((h) => ({ title: h.lessonTitle, text: h.text }));
+  } catch {
+    ragExcerpts = [];
+  }
+
   const messages = buildMessages({
     lessonTitle: lesson.title,
     subject: lesson.module.subject.name,
@@ -68,6 +80,7 @@ export async function POST(req: Request) {
     history,
     userContent: content,
     context: copilotContext,
+    ragExcerpts,
   });
 
   const threadId = thread.id;

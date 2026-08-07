@@ -1,0 +1,91 @@
+/* Module connector canvas. Lives inside the fixed-height studio shell — fills it and
+   scrolls internally (the .mc-scroll), so it never adds page scroll. */
+.mc-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--surface-2); }
+
+.mc-bar { flex: none; display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+.mc-bar-title { display: inline-flex; align-items: center; gap: 8px; font: 600 15px var(--font-head); }
+.mc-bar-title svg { width: 17px; height: 17px; color: var(--indigo-600); }
+.mc-bar-hint { font-size: 12.5px; color: var(--text-muted); }
+.mc-dot-inline { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--indigo-500); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--indigo-400); vertical-align: middle; }
+.mc-legend-live { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--danger-fg); vertical-align: middle; }
+
+.mc-scroll { flex: 1; min-height: 0; overflow: auto; }
+.mc-inner { position: relative; display: grid; grid-template-columns: 300px 1fr; gap: 90px; padding: 24px 32px 48px; min-height: 100%; align-content: start; }
+
+/* SVG overlay sits above the columns but lets clicks through to the cards/nodes. */
+.mc-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.mc-edge { fill: none; stroke: var(--indigo-400); stroke-width: 2; }
+.mc-edge.dragging { stroke: var(--indigo-500); stroke-dasharray: 5 5; }
+
+.mc-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; align-content: start; }
+.mc-col-modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; align-items: start; height: max-content; }
+.mc-col-h { grid-column: 1 / -1; font: 700 11px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+.mc-count { background: var(--slate-200); color: var(--slate-600); border-radius: var(--r-pill); padding: 1px 8px; font-size: 11px; }
+.mc-group-l { font: 600 12px var(--font-ui); color: var(--text-soft); margin-top: 6px; }
+.mc-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 4px 2px; }
+
+/* lesson cards */
+.mc-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 13px; box-shadow: var(--sh-xs); transition: box-shadow .15s, border-color .15s; }
+.mc-card:hover { border-color: var(--indigo-200); box-shadow: var(--sh-sm); }
+.mc-card:hover .mc-card-x { opacity: 1; }
+.mc-card.busy { opacity: .6; pointer-events: none; }
+/* the teacher's live (published) lessons — flagged red so they're easy to spot + update */
+.mc-card.live { border-left: 3px solid var(--danger-fg); }
+.mc-card-main { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.mc-card-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.mc-card-title { flex: 1; font: 600 13.5px var(--font-ui); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-card-x { opacity: 0; border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 3px; border-radius: var(--r-sm); flex: none; transition: opacity .12s; }
+.mc-card-x:hover { background: var(--danger-bg); }
+.mc-card-x svg { width: 13px; height: 13px; }
+.mc-card-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.mc-pill { font: 700 10px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; padding: 2px 7px; border-radius: var(--r-pill); }
+.mc-pill.ok { background: var(--success-bg); color: var(--success-fg); }
+.mc-pill.draft { background: var(--slate-200); color: var(--slate-600); }
+.mc-card-mod { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; color: var(--text-muted); }
+.mc-card-mod svg { width: 13px; height: 13px; }
+.mc-card-acts { margin-left: auto; display: inline-flex; gap: 8px; }
+.mc-link { border: 0; background: transparent; color: var(--indigo-700); font: 600 12px var(--font-ui); cursor: pointer; display: inline-flex; align-items: center; gap: 3px; padding: 0; }
+.mc-link svg { width: 13px; height: 13px; }
+.mc-link.danger { color: var(--danger-fg); }
+.mc-link:disabled { opacity: .5; cursor: default; }
+
+/* drag handle on the right edge */
+.mc-handle { position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--indigo-500); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--indigo-300); cursor: grab; z-index: 3; touch-action: none; }
+.mc-handle:hover { background: var(--indigo-600); transform: translateY(-50%) scale(1.12); }
+.mc-handle:active { cursor: grabbing; }
+
+/* module — a card that expands to reveal its lessons; full-width when open. */
+.mc-module { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-xs); }
+.mc-module.open { grid-column: 1 / -1; border-color: var(--indigo-200); box-shadow: var(--sh-sm); }
+
+.mc-node { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 16px; min-height: 56px; cursor: pointer; border-radius: var(--r-md); transition: border-color .12s, background .12s; }
+.mc-node.targetable { outline: 1px dashed var(--indigo-300); outline-offset: -1px; }
+.mc-node.hover { outline: 2px solid var(--indigo-500); outline-offset: -2px; background: var(--indigo-50); }
+.mc-module.open .mc-node { border-bottom: 1px solid var(--border); border-radius: var(--r-md) var(--r-md) 0 0; }
+.mc-anchor { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--indigo-300); }
+.mc-node-ic { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: var(--r-sm); background: var(--indigo-50); color: var(--indigo-600); }
+.mc-node-ic svg { width: 17px; height: 17px; }
+.mc-node-title { font: 600 13.5px var(--font-ui); color: var(--text); line-height: 1.25; }
+.mc-node-count { margin-left: auto; font: 700 11px var(--font-ui); color: var(--text-muted); background: var(--slate-100); border-radius: var(--r-pill); padding: 2px 9px; flex: none; }
+.mc-node-chev { color: var(--text-muted); display: flex; flex: none; }
+.mc-node-chev svg { width: 16px; height: 16px; }
+
+/* expanded lesson list inside a module */
+.mc-lessons { padding: 6px 14px 12px; }
+.mc-lrow { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--r-sm); }
+.mc-lrow.mine { cursor: pointer; }
+.mc-lrow.mine:hover { background: var(--indigo-50); }
+.mc-lnum { width: 20px; text-align: center; font: 700 11px var(--font-ui); color: var(--text-muted); flex: none; }
+.mc-ldot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.mc-ltitle { flex: 1; font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-ltag { font: 700 9.5px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; padding: 2px 7px; border-radius: var(--r-pill); background: var(--slate-100); color: var(--slate-600); flex: none; }
+.mc-lx { border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 3px; border-radius: var(--r-sm); flex: none; }
+.mc-lx:hover { background: var(--danger-bg); }
+.mc-lx svg { width: 13px; height: 13px; }
+.mc-lempty { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 8px; }
+
+/* insertion drop-slot (only present while dragging) */
+.mc-slot { height: 8px; margin: 1px 0; border-radius: var(--r-pill); display: flex; align-items: center; }
+.mc-slot span { display: block; height: 3px; width: 100%; border-radius: var(--r-pill); background: transparent; transition: background .1s; }
+.mc-slot.active { height: 12px; }
+.mc-slot.active span { background: var(--indigo-500); box-shadow: 0 0 0 3px var(--indigo-100); }

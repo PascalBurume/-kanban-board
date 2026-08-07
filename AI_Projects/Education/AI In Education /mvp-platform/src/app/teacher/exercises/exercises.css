@@ -1,0 +1,170 @@
+/* Teacher « Exercices » page chrome: toolbar, subject tabs, canvas shell,
+   right slide-over drawer. Canvas visuals live in ExerciseCanvas.css. */
+
+/* Fill the shell instead of guessing the chrome height with `100vh - 120px`,
+   which left both a page scrollbar and a dead band under the card. The shell
+   is pinned to the viewport so the long module list scrolls inside the canvas
+   rather than stretching .t-main past the fold. */
+.t-main:has(.exp-wrap) { height: 100vh; overflow: hidden; }
+.t-main:has(.exp-wrap) .t-content { display: flex; flex-direction: column; flex: 1; min-height: 0; padding-bottom: 26px; }
+.exp-wrap { display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+
+.exp-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; flex-wrap: wrap; }
+.exp-bar-title { display: inline-flex; align-items: center; gap: 9px; font: 600 15px var(--font-head); }
+.exp-bar-title svg { width: 18px; height: 18px; color: var(--indigo-600); }
+.exp-bar-hint { font: 400 12.5px var(--font-ui); color: var(--text-muted); }
+.exp-bar-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.exp-select { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: 600 13px var(--font-ui); padding: 8px 10px; cursor: pointer; }
+.exp-search { display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); padding: 7px 11px; }
+.exp-search svg { width: 14px; height: 14px; color: var(--text-muted); flex: none; }
+.exp-search input { border: 0; outline: 0; background: transparent; font: 500 13px var(--font-ui); color: var(--text); width: 190px; }
+.exp-flagbtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--danger-fg); border-radius: var(--r-md); background: var(--surface); color: var(--danger-fg); font: 600 13px var(--font-ui); padding: 7px 11px; cursor: pointer; }
+.exp-flagbtn svg { width: 14px; height: 14px; flex: none; }
+.exp-flagbtn.on { background: var(--danger-bg); }
+.exp-flagbtn .exp-flagn { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); background: var(--danger-fg); color: #fff; font: 700 11px var(--font-ui); }
+
+.exp-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.exp-tab { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); border-radius: var(--r-pill); padding: 7px 14px; font: 600 13px var(--font-ui); cursor: pointer; transition: all .12s; }
+.exp-tab:hover { border-color: var(--indigo-300); color: var(--text); }
+.exp-tab.on { background: var(--indigo-600); border-color: var(--indigo-600); color: #fff; }
+.exp-tab-n { font-size: 11px; font-weight: 700; background: rgba(0,0,0,.08); border-radius: var(--r-pill); padding: 1px 7px; }
+.exp-tab.on .exp-tab-n { background: rgba(255,255,255,.22); }
+
+.exp-canvas { flex: 1; min-height: 0; display: flex; flex-direction: row; padding: 0; overflow: hidden; }
+.exp-loading { flex: 1; display: grid; place-items: center; color: var(--text-muted); font: 500 14px var(--font-ui); gap: 8px; }
+.exp-loading svg { width: 18px; height: 18px; }
+
+/* ── Copilot side panel (« Conseiller d'exercices ») ── */
+.exa-side { position: relative; width: 344px; flex: none; border-left: 1px solid var(--border); background: var(--surface); overflow: auto; }
+.exa-collapse { position: absolute; top: 10px; right: 10px; z-index: 2; border: 0; background: transparent; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: var(--r-sm); display: grid; place-items: center; }
+.exa-collapse:hover { background: var(--surface-2); color: var(--text); }
+.exa-collapse svg { width: 15px; height: 15px; }
+.exa-reopen { flex: none; width: 40px; border: 0; border-left: 1px solid var(--border); background: var(--surface-2); cursor: pointer; color: var(--indigo-700); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; font: 700 11px var(--font-ui); }
+.exa-reopen:hover { background: var(--indigo-50); }
+.exa-reopen span { writing-mode: vertical-rl; letter-spacing: .06em; text-transform: uppercase; }
+.exa-reopen svg { width: 16px; height: 16px; }
+
+.exa-head { display: flex; align-items: center; gap: 7px; padding: 13px 14px; border-bottom: 1px solid var(--border); font: 700 13px var(--font-ui); color: var(--text); }
+.exa-head svg { width: 15px; height: 15px; color: var(--indigo-600); }
+
+.exa-sel { border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 11px; background: var(--surface-2); }
+.exa-sel-t { font: 600 12.5px var(--font-ui); color: var(--text); line-height: 1.35; }
+.exa-sel-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; font: 600 10.5px var(--font-ui); text-transform: uppercase; letter-spacing: .03em; border-radius: var(--r-pill); padding: 3px 8px; background: var(--slate-100, var(--surface)); color: var(--text-muted); }
+.exa-sel-pill.mine { background: var(--indigo-50); color: var(--indigo-700); }
+.exa-sel-pill svg { width: 11px; height: 11px; }
+
+.exa-expl { border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px; display: flex; flex-direction: column; gap: 9px; }
+.exa-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.exa-chip { font: 600 11px var(--font-ui); background: var(--indigo-50); color: var(--indigo-700); border-radius: var(--r-pill); padding: 3px 9px; }
+.exa-diff-row { display: flex; align-items: center; gap: 8px; }
+.exa-diff-l { font: 600 11.5px var(--font-ui); color: var(--text-muted); }
+.exa-diff { display: inline-flex; gap: 3px; }
+.exa-diff i { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+.exa-diff.d1 i:nth-child(1) { background: var(--success-fg, var(--success)); }
+.exa-diff.d2 i:nth-child(-n+2) { background: var(--warning-fg); }
+.exa-diff.d3 i { background: var(--danger-fg); }
+.exa-diff-v { font: 700 11.5px var(--font-ui); color: var(--text-soft); }
+.exa-why { margin: 0; font-size: 12px; color: var(--text-muted); font-style: italic; }
+.exa-summary { font-size: 12.5px; color: var(--text-soft); line-height: 1.5; }
+.exa-summary p { margin: 0; }
+.exa-prereq-l { font: 700 10px var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+.exa-prereq ul { margin: 4px 0 0; padding-left: 16px; font-size: 12px; color: var(--text-soft); }
+
+.exa-sug-h { display: flex; align-items: center; gap: 7px; font: 700 11px var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-top: 2px; }
+.exa-sug { border: 1px solid var(--border); border-left: 3px solid var(--indigo-400); border-radius: var(--r-md); padding: 9px 11px; background: var(--surface-2); }
+.exa-sug-t { font: 600 12.5px var(--font-ui); color: var(--text); }
+.exa-sug-m { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+.exa-sug-r { font-size: 12px; color: var(--text-soft); margin-top: 5px; line-height: 1.45; }
+.exa-sug-f { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+.exa-conf { flex: 1; height: 5px; border-radius: var(--r-pill); background: var(--border); overflow: hidden; }
+.exa-conf i { display: block; height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--indigo-400), var(--indigo-600)); transition: width .45s cubic-bezier(.22,1,.36,1); }
+.exa-conf-v { font: 700 10.5px var(--font-ui); color: var(--text-muted); min-width: 30px; }
+.exa-linked { display: inline-flex; align-items: center; gap: 4px; font: 700 10.5px var(--font-ui); text-transform: uppercase; letter-spacing: .03em; color: var(--success-fg, var(--success)); background: var(--success-bg); border-radius: var(--r-pill); padding: 3px 9px; }
+.exa-linked svg { width: 11px; height: 11px; }
+
+.exa-chat-toggle { border: 1px dashed var(--border); background: transparent; border-radius: var(--r-md); padding: 9px; font: 600 12px var(--font-ui); color: var(--indigo-700); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.exa-chat-toggle:hover { background: var(--indigo-50); border-style: solid; }
+.exa-chat-toggle svg { width: 14px; height: 14px; }
+.exa-chat { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.exa-chat-box { max-height: 260px; overflow: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); }
+.exa-chat-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
+.exa-chip.suggest { cursor: pointer; border: 0; text-align: left; font-weight: 500; }
+.exa-chip.suggest:hover { background: var(--indigo-100, var(--indigo-50)); }
+.exa-msg { font-size: 12.5px; line-height: 1.5; border-radius: var(--r-md); padding: 7px 10px; max-width: 92%; }
+.exa-msg p { margin: 0 0 6px; }
+.exa-msg p:last-child { margin-bottom: 0; }
+.exa-msg.user { align-self: flex-end; background: var(--indigo-600); color: #fff; }
+.exa-msg.assistant { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text-soft); }
+.exa-chat-input { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--border); }
+.exa-chat-input input { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 7px 9px; font: 500 12.5px var(--font-ui); background: var(--surface); }
+
+/* ── right slide-over drawer ── */
+.exp-scrim { position: fixed; inset: 0; background: rgba(28, 26, 20, .35); z-index: 60; animation: exp-fade .18s ease-out; }
+.exp-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 94vw); background: var(--surface); z-index: 61; box-shadow: -24px 0 60px rgba(20, 20, 40, .18); overflow-y: auto; padding: 0; animation: exp-slide .22s cubic-bezier(.3, .8, .4, 1); }
+@keyframes exp-fade { from { opacity: 0; } }
+@keyframes exp-slide { from { transform: translateX(40px); opacity: 0; } }
+
+/* Header stays put while the énoncé/corrigé fields scroll under it. */
+.exp-drawer-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 24px 14px; margin: 0 -24px 4px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.exp-drawer-head b { font: 700 17px var(--font-head); letter-spacing: -.01em; }
+.exp-close { border: 0; background: var(--slate-100); color: var(--text-soft); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; transition: background .12s, color .12s; }
+.exp-close:hover { background: var(--slate-200); color: var(--text); }
+.exp-close svg { width: 15px; height: 15px; }
+
+/* form */
+.exp-form { display: flex; flex-direction: column; gap: 0; padding: 0 24px 24px; }
+.exp-l { font: 700 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 20px 0 7px; }
+.exp-l:first-of-type { margin-top: 16px; }
+.exp-hint { font: 400 12px var(--font-ui); color: var(--text-muted); margin: -3px 0 7px; line-height: 1.45; }
+.exp-hint code { font: 600 11.5px var(--font-mono, ui-monospace, monospace); background: var(--slate-100); border-radius: 4px; padding: 1px 5px; color: var(--text-soft); }
+.exp-input { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); font: 500 13.5px var(--font-ui); color: var(--text); padding: 9px 11px; outline: none; transition: border-color .12s, box-shadow .12s; }
+.exp-input:focus { border-color: var(--indigo-400); box-shadow: var(--ring); }
+.exp-form .qmi-preview { margin-top: 6px; }
+
+/* Actions ride the bottom of the drawer, always reachable. */
+.exp-form-acts { position: sticky; bottom: 0; display: flex; align-items: center; gap: 10px; margin: 24px -24px 0; padding: 14px 24px; border-top: 1px solid var(--border); background: var(--surface); }
+.exp-form-acts .btn-ghost { margin-left: auto; color: var(--danger-fg); }
+.exp-form-acts .btn-ghost:hover { background: var(--danger-bg); }
+
+/* read-only viewer */
+.exp-view { display: flex; flex-direction: column; gap: 10px; padding: 0 24px 24px; }
+.exp-view-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.exp-view-src { font: 600 12.5px var(--font-ui); color: var(--text-soft); }
+.exp-view-lock { display: inline-flex; align-items: center; gap: 5px; font: 700 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--warning-fg); background: var(--warning-bg); border-radius: var(--r-pill); padding: 3px 10px; }
+.exp-view-lock svg { width: 11px; height: 11px; }
+.exp-view-subj { display: inline-flex; align-items: center; font: 700 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--indigo-600); background: var(--indigo-100); border-radius: var(--r-pill); padding: 3px 10px; }
+.exp-view-lessons { margin-top: 12px; }
+.exp-view-lessons-lbl { display: inline-flex; align-items: center; gap: 5px; font: 700 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-soft); }
+.exp-view-lessons-lbl svg { width: 12px; height: 12px; }
+.exp-view-lchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.exp-view-lchip { font: 600 12px var(--font-ui); color: var(--text); background: var(--surface-2, var(--slate-100)); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 4px 11px; text-decoration: none; transition: border-color .12s, color .12s, background .12s; }
+a.exp-view-lchip:hover { color: var(--indigo-600); border-color: var(--indigo-400); background: var(--indigo-100); }
+.exp-view-sec { font: 700 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; }
+.exp-view-sec.sol { color: var(--success-fg); }
+.exp-view-sec svg { width: 13px; height: 13px; }
+/* Statement and worked solution read as blocks, with each sub-item ("a) …")
+   on its own line thanks to <Markdown breaks>. */
+.exp-md { font-size: 14.5px; color: var(--text); line-height: 1.75; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; }
+.exp-md.sol { border-left: 3px solid var(--success-fg); }
+.exp-md.ai { border-left: 3px solid #c2410c; }
+
+/* Reconstructed-from-scan warning: the statement and solution below may be
+   invented, so this must be impossible to miss. */
+.exp-view-warn { display: flex; gap: 9px; align-items: flex-start; background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--r-md); padding: 11px 13px; font-size: 12.5px; line-height: 1.5; color: #7c2d12; }
+.exp-view-warn svg { width: 15px; height: 15px; flex: none; margin-top: 1px; color: #c2410c; }
+.exp-view-warn b { font-weight: 700; }
+.exp-view-todo { display: flex; gap: 9px; align-items: flex-start; background: var(--danger-bg); border: 1px solid var(--danger-fg); border-radius: var(--r-md); padding: 11px 13px; font-size: 12.5px; line-height: 1.5; color: var(--danger-fg); }
+.exp-view-todo svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+.exp-view-fixed { display: flex; gap: 9px; align-items: flex-start; background: var(--success-bg); border: 1px solid var(--success); border-radius: var(--r-md); padding: 11px 13px; font-size: 12.5px; line-height: 1.5; color: var(--success-fg); }
+.exp-view-fixed svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+.exp-view-fixacts { display: flex; gap: 8px; }
+.exp-view-sec.ai { color: #c2410c; }
+.exp-md p { margin: 0 0 10px; }
+.exp-md p:last-child { margin-bottom: 0; }
+.exp-md .katex { font-size: 1.02em; }
+.exp-md h2, .exp-md h3 { font: 700 14px var(--font-head); margin: 14px 0 6px; }
+.exp-md h2:first-child, .exp-md h3:first-child { margin-top: 0; }
+.exp-pre { white-space: pre-wrap; word-break: break-word; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: var(--text-soft); background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: var(--r-md); padding: 12px 14px; margin: 0; }
+.exp-pre.sol { border-color: var(--success); background: var(--success-bg); color: var(--success-fg); }
+.exp-view-nosol { font-size: 13px; color: var(--text-muted); font-style: italic; }

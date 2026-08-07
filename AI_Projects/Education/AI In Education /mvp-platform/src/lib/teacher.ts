@@ -128,14 +128,24 @@ export async function setCopilotPolicy(opts: {
     });
     return;
   }
-  // STUDENT scope (per-row or bulk)
-  for (const sid of studentIds ?? []) {
-    const existing = await prisma.copilotPolicy.findFirst({ where: { scope: "STUDENT", studentId: sid } });
-    if (existing) {
-      await prisma.copilotPolicy.update({ where: { id: existing.id }, data: { enabled, reason, setById } });
-    } else {
-      await prisma.copilotPolicy.create({ data: { scope: "STUDENT", studentId: sid, enabled, reason, setById } });
+  // STUDENT scope (per-row or bulk). A bulk toggle can cover a whole class, so
+  // split into "already have a row" vs "new" and write each side in one
+  // statement — one updateMany + one createMany inside a single transaction —
+  // rather than 2 queries per student. STUDENT rows have classId = null, so the
+  // (scope, studentId) filter can't collide across the two writes.
+  const ids = studentIds ?? [];
+  if (ids.length > 0) {
+    const existing = await prisma.copilotPolicy.findMany({ where: { scope: "STUDENT", studentId: { in: ids } }, select: { studentId: true } });
+    const existingIds = new Set(existing.map((e) => e.studentId).filter((v): v is string => v !== null));
+    const newIds = ids.filter((id) => !existingIds.has(id));
+    const writes = [];
+    if (existingIds.size > 0) {
+      writes.push(prisma.copilotPolicy.updateMany({ where: { scope: "STUDENT", studentId: { in: [...existingIds] } }, data: { enabled, reason, setById } }));
     }
+    if (newIds.length > 0) {
+      writes.push(prisma.copilotPolicy.createMany({ data: newIds.map((studentId) => ({ scope: "STUDENT", studentId, enabled, reason, setById })) }));
+    }
+    if (writes.length > 0) await prisma.$transaction(writes);
   }
   await prisma.auditLog.create({
     data: { actorId: setById, actorName, action: enabled ? "COPILOT_ENABLE_STUDENTS" : "COPILOT_DISABLE_STUDENTS", targetType: "students", metaJson: JSON.stringify({ studentIds, reason }) },
@@ -272,8 +282,8 @@ export async function studentDrawer(teacherId: string, studentId: string) {
   });
   const timeline = recent.map((p) => ({
     lessonTitle: p.lesson.title,
-    subject: p.lesson.module.subject.name,
-    icon: p.lesson.module.subject.icon,
+    subject: p.lesson.module?.subject.name ?? "—",
+    icon: p.lesson.module?.subject.icon ?? null,
     at: p.completedAt ? p.completedAt.toISOString() : null,
   }));
 
@@ -316,46 +326,77 @@ export async function studentDrawer(teacherId: string, studentId: string) {
 
 // All understanding feedback from the teacher's students — the "Retours" inbox.
 // Unresolved + lower understanding float to the top.
+// Routing: a teacher sees feedback on lessons of the subject(s) they teach in
+// the student's class; the class titulaire (isLead) sees everything for that class.
 export async function teacherFeedbackInbox(teacherId: string) {
   const classes = await teacherClasses(teacherId);
   const classIds = classes.map((c) => c.id);
   if (classIds.length === 0) return { items: [], openCount: 0 };
-  const enrollments = await prisma.enrollment.findMany({ where: { classId: { in: classIds } }, select: { studentId: true } });
+  const byClass = new Map(classes.map((c) => [c.id, c]));
+  const enrollments = await prisma.enrollment.findMany({ where: { classId: { in: classIds } }, select: { studentId: true, classId: true } });
+  const classByStudent = new Map(enrollments.map((e) => [e.studentId, e.classId]));
   const studentIds = enrollments.map((e) => e.studentId);
   if (studentIds.length === 0) return { items: [], openCount: 0 };
 
-  const fbs = await prisma.lessonFeedback.findMany({
-    where: { studentId: { in: studentIds } },
-    orderBy: [{ resolved: "asc" }, { understanding: "asc" }, { createdAt: "desc" }],
-    take: 80,
-    include: {
-      student: { select: { firstName: true, lastName: true, avatarColor: true } },
-      lesson: { select: { title: true, module: { select: { subject: { select: { name: true } } } } } },
-    },
-  });
+  const fbs = (
+    await prisma.lessonFeedback.findMany({
+      where: { studentId: { in: studentIds } },
+      orderBy: [{ resolved: "asc" }, { understanding: "asc" }, { createdAt: "desc" }],
+      take: 400,
+      include: {
+        student: { select: { firstName: true, lastName: true, avatarColor: true } },
+        lesson: { select: { title: true, subjectSlug: true, module: { select: { subjectSlug: true, subject: { select: { name: true } } } } } },
+      },
+    })
+  ).filter((f) => {
+    const cls = byClass.get(classByStudent.get(f.studentId) ?? "");
+    if (!cls) return false;
+    if (cls.isLead) return true;
+    const slug = f.lesson.module?.subjectSlug ?? f.lesson.subjectSlug;
+    return !!slug && cls.subjectSlugs.has(slug);
+  }).slice(0, 80);
 
-  const items = fbs.map((f) => ({
-    id: f.id,
-    studentId: f.studentId,
-    studentName: `${f.student.firstName} ${f.student.lastName}`,
-    avatarColor: f.student.avatarColor,
-    lessonTitle: f.lesson.title,
-    subject: f.lesson.module.subject.name,
-    understanding: f.understanding,
-    message: f.message ?? "",
-    resolved: f.resolved,
-    at: f.createdAt.toISOString(),
-  }));
+  const items = fbs.map((f) => {
+    const classId = classByStudent.get(f.studentId) ?? "";
+    return {
+      id: f.id,
+      studentId: f.studentId,
+      studentName: `${f.student.firstName} ${f.student.lastName}`,
+      avatarColor: f.student.avatarColor,
+      classId,
+      className: byClass.get(classId)?.name ?? "—",
+      lessonId: f.lessonId,
+      lessonTitle: f.lesson.title,
+      subject: f.lesson.module?.subject.name ?? "—",
+      understanding: f.understanding,
+      message: f.message ?? "",
+      resolved: f.resolved,
+      at: f.createdAt.toISOString(),
+    };
+  });
   const openCount = items.filter((i) => !i.resolved && i.understanding < 100).length;
   return { items, openCount };
 }
 
-// Mark a feedback item resolved — guarded so a teacher can only touch their own
-// students' feedback.
+// Mark a feedback item resolved — same visibility rule as the inbox: the
+// subject's teacher in that class, or the class titulaire.
 export async function resolveFeedback(teacherId: string, feedbackId: string) {
-  const fb = await prisma.lessonFeedback.findUnique({ where: { id: feedbackId }, include: { student: { include: { enrollment: true } } } });
+  const fb = await prisma.lessonFeedback.findUnique({
+    where: { id: feedbackId },
+    include: {
+      student: { include: { enrollment: true } },
+      lesson: { select: { subjectSlug: true, module: { select: { subjectSlug: true } } } },
+    },
+  });
   if (!fb || !fb.student.enrollment) return false;
-  const assigned = await prisma.teacherAssignment.findFirst({ where: { teacherId, classId: fb.student.enrollment.classId } });
+  const slug = fb.lesson.module?.subjectSlug ?? fb.lesson.subjectSlug;
+  const assigned = await prisma.teacherAssignment.findFirst({
+    where: {
+      teacherId,
+      classId: fb.student.enrollment.classId,
+      OR: [{ isLead: true }, ...(slug ? [{ subjectSlug: slug }] : [])],
+    },
+  });
   if (!assigned) return false;
   await prisma.lessonFeedback.update({ where: { id: feedbackId }, data: { resolved: true } });
   return true;
@@ -366,22 +407,31 @@ export async function teacherOverview(teacherId: string) {
   const classes = await teacherClasses(teacherId);
   const weekAgo = new Date(Date.now() - 7 * DAY);
 
-  let allStudents: StudentMetrics[] = [];
-  const classCards = [] as { id: string; name: string; level: string; field: string | null; studentCount: number; avgProgress: number; alert: { type: "ok" | "warning" | "danger"; text: string } }[];
+  let allStudents: (StudentMetrics & { classId?: string })[] = [];
+  const classCards = [] as {
+    id: string; name: string; level: string; field: string | null; studentCount: number; avgProgress: number;
+    avgQuiz: number | null; copilotCount: number; onTrack: number; behind: number; inactive: number; activeWeek: number;
+    alert: { type: "ok" | "warning" | "danger"; text: string };
+  }[];
 
   for (const c of classes) {
     const totalLessons = await classLessonTotal(c.id);
     const enr = await prisma.enrollment.findMany({ where: { classId: c.id }, include: { student: true } });
     const metrics = await Promise.all(enr.map((e) => studentMetrics(e.student, totalLessons)));
-    allStudents = allStudents.concat(metrics.map((m) => ({ ...m })));
+    allStudents = allStudents.concat(metrics.map((m) => ({ ...m, classId: c.id })));
     const avgProgress = metrics.length ? Math.round(metrics.reduce((s, m) => s + m.progressPct, 0) / metrics.length) : 0;
-    const inactive = metrics.filter((m) => m.status === "inactive").length;
+    const quizVals = metrics.map((m) => m.avgQuiz).filter((v): v is number => v != null);
+    const avgQuiz = quizVals.length ? Math.round(quizVals.reduce((s, v) => s + v, 0) / quizVals.length) : null;
+    const copilotCount = metrics.reduce((s, m) => s + m.copilotCount, 0);
+    const onTrack = metrics.filter((m) => m.status === "ok").length;
     const behind = metrics.filter((m) => m.status === "behind").length;
+    const inactive = metrics.filter((m) => m.status === "inactive").length;
+    const activeWeek = metrics.filter((m) => m.lastActiveDays != null && m.lastActiveDays <= 7).length;
     let alert: { type: "ok" | "warning" | "danger"; text: string };
     if (inactive > 0) alert = { type: "danger", text: `${inactive} élève${inactive > 1 ? "s" : ""} inactif${inactive > 1 ? "s" : ""} 7+ j` };
     else if (behind > 0) alert = { type: "warning", text: `${behind} élève${behind > 1 ? "s" : ""} en difficulté` };
     else alert = { type: "ok", text: "Classe sur la bonne voie" };
-    classCards.push({ id: c.id, name: c.name, level: c.level, field: c.field, studentCount: enr.length, avgProgress, alert });
+    classCards.push({ id: c.id, name: c.name, level: c.level, field: c.field, studentCount: enr.length, avgProgress, avgQuiz, copilotCount, onTrack, behind, inactive, activeWeek, alert });
   }
 
   const studentIds = [...new Set(allStudents.map((s) => s.id))];
@@ -396,7 +446,7 @@ export async function teacherOverview(teacherId: string) {
     .filter((m) => m.status !== "ok")
     .map((m) => {
       const reason = m.status === "inactive" ? `Inactif ${m.lastActiveDays ?? "?"} j` : m.avgQuiz !== null && m.avgQuiz < 55 ? `Quiz moyen ${m.avgQuiz}%` : `Progression ${m.progressPct}%`;
-      return { id: m.id, firstName: m.firstName, lastName: m.lastName, avatarColor: m.avatarColor, status: m.status, reason };
+      return { id: m.id, firstName: m.firstName, lastName: m.lastName, avatarColor: m.avatarColor, status: m.status, reason, classId: m.classId };
     })
     .sort((a, b) => (a.status === "inactive" ? -1 : 1) - (b.status === "inactive" ? -1 : 1))
     .slice(0, 6);
@@ -409,7 +459,7 @@ export async function teacherOverview(teacherId: string) {
   const themeMap = new Map<string, { label: string; subject: string; count: number }>();
   for (const t of themeThreads) {
     const key = t.lessonId;
-    const e = themeMap.get(key) ?? { label: t.lesson.title, subject: t.lesson.module.subject.name, count: 0 };
+    const e = themeMap.get(key) ?? { label: t.lesson.title, subject: t.lesson.module?.subject.name ?? "—", count: 0 };
     e.count += t.messages.length;
     themeMap.set(key, e);
   }

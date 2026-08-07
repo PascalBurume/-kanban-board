@@ -15,6 +15,8 @@ import "./BarChart.css";
 //   gridLines           — number of horizontal gridlines (default 3)
 //   ariaLabel           — accessible name (required for a11y)
 //   emptyLabel          — shown when there is no data / all values are 0
+//   onSelect(i)         — makes bars clickable; called with the bar index
+//   selectedIndex       — index of the currently-selected bar (kept "open")
 export default function BarChart({
   data = [],
   unit = "",
@@ -26,7 +28,10 @@ export default function BarChart({
   gridLines = 3,
   ariaLabel,
   emptyLabel,
+  onSelect,
+  selectedIndex,
 }) {
+  const interactive = typeof onSelect === "function";
   const fmt = formatValue || ((v) => `${v}${unit ? ` ${unit}` : ""}`);
   const max = Math.max(...data.map((d) => Number(d.value) || 0), 1);
   const allZero = data.every((d) => !Number(d.value));
@@ -58,10 +63,29 @@ export default function BarChart({
           {data.map((d, i) => {
             const v = Number(d.value) || 0;
             const pct = (v / max) * 100;
+            const sel = selectedIndex === i;
             return (
-              <div className="bc-col" key={`${d.label}-${i}`} title={`${d.label} : ${fmt(v)}`}>
+              <div
+                className={`bc-col${interactive ? " ix" : ""}${sel ? " sel" : ""}`}
+                key={`${d.label}-${i}`}
+                title={`${d.label} : ${fmt(v)}`}
+                {...(interactive
+                  ? {
+                      role: "button",
+                      tabIndex: 0,
+                      "aria-pressed": sel,
+                      onClick: () => onSelect(i),
+                      onKeyDown: (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelect(i);
+                        }
+                      },
+                    }
+                  : {})}
+              >
                 <div
-                  className={`bc-bar${d.highlight ? " hl" : ""}`}
+                  className={`bc-bar${d.highlight ? " hl" : ""}${sel ? " sel" : ""}`}
                   style={{ height: `${pct}%`, background: d.highlight ? highlightColor : color }}
                 >
                   {showValues && v > 0 && <span className="bc-val">{fmt(v)}</span>}
@@ -76,15 +100,18 @@ export default function BarChart({
           <span className={`bc-xlbl${d.highlight ? " hl" : ""}`} key={`${d.label}-${i}`}>{d.label}</span>
         ))}
       </div>
-      {/* Screen-reader equivalent */}
-      <table className="bc-sr">
-        <caption>{ariaLabel}</caption>
-        <tbody>
-          {data.map((d, i) => (
-            <tr key={`${d.label}-${i}`}><th scope="row">{d.label}</th><td>{fmt(Number(d.value) || 0)}</td></tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Screen-reader equivalent — wrapped so the table's intrinsic height
+          can't leak into the page (tables ignore height:1px). */}
+      <div className="bc-sr">
+        <table>
+          <caption>{ariaLabel}</caption>
+          <tbody>
+            {data.map((d, i) => (
+              <tr key={`${d.label}-${i}`}><th scope="row">{d.label}</th><td>{fmt(Number(d.value) || 0)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }

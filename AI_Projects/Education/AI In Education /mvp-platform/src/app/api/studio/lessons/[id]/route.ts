@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { lessonForEdit, saveLesson } from "@/lib/studio";
+import { lessonForEdit, saveLesson, deleteLesson } from "@/lib/studio";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,23 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (!u) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   const body = await req.json().catch(() => ({}));
   if (typeof body.contentMd !== "string") return NextResponse.json({ error: "BAD_REQUEST" }, { status: 400 });
-  const result = await saveLesson(u, params.id, { contentMd: body.contentMd, title: body.title, estMinutes: body.estMinutes });
+  // `force` marks a save the teacher asked for by name — the Enregistrer button, or
+  // the flush when they leave the page — as opposed to a background autosave. Only
+  // the former earns its own restorable version; see shouldSnapshot in lib/studio.
+  const result = await saveLesson(u, params.id, {
+    contentMd: body.contentMd,
+    title: body.title,
+    estMinutes: body.estMinutes,
+    force: body.force === true,
+  });
   if (!result) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
   return NextResponse.json({ ok: true, ...result });
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  const u = await staff();
+  if (!u) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  const result = await deleteLesson(u, params.id);
+  if (!result) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+  return NextResponse.json(result);
 }

@@ -16,28 +16,34 @@ model User {
   role               String // STUDENT | TEACHER | ADMIN
   firstName          String
   lastName           String
+  disciplines        String? // teachers: comma-sep Subject.family keys ("math", "physique,chimie") — set by super admin; drives which book a class assignment resolves to
   avatarColor        String?
   email              String?   @unique
   passwordHash       String? // staff
   pinHash            String? // students (4-digit, bcrypt)
   locale             String    @default("fr") // fr | en
   isActive           Boolean   @default(true)
-  pending            Boolean   @default(false) // self-registered, awaiting admin approval
   mustChangePassword Boolean   @default(false)
   failedAttempts     Int       @default(0)
   lockedUntil        DateTime?
   lastLoginAt        DateTime?
   createdAt          DateTime  @default(now())
 
-  enrollment         Enrollment?
-  teacherAssignments TeacherAssignment[]
-  progress           Progress[]
-  quizAttempts       QuizAttempt[]
-  sessionLogs        SessionLog[]
-  copilotThreads     CopilotThread[]
-  copilotPolicies    CopilotPolicy[]
-  badgeAwards        BadgeAward[]
-  lessonFeedbacks    LessonFeedback[]
+  enrollment              Enrollment?
+  teacherAssignments      TeacherAssignment[]
+  progress                Progress[]
+  quizAttempts            QuizAttempt[]
+  sessionLogs             SessionLog[]
+  copilotThreads          CopilotThread[]
+  copilotPolicies         CopilotPolicy[]
+  badgeAwards             BadgeAward[]
+  lessonFeedbacks         LessonFeedback[]
+  projectSubmissions      ProjectSubmission[]
+  projectGroupMemberships ProjectGroupMember[]
+  modulePlans             ModulePlan[]
+  notebookProjects        NotebookProject[]
+  notebookDocs            NotebookDoc[]
+  exercises               Exercise[]
 }
 
 model ClassGroup {
@@ -55,6 +61,11 @@ model ClassGroup {
   assignments        Assignment[]
   copilotPolicies    CopilotPolicy[]
   moduleLocks        ModuleLock[]
+  projectAssignments ProjectAssignment[]
+  projectGroups      ProjectGroup[]
+  modulePlans        ModulePlan[]
+  notebookProjects   NotebookProject[]
+  exercises          Exercise[]
 }
 
 model Enrollment {
@@ -79,23 +90,44 @@ model TeacherAssignment {
 }
 
 model Subject {
-  slug    String   @id // mirrors content bundle
-  name    String
-  color   String?
-  icon    String?
-  order   Int      @default(0)
-  modules Module[]
+  slug      String     @id // mirrors content bundle (one subject = one book)
+  name      String
+  color     String?
+  icon      String?
+  family    String? // academic discipline: "math" | "physique" | "chimie" | "geometrie" | "exetat"
+  order     Int        @default(0)
+  modules   Module[]
+  projects  Project[]
+  offerings Offering[]
+  exercises Exercise[]
+}
+
+// Which books a (level, field) studies — materialized from the content
+// manifest's class → field → subjects hierarchy. Single source of truth for
+// resolving/validating class ↔ book links (a 6e class can never be wired to
+// the Maths 5 book again).
+model Offering {
+  id          String  @id @default(cuid())
+  level       String // "5e" | "6e" | "examen" — matches ClassGroup.level
+  field       String // section label, e.g. "Scientifique — Math-Physique"
+  subjectSlug String
+  subject     Subject @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([level, field, subjectSlug])
 }
 
 model Module {
-  id          String   @id @default(cuid())
-  subjectSlug String
-  classLevel  String // "5e" | "6e"
-  title       String
-  order       Int      @default(0)
-  subject     Subject  @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
-  lessons     Lesson[]
-  locks       ModuleLock[]
+  id             String          @id @default(cuid())
+  subjectSlug    String
+  classLevel     String? // "5e" | "6e" — null = book shared across levels
+  title          String
+  order          Int             @default(0)
+  subject        Subject         @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
+  lessons        Lesson[]
+  locks          ModuleLock[]
+  projectPrereqs ProjectPrereq[]
+  plans          ModulePlan[]
+  exerciseLinks  ExerciseLink[]
 }
 
 // Teacher-controlled per-class module lock. Modules are accessible to students
@@ -114,27 +146,53 @@ model ModuleLock {
 }
 
 model Lesson {
-  id        String @id @default(cuid())
-  moduleId  String
-  slug      String
-  title     String
-  order     Int    @default(0)
-  status    String @default("PUBLISHED") // DRAFT | PUBLISHED
-  contentMd String @default("")
-  estMinutes Int   @default(15)
-  sourceRef String? // bundle path
+  id            String  @id @default(cuid())
+  moduleId      String? // null = sitting in a teacher's library, not yet connected to a module
+  slug          String
+  title         String
+  order         Int     @default(0)
+  status        String  @default("PUBLISHED") // DRAFT | PUBLISHED
+  contentMd     String  @default("")
+  estMinutes    Int     @default(15)
+  sourceRef     String? // bundle path
+  authorId      String? // teacher who authored it (null = seeded book content); drives "my library"
+  subjectSlug   String? // subject bucket for library lessons + valid connect targets
+  // A teacher-authored "companion" lesson complements a book lesson: it stays out of the
+  // module tree (moduleId null) and surfaces under its target for the teacher's classes.
+  companionOfId String?
 
-  module        Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  versions      LessonVersion[]
-  quizzes       Quiz[]
-  assignments   Assignment[]
-  progress      Progress[]
-  sessionLogs   SessionLog[]
+  module         Module?          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  companionOf    Lesson?          @relation("LessonCompanions", fields: [companionOfId], references: [id], onDelete: Cascade)
+  companions     Lesson[]         @relation("LessonCompanions")
+  versions       LessonVersion[]
+  quizzes        Quiz[]
+  assignments    Assignment[]
+  progress       Progress[]
+  sessionLogs    SessionLog[]
   copilotThreads CopilotThread[]
-  copilotTopics CopilotTopic[]
-  feedbacks     LessonFeedback[]
+  copilotTopics  CopilotTopic[]
+  feedbacks      LessonFeedback[]
+  chunks         LessonChunk[]
+  exerciseLinks  ExerciseLink[]
 
   @@unique([moduleId, slug])
+}
+
+// RAG index: lesson content split into overlapping chunks with local Ollama
+// embeddings (Float32Array stored as Bytes). contentHash (sha256 of contentMd
+// at index time) makes reindexing incremental without touching Lesson writes.
+model LessonChunk {
+  id          String   @id @default(cuid())
+  lessonId    String
+  ord         Int
+  text        String
+  embedding   Bytes? // null when the embedding model is unavailable
+  contentHash String
+  updatedAt   DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
 }
 
 // Per-lesson self-assessment: how well the student understood (0/25/50/75/100),
@@ -176,15 +234,15 @@ model Quiz {
 }
 
 model Question {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   quizId        String
   type          String // MCQ | TF | SHORT
   promptMd      String
   optionsJson   String? // JSON array of options (MCQ)
   answerJson    String // JSON: correct answer(s)
   explanationMd String?
-  order         Int    @default(0)
-  quiz          Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  order         Int     @default(0)
+  quiz          Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model Assignment {
@@ -253,12 +311,12 @@ model CopilotPolicy {
 }
 
 model CopilotThread {
-  id        String          @id @default(cuid())
+  id        String           @id @default(cuid())
   studentId String
   lessonId  String
-  startedAt DateTime        @default(now())
-  student   User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  lesson    Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  startedAt DateTime         @default(now())
+  student   User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson    Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   messages  CopilotMessage[]
 }
 
@@ -315,4 +373,273 @@ model AuditLog {
 model Setting {
   key   String @id
   value String
+}
+
+// ───────────────────────── Projects ("Projets appliqués") ─────────────────────
+// Capstone, real-world projects that unlock after a set of prerequisite modules
+// are completed. Students work through ordered steps, submit, and a teacher
+// reviews + grades. See docs/PROJECTS_FEATURE.md.
+
+model Project {
+  id            String   @id @default(cuid())
+  subjectSlug   String // mirrors Subject.slug
+  classLevel    String // "5e" | "6e"
+  slug          String   @unique
+  title         String
+  scenarioMd    String // the real-world case / context
+  objectivesMd  String   @default("") // skills practised
+  deliverableMd String   @default("") // what to hand in
+  difficulty    String   @default("INTERMEDIATE") // INTRO | INTERMEDIATE | ADVANCED
+  estMinutes    Int      @default(120)
+  order         Int      @default(0)
+  status        String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  createdAt     DateTime @default(now())
+
+  subject          Subject                  @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
+  prereqs          ProjectPrereq[]
+  steps            ProjectStep[]
+  submissions      ProjectSubmission[]
+  assignments      ProjectAssignment[]
+  groupAssignments ProjectGroupAssignment[]
+}
+
+// Modules that gate a project — all must be completed for it to unlock.
+model ProjectPrereq {
+  id        String  @id @default(cuid())
+  projectId String
+  moduleId  String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  module    Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, moduleId])
+}
+
+model ProjectStep {
+  id            String              @id @default(cuid())
+  projectId     String
+  order         Int                 @default(0)
+  title         String
+  instructionMd String              @default("")
+  hintMd        String              @default("")
+  project       Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  answers       ProjectStepAnswer[]
+}
+
+// A working instance of a project — solo (studentId) or group (groupId).
+// Exactly one of studentId / groupId is set; a group shares one submission.
+model ProjectSubmission {
+  id           String    @id @default(cuid())
+  studentId    String? // NULL for group submissions
+  groupId      String? // NULL for solo submissions
+  projectId    String
+  status       String    @default("IN_PROGRESS") // IN_PROGRESS | SUBMITTED | RETURNED | GRADED
+  submittedAt  DateTime?
+  grade        Int? // 0-100, teacher-set
+  feedbackMd   String?
+  reviewedById String? // teacher User id (audit-style, no FK)
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  student User?               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group   ProjectGroup?       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  project Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  answers ProjectStepAnswer[]
+
+  @@unique([studentId, projectId])
+  @@unique([groupId, projectId])
+}
+
+// Named work group on the assignment canvas, scoped to one class.
+model ProjectGroup {
+  id          String   @id @default(cuid())
+  classId     String
+  name        String // "Groupe A"
+  createdById String? // teacher User id (audit-style, no FK)
+  createdAt   DateTime @default(now())
+
+  class       ClassGroup               @relation(fields: [classId], references: [id], onDelete: Cascade)
+  members     ProjectGroupMember[]
+  assignments ProjectGroupAssignment[]
+  submissions ProjectSubmission[]
+
+  @@unique([classId, name])
+}
+
+model ProjectGroupMember {
+  id        String @id @default(cuid())
+  groupId   String
+  studentId String
+
+  group   ProjectGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, studentId])
+}
+
+// Group → project edge with a per-assignment due date. Class-level
+// ProjectAssignment below stays as the whole-class fallback.
+model ProjectGroupAssignment {
+  id          String    @id @default(cuid())
+  groupId     String
+  projectId   String
+  dueDate     DateTime?
+  createdById String? // teacher User id (audit-style, no FK)
+  createdAt   DateTime  @default(now())
+
+  group   ProjectGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, projectId])
+}
+
+model ProjectStepAnswer {
+  id           String   @id @default(cuid())
+  submissionId String
+  stepId       String
+  responseMd   String   @default("")
+  done         Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+
+  submission ProjectSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  step       ProjectStep       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, stepId])
+}
+
+// Teacher attaches a project to a class with an optional due date (advisory).
+model ProjectAssignment {
+  id          String     @id @default(cuid())
+  classId     String
+  projectId   String
+  dueDate     DateTime?
+  createdById String?
+  createdAt   DateTime   @default(now())
+  class       ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, projectId])
+}
+
+// ───────────────────────── Teacher notebook ("Carnet de bord") ────────────────
+// A teacher's per-class planning journal.
+//  • ModulePlan      — the teacher's OWN coverage of a curriculum module for a
+//                      class (distinct from student Progress and from ModuleLock).
+//  • NotebookProject — a lightweight planning card for an applied project the
+//                      teacher intends to run (distinct from the student-facing
+//                      Project capstones above).
+
+model ModulePlan {
+  id         String     @id @default(cuid())
+  teacherId  String
+  classId    String
+  moduleId   String
+  status     String     @default("PLANNED") // PLANNED | IN_PROGRESS | COVERED
+  plannedFor DateTime?
+  coveredAt  DateTime?
+  notesMd    String     @default("")
+  order      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  teacher    User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  class      ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+  module     Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classId, moduleId])
+}
+
+model NotebookProject {
+  id            String     @id @default(cuid())
+  teacherId     String
+  classId       String
+  subjectSlug   String? // mirrors Subject.slug (no FK)
+  moduleId      String? // optional anchor module (audit-style, no FK)
+  title         String
+  objectivesMd  String     @default("")
+  deliverableMd String     @default("")
+  status        String     @default("IDEA") // IDEA | PLANNED | ASSIGNED | IN_PROGRESS | DONE
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  teacher       User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  class         ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────────── Carnet (personal notebooks) ─────────────────────────
+// A student's own math/physics/chemistry notes. Deliberately NOT a Lesson: Lesson
+// rows are curriculum (versioned, RAG-indexed, class-facing) and students must
+// never hold a write path into them.
+//
+// Offline shape: `id` is a uuid minted by the client, so a notebook created with
+// no network already carries its permanent identity and first sync is a plain
+// upsert. `clientUpdatedAt` is the device clock and drives last-write-wins;
+// `deletedAt` is a tombstone rather than a hard delete so a device that was
+// offline during the delete learns about it instead of resurrecting the doc.
+model NotebookDoc {
+  id              String    @id @default(cuid())
+  ownerId         String
+  title           String    @default("Sans titre")
+  subjectSlug     String? // mirrors Subject.slug (no FK)
+  contentMd       String    @default("")
+  clientUpdatedAt DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, updatedAt])
+}
+
+// ───────────────────────── Teacher exercises ─────────────────────────
+// Teacher-authored practice exercises (statement + worked solution, markdown/
+// LaTeX). Book exercises stay file-based (public/content/exercises.json) and
+// are merged at read time; only custom exercises live here. Links (module or
+// lesson) drive both the connector-canvas arrows and student visibility in
+// the Atelier.
+
+// Teacher correction of a BOOK exercise (file-based, no DB row of its own —
+// exercises.json id). One fix per exercise, merged over the AI/OCR version at
+// read time; deleting the row reverts to the automatic reconstruction.
+model BookExerciseFix {
+  id          String   @id @default(cuid())
+  exId        Int      @unique // id in public/content/exercises.json
+  statementMd String
+  solutionMd  String   @default("")
+  editedById  String? // User id (audit-style, no FK)
+  updatedAt   DateTime @updatedAt
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  authorId    String
+  subjectSlug String
+  classId     String? // null = all the author's classes studying this book
+  title       String   @default("")
+  statementMd String
+  solutionMd  String   @default("")
+  status      String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author  User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  subject Subject        @relation(fields: [subjectSlug], references: [slug], onDelete: Cascade)
+  class   ClassGroup?    @relation(fields: [classId], references: [id], onDelete: SetNull)
+  links   ExerciseLink[]
+}
+
+// One arrow on the canvas: exercise → module OR exercise → lesson
+// (exactly one of moduleId/lessonId is set).
+model ExerciseLink {
+  id         String  @id @default(cuid())
+  exerciseId String
+  moduleId   String?
+  lessonId   String?
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  module   Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lesson   Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, moduleId, lessonId])
+  @@index([moduleId])
+  @@index([lessonId])
 }

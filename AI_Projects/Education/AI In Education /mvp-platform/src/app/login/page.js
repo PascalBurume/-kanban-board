@@ -35,7 +35,7 @@ function ClassStep({ classes, loading, onPick, onStaff }) {
       ) : (
         <div className="class-grid">
           {classes.map((c, i) => (
-            <button key={c.id} className="card card-hover class-card" onClick={() => onPick(c)}>
+            <button key={c.id} className="card card-hover class-card reveal" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }} onClick={() => onPick(c)}>
               <div className="cc-top">
                 <div>
                   <h3>{c.name}</h3>
@@ -56,10 +56,15 @@ function ClassStep({ classes, loading, onPick, onStaff }) {
           ))}
         </div>
       )}
-      <div className="staff-row">
-        <a className="staff-link" href="/register/?role=student">Nouveau ? Rejoignez avec un code de classe</a>
-        <button className="staff-link" onClick={onStaff}>Connexion du personnel (enseignants &amp; administrateurs)</button>
+      <div className="role-bar">
+        <span className="rb-label">Vous êtes…</span>
+        <div className="rb-chips">
+          <span className="rb-chip active"><span className="rb-ic"><Icon name="book" /></span> Élève</span>
+          <button className="rb-chip" onClick={() => onStaff("teacher")}><span className="rb-ic"><Icon name="users" /></span> Enseignant</button>
+          <button className="rb-chip" onClick={() => onStaff("admin")}><span className="rb-ic"><Icon name="settings" /></span> Administrateur</button>
+        </div>
       </div>
+      <a className="register-link" href="/register/?role=student">Nouveau ? Rejoignez avec un code de classe <Icon name="arrowR" /></a>
     </>
   );
 }
@@ -125,7 +130,7 @@ function PinStep({ cls, student, onBack }) {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
         setOk(true);
-        const t = setTimeout(() => { window.location.href = data.redirect || "/student/"; }, 900);
+        const t = setTimeout(() => { window.location.href = data.redirect || "/student/"; }, 450);
         timers.current.push(t);
         return;
       }
@@ -207,21 +212,49 @@ function PinStep({ cls, student, onBack }) {
 }
 
 /* ---- Staff modal ---- */
-function StaffModal({ onClose }) {
+const STAFF_ROLES = {
+  teacher: {
+    icon: "users",
+    kicker: "Espace enseignant",
+    title: "Bon retour, professeur.",
+    sub: "Vos classes, votre studio et le tuteur Copilot.",
+    placeholder: "prenom.nom@mwalimu.school",
+    cta: "Entrer dans mon espace",
+    foot: "Les comptes enseignants sont créés par l’administrateur.",
+  },
+  admin: {
+    icon: "settings",
+    kicker: "Espace administrateur",
+    title: "Console d’administration.",
+    sub: "Comptes, classes, contenu et accès de l’école.",
+    placeholder: "admin@mwalimu.school",
+    cta: "Accéder à la console",
+    foot: "Accès réservé à l’administration de l’école.",
+  },
+};
+
+function StaffModal({ role = "teacher", onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const emailRef = useRef(null);
+  const pwRef = useRef(null);
+  const cfg = STAFF_ROLES[role] || STAFF_ROLES.teacher;
 
   async function signIn() {
     if (busy) return;
+    // Read from the DOM, not just React state: Safari autofill fills the inputs
+    // without firing onChange, so on the first click the state can still be empty.
+    const emailVal = (emailRef.current?.value ?? email).trim().toLowerCase();
+    const passwordVal = pwRef.current?.value ?? password;
     setErr("");
     setBusy(true);
     try {
       const res = await fetch("/api/auth/staff-login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: emailVal, password: passwordVal }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
@@ -229,7 +262,6 @@ function StaffModal({ onClose }) {
         return;
       }
       if (data.error === "LOCKED") setErr("Trop d’essais — verrouillé pendant 5 min.");
-      else if (data.error === "PENDING_APPROVAL") setErr("Votre compte est en attente d’approbation par l’administrateur.");
       else if (data.error === "DEACTIVATED") setErr("Ce compte a été désactivé. Contactez votre administrateur.");
       else setErr("E-mail ou mot de passe incorrect.");
     } catch {
@@ -241,55 +273,74 @@ function StaffModal({ onClose }) {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal">
-        <div className="modal-head">
-          <div>
-            <h2>Connexion du personnel</h2>
-            <div className="sub">Enseignants et administrateurs</div>
-          </div>
-          <button className="icon-x" onClick={onClose}><Icon name="x" /></button>
-        </div>
-        <div className="staff-fields">
-          <div className="field">
-            <label>E-mail</label>
-            <input
-              className="input"
-              placeholder="nom@mwalimu.school"
-              value={email}
-              autoComplete="username"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label>Mot de passe</label>
-            <input
-              className="input"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              autoComplete="current-password"
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") signIn(); }}
-            />
+      <div className={`modal staff-modal staff-${role}`}>
+        <button className="icon-x staff-x" onClick={onClose} aria-label="Fermer"><Icon name="x" /></button>
+        <div className="staff-hero">
+          <span className="staff-badge"><Icon name={cfg.icon} /></span>
+          <div className="staff-hero-txt">
+            <div className="staff-kicker">
+              {cfg.kicker}
+              {role === "admin" && <span className="secure-chip"><Icon name="lock" /> Accès sécurisé</span>}
+            </div>
+            <h2>{cfg.title}</h2>
+            <p>{cfg.sub}</p>
           </div>
         </div>
-        {err ? (
-          <div className="demo-note" style={{ color: "var(--danger-fg)" }}>
-            <Icon name="alert" /> {err}
+
+        <form className="staff-body" onSubmit={(e) => { e.preventDefault(); signIn(); }}>
+          <div className="staff-fields">
+            <div className="field">
+              <label>E-mail</label>
+              <div className="input-ic">
+                <Icon name="user" />
+                <input
+                  ref={emailRef}
+                  className="input"
+                  type="email"
+                  placeholder={cfg.placeholder}
+                  value={email}
+                  autoComplete="username"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label>Mot de passe</label>
+              <div className="input-ic">
+                <Icon name="lock" />
+                <input
+                  ref={pwRef}
+                  className="input"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  autoComplete="current-password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
-        ) : null}
-        <button
-          className="btn btn-primary btn-block btn-lg"
-          style={{ marginTop: "16px" }}
-          onClick={signIn}
-          disabled={busy}
-        >
-          {busy ? "Connexion…" : <>Se connecter <Icon name="arrowR" /></>}
-        </button>
-        <div className="staff-foot">
-          <a href="/register/?role=teacher">Créer un compte enseignant</a>
-          <a href="/login/forgot/?role=staff">Mot de passe oublié ?</a>
-        </div>
+
+          {err ? (
+            <div className="demo-note" style={{ color: "var(--danger-fg)" }}>
+              <Icon name="alert" /> {err}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            className="btn btn-block btn-lg staff-cta"
+            style={{ marginTop: "16px" }}
+            disabled={busy}
+          >
+            {busy ? "Connexion…" : <>{cfg.cta} <Icon name="arrowR" /></>}
+          </button>
+
+          <div className="staff-foot">
+            <span className="muted">{cfg.foot}</span>
+            <a href="/login/forgot/?role=staff">Mot de passe oublié ?</a>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -301,6 +352,7 @@ export default function LoginPage() {
   const [cls, setCls] = useState(null);
   const [student, setStudent] = useState(null);
   const [staffOpen, setStaffOpen] = useState(false);
+  const [staffRole, setStaffRole] = useState("teacher");
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -328,8 +380,11 @@ export default function LoginPage() {
       <div className="login-root" data-layout="split">
         {/* Brand panel */}
         <aside className="brand-panel">
+          <span className="bp-orb bp-orb-a" aria-hidden="true" />
+          <span className="bp-orb bp-orb-b" aria-hidden="true" />
           <div className="bp-logo"><BrandMark /> Mwalimu</div>
           <div className="bp-mid">
+            <div className="bp-eyebrow">Bienvenue <span className="wave">👋</span></div>
             <h1>Apprenez sans limites, même hors ligne.</h1>
             <p className="tag">La plateforme d’apprentissage de votre école — leçons, quiz et un tuteur IA, fonctionnant entièrement sur le serveur local.</p>
             <ul className="bp-features">
@@ -366,7 +421,7 @@ export default function LoginPage() {
                   classes={classes}
                   loading={loading}
                   onPick={(c) => { setCls(c); setStep(2); }}
-                  onStaff={() => setStaffOpen(true)}
+                  onStaff={(role) => { setStaffRole(role); setStaffOpen(true); }}
                 />
               )}
               {step === 2 && cls && (
@@ -388,7 +443,7 @@ export default function LoginPage() {
         </section>
       </div>
 
-      {staffOpen && <StaffModal onClose={() => setStaffOpen(false)} />}
+      {staffOpen && <StaffModal role={staffRole} onClose={() => setStaffOpen(false)} />}
     </div>
   );
 }

@@ -17,8 +17,15 @@ body { @apply bg-slate-50 text-ink antialiased; }
 .prose-reader ol { @apply list-decimal pl-6 my-3 space-y-1; }
 .prose-reader blockquote { @apply border-l-4 border-brand-light bg-teal-50/60 text-slate-600 px-4 py-2 my-4 rounded-r text-sm; }
 .prose-reader strong { @apply font-semibold text-slate-900; }
+/* Scroll wide tables inside their own box (see Markdown.js) instead of clipping. */
+.prose-reader .md-table-wrap { @apply my-4 overflow-x-auto rounded-lg border border-slate-200; -webkit-overflow-scrolling: touch; }
 .prose-reader table { @apply w-full text-sm my-4 border-collapse; }
+/* Wrapped table sizes to its content, still filling the box when it's narrow;
+   nowrap cells keep set notation like {a,b,c} on one line as the table scrolls. */
+.prose-reader .md-table-wrap table { @apply my-0 border-0; width: max-content; min-width: 100%; }
+.prose-reader .md-table-wrap th, .prose-reader .md-table-wrap td { @apply whitespace-nowrap; }
 .prose-reader th, .prose-reader td { @apply border border-slate-300 px-2 py-1 text-left; }
+.prose-reader thead th { @apply bg-slate-50 font-semibold; }
 /* Worked calculations (ASCII math, long division…) read as a clean light block,
    not a dark terminal. */
 .prose-reader pre { @apply bg-slate-50 text-slate-700 text-[13.5px] leading-relaxed p-4 rounded-xl border border-slate-200 overflow-x-auto my-4 whitespace-pre-wrap; }
@@ -28,6 +35,20 @@ body { @apply bg-slate-50 text-ink antialiased; }
 .katex { font-size: 1.02em; }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
 mark { @apply bg-yellow-200 rounded px-0.5; }
+
+/* ---------- Authored figures: hand-drawn SVG épures embedded in lessons ----------
+   Scoped under .prose-reader so .ai-badge does NOT collide with the unrelated
+   teacher-insights pill of the same name (insights.css). Figures always sit on a
+   white surface so the black strokes stay legible. */
+/* Recreated SVG figures share a fixed 720×480 canvas; without a cap the reader's
+   `max-width:100%` inflates each to the full column width (~700px), which reads as
+   oversized diagrams. Cap to a natural, centered size so they sit like textbook
+   figures; the box hugs its content instead of spanning the whole column. */
+.prose-reader figure.ai-figure { margin: 1.5rem auto; padding: 12px 14px; width: fit-content; max-width: min(100%, 520px); background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.04); overflow-x: auto; }
+.prose-reader figure.ai-figure svg { display: block; margin: 0 auto; width: 100%; max-width: 492px; height: auto; }
+.prose-reader figure.ai-figure figcaption { margin-top: 10px; font-size: 13px; line-height: 1.45; color: #475569; text-align: center; }
+.prose-reader .ai-badge { display: block; margin-top: 8px; font-size: 11.5px; line-height: 1.4; color: #64748b; font-style: italic; }
+.prose-reader .fig-omissions { display: block; margin-top: 5px; font-size: 11px; line-height: 1.4; color: #94a3b8; }
 
 /* ---------- Exercise cards (shared: /practice + /manuels) ---------- */
 /* Single-column worksheet: even, readable, no masonry gaps. */
@@ -50,6 +71,10 @@ mark { @apply bg-yellow-200 rounded px-0.5; }
 .ex-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: #d1fae5; color: #047857; white-space: nowrap; }
 .ex-tag svg { width: 12px; height: 12px; }
 .ex-tag.draft { background: #fef3c7; color: #b45309; }
+.ex-tag.prof { background: #ede9fe; color: #6d28d9; }
+/* AI-reconstructed from an unreadable scan — deliberately not the green
+   "Vérifié" treatment, which asserts the book's own answer key. */
+.ex-tag.ai { background: #fff7ed; color: #c2410c; }
 
 .ex-body { font-size: 14.5px; color: #334155; line-height: 1.6; }
 .ex-body .prose-reader { margin: 0; }
@@ -83,3 +108,12 @@ mark { @apply bg-yellow-200 rounded px-0.5; }
 .ur-msg textarea:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
 .ur-send { align-self: flex-start; }
 @media (max-width: 520px) { .ur-scale { grid-template-columns: repeat(5, 1fr); gap: 5px; } .ur-lbl { display: none; } }
+
+/* Figures (```figure) — the same renderer runs in the editor and on the student
+   page, so the class sees exactly what the teacher plotted. */
+.md-figure, .lw-figure { margin: 18px auto; max-width: 640px; color: var(--text); }
+.md-figure svg, .lw-figure svg { width: 100%; height: auto; display: block; }
+.md-figure-bad { font-size: 12px; color: var(--danger-fg); background: var(--danger-bg); padding: 8px 10px; border-radius: 6px; overflow-x: auto; }
+.lw-figure { cursor: pointer; border-radius: 6px; padding: 4px; }
+.lw-figure:hover { background: var(--indigo-50); }
+.lw-figure.ProseMirror-selectednode { outline: 2px solid var(--indigo-400); background: var(--indigo-50); }

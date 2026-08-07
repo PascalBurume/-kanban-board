@@ -28,7 +28,8 @@ export default function PracticeHub() {
         <a className="brand" href="/student/" style={{ textDecoration: "none", color: "inherit" }}>
           <BrandMark /> Mwalimu
         </a>
-        <div className="row" style={{ gap: 14 }}>
+        <div className="row" style={{ gap: 14, display: "flex", alignItems: "center" }}>
+          <a className="back-pill" href="/projects/"><Icon name="layers" /> Projets</a>
           <OfflinePill label="Serveur local connecté" />
           <a className="back-pill" href="/student/"><Icon name="chevL" /> Tableau de bord</a>
         </div>

@@ -1,6 +1,8 @@
 "use client";
 import "./dashboard.css";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import Ring from "@/components/ui/Ring";
 import BarChart from "@/components/ui/BarChart";
@@ -52,9 +54,9 @@ function ChapterCard({ c, accent }) {
     );
   }
   return (
-    <a className={`chap-card chap-${c.status}`} href={`/module/${c.moduleId}/`} style={{ "--accent": accent || "#4f46e5" }}>
+    <Link className={`chap-card chap-${c.status}`} href={`/module/${c.moduleId}/`} style={{ "--accent": accent || "#4f46e5" }}>
       {inner}
-    </a>
+    </Link>
   );
 }
 
@@ -70,6 +72,7 @@ function subjectSummary(s) {
 }
 
 export default function StudentDashboard() {
+  const router = useRouter();
   const [copilot, setCopilot] = useState(true);
   const [data, setData] = useState(null);
   const [chapters, setChapters] = useState(null);
@@ -141,6 +144,12 @@ export default function StudentDashboard() {
           <a className="practice-nav" href="/practice/">
             <Icon name="sparkles" /> S’entraîner
           </a>
+          <a className="practice-nav" href="/projects/">
+            <Icon name="layers" /> Projets
+          </a>
+          <a className="practice-nav" href="/student/carnet/">
+            <Icon name="book" /> Mon carnet
+          </a>
           <OfflinePill label="Serveur local connecté" />
           <LangToggle
             onNotice={() =>
@@ -180,7 +189,7 @@ export default function StudentDashboard() {
               {/* Hero */}
               <div
                 className="hero"
-                onClick={() => { if (heroLessonId) window.location.href = "/lesson/?id=" + heroLessonId; }}
+                onClick={() => { if (heroLessonId) router.push("/lesson/?id=" + heroLessonId); }}
                 style={{ cursor: heroLessonId ? "pointer" : "default" }}
               >
                 <Ring pct={overallPct} size={92} stroke={8} color="#fff" track="rgba(255,255,255,.25)" />
@@ -199,7 +208,11 @@ export default function StudentDashboard() {
                   </div>
                 </div>
                 {heroLessonId && (
-                  <a className="btn btn-light btn-lg" href={"/lesson/?id=" + heroLessonId} onClick={(e) => e.stopPropagation()}>
+                  <a
+                    className="btn btn-light btn-lg"
+                    href={"/lesson/?id=" + heroLessonId}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push("/lesson/?id=" + heroLessonId); }}
+                  >
                     {cont ? "Reprendre" : "Revoir"} <span><Icon name="arrowR" /></span>
                   </a>
                 )}
@@ -299,7 +312,7 @@ export default function StudentDashboard() {
                       <div className="tiny muted">{data.nextQuiz.title}</div>
                     </div>
                   </div>
-                  <button className="btn btn-secondary btn-block btn-sm" onClick={() => { window.location.href = "/lesson/?id=" + data.nextQuiz.lessonId; }}>
+                  <button className="btn btn-secondary btn-block btn-sm" onClick={() => router.push("/lesson/?id=" + data.nextQuiz.lessonId)}>
                     Aperçu du quiz
                   </button>
                 </div>

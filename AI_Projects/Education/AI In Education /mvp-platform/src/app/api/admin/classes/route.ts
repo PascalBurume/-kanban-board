@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser, audit } from "@/lib/auth";
+import { offeringOptions, isValidLevelField } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export async function GET() {
       studentCount: c._count.enrollments,
       teacherCount: c._count.teacherAssignments,
     })),
+    offerings: await offeringOptions(), // the (level, field) pairs the class form may offer
   });
 }
 
@@ -36,6 +38,7 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const { name, level, field } = body;
   if (!name || !level) return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
+  if (!(await isValidLevelField(level, field))) return NextResponse.json({ error: "BAD_OFFERING" }, { status: 400 });
   const exists = await prisma.classGroup.findUnique({ where: { name } });
   if (exists) return NextResponse.json({ error: "DUPLICATE" }, { status: 409 });
   const cls = await prisma.classGroup.create({ data: { name, level, field: field || null, year: 2025 } });

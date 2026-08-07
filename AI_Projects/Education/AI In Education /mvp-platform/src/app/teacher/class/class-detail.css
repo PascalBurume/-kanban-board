@@ -8,6 +8,27 @@
 .class-hero .master .ml { font-size: 13px; font-weight: 600; }
 .class-hero .master .ml small { display: block; color: var(--text-muted); font-weight: 500; font-size: 11.5px; }
 
+/* class switcher */
+.class-switch-wrap { position: relative; }
+.class-switch { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-radius: var(--r-md); }
+.class-switch h1 { display: inline-flex; align-items: center; gap: 9px; }
+.cs-chev { width: 26px; height: 26px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; color: var(--text-soft); transition: transform .16s ease, background .14s ease; }
+.cs-chev svg { width: 16px; height: 16px; }
+.class-switch:hover .cs-chev { background: var(--indigo-50); color: var(--indigo-700); border-color: var(--indigo-200); }
+.cs-chev.open { transform: rotate(180deg); }
+.cs-backdrop { position: fixed; inset: 0; z-index: 40; }
+.class-switch-menu { position: absolute; top: calc(100% + 10px); left: 0; z-index: 41; min-width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-lg); padding: 6px; animation: cs-pop .14s ease; }
+@keyframes cs-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.cs-menu-label { font: 700 11px var(--font-ui); text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); padding: 8px 12px 6px; }
+.class-switch-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; background: none; border-radius: var(--r-md); cursor: pointer; text-align: left; transition: background .12s ease; }
+.class-switch-item:hover { background: var(--surface-2); }
+.class-switch-item.active { background: var(--indigo-50); }
+.class-switch-item .csi-tile { width: 36px; height: 36px; border-radius: 10px; background: var(--math-bg); color: var(--math); font: 700 14px var(--font-head); display: grid; place-items: center; flex: none; }
+.class-switch-item .csi-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.class-switch-item .csi-name { font-weight: 600; font-size: 14.5px; color: var(--text); }
+.class-switch-item .csi-sub { font-size: 12px; color: var(--text-muted); }
+.class-switch-item > .icon svg { width: 17px; height: 17px; color: var(--indigo-600); }
+
 .mini-kpis { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
 .mini-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 13px 18px; display: flex; align-items: center; gap: 12px; box-shadow: var(--sh-xs); }
 .mini-kpi .ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; flex: none; }
@@ -16,6 +37,10 @@
 .mini-kpi .l { font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
 
 .tbl-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.status-chips { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.schip { border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-soft); font: 600 13px var(--font-ui); padding: 8px 15px; border-radius: var(--r-pill); cursor: pointer; transition: all .14s ease; }
+.schip:hover { border-color: var(--indigo-300); color: var(--indigo-700); }
+.schip.on { background: var(--text); color: #fff; border-color: var(--text); }
 .tbl-search { position: relative; }
 .tbl-search input { padding-left: 38px; width: 260px; }
 .tbl-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--text-muted); }
@@ -47,7 +72,7 @@ th .selall { display: flex; align-items: center; }
 .topic-chip { background: var(--indigo-50); color: var(--indigo-700); border: 1px solid var(--indigo-100); font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
 
 /* module access (lock/unlock) panel */
-.mod-locks { padding: 0; overflow: hidden; }
+.mod-locks { padding: 0; overflow: hidden; margin-bottom: 22px; }
 .mod-locks .ml-head { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; cursor: pointer; padding: 16px 18px; text-align: left; }
 .mod-locks .ml-head h3 { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 0; }
 .mod-locks .ml-head h3 svg { width: 17px; height: 17px; color: var(--primary); }

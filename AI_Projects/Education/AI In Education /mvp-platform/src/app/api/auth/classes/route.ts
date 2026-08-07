@@ -5,9 +5,11 @@ export const dynamic = "force-dynamic";
 
 // Public — drives the 3-step login picker (class grid → student grid).
 // Returns only what the login screen needs; no secrets.
+// Only classes that already have a supervisor (lead teacher / titulaire) are
+// exposed here; unassigned classes stay admin-only (see /api/admin/classes).
 export async function GET() {
   const classes = await prisma.classGroup.findMany({
-    where: { isArchived: false },
+    where: { isArchived: false, teacherAssignments: { some: { isLead: true } } },
     orderBy: { name: "asc" },
     include: {
       enrollments: {

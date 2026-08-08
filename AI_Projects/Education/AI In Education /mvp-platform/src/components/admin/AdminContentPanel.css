@@ -3,7 +3,8 @@
 
 .acp { background: transparent; min-height: auto; }
 
-/* info banner — same warm treatment as the studio's .ed-readonly */
+/* Info banner — the warm, low-alarm treatment. (The studio no longer has one: its
+   read-only notice became an eyebrow plus buttons, see .preview-head .ph-lock.) */
 .acp-banner { display: flex; align-items: flex-start; gap: 10px; padding: 11px 16px; background: #faf9f5; border: 1px solid #e7e4dc; border-radius: var(--r-md); color: #5b5852; font-size: 13px; line-height: 1.45; margin-bottom: 18px; }
 .acp-banner svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--indigo-600); }
 

@@ -46,7 +46,11 @@ export default function TeacherShell({ active = "", crumbGroup = "Enseignement",
 
   const fromBadge = badges?.teacher || {};
   const teacherName = `${teacher.firstName || fromBadge.firstName || ""} ${teacher.lastName || fromBadge.lastName || ""}`.trim();
-  const role = teacher.role || (fromBadge.subjectLabel ? `Enseignante · ${fromBadge.subjectLabel}` : "Enseignante");
+  // The API agrees « Mme »/« M. » and « Enseignante »/« Enseignant » with User.gender —
+  // never re-derive it here, that divergence is the bug this replaced.
+  const displayName = fromBadge.displayName || teacherName;
+  const role = teacher.role || (fromBadge.discipline ? `${fromBadge.roleLabel} · ${fromBadge.discipline}` : fromBadge.roleLabel || "");
+  const taughtSubjects = fromBadge.subjects || [];
   const openFeedback = badges?.openFeedback || 0;
 
   return (
@@ -76,10 +80,12 @@ export default function TeacherShell({ active = "", crumbGroup = "Enseignement",
         </nav>
         <div className="t-side-foot">
           <div className="t-userbox">
-            <Avatar name={teacherName || "Grâce Mukendi"} size="avatar-sm" />
+            {/* The bare name, not displayName — initials come from Grâce/Mukendi, and a
+                seeded stand-in name here would be wrong for every other teacher. */}
+            <Avatar name={teacherName} size="avatar-sm" />
             <a className="meta" href="/profile/" style={{ textDecoration: "none", color: "inherit" }}>
-              <div className="un">{teacherName ? `Mme ${teacherName}` : "Mme Grâce Mukendi"}</div>
-              <div className="ur">{role}</div>
+              <div className="un">{displayName}</div>
+              <div className="ur" title={taughtSubjects.join("\n")}>{role}</div>
             </a>
             <a className="lo" href="/api/auth/logout/" title="Se déconnecter">
               <Icon name="logout" />

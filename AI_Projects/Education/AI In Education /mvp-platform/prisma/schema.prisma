@@ -17,6 +17,7 @@ model User {
   firstName          String
   lastName           String
   disciplines        String? // teachers: comma-sep Subject.family keys ("math", "physique,chimie") — set by super admin; drives which book a class assignment resolves to
+  gender             String? // F | M | null — French agreement ONLY (« Enseignante » vs « Enseignant », « Mme » vs « M. »). Null is a real answer, not missing data: it renders « Enseignant(e) ».
   avatarColor        String?
   email              String?   @unique
   passwordHash       String? // staff
@@ -44,6 +45,7 @@ model User {
   notebookProjects        NotebookProject[]
   notebookDocs            NotebookDoc[]
   exercises               Exercise[]
+  teachThreads            TeachThread[]
 }
 
 model ClassGroup {
@@ -173,6 +175,7 @@ model Lesson {
   copilotTopics  CopilotTopic[]
   feedbacks      LessonFeedback[]
   chunks         LessonChunk[]
+  teachThreads   TeachThread[]
   exerciseLinks  ExerciseLink[]
 
   @@unique([moduleId, slug])
@@ -642,4 +645,72 @@ model ExerciseLink {
   @@unique([exerciseId, moduleId, lessonId])
   @@index([moduleId])
   @@index([lessonId])
+}
+
+// ───────────────────────── Corbeille ─────────────────────────
+// Deleting a lesson used to be irreversible in the worst possible way: ten
+// relations cascade off Lesson, and one of them is LessonVersion — so the delete
+// destroyed the lesson AND the only history that could have brought it back.
+//
+// This is an archive, not a tombstone. The lesson row is still hard-deleted, so
+// there is no `deletedAt` for ~54 read sites across 13 files to remember to
+// filter, and no path by which a deleted lesson can reach a student: the row
+// genuinely is not there. What survives is this write-once record, from which a
+// restore rebuilds the lesson and everything that hung off it.
+//
+// The whole capture lives in payloadJson (shape versioned inside it) rather than
+// in mirror tables — it is written once, read rarely, and its shape has to be
+// free to follow Lesson's.
+model DeletedLesson {
+  id            String   @id @default(cuid())
+  lessonId      String   @unique // the id it had, and the id it gets back on restore
+  title         String
+  subjectSlug   String?
+  moduleId      String? // where it was; the module may since have gone
+  moduleTitle   String? // denormalised so the bin reads well without a join
+  authorId      String?
+  wasPublished  Boolean  @default(false)
+  extraCount    Int      @default(0) // companions dragged down with it, for the bin's wording
+  deletedById   String
+  deletedByName String
+  deletedAt     DateTime @default(now())
+  payloadJson   String
+
+  @@index([authorId, deletedAt])
+}
+
+// ───────────────────── Copilot Enseigner ─────────────────────
+// The teacher's teaching-support conversation about one lesson. Deliberately NOT
+// CopilotThread: that table is the student-question corpus buildInsights() reads,
+// and the student rate limiter counts its rows by thread.studentId. Teacher turns
+// in there would corrupt the very signal this Copilot exists to surface.
+//
+// Scoped per (teacher, lesson) — the teacher picks a lesson and the thread is the
+// running conversation about teaching it. The unique constraint is the one the
+// student side is missing: without it, two concurrent first messages create two
+// threads and the reader silently keeps only the newest.
+model TeachThread {
+  id        String   @id @default(cuid())
+  teacherId String
+  lessonId  String
+  startedAt DateTime @default(now())
+
+  teacher  User           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lesson   Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  messages TeachMessage[]
+
+  @@unique([teacherId, lessonId])
+  @@index([lessonId])
+}
+
+model TeachMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      String // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+
+  thread TeachThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
 }

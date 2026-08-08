@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { teacherOverview } from "@/lib/teacher";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +8,15 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const u = await getCurrentUser();
   if (!u || u.role !== "TEACHER") return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-  const data = await teacherOverview(u.userId);
-  return NextResponse.json({ teacher: { firstName: u.firstName, lastName: u.lastName }, ...data });
+  // The name is read from the row rather than the session, which only caches it: after a
+  // rename on /profile the dashboard kept greeting the teacher by their old name until
+  // they signed out and back in.
+  const [data, me] = await Promise.all([
+    teacherOverview(u.userId),
+    prisma.user.findUnique({ where: { id: u.userId }, select: { firstName: true, lastName: true } }),
+  ]);
+  return NextResponse.json({
+    teacher: { firstName: me?.firstName ?? u.firstName, lastName: me?.lastName ?? u.lastName },
+    ...data,
+  });
 }

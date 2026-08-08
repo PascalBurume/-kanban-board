@@ -1,8 +1,12 @@
 # Mwalimu — Pilot Specification
 
 **Features, capabilities and hardware requirements**
-Version: pilot draft — 24 July 2026
+Version: pilot draft — updated 8 August 2026
 Scope: what is built and running today in `mvp-platform`, and what a school needs to run it.
+
+> **Related:** [PRD.md](PRD.md) states what the product is *required* to do, and why.
+> [BUILD_LOG.md](BUILD_LOG.md) records what has been built, when, with evidence.
+> This document is the deployment view: what a school receives and what it must supply.
 
 ---
 
@@ -42,11 +46,16 @@ Content is built from textbook sources at build time and seeded into the databas
 Alongside the lessons:
 
 - **344 quizzes / 1 025 questions** (auto-graded, LaTeX-capable).
-- **237 reconstructed textbook exercise sets**, linked to the lessons they belong to.
-- **91 hand-authored SVG figures / épures** rendered inline (descriptive geometry,
-  Maths 5, Chimie 6) — no image files, so they stay crisp and cost almost nothing to serve.
-- **Full LaTeX/KaTeX maths rendering** throughout lessons, exercises and quizzes.
-- Content payload: ~13 MB static + ~19 MB seeded database (3.4 MB of lesson markdown).
+- **276 reconstructed textbook exercises**, linked to the lessons they belong to and
+  QA'd by `scripts/check-exercises.mjs` — **0 flagged, 0 incomplete, 0 KaTeX failures**.
+- **423 hand-authored SVG figures / épures across 91 lessons**, rendered inline
+  (descriptive geometry 62, Maths 5 191, Chimie 6 170) — no image files, so they stay
+  crisp at any zoom and cost almost nothing to serve.
+- **Full LaTeX/KaTeX maths rendering** throughout lessons, exercises and quizzes,
+  audited by `scripts/check-latex.mjs` — currently **0 failures and 0 leaks across all
+  nine books**.
+- **4 027 RAG chunks** for semantic search and Copilot grounding (built after seeding).
+- Content payload: ~13 MB static + ~25 MB seeded database (3.4 MB of lesson markdown).
 
 Four seeded classes for the pilot: 5e Scientifique A, 5e Math-Physique A,
 6e Scientifique A, 6e Math-Physique A.
@@ -88,9 +97,32 @@ Four seeded classes for the pilot: 5e Scientifique A, 5e Math-Physique A,
   pace the year.
 - **Carnet / Notebook**: module planner and project planner.
 - **Feedback inbox**, scoped to the subject teacher plus the class *titulaire*.
-- **Studio (content authoring)** with subject tabs for multi-subject teachers:
-  - write or edit lessons, autosave, version history and restore, device preview toggle;
-  - a **personal library** (lessons that belong to the teacher, not a module);
+- **« Rédiger une leçon » — a real word processor** (`/teacher/studio/rediger`). A
+  Google Docs shell (title bar, menu bar, toolbar, centred page, **Copilot docked as a
+  right rail**) with Word-level depth, so a teacher never has to see markdown:
+  - bold, italic, underline, strikethrough, subscript, superscript, text colour,
+    highlight, alignment, lists, indent, blockquote, case conversion, clear formatting;
+  - **tables** by grid picker, with maths inside cells and per-column alignment;
+  - **maths**: inline and display formulas, a symbol palette, and a 3-pane LaTeX editor
+    with live KaTeX — nothing unrenderable can reach a lesson;
+  - **figures**: 12 chart types and 8 geometry templates inserted as *editable data*
+    (drag a point and the whole construction follows), plus a **76-figure catalogue**
+    from « Catalogue des figures scientifiques », all 76 of them editable;
+  - **images**: photo or scanned schema, shrunk in the browser before upload, resizable,
+    and **queued offline** so a picture never blocks a save;
+  - find & replace, document outline, print/PDF, and three modes —
+    **Visuel · Markdown (source) · Côte à côte**;
+  - every command is also reachable by touch on a 1024×768 tablet.
+
+  **The safety property that matters:** before a lesson opens visually, the platform
+  proves the round trip (markdown → document → markdown) is lossless *for that lesson*.
+  If it cannot, the teacher keeps a source view — text is never silently mangled.
+  Today **457 of the 481 seeded book lessons (95 %) open in the visual editor**; the
+  remaining 24 are 15 malformed OCR tables and 9 fragments of unsupported HTML.
+- **Studio de contenu** with subject tabs for multi-subject teachers:
+  - autosave, version history and restore, device preview toggle;
+  - a **personal library** (lessons that belong to the teacher, not a module) and
+    **compléments** attached to a book lesson for the teacher's own students;
   - build quizzes, including LaTeX questions;
   - **Copilot APS** co-authoring: draft a lesson or a project from a real Congolese
     situation, grounded strictly in the prerequisite modules the teacher selects;
@@ -270,10 +302,19 @@ Anything with a modern browser. No installation, no app store.
 4. **Content coverage is uneven.** Maths 5e is deep (169 lessons); Physique (18) and the
    EXETAT revision track (9) are thin. Chimie 6e grounding is pending a full-book
    transcription — only chapters I–IV are covered by the source PDF.
-5. **Mobile responsiveness is partial.** The student dashboard is phone-ready; several
-   teacher and admin pages still assume a desktop-width screen.
+5. **Mobile responsiveness is partial.** Phone-ready: the student dashboard, the lesson
+   reader, the module page and the teacher shell (its sidebar becomes a drawer). Still
+   desktop-width: the admin console's dense tables and the teacher pages' data tables.
 6. **Single point of failure.** One server, one SQLite file. UPS + tested backups are the
    mitigation; there is no failover.
+7. **24 book lessons (5 %) open in the source view rather than the visual editor** — 15
+   carry pipe tables the OCR left malformed, 9 carry HTML outside the supported dialect.
+   Nothing is lost or unreadable; those teachers edit markdown for those lessons. Both
+   causes are fixable in the content, not in the code.
+8. **A content update is a migration, not a reseed.** `db:seed` rebuilds the demo dataset
+   and cascade-deletes teacher-created exercises and the whole RAG index. There is no
+   incremental content-update path yet, so any pilot content refresh must be planned and
+   followed by a re-index from the admin panel.
 
 ---
 
@@ -286,5 +327,6 @@ Anything with a modern browser. No installation, no app store.
 | Does the tutor help or replace thinking? | `CopilotMessage` volume vs. quiz scores |
 | Which lessons are unclear? | `LessonFeedback` ("je n'ai pas compris") per lesson |
 | Do teachers author content? | Studio lessons/quizzes/exercises created |
+| Do they stay in the visual editor? | Time in `visual` vs `source` mode; how often the round-trip gate refuses a lesson |
 | Is the hardware adequate? | Admin health: Ollama latency, disk, DB growth |
 | Does APS project work land? | `ProjectSubmission` grades and teacher feedback |

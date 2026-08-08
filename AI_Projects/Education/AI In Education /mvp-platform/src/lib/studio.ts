@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import type { SessionUser } from "./session";
 import { BLANK_CONTENT } from "./lessonSkeleton";
+import { archiveAndDelete, restoreArchive, purgeArchive } from "./lessonArchive";
 
 // Subjects a user may edit: ADMIN → all; TEACHER → their assigned subjects.
 export async function editableSubjectSlugs(user: SessionUser): Promise<string[]> {
@@ -100,6 +101,50 @@ function libCard(
 function isBlank(md: string): boolean {
   const strip = (s: string) => s.replace(/\s+/g, " ").trim();
   return strip(md) === "" || strip(md) === strip(BLANK_CONTENT);
+}
+
+/**
+ * Everything the user may WRITE — their own lessons and the books they could start one
+ * in — across every class, with no class scope at all.
+ *
+ * « Rédiger une leçon » used to build its start screen from `studioTree()`, which is
+ * class-scoped on purpose: you edit one class's manual there. With no `?class=` a teacher
+ * gets `classes[0]`, so the start screen showed one class's books and silently hid every
+ * lesson written for the others — a teacher of 5e and 6e could see neither her 6e drafts
+ * nor a way to begin a new one. A personal library is not owned by a class.
+ *
+ * Subjects still gate the list: a lesson in a book you no longer teach is one the editor
+ * would refuse to open, so listing it would only offer a dead link.
+ */
+export async function studioLibrary(user: SessionUser) {
+  const slugs = await editableSubjectSlugs(user);
+  const [subjects, authored] = await Promise.all([
+    prisma.subject.findMany({ where: { slug: { in: slugs } }, orderBy: { order: "asc" }, select: { slug: true, name: true } }),
+    prisma.lesson.findMany({
+      where: { authorId: user.role === "ADMIN" ? { not: null } : user.userId, subjectSlug: { in: slugs } },
+      select: { id: true, title: true, status: true, moduleId: true, subjectSlug: true, contentMd: true },
+    }),
+  ]);
+
+  // Same "last written" derivation as studioTree — Lesson has no updatedAt, so the newest
+  // snapshot stands in for it.
+  const lastEdits = authored.length
+    ? await prisma.lessonVersion.groupBy({
+        by: ["lessonId"],
+        where: { lessonId: { in: authored.map((l) => l.id) } },
+        _max: { createdAt: true },
+      })
+    : [];
+  const editedAt = new Map(lastEdits.map((e) => [e.lessonId, e._max.createdAt?.getTime() ?? null]));
+  const nameOf = new Map(subjects.map((s) => [s.slug, s.name]));
+
+  return {
+    subjects: subjects.map((s) => ({ slug: s.slug, name: s.name })),
+    // Newest first: the lesson you were just in is the one you are coming back for.
+    drafts: authored
+      .map((l) => ({ ...libCard(l, editedAt.get(l.id) ?? null), subjectName: nameOf.get(l.subjectSlug ?? "") ?? "" }))
+      .sort((a, b) => (b.editedAt ?? 0) - (a.editedAt ?? 0)),
+  };
 }
 
 // classId scopes the tree to that class's books, with modules narrowed to its
@@ -255,14 +300,37 @@ export async function connectLesson(user: SessionUser, lessonId: string, moduleI
 }
 
 // Delete a lesson — only one the teacher authored (never book content); admin may delete
-// any. Cascades remove versions/quiz/assignments; student progress is set null/removed.
+// any. The row is still hard-deleted, but everything that hangs off it is captured into
+// the corbeille first, in the same transaction, so the delete is reversible. See
+// lessonArchive.ts.
 export async function deleteLesson(user: SessionUser, lessonId: string) {
   const lesson = await prisma.lesson.findUnique({ where: { id: lessonId } });
   if (!lesson) return null;
   if (user.role !== "ADMIN" && lesson.authorId !== user.userId) return null; // admin, or the author of their own lesson
-  await prisma.lesson.delete({ where: { id: lessonId } });
-  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "LESSON_DELETE", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ title: lesson.title }) } });
-  return { ok: true };
+  const done = await archiveAndDelete(user, lessonId);
+  if (!done) return null;
+  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "LESSON_DELETE", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ title: lesson.title, extraCount: done.extraCount }) } });
+  return { ok: true, title: done.title, extraCount: done.extraCount };
+}
+
+// Restore from the corbeille. `exact` is the undo on the delete toast — it puts the
+// lesson back exactly as it was, status included. Without it (a restore days later
+// from the bin) the lesson comes back as a draft, so an old lesson can never silently
+// re-expose itself to a class.
+export async function undeleteLesson(user: SessionUser, lessonId: string, exact = false) {
+  const report = await restoreArchive(user, lessonId, { exact });
+  if (!report) return null;
+  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "LESSON_UNDELETE", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ title: report.title, exact }) } });
+  // The RAG chunks went with the lesson; they are derived, so rebuild rather than archive.
+  import("./rag").then((m) => m.indexLesson(lessonId)).catch(() => {});
+  return report;
+}
+
+export async function emptyFromTrash(user: SessionUser, lessonId: string) {
+  const done = await purgeArchive(user, lessonId);
+  if (!done) return null;
+  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "LESSON_PURGE", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ title: done.title }) } });
+  return done;
 }
 
 // What a teacher may OPEN in the studio: their own lessons, or any lesson in a subject

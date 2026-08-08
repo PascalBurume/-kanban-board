@@ -28,6 +28,10 @@ async function main() {
   const keep = new Set();
   for (const l of await prisma.lesson.findMany({ select: { contentMd: true } })) referenced(l.contentMd, keep);
   for (const v of await prisma.lessonVersion.findMany({ select: { contentMd: true } })) referenced(v.contentMd, keep);
+  // …and the corbeille, for exactly the reason stated above: a lesson in the bin is
+  // restorable, so pruning its pictures would restore text with holes in it. The whole
+  // archived payload is scanned — the lesson AND every version inside it.
+  for (const d of await prisma.deletedLesson.findMany({ select: { payloadJson: true } })) referenced(d.payloadJson, keep);
 
   const root = path.join(UPLOAD_DIR, "lessons");
   const lessons = await fs.readdir(root).catch(() => []);

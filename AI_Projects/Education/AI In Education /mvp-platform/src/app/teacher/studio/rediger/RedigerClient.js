@@ -6,6 +6,7 @@ import Markdown from "@/components/Markdown";
 import DocMenuBar from "@/components/ui/DocMenuBar";
 import ResizeGrip from "@/components/ui/ResizeGrip";
 import { StudioComposePanel } from "@/components/StudioComposePanel";
+import TeachPanel from "@/components/TeachPanel";
 import LessonWriter from "@/components/LessonWriter";
 import QuizMathInput from "@/components/QuizMathInput";
 import { auditDocument, auditQuiz } from "@/lib/lessonAudit";
@@ -161,16 +162,16 @@ export default function RedigerClient() {
 
   // ---- load ----
 
-  /** Fetch the "reprendre" list. Newest first: the lesson you were just in is the one
-   *  you are most likely coming back for. */
+  /** Every subject the teacher may write in and every lesson they own, newest first.
+   *
+   *  NOT /api/studio/tree/ — that is scoped to one class, and with no ?class= a teacher
+   *  gets classes[0]. Building this screen from it showed the books of a single class and
+   *  hid the lessons written for all the others. /library is unscoped by design. */
   const loadStart = useCallback(async () => {
-    const t = await fetch("/api/studio/tree/", { credentials: "same-origin", cache: "no-store" }).then((x) => (x.ok ? x.json() : null)).catch(() => null);
-    setStart({
-      subjects: (t?.subjects || []).map((s) => ({ slug: s.slug, name: s.name })),
-      drafts: (t?.subjects || [])
-        .flatMap((s) => (s.library || []).map((l) => ({ ...l, subjectName: s.name })))
-        .sort((a, b) => (b.editedAt ?? 0) - (a.editedAt ?? 0)),
-    });
+    const d = await fetch("/api/studio/library/", { credentials: "same-origin", cache: "no-store" })
+      .then((x) => (x.ok ? x.json() : null))
+      .catch(() => null);
+    setStart({ subjects: d?.subjects || [], drafts: d?.drafts || [] });
   }, []);
 
   /**
@@ -633,6 +634,7 @@ export default function RedigerClient() {
         label: "Outils",
         items: [
           { id: "copilot", icon: "sparkles", label: "Copilot APS" },
+          { id: "enseigner", icon: "message", label: "Copilot Enseigner", hint: "Comment enseigner cette leçon" },
           // The atelier stays part of the platform: it is the only surface with the
           // agent's visible verify-and-retry steps and a raw source pane beside a live
           // render, and a teacher deep in a derivation wants both.
@@ -703,6 +705,7 @@ export default function RedigerClient() {
         case "quote": return void e?.chain()?.toggleBlockquote().run();
         case "atelier": return void window.open(`/teacher/studio/latex/?id=${lessonId}`, "_blank", "noopener");
         case "copilot": return openRail("copilot");
+        case "enseigner": return openRail("enseigner");
         case "problemes": return openRail("problemes");
         case "quiz": return openRail("quiz");
         default: return undefined;
@@ -726,33 +729,40 @@ export default function RedigerClient() {
   // ---- start screen ----
   if (start) {
     return (
-      <div className="rd-start teacher-page">
-        <header className="rd-start-hd">
-          <div>
-            <h1>Rédiger une leçon</h1>
-            <p className="rd-start-sub">Écrivez, mettez en forme, insérez vos formules et vos figures, puis reliez la leçon au manuel.</p>
+      // The theme host must be full-bleed: `teacher-page` paints --bg, and when it was
+      // also the 1040px column the warm paper showed as a stripe down the middle of the
+      // app's cool body. Host outside, measure inside.
+      <div className="rd-startpage teacher-page">
+        <div className="rd-start-band">
+          <div className="rd-start-in">
+            <header className="rd-start-hd">
+              <div>
+                <h1>Rédiger une leçon</h1>
+                <p className="rd-start-sub">Écrivez, mettez en forme, insérez vos formules et vos figures, puis reliez la leçon au manuel.</p>
+              </div>
+              <a className="rd-start-back" href="/teacher/studio/"><Icon name="chevL" /> Studio de contenu</a>
+            </header>
+
+            <section className="rd-start-new">
+              <h2>Commencer une nouvelle leçon</h2>
+              {start.subjects.length === 0 ? (
+                <p className="rd-start-none">Aucune matière ne vous est attribuée. Voyez avec la direction.</p>
+              ) : (
+                <div className="rd-start-row">
+                  {start.subjects.map((s) => (
+                    <button key={s.slug} className="rd-newcard" onClick={() => createLesson(s.slug)}>
+                      <span className="rd-newcard-i"><Icon name="plus" /></span>
+                      <span className="rd-newcard-t">{s.name}</span>
+                      <span className="rd-newcard-h">Page blanche</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
-          <a className="rd-start-back" href="/teacher/studio/"><Icon name="chevL" /> Studio de contenu</a>
-        </header>
+        </div>
 
-        <section className="rd-start-new">
-          <h2>Commencer une nouvelle leçon</h2>
-          {start.subjects.length === 0 ? (
-            <p className="rd-start-none">Aucune matière ne vous est attribuée. Voyez avec la direction.</p>
-          ) : (
-            <div className="rd-start-row">
-              {start.subjects.map((s) => (
-                <button key={s.slug} className="rd-newcard" onClick={() => createLesson(s.slug)}>
-                  <span className="rd-newcard-i"><Icon name="plus" /></span>
-                  <span className="rd-newcard-t">{s.name}</span>
-                  <span className="rd-newcard-h">Page blanche</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section>
+        <div className="rd-start-in rd-start-list">
           <div className="rd-start-h2">
             <h2>Reprendre une leçon</h2>
             {start.drafts.length > 0 && <span className="rd-start-count">{start.drafts.length}</span>}
@@ -788,7 +798,7 @@ export default function RedigerClient() {
               ))}
             </ul>
           )}
-        </section>
+        </div>
       </div>
     );
   }
@@ -803,6 +813,25 @@ export default function RedigerClient() {
     );
   }
   if (!meta) return <div className="rd-empty teacher-page"><p>Chargement…</p></div>;
+
+  // One definition of the rail's tabs, rendered both in the desktop rail and inside
+  // the tablet drawer. It used to exist only in the rail — so on a tablet, where the
+  // rail collapses, « Enseigner » was unreachable however the pane was opened.
+  const railTabs = (
+    <nav className="rd-railtabs">
+      {[
+        ["copilot", "Copilot", null],
+        ["enseigner", "Enseigner", null],
+        ["problemes", "Problèmes", problemCount || null],
+        ["quiz", "Quiz", quizIssues || quiz.length || null],
+      ].map(([k, label, badge]) => (
+        <button key={k} className={`rd-railtab${rail === k ? " active" : ""}`} onClick={() => setRail(k)}>
+          {label}
+          {badge != null && <span className={`rd-badge${k === "problemes" ? " warn" : ""}`}>{badge}</span>}
+        </button>
+      ))}
+    </nav>
+  );
 
   const cols = [
     outlineOpen && !narrow ? `${outlineW}px` : null,
@@ -902,8 +931,8 @@ export default function RedigerClient() {
               {/* Above the outline, and outside the collapsible « Contexte » box: a
                   warning folded away is a warning nobody reads. */}
               {warnings.length > 0 && (
-                <section className="rd-card rd-warn">
-                  <p className="rd-card-l"><Icon name="alert" /> À relire</p>
+                <section className="rd-side rd-warn">
+                  <p className="rd-side-l"><Icon name="alert" /> À relire</p>
                   <ul>
                     {warnings.map((w, i) => (
                       <li key={i}>
@@ -934,8 +963,8 @@ export default function RedigerClient() {
               <details className="rd-ctxbox" open>
                 <summary>Contexte</summary>
 
-                <section className="rd-card">
-                  <p className="rd-card-l">Leçon du manuel</p>
+                <section className="rd-side">
+                  <p className="rd-side-l">Leçon du manuel</p>
                   <select value={sourceId} onChange={(e) => saveSource(e.target.value)} disabled={!meta.canEdit}>
                     <option value="">— Aucune (leçon indépendante) —</option>
                     {bookLessons.map((b) => (
@@ -949,8 +978,8 @@ export default function RedigerClient() {
                   )}
                 </section>
 
-                <section className="rd-card">
-                  <p className="rd-card-l">Copilot APS</p>
+                <section className="rd-side">
+                  <p className="rd-side-l">Copilot APS</p>
                   <ul className="rd-ctx">
                     <li><span>Matière</span><b>{meta.subjectName}</b></li>
                     <li><span>Niveau</span><b>{classLevel || "—"}</b></li>
@@ -998,18 +1027,7 @@ export default function RedigerClient() {
               onChange={setRailW}
               onCommit={(v) => window.localStorage.setItem("mwalimu.rediger.railW", String(v))}
             />
-            <nav className="rd-railtabs">
-              {[
-                ["copilot", "Copilot", null],
-                ["problemes", "Problèmes", problemCount || null],
-                ["quiz", "Quiz", quizIssues || quiz.length || null],
-              ].map(([k, label, badge]) => (
-                <button key={k} className={`rd-railtab${rail === k ? " active" : ""}`} onClick={() => setRail(k)}>
-                  {label}
-                  {badge != null && <span className={`rd-badge${k === "problemes" ? " warn" : ""}`}>{badge}</span>}
-                </button>
-              ))}
-            </nav>
+            {railTabs}
 
             <div className="rd-pane-body">
               {rail === "copilot" && (
@@ -1033,6 +1051,11 @@ export default function RedigerClient() {
                   onApplyFormula={(tex) => { writer.current?.ed?.applyFormula?.(tex); touch(); }}
                 />
               )}
+
+              {/* The teaching coach. Same rail, different question: Copilot APS writes
+                  the lesson, Enseigner talks about how to teach it — and only writes
+                  when the conversation has become a brief worth writing from. */}
+              {rail === "enseigner" && <TeachPanel lessonId={lessonId} onApplyContent={applyContent} />}
 
               {rail === "problemes" && (
                 <div className="rd-problems">
@@ -1163,9 +1186,10 @@ export default function RedigerClient() {
           <div className="drawer-overlay show" onClick={() => { setOutlineOpen(false); setRailOpen(false); }} />
           <aside className="drawer show rd-drawer">
             <div className="rd-pane-head">
-              <span>{outlineOpen ? "Plan du document" : "Copilot"}</span>
+              <span>{outlineOpen ? "Plan du document" : "Assistant"}</span>
               <button onClick={() => { setOutlineOpen(false); setRailOpen(false); }} aria-label="Fermer"><Icon name="x" /></button>
             </div>
+            {!outlineOpen && railOpen && railTabs}
             <div className="rd-pane-body">
               {outlineOpen && (
                 audit.plan.length === 0 ? <p className="rd-none">Aucun titre.</p> : (
@@ -1178,7 +1202,23 @@ export default function RedigerClient() {
                   </ol>
                 )
               )}
-              {railOpen && !outlineOpen && (
+              {/* The drawer used to hardcode the Copilot and ignore `rail`, which would
+                  have made Enseigner desktop-only — on the one device teachers carry
+                  into class. */}
+              {railOpen && !outlineOpen && rail === "enseigner" && (
+                <TeachPanel lessonId={lessonId} onApplyContent={applyContent} />
+              )}
+              {/* The drawer's tabs can now select Problèmes and Quiz too, so send the
+                  teacher back to the desktop-shaped panes rather than silently showing
+                  the Copilot under a tab that says something else. */}
+              {railOpen && !outlineOpen && (rail === "problemes" || rail === "quiz") && (
+                <p className="rd-none">
+                  {rail === "problemes"
+                    ? "Les problèmes du document s'affichent dans le panneau latéral, sur un écran plus large."
+                    : "Le quiz s'édite dans le panneau latéral, sur un écran plus large."}
+                </p>
+              )}
+              {railOpen && !outlineOpen && rail === "copilot" && (
                 <StudioComposePanel
                   subjectSlug={meta.subjectSlug}
                   moduleId={meta.moduleId}

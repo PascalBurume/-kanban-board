@@ -690,3 +690,73 @@ export function assignAdvisorSystemPrompt(c: AssignAdvisorCtx): string {
     '{"readiness":"READY|PARTIAL|NOT_READY","readinessNote":"… (1 phrase)","suggestedDueDate":"YYYY-MM-DD","rationale":"… (1 phrase)"}',
   ].join("\n");
 }
+
+// ───────────────────── Copilot Enseigner (teaching support) ─────────────────────
+// The mirror image of copilotSystemPrompt. That one addresses a 15-19 year old, keeps
+// answers short and encouraging, and is forbidden from giving the answer. This one
+// addresses a colleague who already knows the subject and wants to know how to get it
+// across to THIS room — so it is direct, concrete, and withholds nothing.
+export type TeachCoachCtx = {
+  lessonTitle: string;
+  subject: string;
+  classLevel: string;
+  lessonText: string;      // the lesson itself, already truncated
+  moduleContext: string;   // sibling lessons in the module
+  classSignals: string;    // what these pupils actually asked / said they missed
+  ragExcerpts: string;     // related passages elsewhere in the corpus
+};
+
+export function teachCoachSystemPrompt(c: TeachCoachCtx): string {
+  const lines = [
+    "Tu es **Copilot Enseigner**, l'assistant pédagogique d'un enseignant du secondaire en République Démocratique du Congo.",
+    "Tu t'adresses à un collègue qui maîtrise déjà sa matière. Ton rôle n'est pas de lui expliquer le contenu, mais de l'aider à l'ENSEIGNER.",
+    "",
+    "Réponds toujours en français, de façon concrète et directive :",
+    "- Propose des démarches utilisables telles quelles : une entrée en matière, une séquence au tableau, une question à poser, un exemple chiffré, un contre-exemple qui fait tomber l'erreur.",
+    "- Nomme les erreurs typiques des élèves sur ce point précis, et dis à quoi on les reconnaît dans une copie.",
+    "- Quand c'est utile, distingue ce que tu ferais avec les élèves qui suivent et avec ceux qui décrochent.",
+    "- Ancre les exemples dans le quotidien congolais (prix en francs congolais, marché, transport, champ, atelier) plutôt que dans des situations abstraites.",
+    "- Formules en LaTeX entre $…$ — UNIQUEMENT les formules. N'enferme jamais une phrase entière dans $\\text{…}$ : le texte se lit en français, pas en notation.",
+    "- Sois bref par défaut ; développe dès qu'on te le demande.",
+    "- Ne retiens rien : donne les réponses, les corrigés et les valeurs numériques. C'est un enseignant, pas un élève.",
+    "",
+    `Matière : ${c.subject}`,
+    `Niveau : ${c.classLevel}`,
+    `Leçon : ${c.lessonTitle}`,
+  ];
+
+  if (c.lessonText.trim()) {
+    lines.push("", "Contenu de la leçon (référence) :", "<<<LEÇON", c.lessonText.trim(), ">>>");
+  }
+  if (c.moduleContext.trim()) {
+    lines.push("", "Autres leçons du même module (ce que les élèves ont déjà vu) :", "<<<MODULE", c.moduleContext.trim(), ">>>");
+  }
+  // The part that makes this advice about a real room rather than pedagogy in general.
+  if (c.classSignals.trim()) {
+    lines.push(
+      "",
+      "CE QUE SES ÉLÈVES ONT RÉELLEMENT DEMANDÉ ET COMPRIS SUR CETTE LEÇON — c'est la matière première de ton conseil.",
+      "Appuie-toi dessus explicitement (« vos élèves reviennent surtout sur… ») au lieu de rester général.",
+      "<<<CLASSE",
+      c.classSignals.trim(),
+      ">>>",
+    );
+  }
+  if (c.ragExcerpts.trim()) {
+    lines.push("", "Extraits d'autres leçons du manuel qui peuvent servir d'appui :", "<<<MANUEL", c.ragExcerpts.trim(), ">>>");
+  }
+  return lines.join("\n");
+}
+
+export function buildTeachMessages(opts: {
+  ctx: TeachCoachCtx;
+  history: { role: string; content: string }[];
+  userContent: string;
+}): ChatMessage[] {
+  const msgs: ChatMessage[] = [{ role: "system", content: teachCoachSystemPrompt(opts.ctx) }];
+  for (const h of opts.history.slice(-HISTORY_TURNS)) {
+    msgs.push({ role: h.role === "assistant" ? "assistant" : "user", content: h.content });
+  }
+  msgs.push({ role: "user", content: opts.userContent });
+  return msgs;
+}

@@ -335,8 +335,8 @@ export async function listTeacherSubmissions(teacherId: string, opts: { classId?
     },
     orderBy: [{ submittedAt: "desc" }],
     include: {
-      project: { select: { title: true, subjectSlug: true, steps: { select: { id: true } } } },
-      answers: { select: { done: true } },
+      project: { select: { title: true, subjectSlug: true, steps: { select: { id: true, title: true, order: true }, orderBy: { order: "asc" } } } },
+      answers: { select: { stepId: true, done: true } },
       student: { select: { id: true, firstName: true, lastName: true, avatarColor: true, enrollment: { select: { class: { select: { id: true, name: true } } } } } },
       group: {
         select: {
@@ -369,6 +369,10 @@ export async function listTeacherSubmissions(teacherId: string, opts: { classId?
       grade: s.grade,
       submittedAt: s.submittedAt,
       stepCount: s.project.steps.length,
+      // The board shows a cell per step, so it needs the steps themselves and which of
+      // them this group has actually finished — not just how many there are.
+      steps: s.project.steps.map((st) => ({ id: st.id, title: st.title })),
+      doneStepIds: s.answers.filter((a) => a.done).map((a) => a.stepId),
     }));
 }
 
@@ -570,9 +574,11 @@ export async function listEditableProjects(user: SessionUser) {
     orderBy: [{ subjectSlug: "asc" }, { order: "asc" }],
     include: {
       subject: { select: { name: true } },
-      steps: { select: { id: true } },
+      steps: { select: { id: true, title: true }, orderBy: { order: "asc" } },
+      prereqs: { include: { module: { select: { title: true } } } },
       assignments: { select: { id: true } },
-      submissions: { select: { id: true } },
+      // Status too: the dossier card shows how much of the handed-in work is done with.
+      submissions: { select: { id: true, status: true } },
     },
   });
   return projects.map((p) => ({
@@ -585,8 +591,12 @@ export async function listEditableProjects(user: SessionUser) {
     status: p.status,
     estMinutes: p.estMinutes,
     stepCount: p.steps.length,
+    steps: p.steps.map((s) => s.title),
+    prereqs: p.prereqs.map((r) => r.module.title),
     assignedCount: p.assignments.length,
     submissionCount: p.submissions.length,
+    gradedCount: p.submissions.filter((s) => s.status === "GRADED").length,
+    pendingCount: p.submissions.filter((s) => s.status === "SUBMITTED").length,
   }));
 }
 

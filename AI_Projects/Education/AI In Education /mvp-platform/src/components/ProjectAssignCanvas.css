@@ -1,7 +1,9 @@
 /* Project assignment canvas — students → groups → projects.
    Same visual vocabulary as ModuleConnector (mc-*), pc-* namespace. */
 
-.pc-wrap { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-height: 560px; }
+/* Fills the window rather than a fixed 560px box: this is a workspace, and the
+   vertical room is what lets four lanes breathe. */
+.pc-wrap { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-height: min(78vh, 940px); }
 
 .pc-bar { flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
 .pc-bar-title { display: inline-flex; align-items: center; gap: 8px; font: 600 15px var(--font-head); }
@@ -16,11 +18,24 @@
    (cqi), not the viewport — opening the 320px agent panel shrinks the canvas
    without the viewport changing. Previously the middle `1fr` lane absorbed the
    whole deficit and collapsed to ~90px while the grid still overflowed. */
-.pc-inner { position: relative; display: grid; grid-template-columns: minmax(190px, 220px) minmax(180px, 1fr) minmax(250px, 300px); gap: clamp(24px, 3.4cqi, 56px); padding: 20px 24px 40px; min-height: 100%; align-content: start; }
+/* Four columns: élèves → groupes → projets → chapitres requis. The gap tightens as the
+   canvas narrows so the fourth column costs width, not legibility. */
+.pc-inner { position: relative; display: grid; grid-template-columns: minmax(168px, 200px) minmax(190px, 1fr) minmax(250px, 320px) minmax(150px, 200px); gap: clamp(16px, 2.4cqi, 40px); padding: 18px 20px 36px; min-height: 100%; align-content: start; }
 
 .pc-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
 .pc-edge { fill: none; stroke: var(--indigo-400); stroke-width: 2; }
 .pc-edge.dragging { stroke: var(--indigo-500); stroke-dasharray: 5 5; }
+
+/* The line says where the work stands before any label is read. Semantic colours, kept
+   distinct from the indigo brand so "connected" and "corrected" never look alike. */
+.pc-edge.st-graded { stroke: var(--success, #15803d); }
+.pc-edge.st-returned { stroke: var(--warning-fg, #b45309); }
+.pc-edge.st-sent { stroke: var(--indigo-500); }
+.pc-edge.st-idle { stroke: var(--border-strong); stroke-dasharray: 5 5; }
+/* Prerequisites are a weaker relation than an assignment — thinner, and dashed while
+   the class is not there yet. */
+.pc-edge.st-ready { stroke: var(--success, #15803d); stroke-width: 1.5; opacity: .55; }
+.pc-edge.st-thin { stroke: var(--border-strong); stroke-width: 1.5; stroke-dasharray: 4 5; }
 
 .pc-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; align-content: start; height: max-content; }
 .pc-col-h { font: 700 11px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
@@ -69,7 +84,17 @@
 .pc-group-links { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; }
 .pc-link-pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11px var(--font-ui); color: var(--indigo-700); background: var(--indigo-50); border-radius: var(--r-pill); padding: 3px 9px; }
 .pc-link-pill svg { width: 11px; height: 11px; }
-.pc-sub-status { font-weight: 800; color: var(--success-fg, var(--success)); }
+.pc-sub-status { font-weight: 800; }
+.pc-sub-status.ok { color: var(--success, #15803d); }
+.pc-sub-status.warn { color: var(--warning-fg, #b45309); }
+.pc-sub-status.sent { color: var(--indigo-700); }
+.pc-sub-status.idle { color: var(--text-muted); }
+
+/* One pip per step. Reads as a position in the work, not a status word — and it is the
+   only thing on this canvas that distinguishes "started yesterday" from "stuck at 2". */
+.pc-steps { display: inline-flex; align-items: center; gap: 2.5px; margin: 0 1px; }
+.pc-steps i { width: 5px; height: 5px; border-radius: 50%; background: var(--indigo-200); }
+.pc-steps i.on { background: var(--indigo-600); }
 
 /* ── project cards ── */
 .pc-project { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; box-shadow: var(--sh-xs); transition: outline-color .12s, background .12s; }
@@ -80,8 +105,19 @@
 .pc-project-t { flex: 1; min-width: 0; }
 .pc-project-title { font: 600 13.5px var(--font-ui); color: var(--text); line-height: 1.3; }
 .pc-project-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; }
-.pc-prereqs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
-.pc-prereq { font: 600 10.5px var(--font-ui); color: var(--text-soft); background: var(--slate-100); border-radius: var(--r-pill); padding: 2px 8px; }
+/* The verdict on the card; the chapters themselves are nodes in the fourth column. */
+.pc-ready { display: inline-flex; align-items: center; gap: 5px; margin-top: 9px; font: 600 10.5px var(--font-ui); color: var(--warning-fg, #b45309); background: var(--warning-bg, #fffbeb); border-radius: var(--r-pill); padding: 3px 9px; }
+.pc-ready.ok { color: var(--success, #15803d); background: var(--success-bg, #dcfce7); }
+.pc-ready svg { width: 11px; height: 11px; flex: none; }
+
+/* ── chapitres requis ── */
+.pc-chapter { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 9px 11px; box-shadow: var(--sh-xs); }
+.pc-chapter + .pc-chapter { margin-top: 8px; }
+.pc-chapter-t { font: 600 11.5px var(--font-ui); color: var(--text); line-height: 1.35; overflow-wrap: anywhere; }
+.pc-chapter-bar { height: 4px; border-radius: 999px; background: var(--slate-100); margin: 7px 0 5px; overflow: hidden; }
+.pc-chapter-bar i { display: block; height: 100%; border-radius: 999px; background: var(--border-strong); }
+.pc-chapter.ok .pc-chapter-bar i { background: var(--success, #15803d); }
+.pc-chapter-m { font: 600 10px var(--font-ui); color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .pc-connected { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .pc-conn-pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px var(--font-ui); color: var(--indigo-700); background: var(--indigo-50); border: 1px solid var(--indigo-100, var(--border)); border-radius: var(--r-pill); padding: 3px 6px 3px 10px; }
 .pc-conn-pill i { font-style: normal; color: var(--text-muted); font-weight: 500; }
@@ -105,7 +141,9 @@
    their floors), so wide screens get a roomier assistant and narrow ones keep
    the canvas intact. `.wide` overrides that budget on demand: the assistant
    takes 55% and the canvas scrolls horizontally instead of shrinking. */
-.pc-side { flex: none; width: clamp(320px, calc(100% - 730px), 440px); border-left: 1px solid var(--border); background: var(--surface); overflow: auto; min-height: 0; transition: width .18s ease; }
+/* Reserve enough for FOUR lanes before the panel takes any width — at 730px the
+   panel was eating the canvas and the lanes collapsed. */
+.pc-side { flex: none; width: clamp(300px, calc(100% - 940px), 420px); border-left: 1px solid var(--border); background: var(--surface); overflow: auto; min-height: 0; transition: width .18s ease; }
 .pc-side.wide { width: clamp(420px, 55%, 720px); }
 .pc-side-acts { display: inline-flex; align-items: center; gap: 2px; }
 .pc-side-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }

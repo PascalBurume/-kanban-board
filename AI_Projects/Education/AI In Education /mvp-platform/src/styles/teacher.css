@@ -177,7 +177,13 @@
   .t-content { padding: 18px 16px 56px; }
 }
 
-.t-content { padding: 26px 28px 60px; max-width: 1320px; width: 100%; margin: 0 auto; }
+/* The teacher area is dashboards, tables and canvases — things you scan, not prose you
+   read line by line — so it earns the window. 1320px was a reading measure and it left
+   a wide screen half empty while the class table scrolled sideways underneath.
+   1680 rather than none: past that, a 12-column table on an ultrawide becomes a
+   head-turning exercise, and nothing here has enough columns to justify it. On the
+   1024px pilot tablets the cap never binds; there, the tighter gutters are the win. */
+.t-content { padding: 22px 22px 56px; max-width: 1680px; width: 100%; margin: 0 auto; }
 
 /* ---- KPI cards ---- */
 .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }

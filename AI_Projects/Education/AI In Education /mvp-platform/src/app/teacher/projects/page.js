@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { Fragment, useEffect, useState, useRef } from "react";
 import "./projects.css";
 import Icon from "@/components/ui/Icon";
 import Markdown from "@/components/Markdown";
@@ -245,6 +245,107 @@ function AssignCard({ p, classes, onAssigned }) {
 }
 
 // Projects + classes the teacher may assign — shared by the two assign tabs.
+/**
+ * « Rendus à corriger » as a progress board rather than a flat list.
+ *
+ * The list told you a submission existed. It could not tell you WHERE the work stopped,
+ * so "en cours" covered both "started this morning" and "stuck on step 2 for a
+ * fortnight". One row per group, one column per step of the project, and the cell says
+ * what happened there.
+ *
+ * Grouped by project because the columns ARE that project's steps — two projects with
+ * different steps cannot share a grid. Ordered by what needs a teacher: handed in and
+ * waiting first, then sent back, then everything already graded, which collapses onto a
+ * single line since a finished group needs no cells.
+ */
+const BOARD_RANK = { SUBMITTED: 0, RETURNED: 1, IN_PROGRESS: 2, GRADED: 3 };
+
+function ProgressBoard({ items, onOpen }) {
+  // Preserve the API's ordering (newest first) within each project.
+  const byProject = [];
+  const seen = new Map();
+  for (const it of items) {
+    let bucket = seen.get(it.projectTitle);
+    if (!bucket) {
+      bucket = { title: it.projectTitle, subjectSlug: it.subjectSlug, steps: it.steps || [], rows: [] };
+      seen.set(it.projectTitle, bucket);
+      byProject.push(bucket);
+    }
+    // A project whose steps were edited after a submission: trust the longest list.
+    if ((it.steps?.length || 0) > bucket.steps.length) bucket.steps = it.steps;
+    bucket.rows.push(it);
+  }
+  for (const b of byProject) {
+    b.rows.sort((a, z) => (BOARD_RANK[a.status] ?? 9) - (BOARD_RANK[z.status] ?? 9));
+  }
+
+  return (
+    <div className="pb-wrap">
+      {byProject.map((b) => {
+        const tile = tileFor(b.subjectSlug);
+        return (
+          <section className="pb" key={b.title}>
+            <header className="pb-h">
+              <span className={`pj-tile sm ${tile.cls}`}>{tile.l}</span>
+              <h3>{b.title}</h3>
+              <span className="pb-h-count">{b.rows.length} rendu{b.rows.length > 1 ? "s" : ""}</span>
+            </header>
+
+            <div className="pb-scroll">
+              <div className="pb-grid" style={{ "--steps": b.steps.length }}>
+                <div className="pb-col-h">Groupe</div>
+                {b.steps.map((s, i) => (
+                  <div className="pb-col-h" key={s.id} title={s.title}>{i + 1} · {s.title}</div>
+                ))}
+
+                {b.rows.map((r) => {
+                  const done = new Set(r.doneStepIds || []);
+                  const graded = r.status === "GRADED";
+                  const firstOpen = b.steps.findIndex((s) => !done.has(s.id));
+                  return (
+                    <Fragment key={r.id}>
+                      <button className="pb-who" onClick={() => onOpen(r.id)} title="Ouvrir le rendu">
+                        <span className="pb-who-n">{r.studentName}</span>
+                        <span className="pb-who-m">
+                          {r.className}
+                          {r.submittedAt ? ` · ${relTime(r.submittedAt)}` : ""}
+                        </span>
+                      </button>
+
+                      {/* A corrected group needs no cells — the verdict is the whole row. */}
+                      {graded ? (
+                        <button className="pb-cell done full" onClick={() => onOpen(r.id)}>
+                          Les {b.steps.length} étapes faites · corrigé{r.grade != null ? `, ${r.grade}/100` : ""}
+                        </button>
+                      ) : (
+                        b.steps.map((s, i) => {
+                          const isDone = done.has(s.id);
+                          // On a returned submission, exactly ONE step is the one to redo:
+                          // the first unfinished. Marking every empty cell "à reprendre"
+                          // would say the group must redo work it never started.
+                          const isRedo = !isDone && r.status === "RETURNED" && i === firstOpen;
+                          const cls = isDone ? "done" : isRedo ? "redo" : "todo";
+                          const label = isDone ? "Fait" : isRedo ? "À reprendre" : "—";
+                          return (
+                            <button className={`pb-cell ${cls}`} key={s.id} onClick={() => onOpen(r.id)} title={s.title}>
+                              {label}
+                            </button>
+                          );
+                        })
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      })}
+      <p className="pb-note">Les rendus qui demandent une action passent devant ; ceux qui sont corrigés se replient sur une seule ligne.</p>
+    </div>
+  );
+}
+
 function useAssignOptions() {
   const [opts, setOpts] = useState(null);
   useEffect(() => {
@@ -701,32 +802,67 @@ function ManageTab() {
           <div className="muted">Créez votre premier projet appliqué avec « Nouveau projet ».</div>
         </div>
       ) : (
-        <div className="pj-manage-list">
+        <div className="pj-dossiers">
           {data.projects.map((p) => {
             const tile = tileFor(p.subjectSlug);
             const diff = DIFF[p.difficulty] || DIFF.INTERMEDIATE;
             const pub = p.status === "PUBLISHED";
+            // The ring answers "is this project done with?" — corrected out of handed in.
+            const total = p.submissionCount || 0;
+            const pct = total ? Math.round((p.gradedCount / total) * 100) : 0;
+            const R = 26, C = 2 * Math.PI * R;
             return (
-              <div className="pj-manage-row" key={p.id}>
-                <span className={`pj-tile sm ${tile.cls}`}>{tile.l}</span>
-                <button className="pj-row-main pj-row-open" onClick={() => setViewing(p.id)} title="Voir le projet">
-                  <div className="pj-row-title">{p.title}</div>
-                  <div className="pj-row-meta">
-                    {p.subjectName} · {p.classLevel} · {p.stepCount} étapes · {p.estMinutes} min
-                    {p.submissionCount > 0 ? ` · ${p.submissionCount} rendu${p.submissionCount > 1 ? "s" : ""}` : ""}
+              <article className="pj-dossier" key={p.id}>
+                <div className="pj-d-ring" title={total ? `${p.gradedCount} rendu(s) corrigé(s) sur ${total}` : "Aucun rendu pour l’instant"}>
+                  <svg viewBox="0 0 64 64" aria-hidden="true">
+                    <circle cx="32" cy="32" r={R} className="pj-d-track" />
+                    <circle cx="32" cy="32" r={R} className={`pj-d-fill${pct === 100 ? " full" : ""}`}
+                      strokeDasharray={`${(C * pct) / 100} ${C}`} transform="rotate(-90 32 32)" />
+                  </svg>
+                  <span className="pj-d-ring-n">{total ? `${p.gradedCount}/${total}` : "—"}</span>
+                  <span className="pj-d-ring-l">{total ? "corrigés" : "aucun rendu"}</span>
+                </div>
+
+                <div className="pj-d-main">
+                  <div className="pj-d-h">
+                    <span className={`pj-tile sm ${tile.cls}`}>{tile.l}</span>
+                    <button className="pj-d-title" onClick={() => setViewing(p.id)} title="Voir le projet">{p.title}</button>
+                    <span className={`pj-pill ${pub ? "ok" : "neutral"}`}>{pub ? "Publié" : "Brouillon"}</span>
+                    {p.pendingCount > 0 && <span className="pj-d-flag">{p.pendingCount} à corriger</span>}
                   </div>
-                </button>
-                <span className={`pj-diff ${diff.cls}`}>{diff.label}</span>
-                <span className={`pj-pill ${pub ? "ok" : "neutral"}`}>{pub ? "Publié" : "Brouillon"}</span>
-                <button className="pj-icon-btn" title={pub ? "Dépublier" : "Publier"} onClick={() => toggleStatus(p)}>
-                  <Icon name={pub ? "eye" : "check"} />
-                </button>
-                <button className="btn btn-secondary btn-sm" onClick={() => setViewing(p.id)}><Icon name="eye" /> Voir</button>
-                <button className="btn btn-secondary btn-sm" onClick={() => setEditing(p.id)}><Icon name="edit" /> Modifier</button>
-                <button className="pj-icon-btn danger" title="Supprimer" onClick={() => del(p)} disabled={p.submissionCount > 0}>
-                  <Icon name="x" />
-                </button>
-              </div>
+                  <div className="pj-d-meta">
+                    {p.subjectName} · {p.classLevel} · {p.estMinutes} min
+                    <span className={`pj-diff ${diff.cls}`}>{diff.label}</span>
+                  </div>
+
+                  {p.prereqs?.length > 0 && (
+                    <div className="pj-d-req">
+                      <span className="pj-d-req-l">Prérequis</span>
+                      {p.prereqs.map((t) => <span className="pj-d-chip" key={t}>{t}</span>)}
+                    </div>
+                  )}
+
+                  {/* The steps ARE the project — the spine, as in the dossier view. */}
+                  {p.steps?.length > 0 && (
+                    <ol className="pj-d-steps">
+                      {p.steps.map((t, i) => (
+                        <li key={i}><span className="pj-d-step-n">{i + 1}</span>{t}</li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+
+                <div className="pj-d-acts">
+                  <button className="btn btn-secondary btn-sm" onClick={() => setViewing(p.id)}><Icon name="eye" /> Voir</button>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setEditing(p.id)}><Icon name="edit" /> Modifier</button>
+                  <button className="pj-icon-btn" title={pub ? "Dépublier" : "Publier"} onClick={() => toggleStatus(p)}>
+                    <Icon name={pub ? "eye" : "check"} />
+                  </button>
+                  <button className="pj-icon-btn danger" title={p.submissionCount > 0 ? "Des élèves ont déjà rendu" : "Supprimer"} onClick={() => del(p)} disabled={p.submissionCount > 0}>
+                    <Icon name="x" />
+                  </button>
+                </div>
+              </article>
             );
           })}
         </div>
@@ -803,30 +939,7 @@ export default function TeacherProjects() {
                 <div className="muted">Tout est corrigé — vos élèves sont sur la bonne voie.</div>
               </div>
             ) : (
-              <div className="pj-list">
-                {items.map((it) => {
-                  const tile = tileFor(it.subjectSlug);
-                  const st = SUB_STATUS[it.status] || SUB_STATUS.SUBMITTED;
-                  return (
-                    <div key={it.id} className="pj-row" onClick={() => setOpenId(it.id)}>
-                      <span className="pj-row-av">{initials(it.studentName)}</span>
-                      <span className={`pj-tile sm ${tile.cls}`}>{tile.l}</span>
-                      <div className="pj-row-main">
-                        <div className="pj-row-title">{it.projectTitle}</div>
-                        <div className="pj-row-meta">
-                          {it.studentName} · {it.className} · {it.stepCount} étapes
-                          {it.submittedAt ? ` · ${relTime(it.submittedAt)}` : ""}
-                        </div>
-                      </div>
-                      <span className={`pj-pill ${st.cls}`}>{st.label}</span>
-                      <span className="pj-grade">{it.status === "GRADED" && it.grade != null ? `${it.grade}/100` : ""}</span>
-                      <button className="btn btn-primary btn-sm" onClick={(e) => { e.stopPropagation(); setOpenId(it.id); }}>
-                        Corriger
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+              <ProgressBoard items={items} onOpen={setOpenId} />
             )}
           </>
         ) : tab === "assign" ? (

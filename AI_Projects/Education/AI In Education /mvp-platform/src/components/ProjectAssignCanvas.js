@@ -30,6 +30,26 @@ const DIFF = {
 
 const GROUP_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+// A chapter counts as covered once the class is 70% of the way through it. Not 100%:
+// a couple of pupils who never finish would otherwise mark every chapter unready, and
+// the signal has to stay usable in a real classroom.
+const READY_OK = 0.7;
+
+/** What a group's line should say about its work, before anyone reads a label. */
+function edgeState(sub) {
+  if (!sub) return "idle";
+  if (sub.status === "GRADED") return "graded";
+  if (sub.status === "RETURNED") return "returned";
+  if (sub.status === "SUBMITTED") return "sent";
+  return "idle";
+}
+const SUB_TAG = {
+  graded: { label: "corrigé", cls: "ok" },
+  returned: { label: "à reprendre", cls: "warn" },
+  sent: { label: "rendu", cls: "sent" },
+  idle: { label: "en cours", cls: "idle" },
+};
+
 function fmtDate(iso) {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
@@ -65,6 +85,7 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
   const innerRef = useRef(null);
   const groupRefs = useRef(new Map()); // groupId -> header el (edge source)
   const projectRefs = useRef(new Map()); // projectId -> card el (edge target)
+  const chapterRefs = useRef(new Map()); // moduleId -> chapter node el (edge target)
 
   const load = useCallback(async (cid) => {
     if (!cid) return;
@@ -78,7 +99,12 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
   for (const g of data?.groups || []) for (const sid of g.members) memberOf.set(sid, g.id);
   const studentById = new Map((data?.students || []).map((s) => [s.id, s]));
 
-  // ── edges: one per group assignment, group header → project card ──
+  // ── edges ──
+  // Two kinds now. Group → project carries where that group's work stands, so the
+  // colour of the line answers "who needs me" without reading a single label. Project
+  // → chapter carries the prerequisite, which was in the database from the start and
+  // drawn nowhere: a project resting on a chapter the class has barely opened is the
+  // thing you want to see BEFORE you hand it out.
   const recompute = useCallback(() => {
     const inner = innerRef.current;
     if (!inner || !data) return;
@@ -92,12 +118,32 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
         const pEl = projectRefs.current.get(a.projectId);
         if (!pEl) continue;
         const pr = pEl.getBoundingClientRect();
+        const sub = g.submissions.find((s) => s.projectId === a.projectId);
         next.push({
           id: `${g.id}:${a.projectId}`,
+          state: edgeState(sub),
           x1: gr.right - ir.left,
           y1: gr.top - ir.top + gr.height / 2,
           x2: pr.left - ir.left,
           y2: pr.top - ir.top + pr.height / 2,
+        });
+      }
+    }
+    for (const p of data.projects) {
+      const pEl = projectRefs.current.get(p.id);
+      if (!pEl) continue;
+      const pr = pEl.getBoundingClientRect();
+      for (const req of p.prereqs || []) {
+        const cEl = chapterRefs.current.get(req.id);
+        if (!cEl) continue;
+        const cr = cEl.getBoundingClientRect();
+        next.push({
+          id: `req:${p.id}:${req.id}`,
+          state: req.ready >= READY_OK ? "ready" : "thin",
+          x1: pr.right - ir.left,
+          y1: pr.top - ir.top + pr.height / 2,
+          x2: cr.left - ir.left,
+          y2: cr.top - ir.top + cr.height / 2,
         });
       }
     }
@@ -263,6 +309,18 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
   const groupName = (gid) => data?.groups.find((g) => g.id === gid)?.name || "";
   const ungrouped = (data?.students || []).filter((s) => !memberOf.has(s.id));
 
+  // Each chapter appears once even when several projects require it — two projects
+  // pointing at the same node is the useful picture, two copies of the node is not.
+  const chapters = [];
+  const seenChapter = new Set();
+  for (const p of data?.projects || []) {
+    for (const r of p.prereqs || []) {
+      if (seenChapter.has(r.id)) continue;
+      seenChapter.add(r.id);
+      chapters.push(r);
+    }
+  }
+
   return (
     <div className="pc-wrap">
       <div className="pc-bar">
@@ -286,11 +344,31 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
             <div className="pc-inner" ref={innerRef}>
               <svg className="pc-edges" width="100%" height="100%">
                 <defs>
-                  <marker id="pc-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--indigo-400)" />
-                  </marker>
+                  {/* One marker per state: an SVG marker cannot inherit the stroke of
+                      the path it caps, so a shared arrowhead would stay indigo while
+                      the line turned green. */}
+                  {[
+                    ["pc-arrow", "var(--indigo-400)"],
+                    ["pc-arrow-graded", "var(--success, #15803d)"],
+                    ["pc-arrow-returned", "var(--warning-fg, #b45309)"],
+                    ["pc-arrow-sent", "var(--indigo-500)"],
+                    ["pc-arrow-idle", "var(--border-strong)"],
+                    ["pc-arrow-ready", "var(--success, #15803d)"],
+                    ["pc-arrow-thin", "var(--border-strong)"],
+                  ].map(([id, fill]) => (
+                    <marker key={id} id={id} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill={fill} />
+                    </marker>
+                  ))}
                 </defs>
-                {edges.map((e) => <path key={e.id} className="pc-edge" d={bezier(e.x1, e.y1, e.x2, e.y2)} markerEnd="url(#pc-arrow)" />)}
+                {edges.map((e) => (
+                  <path
+                    key={e.id}
+                    className={`pc-edge${e.state ? ` st-${e.state}` : ""}`}
+                    d={bezier(e.x1, e.y1, e.x2, e.y2)}
+                    markerEnd={`url(#pc-arrow${e.state ? `-${e.state}` : ""})`}
+                  />
+                ))}
                 {drag?.kind === "connect" && (
                   <path className="pc-edge dragging" d={bezier(drag.x1, drag.y1, drag.cx, drag.cy)} markerEnd="url(#pc-arrow)" />
                 )}
@@ -382,10 +460,24 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
                         {g.assignments.map((a) => {
                           const p = data.projects.find((x) => x.id === a.projectId);
                           const sub = g.submissions.find((x) => x.projectId === a.projectId);
+                          const tag = SUB_TAG[edgeState(sub)];
+                          const total = p?.stepCount || 0;
+                          const doneN = Math.min(sub?.stepsDone ?? 0, total);
                           return (
                             <span key={a.projectId} className="pc-link-pill" title={p?.title}>
                               <Icon name="arrowR" /> {p?.title?.slice(0, 26)}{(p?.title?.length || 0) > 26 ? "…" : ""}
-                              {sub && <b className="pc-sub-status">{sub.status === "GRADED" ? `${sub.grade}/100` : sub.status === "SUBMITTED" ? "rendu" : "en cours"}</b>}
+                              {/* One pip per step of the project: "en cours" stops being a
+                                  single word and becomes a position in the work. */}
+                              {total > 0 && (
+                                <span className="pc-steps" title={`${doneN} étape${doneN > 1 ? "s" : ""} sur ${total}`} aria-label={`${doneN} étapes sur ${total}`}>
+                                  {Array.from({ length: total }, (_, i) => (
+                                    <i key={i} className={i < doneN ? "on" : ""} />
+                                  ))}
+                                </span>
+                              )}
+                              <b className={`pc-sub-status ${tag.cls}`}>
+                                {sub?.status === "GRADED" && sub.grade != null ? `${sub.grade}/100` : tag.label}
+                              </b>
                             </span>
                           );
                         })}
@@ -422,11 +514,19 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
                           </div>
                         </div>
                       </div>
-                      {p.prereqs.length > 0 && (
-                        <div className="pc-prereqs">
-                          {p.prereqs.map((t) => <span className="pc-prereq" key={t}>{t}</span>)}
-                        </div>
-                      )}
+                      {/* The chapters themselves are nodes in the next column now; the
+                          card keeps only the verdict, which is what decides whether you
+                          hand this project out today. */}
+                      {p.prereqs.length > 0 && (() => {
+                        const ok = p.prereqs.filter((r) => r.ready >= READY_OK).length;
+                        const all = ok === p.prereqs.length;
+                        return (
+                          <div className={`pc-ready${all ? " ok" : ""}`}>
+                            <Icon name={all ? "check" : "alert"} />
+                            {ok}/{p.prereqs.length} chapitre{p.prereqs.length > 1 ? "s" : ""} {all ? "acquis · classe prête" : "acquis"}
+                          </div>
+                        );
+                      })()}
                       {connected.length > 0 && (
                         <div className="pc-connected">
                           {connected.map((g) => {
@@ -463,6 +563,32 @@ export default function ProjectAssignCanvas({ classes, agentPanel }) {
                           </div>
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ── chapters the projects rest on ──
+                  Placed AFTER the projects, not before, because the flow of this canvas
+                  is students → groups → projects and reversing it would break the drag
+                  everyone already knows. The arrow points from a project to what it
+                  requires, and the bar says how far this class has actually got. */}
+              <div className="pc-col pc-col-chapters">
+                <div className="pc-col-h">Chapitres requis <span className="pc-count">{chapters.length}</span></div>
+                {chapters.length === 0 && <div className="pc-empty">Aucun prérequis déclaré sur ces projets.</div>}
+                {chapters.map((c) => {
+                  const pct = Math.round(c.ready * 100);
+                  const ok = c.ready >= READY_OK;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`pc-chapter${ok ? " ok" : ""}`}
+                      ref={(el) => { if (el) chapterRefs.current.set(c.id, el); else chapterRefs.current.delete(c.id); }}
+                      title={`${pct}% des leçons de ce chapitre terminées par la classe`}
+                    >
+                      <div className="pc-chapter-t">{c.title}</div>
+                      <div className="pc-chapter-bar"><i style={{ width: `${Math.max(2, pct)}%` }} /></div>
+                      <div className="pc-chapter-m">{pct}% de la classe</div>
                     </div>
                   );
                 })}

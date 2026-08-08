@@ -637,6 +637,9 @@ async function seedProjectSubmissions() {
 
   const projects = await prisma.project.findMany({ include: { steps: { orderBy: { order: "asc" } } } });
   const bySlug = new Map(projects.map((p) => [p.slug, p]));
+  // The maths teacher owns both of these projects, so she is the one who corrected them.
+  const reviewer = await prisma.user.findFirst({ where: { role: "TEACHER", email: "g.mukendi@mwalimu.school" }, select: { id: true } });
+  const reviewerId = reviewer?.id ?? null;
   let created = 0;
 
   for (const row of plan) {
@@ -658,10 +661,98 @@ async function seedProjectSubmissions() {
         submittedAt: when,
         grade: row.grade ?? null,
         feedbackMd: row.feedback ?? null,
-        reviewedById: null,
+        // Corrected work has a corrector. This was null, so every graded submission
+        // claimed a review nobody had signed — and the teacher's own name never
+        // appeared against the feedback she is shown as the author of.
+        reviewedById: row.status === "GRADED" || row.status === "RETURNED" ? reviewerId : null,
         reviewedAt: row.status === "GRADED" || row.status === "RETURNED" ? when : null,
         answers: {
           create: steps.map((s, i) => ({ stepId: s.id, responseMd: resp[i] ?? "", done: true })),
+        },
+      },
+    });
+    created++;
+  }
+  return created;
+}
+
+/**
+ * Work groups on the assignment canvas, and their group submissions.
+ *
+ * None of this was seeded before, so a reseed left « Assigner » with an empty canvas —
+ * no groups, no connections, and every project submission solo. The canvas draws the
+ * state of the work on its edges, which needs one group at each stage to be worth
+ * looking at, so the four states are all represented:
+ *
+ *   Groupe A → enquête      GRADED       5/5   green   corrected, 84/100
+ *   Groupe A → modélisation SUBMITTED    4/4   indigo  waiting on the teacher
+ *   Groupe B → modélisation RETURNED     2/4   amber   sent back
+ *   Groupe C → enquête      IN_PROGRESS  1/5   grey    nothing handed in
+ *
+ * Groupe A carries two projects on purpose: a group working on more than one at once is
+ * the case the layout has to survive, and it was never exercised.
+ */
+async function seedProjectGroups() {
+  const cls = await prisma.classGroup.findFirst({ where: { name: "5e Bio-Chimie" }, select: { id: true } });
+  const teacher = await prisma.user.findFirst({ where: { email: "g.mukendi@mwalimu.school" }, select: { id: true } });
+  if (!cls || !teacher) return 0;
+
+  const ROSTER: Record<string, string[]> = {
+    "Groupe A": ["Amani Kabasele", "Sylvie Kabwe", "Daniel Lwamba"],
+    "Groupe B": ["Chantal Byamungu", "Jonathan Kasongo", "Divine Mapendo"],
+    "Groupe C": ["Josué Mugisho", "Gloire Mwanza"],
+  };
+  const WORK: Array<{ group: string; slug: string; status: string; steps: number; grade?: number; feedback?: string; daysAgo: number; dueIn: number }> = [
+    { group: "Groupe A", slug: "enquete-eau-bukavu", status: "GRADED", steps: 5, grade: 84, daysAgo: 3, dueIn: 9,
+      feedback: "Enquête menée avec sérieux. Le tableau de fréquences est juste et la recommandation finale s'appuie vraiment sur vos chiffres." },
+    { group: "Groupe A", slug: "modeliser-rumeur-fonction", status: "SUBMITTED", steps: 4, daysAgo: 1, dueIn: 5 },
+    { group: "Groupe B", slug: "modeliser-rumeur-fonction", status: "RETURNED", steps: 2, daysAgo: 4, dueIn: 7,
+      feedback: "Bon départ, mais la fonction choisie ne colle pas aux données de l'étape 2 — reprenez le calcul du taux avant de continuer." },
+    { group: "Groupe C", slug: "enquete-eau-bukavu", status: "IN_PROGRESS", steps: 1, daysAgo: 0, dueIn: 9 },
+  ];
+
+  const groupIds = new Map<string, string>();
+  for (const [name, members] of Object.entries(ROSTER)) {
+    const g = await prisma.projectGroup.create({ data: { classId: cls.id, name, createdById: teacher.id } });
+    groupIds.set(name, g.id);
+    for (const full of members) {
+      const [firstName, ...rest] = full.split(" ");
+      const s = await prisma.user.findFirst({ where: { role: "STUDENT", firstName, lastName: rest.join(" ") }, select: { id: true } });
+      if (s) await prisma.projectGroupMember.create({ data: { groupId: g.id, studentId: s.id } });
+    }
+  }
+
+  const projects = await prisma.project.findMany({ include: { steps: { orderBy: { order: "asc" } } } });
+  const bySlug = new Map(projects.map((p) => [p.slug, p]));
+  let created = 0;
+
+  for (const w of WORK) {
+    const gid = groupIds.get(w.group);
+    const project = bySlug.get(w.slug);
+    if (!gid || !project) continue;
+    const reviewed = w.status === "GRADED" || w.status === "RETURNED";
+    const when = new Date(Date.now() - w.daysAgo * 86400000);
+
+    await prisma.projectGroupAssignment.create({
+      data: { groupId: gid, projectId: project.id, dueDate: new Date(Date.now() + w.dueIn * 86400000), createdById: teacher.id },
+    });
+    await prisma.projectSubmission.create({
+      data: {
+        groupId: gid,
+        projectId: project.id,
+        status: w.status,
+        submittedAt: w.status === "IN_PROGRESS" ? null : when,
+        grade: w.grade ?? null,
+        feedbackMd: w.feedback ?? null,
+        reviewedById: reviewed ? teacher.id : null,
+        reviewedAt: reviewed ? when : null,
+        // done drives the step pips on the canvas: how far this group actually got.
+        answers: {
+          create: project.steps.map((s, i) => ({
+            stepId: s.id,
+            done: i < w.steps,
+            responseMd: i < w.steps ? `Réponse du groupe à l'étape ${i + 1}.` : "",
+          })),
         },
       },
     });
@@ -891,9 +982,11 @@ async function main() {
   }
 
   // ---- Project submissions (so teachers can test the grading flow) ----
+  // Both need students and classes, so they run here rather than beside seedProjects().
   const submissionCount = await seedProjectSubmissions();
+  const groupWorkCount = await seedProjectGroups();
   const feedbackCount = await seedFeedback();
-  console.log(`Project submissions seeded: ${submissionCount} · feedback: ${feedbackCount}`);
+  console.log(`Project submissions seeded: ${submissionCount} solo · ${groupWorkCount} en groupe · feedback: ${feedbackCount}`);
 
   // ---- Badges ----
   await prisma.badge.createMany({

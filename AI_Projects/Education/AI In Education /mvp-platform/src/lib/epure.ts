@@ -261,6 +261,115 @@ export function fit(spec: EpureSpec) {
 const at1 = (n: number) => Math.round(n * 10) / 10;
 const attr = (name: string, v: string | number | undefined) => (v == null || v === "" ? "" : ` ${name}="${typeof v === "string" ? esc(v) : v}"`);
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * Transforming a path's `d`
+ *
+ * This used to be one regex that paired up every two numbers and ran them through
+ * (sx, sy). A path is not a list of points. `A rx ry rotation large-arc sweep x y` has
+ * five parameters that are not coordinates, so the radii were flipped, the ROTATION was
+ * read as a y, and `sweep-flag` came out as 240 — which is not 0 or 1, so the browser
+ * rejected the whole path and the arc simply vanished. `H`/`V` were mis-paired the same
+ * way, an odd-length path never transformed its last number, and `M100,50` (commas are
+ * legal) matched nothing at all and stayed in raw coordinates while the figure moved.
+ *
+ * It survived in the catalogue only because every épure there carries a frame, which
+ * makes the flip its own inverse, and because those arcs happen to be horizontal.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/** Parameter kinds for ONE group of each command, in order. */
+const PATH_ARGS: Record<string, readonly string[]> = {
+  M: ["x", "y"], L: ["x", "y"], T: ["x", "y"],
+  H: ["x"], V: ["y"],
+  C: ["x", "y", "x", "y", "x", "y"],
+  S: ["x", "y", "x", "y"], Q: ["x", "y", "x", "y"],
+  A: ["rx", "ry", "rot", "large", "sweep", "x", "y"],
+  Z: [],
+};
+
+// A command letter, or a number — including ".5", "-.5" and exponents. SVG allows
+// commas and lets numbers run together ("M10-20"), which the old regex could not see.
+const PATH_TOKEN = /([MmLlHhVvCcSsQqTtAaZz])|(-?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?)/g;
+
+type Geom = { sx: (n: number) => number; sy: (n: number) => number };
+
+/**
+ * Map a path from the teacher's coordinates into SVG's, honouring what each parameter
+ * of each command actually MEANS.
+ *
+ * Returns the input untouched if it cannot be parsed with confidence. A path left in the
+ * wrong place is a visible, fixable mistake; a path silently rewritten into invalid
+ * numbers is an arc that disappears with no way to tell why.
+ */
+export function transformPathD(d: string, g: Geom): string {
+  const src = String(d ?? "");
+  if (!src.trim()) return src;
+
+  // Everything is derived from the actual mapping, so this holds for a framed figure
+  // (k = 1, y flipped), a fitted one (scaled and flipped) and the degenerate identity.
+  const x0 = g.sx(0);
+  const y0 = g.sy(0);
+  const kx = g.sx(1) - x0;
+  const ky = g.sy(1) - y0;
+  if (!Number.isFinite(kx) || !Number.isFinite(ky)) return src;
+  // A reflection reverses the direction an arc sweeps, and negates its rotation.
+  const mirrored = kx * ky < 0;
+
+  const toks: string[] = [];
+  for (const m of src.matchAll(PATH_TOKEN)) toks.push(m[1] ?? m[2]);
+  if (!toks.length) return src;
+
+  const out: string[] = [];
+  let i = 0;
+  let cmd = "";
+  let firstMove = true; // a leading `m` takes ABSOLUTE coordinates, per the spec
+
+  while (i < toks.length) {
+    const t = toks[i];
+    if (/^[A-Za-z]$/.test(t)) { cmd = t; i++; out.push(t); }
+    else if (!cmd) return src; // numbers before any command — not a path we understand
+
+    const upper = cmd.toUpperCase();
+    const args = PATH_ARGS[upper];
+    if (!args) return src;
+    if (!args.length) { firstMove = false; continue; } // Z
+
+    // Absolute for uppercase; also for the very first group of a leading `m`.
+    const absolute = cmd === upper || (upper === "M" && firstMove);
+    firstMove = false;
+
+    for (const kind of args) {
+      const raw = toks[i];
+      if (raw === undefined || /^[A-Za-z]$/.test(raw)) return src; // ran out mid-group
+      const v = Number(raw);
+      if (!Number.isFinite(v)) return src;
+      i++;
+      let o: number;
+      switch (kind) {
+        case "x": o = absolute ? g.sx(v) : v * kx; break;
+        case "y": o = absolute ? g.sy(v) : v * ky; break;
+        case "rx": o = Math.abs(kx) * v; break;
+        case "ry": o = Math.abs(ky) * v; break;
+        case "rot": o = mirrored ? -v : v; break;
+        case "large": o = v; break;                       // a flag: never transformed
+        case "sweep": o = mirrored ? (v ? 0 : 1) : v; break;
+        default: return src;
+      }
+      out.push(String(at1(o)));
+    }
+  }
+  // "M189.7 70.1 A26 26 …", the shape SVG is normally written in and the shape this
+  // emitted before — so the rendered output stays byte-identical and the catalogue's
+  // faithfulness test keeps comparing pictures rather than whitespace.
+  let s = "";
+  let afterLetter = false;
+  for (const t of out) {
+    const isLetter = /^[A-Za-z]$/.test(t);
+    s += !s || afterLetter ? t : ` ${t}`;
+    afterLetter = isLetter;
+  }
+  return s;
+}
+
 /** Where to put a point's label: pushed away from the figure's centre, never on it. */
 function labelOffset(px: number, py: number, cx: number, cy: number) {
   const dx = px - cx;
@@ -309,7 +418,7 @@ export function renderEpure(spec: EpureSpec): string {
   // Paths carry USER coordinates, so they are transformed like everything else rather
   // than being pasted through — otherwise a fitted figure would tear apart.
   for (const p of spec.paths ?? []) {
-    const d = String(p.d ?? "").replace(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g, (_m, a, b) => `${at1(sx(Number(a)))} ${at1(sy(Number(b)))}`);
+    const d = transformPathD(String(p.d ?? ""), g);
     if (!d.trim()) continue;
     parts.push(`<path d="${esc(d)}" fill="${esc(p.fill ?? "none")}" stroke="${esc(p.color ?? C.k)}" stroke-width="${num(p.width, 1.8)}"${attr("stroke-dasharray", p.dash)}/>`);
   }

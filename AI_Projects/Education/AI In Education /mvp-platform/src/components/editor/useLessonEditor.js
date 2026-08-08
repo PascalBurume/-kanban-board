@@ -38,6 +38,14 @@ import { mdToDoc, docToMd, canEditVisually } from "@/lib/lessonDoc";
 // has to survive the markdown round trip.
 
 /**
+ * Every floating panel that edits the SELECTED node. One list, because a panel missing
+ * from it looks finished and then closes itself the first time it is used — which is
+ * what `.ep`, the épure editor, did on every drag.
+ *   .fe  figure / épure panel chrome     .lx  LaTeX workspace     .ep  épure editor
+ */
+const PANEL_SEL = ".ep, .fe, .lx";
+
+/**
  * Keep the document's selection while a control outside the editor is pressed.
  *
  * Every surface that acts on the SELECTED node — the symbol keyboard, the dock, the
@@ -78,6 +86,11 @@ export function useLessonEditor({ value, onChange, disabled }) {
   const modeRef = useRef(null); // read inside TipTap callbacks, which capture stale state
   const writingBack = useRef(false); // true while a panel is saving into the document
   const seeded = useRef(false); // has the editor emitted its very first update yet?
+  // Did the interaction in progress START inside a panel? See the guard in
+  // onSelectionUpdate — this is the signal that survives an async re-render, which
+  // neither `writingBack` (synchronous only) nor activeElement (the document keeps
+  // focus, because the handles preventDefault) does.
+  const fromPanel = useRef(false);
 
   // Choose the mode from the document as it first arrives — and if the content later
   // becomes unsafe to represent visually (Copilot inserting a table, say), drop back
@@ -161,7 +174,16 @@ export function useLessonEditor({ value, onChange, disabled }) {
       // buttons do not take focus on tap at all on iPadOS. Latching around our OWN
       // write is the thing that is actually true in both cases.
       if (writingBack.current) return;
-      if (typeof document !== "undefined" && document.activeElement?.closest?.(".fe, .lx")) return;
+      // WHERE THE INTERACTION STARTED, not where focus is now, and not just for the
+      // duration of our own write. Dragging a point in the épure panel closed the panel
+      // on the first drag: the handles preventDefault so the document keeps focus (the
+      // activeElement test below sees ProseMirror and lets the close through), and the
+      // selection update that kills it arrives ~40ms AFTER pointerup, long past the
+      // synchronous `writingBack` latch. A pointer that went down in a panel is editing
+      // that panel until it goes down somewhere else.
+      if (fromPanel.current) return;
+      // `.ep` was missing here — the épure panel is the third panel and was never added.
+      if (typeof document !== "undefined" && document.activeElement?.closest?.(PANEL_SEL)) return;
       const n = editor.state.selection.node;
       // Every panel anchors to the node it edits — a panel pinned to the top of the
       // pane sits 800px from its figure in a long lesson.
@@ -195,6 +217,24 @@ export function useLessonEditor({ value, onChange, disabled }) {
       // usable handle for writing the change back.
       setMathSel({ tex: n.attrs.tex, display: kind === "blockMath" || !!n.attrs.display, anchor: anchorFor(), pos: editor.state.selection.from });
     },
+  }, []);
+
+  // Who owns the interaction in progress: the document, or a panel floating over it.
+  // Capture phase, so it is settled before any handler — ours or ProseMirror's — runs,
+  // and it stays set until the pointer next goes down somewhere else, which is what lets
+  // it outlive the asynchronous re-render at the end of a drag. focusin covers the
+  // keyboard route into a panel, where no pointer is involved at all.
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const inPanel = (t) => !!(t instanceof Element && t.closest(PANEL_SEL));
+    const onDown = (e) => { fromPanel.current = inPanel(e.target); };
+    const onFocus = (e) => { fromPanel.current = inPanel(e.target); };
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("focusin", onFocus, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("focusin", onFocus, true);
+    };
   }, []);
 
   // Content replaced from outside (Copilot inserting a draft) → reload the document.

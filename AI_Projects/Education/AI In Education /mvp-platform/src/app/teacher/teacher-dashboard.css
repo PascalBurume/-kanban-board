@@ -5,10 +5,11 @@
 .sec-h h2 { font-size: 18px; }
 .sec-h .sub { font-size: 13px; color: var(--text-muted); }
 
-/* class cards — full-width 3-up, wraps gracefully */
-.class-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-@media (max-width: 1240px) { .class-cards { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 760px) { .class-cards { grid-template-columns: 1fr; } }
+/* Class cards earn a column when there is room for one, rather than stretching to fill
+   it. Fixed at 3-up, the extra width the shell now gives simply made each card wider —
+   six classes stayed two rows of very fat cards. auto-fill also replaces the two
+   breakpoints below it, which were doing by hand what the track sizing does honestly. */
+.class-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
 .tclass { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .tclass .tc-top { display: flex; align-items: flex-start; gap: 12px; }
 .tclass .tc-top .subject-tile { width: 42px; height: 42px; }

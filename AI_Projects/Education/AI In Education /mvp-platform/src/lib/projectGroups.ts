@@ -42,7 +42,12 @@ export async function canvasData(teacherId: string, classId: string) {
       include: {
         members: { select: { studentId: true } },
         assignments: { select: { projectId: true, dueDate: true } },
-        submissions: { select: { projectId: true, status: true, grade: true } },
+        // stepAnswers rides along so the canvas can say HOW FAR a group got, not merely
+        // whether it handed in — the difference between "en cours" and "en cours, bloqué
+        // à l'étape 2 depuis trois semaines".
+        submissions: {
+          select: { projectId: true, status: true, grade: true, answers: { where: { done: true }, select: { stepId: true } } },
+        },
       },
     }),
     prisma.project.findMany({
@@ -51,7 +56,7 @@ export async function canvasData(teacherId: string, classId: string) {
       include: {
         subject: { select: { name: true, icon: true, color: true } },
         steps: { select: { id: true } },
-        prereqs: { include: { module: { select: { title: true } } } },
+        prereqs: { include: { module: { select: { id: true, title: true } } } },
       },
     }),
     prisma.projectAssignment.findMany({ where: { classId }, select: { projectId: true, dueDate: true } }),
@@ -61,6 +66,41 @@ export async function canvasData(teacherId: string, classId: string) {
     .map((e) => e.student)
     .sort((a, b) => a.lastName.localeCompare(b.lastName));
 
+  // ── How far has THIS class actually got in each prerequisite chapter? ──
+  //
+  // A project lists the chapters it assumes. Whether the class has covered them was
+  // never asked, so a teacher could hand out a project resting on a chapter half the
+  // room has not opened. `ready` is the share of (student × published lesson) pairs in
+  // that chapter that are completed — 0 to 1, the class's real progress through it.
+  const prereqModuleIds = [...new Set(projects.flatMap((p) => p.prereqs.map((pr) => pr.moduleId)))];
+  const readiness = new Map<string, number>();
+  if (prereqModuleIds.length && students.length) {
+    const studentIds = students.map((s) => s.id);
+    const [lessons, done] = await Promise.all([
+      prisma.lesson.findMany({
+        where: { moduleId: { in: prereqModuleIds }, status: "PUBLISHED" },
+        select: { id: true, moduleId: true },
+      }),
+      prisma.progress.findMany({
+        where: { studentId: { in: studentIds }, status: "COMPLETED", lesson: { moduleId: { in: prereqModuleIds } } },
+        select: { lesson: { select: { moduleId: true } } },
+      }),
+    ]);
+    const lessonsPer = new Map<string, number>();
+    for (const l of lessons) { if (l.moduleId) lessonsPer.set(l.moduleId, (lessonsPer.get(l.moduleId) ?? 0) + 1); }
+    const donePer = new Map<string, number>();
+    for (const d of done) {
+      const m = d.lesson?.moduleId;
+      if (m) donePer.set(m, (donePer.get(m) ?? 0) + 1);
+    }
+    for (const id of prereqModuleIds) {
+      const total = (lessonsPer.get(id) ?? 0) * students.length;
+      readiness.set(id, total ? Math.min(1, (donePer.get(id) ?? 0) / total) : 0);
+    }
+  }
+
+  const stepIdsOf = new Map(projects.map((p) => [p.id, new Set(p.steps.map((s) => s.id))]));
+
   return {
     class: cls,
     students,
@@ -69,7 +109,14 @@ export async function canvasData(teacherId: string, classId: string) {
       name: g.name,
       members: g.members.map((m) => m.studentId),
       assignments: g.assignments,
-      submissions: g.submissions,
+      submissions: g.submissions.map((s) => ({
+        projectId: s.projectId,
+        status: s.status,
+        grade: s.grade,
+        // Counted against THIS project's steps: an answer left behind by a step the
+        // teacher has since deleted must not inflate the progress.
+        stepsDone: s.answers.filter((a) => stepIdsOf.get(s.projectId)?.has(a.stepId)).length,
+      })),
     })),
     projects: projects.map((p) => ({
       id: p.id,
@@ -79,7 +126,11 @@ export async function canvasData(teacherId: string, classId: string) {
       difficulty: p.difficulty,
       estMinutes: p.estMinutes,
       stepCount: p.steps.length,
-      prereqs: p.prereqs.map((pr) => pr.module.title),
+      prereqs: p.prereqs.map((pr) => ({
+        id: pr.module.id,
+        title: pr.module.title,
+        ready: readiness.get(pr.moduleId) ?? 0,
+      })),
       classAssigned: classAssignments.find((a) => a.projectId === p.id)?.dueDate !== undefined,
       classDueDate: classAssignments.find((a) => a.projectId === p.id)?.dueDate ?? null,
     })),

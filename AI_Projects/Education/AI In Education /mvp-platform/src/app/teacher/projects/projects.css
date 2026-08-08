@@ -322,3 +322,132 @@
 
 /* Agent panel styles moved to src/components/AgentSteps.css (shared with the
    exercises advisor panel), imported by TeacherAgentPanel.js. */
+
+/* ── The connector wants the window, not a reading column ───────────────────
+   The teacher shell caps .t-content at 1320px with 28px gutters, which is right
+   for prose and wrong for a canvas: four lanes plus the assistant panel do not
+   fit in the 1264px that leaves, so the lanes were squeezing and the fourth one
+   wrapped its chapter titles. Scoped with :has() so only the page carrying a
+   canvas breaks out — every other teacher page keeps its reading width.
+
+   Keyed on .pj-tabs, not .pc-wrap: the canvas only exists on the Assigner tab, so
+   keying on it would resize the page every time you changed tab. */
+.t-content:has(.pj-tabs) { max-width: none; padding: 18px 20px 24px; }
+/* A heading earns less room on a working screen than on a document. */
+.t-content:has(.pj-tabs) .pj-head { margin-bottom: 12px; }
+.t-content:has(.pj-tabs) .pj-head h1 { font-size: 23px; }
+.t-content:has(.pj-tabs) .pj-head p { display: none; }
+.t-content:has(.pj-tabs) .pj-tabs { margin-bottom: 12px; }
+
+/* ── « Rendus à corriger » as a progress board ──────────────────────────────
+   Rows are groups, columns are the project's steps, and the cell says what
+   happened there. The flat list it replaces could say a submission existed but
+   not where the work stopped, so "en cours" covered both "started this morning"
+   and "stuck on step 2 for a fortnight". */
+.pb-wrap { display: flex; flex-direction: column; gap: 22px; }
+.pb { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--sh-xs); overflow: hidden; }
+.pb-h { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+.pb-h h3 { margin: 0; font: 600 15px var(--font-head); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pb-h-count { font: 600 11.5px var(--font-ui); color: var(--text-muted); white-space: nowrap; }
+
+/* The grid can outgrow the page on a project with many steps; it scrolls inside
+   its own box so the page never moves sideways. */
+.pb-scroll { overflow-x: auto; padding: 14px 16px 16px; background: var(--surface-2); }
+.pb-grid { display: grid; grid-template-columns: minmax(190px, 230px) repeat(var(--steps), minmax(112px, 1fr)); gap: 8px; min-width: max-content; }
+
+.pb-col-h { font: 700 10px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); padding: 0 2px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pb-who { text-align: left; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 9px 11px; cursor: pointer; transition: border-color .12s, box-shadow .12s; }
+.pb-who:hover { border-color: var(--indigo-300); box-shadow: var(--sh-sm); }
+/* The row that needs answering is named as well as coloured. */
+.pb-who-flag { font: 700 9.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--indigo-700); }
+.pb-who-n { font: 600 13px var(--font-ui); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pb-who-m { font: 400 11px var(--font-ui); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Colour follows the Copilot language rather than a traffic light: one indigo family,
+   read by INTENSITY, so the board is calm until something needs a teacher.
+   The three-colour version competed for attention everywhere at once — on a full board
+   every cell shouted, and the one cell that actually wanted an answer did not stand out.
+   Each cell still carries its word as well as its colour: hue alone fails anyone who
+   cannot separate two of them. */
+.pb-cell { display: grid; place-items: center; border: 1px solid transparent; border-radius: var(--r-md); font: 700 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; padding: 12px 8px; transition: transform .12s, box-shadow .12s, background .12s; }
+
+/* Nothing here yet — an absence, drawn as one. */
+.pb-cell.todo { background: transparent; border: 1px dashed var(--border-strong); color: var(--text-muted); }
+.pb-cell.todo:hover { border-color: var(--indigo-300); color: var(--indigo-700); }
+
+/* Done: settled, quiet, no longer your problem. */
+.pb-cell.done { background: var(--indigo-50); color: var(--indigo-700); border-color: var(--indigo-100); }
+.pb-cell.done:hover { background: var(--indigo-100); }
+
+/* The one cell that wants the teacher — the same gradient the Copilot's own primary
+   action uses. It is the only saturated thing on the board, and that is the point. */
+.pb-cell.redo {
+  background: linear-gradient(135deg, var(--indigo-500), var(--indigo-700));
+  color: #fff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--indigo-600) 30%, transparent);
+}
+.pb-cell.redo:hover { transform: translateY(-1px); box-shadow: 0 4px 12px color-mix(in srgb, var(--indigo-600) 36%, transparent); }
+
+/* A corrected group needs no cells: the verdict is the whole row, and it fades out
+   left-to-right because it is finished business. */
+.pb-cell.full {
+  grid-column: 2 / -1; justify-content: start; padding-left: 14px;
+  text-transform: none; letter-spacing: .01em; font-size: 12px; font-weight: 600;
+  background: linear-gradient(90deg, var(--indigo-50), transparent 88%);
+  border-color: var(--indigo-100); color: var(--indigo-700);
+}
+.pb-cell.full:hover { background: linear-gradient(90deg, var(--indigo-100), transparent 88%); }
+
+.pb-note { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+
+@media (max-width: 760px) {
+  .pb-grid { grid-template-columns: minmax(150px, 1fr) repeat(var(--steps), minmax(96px, 1fr)); }
+}
+
+/* ── « Gérer les projets » as dossiers ──────────────────────────────────────
+   The flat row said a project existed and gave four buttons. A project IS its
+   steps and its prerequisites, and none of that was on screen — you had to open
+   it to remember what you had written. Same anatomy as the dossier view: a ring
+   for where the work stands, the identity in the middle, the steps as a spine.
+   Indigo throughout, per the Copilot palette; the ring only turns solid when a
+   project is genuinely finished with. */
+.pj-dossiers { display: flex; flex-direction: column; gap: 14px; }
+.pj-dossier { display: grid; grid-template-columns: 88px 1fr auto; gap: 18px; align-items: start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--sh-xs); transition: border-color .12s, box-shadow .12s; }
+.pj-dossier:hover { border-color: var(--indigo-200); box-shadow: var(--sh-sm); }
+
+.pj-d-ring { position: relative; width: 88px; display: flex; flex-direction: column; align-items: center; }
+.pj-d-ring svg { width: 72px; height: 72px; }
+.pj-d-track { fill: none; stroke: var(--slate-200); stroke-width: 6; }
+.pj-d-fill { fill: none; stroke: var(--indigo-500); stroke-width: 6; stroke-linecap: round; transition: stroke-dasharray .4s cubic-bezier(.3,.8,.3,1); }
+.pj-d-fill.full { stroke: var(--indigo-700); }
+.pj-d-ring-n { position: absolute; top: 26px; font: 700 14px var(--font-ui); color: var(--text); font-variant-numeric: tabular-nums; }
+.pj-d-ring-l { font: 600 9.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; text-align: center; }
+
+.pj-d-main { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.pj-d-h { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.pj-d-title { border: 0; background: transparent; padding: 0; text-align: left; font: 600 15.5px var(--font-head); color: var(--text); cursor: pointer; min-width: 0; overflow-wrap: anywhere; }
+.pj-d-title:hover { color: var(--indigo-700); }
+/* The only urgent thing on the card, so it is the only saturated thing. */
+.pj-d-flag { font: 700 10px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: #fff; border-radius: var(--r-pill); padding: 3px 9px; background: linear-gradient(135deg, var(--indigo-500), var(--indigo-700)); box-shadow: 0 2px 6px color-mix(in srgb, var(--indigo-600) 28%, transparent); }
+.pj-d-meta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted); }
+
+.pj-d-req { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pj-d-req-l { font: 700 9.5px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.pj-d-chip { font: 600 11px var(--font-ui); color: var(--text-soft); background: var(--slate-100); border-radius: var(--r-pill); padding: 3px 9px; }
+
+/* The spine. Wraps into columns when the card is wide, so a five-step project
+   does not become five lines of mostly-empty row. */
+.pj-d-steps { list-style: none; margin: 2px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 5px 14px; }
+.pj-d-steps li { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--text-soft); min-width: 0; }
+.pj-d-step-n { flex: none; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; background: var(--indigo-50); color: var(--indigo-700); font: 700 9.5px var(--font-ui); }
+
+.pj-d-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+@media (max-width: 860px) {
+  .pj-dossier { grid-template-columns: 64px 1fr; }
+  .pj-d-ring { width: 64px; }
+  .pj-d-ring svg { width: 56px; height: 56px; }
+  .pj-d-ring-n { top: 19px; font-size: 12px; }
+  .pj-d-acts { grid-column: 1 / -1; justify-content: flex-start; }
+}

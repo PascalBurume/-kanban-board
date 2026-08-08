@@ -14,7 +14,10 @@ const NAV = [
   { href: "/teacher/insights/", icon: "sparkles", label: "Analyses Copilot" },
   { href: "/teacher/studio/", icon: "edit", label: "Studio de contenu" },
   { href: "/teacher/studio/rediger/", icon: "file", label: "Rédiger une leçon" },
-  { href: "/teacher/studio/latex/", icon: "func", label: "Atelier LaTeX" },
+  // Atelier LaTeX is deliberately NOT here. It is a tool for the lesson you are writing,
+  // and from the sidebar it opened on nothing — a blank workspace and a picker. It is
+  // reached from « Rédiger une leçon » instead (toolbar → Atelier LaTeX), which hands it
+  // the open lesson. The /teacher/studio/latex/ route is still live: bookmarks work.
   { href: "/teacher/exercises/", icon: "book", label: "Exercices" },
   { href: "/teacher/projects/", icon: "layers", label: "Projets", badge: "toCorrect" },
 ];

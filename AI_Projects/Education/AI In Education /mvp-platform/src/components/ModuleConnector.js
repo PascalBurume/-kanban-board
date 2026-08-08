@@ -243,7 +243,15 @@ function LessonCard({ l, m, reg, busy, onOpen, onDrag, onDelete, moduleLabel, on
           </span>
         </div>
       ) : (
-        <div className="mc-card-meta"><span className="mc-pill draft">Non reliée</span></div>
+        // The status still matters when a lesson has no module — the teacher has just
+        // pressed Publier in « Rédiger » and needs to see that it landed. This branch
+        // dropped m.label entirely, so a published lesson looked exactly like a draft
+        // and the publish read as lost. Both facts are true at once: it is published,
+        // and it is not yet delivered to anyone.
+        <div className="mc-card-meta">
+          <span className="mc-pill" style={m.live ? { background: "var(--danger-bg)", color: "var(--danger-fg)" } : undefined}>{m.label}</span>
+          <span className="mc-pill draft">Non reliée</span>
+        </div>
       )}
       <span className="mc-handle" title="Glisser vers un module" onPointerDown={(e) => onDrag(e, l)} />
     </div>

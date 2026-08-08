@@ -1,6 +1,6 @@
 "use client";
 import "./studio.css";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Icon from "@/components/ui/Icon";
 import Markdown from "@/components/Markdown";
 import { BrandMark } from "@/components/ui/chrome";
@@ -8,7 +8,9 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import { avatarColor, initials } from "@/lib/icons";
 import { isBlankContent } from "@/lib/lessonSkeleton";
 import { toast } from "@/lib/toast";
+import { confirmDialog } from "@/lib/confirm";
 import { StudioComposePanel } from "@/components/StudioComposePanel";
+import TeachPanel from "@/components/TeachPanel";
 import ModuleConnector from "@/components/ModuleConnector";
 import QuizMathInput from "@/components/QuizMathInput";
 
@@ -81,6 +83,11 @@ export default function StudioClient({ initialIsAdmin = false }) {
   // ---- fetched data ----
   const [subjects, setSubjects] = useState([]); // [{ slug,name,icon,color, modules:[{id,title,order,open, lessons:[{id,title,status,order}]}] }]
   const [classes, setClasses] = useState([]); // [{ id, name, level }]
+  const [trash, setTrash] = useState([]); // the corbeille — deleted lessons, restorable
+  const [trashOpen, setTrashOpen] = useState(false);
+  // A topic handed over from Analyses Copilot, pre-filled as the first question.
+  const [teachSeed, setTeachSeed] = useState("");
+  const [addingComplement, setAddingComplement] = useState(false);
 
   // ---- class scope: the studio shows only the book(s) of the selected class ----
   const [selectedClassId, setSelectedClassId] = useState(null); // null = admin's "tous les manuels"
@@ -135,7 +142,6 @@ export default function StudioClient({ initialIsAdmin = false }) {
 
   const [vhOpen, setVhOpen] = useState(false);
   const [asOpen, setAsOpen] = useState(false);
-  const mdRef = useRef(null);
 
   // Role gate: content authoring (create/connect/delete/restore) is ADMIN-only.
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
@@ -152,18 +158,24 @@ export default function StudioClient({ initialIsAdmin = false }) {
   }, []);
 
   // Real teacher identity for the sidebar footer (no hard-coded name).
-  const [who, setWho] = useState({ name: "", role: "Enseignant" });
+  // Name, civility and role all come from the API already agreed — see /api/teacher/badges.
+  const [who, setWho] = useState({ name: "", display: "", role: "", subjects: [] });
   useEffect(() => {
     fetch("/api/teacher/badges/")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (!d?.teacher) return;
-        const name = `${d.teacher.firstName || ""} ${d.teacher.lastName || ""}`.trim();
-        setWho({ name, role: d.teacher.subjectLabel ? `Enseignante · ${d.teacher.subjectLabel}` : "Enseignante" });
+        const t = d.teacher;
+        setWho({
+          name: `${t.firstName || ""} ${t.lastName || ""}`.trim(),
+          display: t.displayName || "",
+          role: t.discipline ? `${t.roleLabel} · ${t.discipline}` : t.roleLabel || "",
+          subjects: t.subjects || [],
+        });
       })
       .catch(() => {});
   }, []);
-  const userName = who.name || "Grâce Mukendi";
+  const userName = who.name;
 
   // Content editing is admin-only; quiz authoring stays open to teachers — the
   // API decides per lesson (canQuiz flag).
@@ -267,7 +279,14 @@ export default function StudioClient({ initialIsAdmin = false }) {
 
         // Pick a lesson inside the new scope: the deep-linked one, else the one
         // already open if it survived the switch, else the first available.
-        const allLessons = subj.flatMap((s) => s.modules.flatMap((m) => m.lessons));
+        //
+        // The library counts. It used to be left out, so deep-linking to an unattached
+        // lesson — or restoring one from the corbeille — warned that it was not in the
+        // teacher's classes while it sat visibly in « Ma bibliothèque » two rows above.
+        const allLessons = [
+          ...subj.flatMap((s) => s.modules.flatMap((m) => m.lessons)),
+          ...subj.flatMap((s) => s.library || []),
+        ];
         if (wantedLesson && !allLessons.some((l) => l.id === wantedLesson)) {
           toast("Cette leçon n’est pas dans vos classes", { icon: "alert" });
         }
@@ -298,8 +317,14 @@ export default function StudioClient({ initialIsAdmin = false }) {
     const initialClass = params.get("class") || (wantedLesson ? "" : localStorage.getItem(STUDIO_CLASS_KEY)) || "";
     loadTree(initialClass || null, wantedLesson);
 
+    // Analyses Copilot links here as /teacher/studio/?lesson=…&topic=… when a lesson
+    // is generating a lot of student questions. That link used to arrive and only
+    // raise a toast. It now lands where the teacher can do something about it.
     const topic = params.get("topic");
-    if (topic) toast(`Sujet : ${topic} — ajoute-le à une leçon`, { icon: "sparkles" });
+    if (topic) {
+      setTab("enseigner");
+      setTeachSeed(topic);
+    }
     // Runs once on mount; loadTree is stable enough for this initial fetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -421,38 +446,44 @@ export default function StudioClient({ initialIsAdmin = false }) {
     }
   }
 
-  // ---- markdown editor ----
-  function onMdChange(e) {
-    if (!canEdit) return;
-    setMd(e.target.value);
-    setSaveState("Modifications non enregistrées");
-    setDirty(true);
-  }
-  function insertMd(kind) {
-    if (!canEdit) return;
-    const map = {
-      bold: "**texte en gras**",
-      italic: "*italique*",
-      h: "\n## Titre\n",
-      list: "\n- élément\n",
-      formula: "\n$$ \\frac{x}{3} = 2 $$\n",
-      img: "\n[Image : schéma]\n",
-    };
-    const ins = map[kind] || "";
-    const el = mdRef.current;
-    const s = el ? el.selectionStart : md.length;
-    const e = el ? el.selectionEnd : md.length;
-    const next = md.slice(0, s) + ins + md.slice(e);
-    setMd(next);
-    setSaveState("Modifications non enregistrées");
-    setDirty(true);
-    if (el) {
-      requestAnimationFrame(() => {
-        el.focus();
-        const pos = s + ins.length;
-        el.setSelectionRange(pos, pos);
+  // ---- write a complément to the book lesson being read ----
+  // The old banner told the teacher to go to « Ma bibliothèque », create a lesson, then
+  // find this one again in a dropdown to attach it. Three steps and a lookup, described
+  // in prose. It is one button: create, attach, open the writer.
+  async function addComplement() {
+    if (!currentId || !subjectSlug || addingComplement) return;
+    setAddingComplement(true);
+    try {
+      const res = await fetch("/api/studio/library/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ subjectSlug }),
       });
+      if (!res.ok) throw new Error("create");
+      const { lesson } = await res.json();
+      await fetch(`/api/studio/lessons/${lesson.id}/companion/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ bookLessonId: currentId }),
+      });
+      window.location.href = `/teacher/studio/rediger/?id=${lesson.id}`;
+    } catch {
+      setAddingComplement(false);
+      toast("Impossible de créer le complément", { icon: "x" });
     }
+  }
+
+  // ---- hand off to « Rédiger une leçon » ----
+  // Flush first. A title typed here, or a Copilot draft just inserted, is unsaved state
+  // in this page; the writer loads the lesson from the server, so leaving without
+  // saving would open it on the older content and the first autosave there would write
+  // that back over what was typed here.
+  async function editInWriter() {
+    if (!currentId) return;
+    if (dirty && canEdit) await saveLesson(true);
+    window.location.href = `/teacher/studio/rediger/?id=${currentId}`;
   }
 
   // ---- Copilot APS: apply generated output into the editor ----
@@ -478,14 +509,12 @@ export default function StudioClient({ initialIsAdmin = false }) {
     toast(mode === "replace" ? "Quiz remplacé — vérifiez les réponses" : `${mapped.length} question(s) ajoutée(s)`, { icon: "target" });
   }
   function insertCopilotText(text) {
-    const el = mdRef.current;
-    const s = el ? el.selectionStart : md.length;
-    const e = el ? el.selectionEnd : md.length;
-    const block = `\n\n${text}\n`;
-    setMd(md.slice(0, s) + block + md.slice(e));
+    // Appended, not inserted at a caret: there is no caret here any more. Placing text
+    // precisely is what « Rédiger une leçon » is for, and the button above goes there.
+    setMd((cur) => `${cur.replace(/\s+$/, "")}\n\n${text}\n`);
     setSaveState("Modifications non enregistrées");
     setDirty(true);
-    toast("Texte inséré dans la leçon ✓", { icon: "check" });
+    toast("Texte ajouté à la fin de la leçon ✓", { icon: "check" });
   }
 
   // ---- quiz builder (editable on own lessons AND book lessons — see canQuiz) ----
@@ -696,15 +725,10 @@ export default function StudioClient({ initialIsAdmin = false }) {
       if (res.status === 403) { window.location.href = "/login/"; return; }
       if (!res.ok) { toast("Impossible de créer la leçon", { icon: "x" }); return; }
       const { lesson } = await res.json();
-      setSubjects((prev) =>
-        prev.map((s) =>
-          s.slug === slug
-            ? { ...s, library: [...(s.library || []), { id: lesson.id, title: lesson.title, status: lesson.status, moduleId: null }] }
-            : s
-        )
-      );
-      toast("Leçon ajoutée à la bibliothèque", { icon: "plus" });
-      loadLesson(lesson.id, { announce: false });
+      // Straight into « Rédiger une leçon ». A blank lesson exists to be written, and
+      // the word processor — not this pane's markdown textarea — is where that happens.
+      // The studio keeps the things it is better at: quiz, versions, connexions.
+      window.location.href = `/teacher/studio/rediger/?id=${lesson.id}`;
     } catch {
       toast("Impossible de créer la leçon", { icon: "x" });
     }
@@ -756,7 +780,15 @@ export default function StudioClient({ initialIsAdmin = false }) {
 
   // ---- delete one of the teacher's own lessons ----
   async function deleteLessonById(lessonId) {
-    if (!window.confirm("Supprimer définitivement cette leçon et son quiz ? Cette action est irréversible.")) return false;
+    // Not window.confirm: an installed PWA or an embedded webview can suppress it,
+    // and a suppressed dialog returns false — so the × silently did nothing and read
+    // as a broken button. See src/lib/confirm.js.
+    const ok = await confirmDialog({
+      title: "Supprimer cette leçon ?",
+      message: "La leçon part à la corbeille avec son quiz, son historique et la progression des élèves. Vous pourrez la restaurer.",
+      confirmLabel: "Supprimer",
+    });
+    if (!ok) return false;
     try {
       const res = await fetch(`/api/studio/lessons/${lessonId}/`, { method: "DELETE", credentials: "same-origin" });
       if (res.status === 403) { window.location.href = "/login/"; return false; }
@@ -772,11 +804,70 @@ export default function StudioClient({ initialIsAdmin = false }) {
         setCurrentId(null);
         setTitle(""); setMd(""); setQuiz([]); setCurrentModuleId(null); setSubjectName(""); setModuleTitle("");
       }
-      toast("Leçon supprimée", { icon: "x" });
+      loadTrash();
+      // Undo puts it back exactly as it was, status included — this is a correction of
+      // the last two seconds, not a decision to republish something old.
+      toast("Leçon déplacée vers la corbeille", {
+        icon: "x",
+        action: { label: "Annuler", onClick: () => undelete(lessonId, true) },
+      });
       return true;
     } catch {
       toast("Suppression impossible", { icon: "x" });
       return false;
+    }
+  }
+
+  // ---- corbeille ----
+  const loadTrash = useCallback(async () => {
+    try {
+      const res = await fetch("/api/studio/trash/", { credentials: "same-origin", cache: "no-store" });
+      if (!res.ok) return;
+      const { items } = await res.json();
+      setTrash(items || []);
+    } catch { /* the bin is a safety net, not a blocker — a failed poll changes nothing */ }
+  }, []);
+
+  useEffect(() => { loadTrash(); }, [loadTrash]);
+
+  async function undelete(lessonId, exact = false) {
+    try {
+      const res = await fetch("/api/studio/trash/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ lessonId, exact }),
+      });
+      if (!res.ok) { toast("Restauration impossible", { icon: "x" }); return; }
+      const r = await res.json();
+      await Promise.all([loadTree(selectedClassId, lessonId), loadTrash()]);
+      // Say what actually happened rather than a bare success: a lesson that came back
+      // detached, renamed or as a draft is a different lesson than the one they deleted.
+      const notes = [
+        !r.reattached && r.status !== undefined ? "dans votre bibliothèque" : null,
+        r.status === "DRAFT" && !exact ? "en brouillon" : null,
+        r.slugChanged ? "avec une nouvelle adresse" : null,
+      ].filter(Boolean);
+      toast(`« ${r.title} » restaurée${notes.length ? ` ${notes.join(", ")}` : ""}`, { icon: "check" });
+    } catch {
+      toast("Restauration impossible", { icon: "x" });
+    }
+  }
+
+  async function purgeTrash(item) {
+    const ok = await confirmDialog({
+      title: "Vider définitivement ?",
+      message: `« ${item.title} » et tout ce qu'elle contient seront effacés pour de bon. Cette fois, c'est irréversible.`,
+      confirmLabel: "Effacer définitivement",
+    });
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/studio/trash/?id=${encodeURIComponent(item.lessonId)}`, { method: "DELETE", credentials: "same-origin" });
+      if (!res.ok) { toast("Suppression impossible", { icon: "x" }); return; }
+      await loadTrash();
+      toast("Effacée définitivement", { icon: "x" });
+    } catch {
+      toast("Suppression impossible", { icon: "x" });
     }
   }
 
@@ -819,7 +910,7 @@ export default function StudioClient({ initialIsAdmin = false }) {
   const quizCount = quiz.length;
 
   return (
-    <div className="teacher-page">
+    <div className="teacher-page studio-shell">
       <div className={`t-app${collapsed ? " collapsed" : ""}`}>
         {/* The Studio is a shared tool: an admin keeps the admin nav, a teacher
             keeps the teacher nav — nobody is dropped into the other's shell. */}
@@ -886,8 +977,10 @@ export default function StudioClient({ initialIsAdmin = false }) {
                 {initials(userName)}
               </div>
               <a className="meta" href="/profile/" style={{textDecoration:"none",color:"inherit"}}>
-                <div className="un">{userName ? `Mme ${userName}` : "Mme Grâce Mukendi"}</div>
-                <div className="ur">{who.role}</div>
+                <div className="un">{who.display}</div>
+                {/* One line, always. The books behind the discipline are the tooltip
+                    here and a card on /profile — never a wrapping run in the footer. */}
+                <div className="ur" title={who.subjects.join("\n")}>{who.role}</div>
               </a>
               <a className="lo" href="/api/auth/logout/" title="Se déconnecter">
                 <Icon name="logout" />
@@ -1007,30 +1100,80 @@ export default function StudioClient({ initialIsAdmin = false }) {
                       <div className="tree-lib">
                         <div className="tree-lib-head">
                           <span className="tll-title"><Icon name="book" /> Ma bibliothèque</span>
-                          <button className="tll-add" onClick={() => addLibraryLesson(subj.slug)} title="Nouvelle leçon perso">
+                          <button className="tll-add" onClick={() => addLibraryLesson(subj.slug)} title="Nouvelle leçon — ouvre « Rédiger une leçon »" aria-label="Nouvelle leçon — ouvre « Rédiger une leçon »">
                             <Icon name="plus" />
                           </button>
                         </div>
                         {libUnattached.length === 0 ? (
                           <div className="tree-lib-empty">{isAdmin ? "Créez une leçon avec +, puis reliez-la à un module." : "Créez une leçon avec + pour rédiger votre propre complément, puis associez-le à une leçon du manuel."}</div>
                         ) : (
-                          libUnattached.map((l) => (
-                            <div
-                              className={`tree-lesson${l.id === currentId ? " active" : ""}`}
-                              key={l.id}
-                              onClick={() => selectLesson(l.id)}
-                            >
-                              <span className="ldot" style={{ background: "var(--warning-fg)" }} />
-                              <span className="nm">{l.title}</span>
-                              <span className="st biblio">Biblio</span>
-                              {(
+                          libUnattached.map((l) => {
+                            // Same status vocabulary as the module rows below. This badge used
+                            // to read a hard-coded "Biblio" whatever the lesson's state, so a
+                            // teacher who pressed Publier in « Rédiger » came back here to a row
+                            // that had not changed — and read that as the publish being lost.
+                            // « Ma bibliothèque » already says these are theirs and unattached,
+                            // so the badge spends its width on the thing that actually varies.
+                            const pub = l.status === "PUBLISHED";
+                            return (
+                              <div
+                                className={`tree-lesson${l.id === currentId ? " active" : ""}`}
+                                key={l.id}
+                                onClick={() => selectLesson(l.id)}
+                              >
+                                <span className="ldot" style={{ background: pub ? "var(--danger-fg)" : "var(--slate-300)" }} />
+                                <span className="nm">{l.title}</span>
+                                <span
+                                  className={`st ${pub ? "live" : "draft"}`}
+                                  title={pub ? "Publiée — reliez-la à un module pour que les élèves la voient" : "Brouillon — pas encore publiée"}
+                                >
+                                  {pub ? "En ligne" : "Brouillon"}
+                                </span>
                                 <button className="tree-del" title="Supprimer la leçon" onClick={(e) => { e.stopPropagation(); deleteLessonById(l.id); }}>
                                   <Icon name="x" />
                                 </button>
-                              )}
-                            </div>
-                          ))
+                              </div>
+                            );
+                          })
                         )}
+
+                        {/* The corbeille. Collapsed and quiet — it is a safety net, not a
+                            place to work — but its count is always visible, because a bin
+                            nobody knows exists is the same as no bin at all. */}
+                        {(() => {
+                          const mine = trash.filter((t) => t.subjectSlug === subj.slug);
+                          if (!mine.length) return null;
+                          return (
+                            <div className={`tree-trash${trashOpen ? " open" : ""}`}>
+                              <button className="tt-head" onClick={() => setTrashOpen((o) => !o)} aria-expanded={trashOpen}>
+                                <Icon name="trash" />
+                                <span className="tt-t">Corbeille</span>
+                                <span className="tt-n">{mine.length}</span>
+                                <Icon name={trashOpen ? "chevD" : "chevR"} />
+                              </button>
+                              {trashOpen && mine.map((t) => (
+                                <div className="tt-row" key={t.lessonId}>
+                                  <div className="tt-main">
+                                    <span className="tt-title">{t.title}</span>
+                                    {/* What a restore would bring back — the reassurance the bin exists to give. */}
+                                    <span className="tt-meta">
+                                      {t.words} mot{t.words > 1 ? "s" : ""}
+                                      {t.versions > 0 && ` · ${t.versions} version${t.versions > 1 ? "s" : ""}`}
+                                      {t.questions > 0 && ` · ${t.questions} question${t.questions > 1 ? "s" : ""}`}
+                                      {t.moduleTitle && ` · ${t.moduleTitle}`}
+                                    </span>
+                                  </div>
+                                  <div className="tt-acts">
+                                    <button className="tt-b" onClick={() => undelete(t.lessonId)} title="Restaurer cette leçon">Restaurer</button>
+                                    <button className="tt-b danger" onClick={() => purgeTrash(t)} title="Effacer définitivement">
+                                      <Icon name="x" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {subj.modules.map((mod, mi) => (
@@ -1168,31 +1311,9 @@ export default function StudioClient({ initialIsAdmin = false }) {
                 </div>
               </div>
 
-              {isOwn && (
-                <div className={`ed-intent${intentOpen ? " open" : ""}`}>
-                  <button className="ed-intent-h" onClick={() => toggleIntent()} aria-expanded={intentOpen}>
-                    <Icon name="sparkles" />
-                    <b>Votre espace de rédaction</b>
-                    <span>— une leçon qui suit l’Approche Par les Situations (APS)</span>
-                    <span className="ed-intent-caret" aria-hidden="true">▾</span>
-                  </button>
-                  {intentOpen && (
-                    <div className="ed-intent-body">
-                      <ol>
-                        <li><b>Situation</b> — partez d’un cas réel de RDC, avec des chiffres. L’élève agit avant d’apprendre la règle.</li>
-                        <li><b>Savoirs essentiels</b> — dégagez les notions que la situation met en jeu, pas à pas.</li>
-                        <li><b>Compétence</b> — l’élève traite la situation et produit quelque chose de concret.</li>
-                      </ol>
-                      <p>
-                        Le squelette dans l’éditeur suit cet ordre : remplacez chaque ligne d’exemple par votre texte.
-                        <b> Copilot APS</b> peut rédiger un premier jet — il propose, vous décidez, vous corrigez.
-                        Reliez enfin votre leçon à une leçon du manuel ci-dessus pour qu’elle apparaisse à vos élèves.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
+              {/* The tab bar is the anchor: everything that changes with the tab lives
+                  BELOW it. The intent banner used to sit above, so hiding it on the quiz
+                  tab would have made the tabs jump under the teacher's cursor. */}
               <div className="ed-tabs">
                 <div
                   className={`ed-tab${tab === "content" ? " active" : ""}`}
@@ -1212,16 +1333,28 @@ export default function StudioClient({ initialIsAdmin = false }) {
                     {quizCount}
                   </span>
                 </div>
+                {/* Teaching support. Works on any selected lesson INCLUDING the manual's,
+                    which is the point: the teacher cannot edit those, but they still
+                    have to teach them. */}
+                <div
+                  className={`ed-tab${tab === "enseigner" ? " active" : ""}`}
+                  onClick={() => setTab("enseigner")}
+                >
+                  <Icon name="message" /> Enseigner
+                </div>
               </div>
 
-              {!canEdit && (
-                <div className="ed-readonly">
-                  <Icon name="lock" />
-                  <span><b>Contenu géré par l’administration</b> — la leçon du manuel est en lecture seule. Votre espace : <b>créer le quiz</b> de cette leçon (onglet <b>Quiz</b>, formules LaTeX prises en charge), ou rédiger un <b>complément</b> depuis « Ma bibliothèque » et l’associer à cette leçon.</span>
-                </div>
-              )}
+              {/* ── content-tab chrome ── all of it is about the lesson text, so none of
+                  it follows the teacher onto the quiz page. */}
+              {/* A book lesson being read-only used to be announced here by a full-width
+                  amber banner: two lines of prose, four bolded fragments, sitting 40px
+                  above a header that already read « Leçon du manuel · lecture seule ».
+                  Amber says something is going wrong; this is the normal and permanent
+                  state of 481 of the 485 lessons. The fact now appears once, calmly, in
+                  that header — and the two things the prose merely described became the
+                  buttons next to it. */}
 
-              {isOwn && (
+              {tab === "content" && isOwn && (
                 <div className="ed-companion">
                   <Icon name="layers" />
                   <label htmlFor="companion-select">Complète la leçon du manuel :</label>
@@ -1241,13 +1374,40 @@ export default function StudioClient({ initialIsAdmin = false }) {
                 </div>
               )}
 
+              {tab === "content" && isOwn && (
+                <div className={`ed-intent${intentOpen ? " open" : ""}`}>
+                  <button className="ed-intent-h" onClick={() => toggleIntent()} aria-expanded={intentOpen}>
+                    <Icon name="sparkles" />
+                    <b>Votre espace de rédaction</b>
+                    <span>— une leçon qui suit l’Approche Par les Situations (APS)</span>
+                    <span className="ed-intent-caret" aria-hidden="true">▾</span>
+                  </button>
+                  {intentOpen && (
+                    <div className="ed-intent-body">
+                      <ol>
+                        <li><b>Situation</b> — partez d’un cas réel de RDC, avec des chiffres. L’élève agit avant d’apprendre la règle.</li>
+                        <li><b>Savoirs essentiels</b> — dégagez les notions que la situation met en jeu, pas à pas.</li>
+                        <li><b>Compétence</b> — l’élève traite la situation et produit quelque chose de concret.</li>
+                      </ol>
+                      <p>
+                        Le squelette suit cet ordre. <b>Copilot APS</b> peut rédiger un premier jet —
+                        il propose, vous décidez, vous corrigez. Ouvrez <b>Modifier la leçon</b> pour écrire,
+                        et reliez-la ci-dessus à une leçon du manuel pour qu’elle apparaisse à vos élèves.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {copilotOpen && currentId && canQuiz && (
                 <div className="ed-copilot">
                   <StudioComposePanel
                     subjectSlug={subjectSlug}
                     moduleId={currentModuleId}
                     classLevel={classLevel}
-                    allowContent={canEdit}
+                    // On the quiz tab the panel keeps only « Générer un quiz » — the
+                    // drafting actions have nothing to act on there.
+                    allowContent={canEdit && tab === "content"}
                     contentReady={!isBlankContent(md) && md.trim().length > 40}
                     getContent={() => md}
                     onApplyContent={applyCopilotContent}
@@ -1258,48 +1418,25 @@ export default function StudioClient({ initialIsAdmin = false }) {
                 </div>
               )}
 
-              {/* content tab — full editor when editable; read-only rendered page otherwise */}
-              <div
-                className={`ed-body${tab === "content" ? "" : " pane-hidden"}`}
-                style={!canEdit ? { gridTemplateColumns: "1fr" } : undefined}
-              >
-                {canEdit && (
-                  <div className="ed-pane">
-                    <div className="md-toolbar">
-                      <button className="md-btn" title="Gras" onClick={() => insertMd("bold")}>
-                        <Icon name="bold" />
-                      </button>
-                      <button className="md-btn" title="Italique" onClick={() => insertMd("italic")}>
-                        <Icon name="italic" />
-                      </button>
-                      <div className="md-sep" />
-                      <button className="md-btn" title="Titre" onClick={() => insertMd("h")}>
-                        <b style={{ fontSize: "14px" }}>H</b>
-                      </button>
-                      <button className="md-btn" title="Liste" onClick={() => insertMd("list")}>
-                        <Icon name="list" />
-                      </button>
-                      <div className="md-sep" />
-                      <button className="md-btn" title="Formule mathématique (LaTeX)" onClick={() => insertMd("formula")}>
-                        <Icon name="func" />
-                      </button>
-                      <button className="md-btn" title="Image" onClick={() => insertMd("img")}>
-                        <Icon name="book" />
-                      </button>
-                    </div>
-                    <textarea
-                      ref={mdRef}
-                      className="md-input"
-                      spellCheck="false"
-                      value={md}
-                      onChange={onMdChange}
-                    />
-                  </div>
-                )}
+              {/* Content tab — the lesson as the student sees it, formulas typeset.
+                  The raw-markdown textarea that used to sit beside this is gone: writing
+                  belongs in « Rédiger une leçon », which can do all of this without ever
+                  showing a teacher a dollar sign. What is left here is reading, checking
+                  on both screen sizes, and one button to go and change it. */}
+              <div className={`ed-body one-col${tab === "content" ? "" : " pane-hidden"}`}>
                 <div className="ed-pane preview-pane">
                   <div className="preview-head">
-                    <span><Icon name="eye" /> {canEdit ? "Aperçu en direct · LaTeX" : "Leçon du manuel · lecture seule"}</span>
-                    {canEdit && (
+                    {canEdit ? (
+                      <span><Icon name="eye" /> La leçon · formules composées</span>
+                    ) : (
+                      // Stated as a fact, in the muted eyebrow, with a tooltip carrying
+                      // the "why" for whoever wants it — instead of a warning block
+                      // spending 60px explaining it to everyone, every time.
+                      <span className="ph-lock" title="Le contenu des manuels est géré par l'administration. Vous gardez le quiz et les compléments.">
+                        <Icon name="lock" /> Leçon du manuel · lecture seule
+                      </span>
+                    )}
+                    <div className="preview-actions">
                       <div className="device-toggle">
                         <button
                           className={device === "desktop" ? "active" : ""}
@@ -1316,15 +1453,45 @@ export default function StudioClient({ initialIsAdmin = false }) {
                           <Icon name="book" />
                         </button>
                       </div>
-                    )}
+                      {canEdit ? (
+                        <button className="btn btn-primary btn-sm" onClick={editInWriter} disabled={!currentId}>
+                          <Icon name="edit" /> Modifier la leçon
+                        </button>
+                      ) : (
+                        // What the old prose only described. A teacher should not have to
+                        // translate a sentence into clicks.
+                        <>
+                          <button className="btn btn-sm" onClick={() => setTab("quiz")} disabled={!currentId}>
+                            <Icon name="target" /> {quizCount ? "Modifier le quiz" : "Créer le quiz"}
+                          </button>
+                          <button className="btn btn-primary btn-sm" onClick={addComplement} disabled={!currentId || addingComplement}>
+                            <Icon name="plus" /> {addingComplement ? "Création…" : "Écrire un complément"}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className={`preview-scroll dev-${device}`}>
-                    <div className="preview-doc">
-                      <Markdown>{md}</Markdown>
+                    {/* prose-reader is the student page's own class. This pane is now the
+                        only place a teacher sees their lesson, so it has to be the same
+                        rendering — figures at textbook size, tables in their scroll wrap,
+                        display formulas boxed — not a half-copy that drifts from it. */}
+                    <div className="preview-doc prose-reader">
+                      {md.trim()
+                        ? <Markdown>{md}</Markdown>
+                        : <p className="preview-empty">Cette leçon est vide. Ouvrez « Modifier la leçon » pour l’écrire.</p>}
                     </div>
                   </div>
                 </div>
               </div>
+
+              {tab === "enseigner" && currentId && (
+                <div className="ed-body one-col ed-teachbody">
+                  <div className="ed-teach">
+                    <TeachPanel lessonId={currentId} seed={teachSeed} onSeedUsed={() => setTeachSeed("")} onApplyContent={applyCopilotContent} />
+                  </div>
+                </div>
+              )}
 
               {/* quiz tab */}
               <div

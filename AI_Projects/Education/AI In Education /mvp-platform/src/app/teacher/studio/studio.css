@@ -1,6 +1,11 @@
-.teacher-page { min-height: 100vh; height: 100vh; overflow: hidden; }
-.teacher-page .t-app { height: 100vh; }
-.teacher-page .t-main { height: 100vh; overflow: hidden; }
+/* Scoped to .studio-shell, NOT to bare .teacher-page: that class is the teacher THEME,
+   worn by every teacher page. Unscoped, this stylesheet stayed in the document after a
+   client-side nav out of the studio and locked whatever teacher page came next —
+   /rediger's start screen among them — to one clipped viewport, overflow hidden, with
+   everything below the fold unreachable. */
+.teacher-page.studio-shell { min-height: 100vh; height: 100vh; overflow: hidden; }
+.teacher-page.studio-shell .t-app { height: 100vh; }
+.teacher-page.studio-shell .t-main { height: 100vh; overflow: hidden; }
 /* contain:strict adds size containment so the nested flex/grid preview scroller
    can't leak its overflow into the document's scrollHeight (Chromium quirk that
    left a phantom empty area below the fixed-height studio). */
@@ -64,7 +69,6 @@
 .tll-add:hover { background: var(--indigo-50); }
 .tll-add svg { width: 14px; height: 14px; }
 .tree-lib-empty { font-size: 11.5px; color: var(--text-muted); padding: 2px 6px 4px; line-height: 1.4; }
-.tree-lesson .st.biblio { background: var(--warning-bg); color: var(--warning-fg); }
 .tree-lesson .st.perso { background: var(--indigo-100); color: var(--indigo-700); }
 /* the teacher's own lesson that is live to students — red so it's easy to spot + update */
 .tree-lesson .st.live { background: var(--danger-bg); color: var(--danger-fg); }
@@ -110,8 +114,6 @@
 .ed-tab:hover:not(.active) { color: var(--text); }
 
 /* Read-only banner shown when a teacher opens a book ("En ligne") lesson. */
-.ed-readonly { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: var(--warning-bg); border-bottom: 1px solid var(--warning-fg); color: var(--warning-fg); font-size: 13px; line-height: 1.4; }
-.ed-readonly svg { width: 16px; height: 16px; flex: none; }
 
 /* "What this page is for" — the APS intention, collapsible, on own lessons only. */
 .ed-intent { flex: none; border-bottom: 1px solid var(--border); background: var(--surface-2); }
@@ -134,7 +136,6 @@
 .ed-companion select { padding: 5px 9px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 13px var(--font-ui); color: var(--text); max-width: 340px; }
 .ed-companion-on { display: inline-flex; align-items: center; gap: 5px; font: 600 12px var(--font-ui); color: var(--success-fg, var(--success)); }
 .ed-companion-on svg { width: 14px; height: 14px; color: currentColor; }
-.ed-readonly b { font-weight: 700; }
 
 /* Copilot APS strip — collapsible, capped so it never dominates the fixed shell. */
 .ed-copilot { flex: none; max-height: 52%; overflow-y: auto; padding: 14px 18px 0; border-bottom: 1px solid var(--border); background: var(--surface-2); }
@@ -160,13 +161,6 @@
 .preview-scroll.dev-mobile { display: flex; justify-content: center; padding: 24px 0; }
 .preview-scroll.dev-mobile .preview-doc { width: 340px; max-width: 92%; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--sh-md); padding: 26px 22px; align-self: flex-start; }
 .preview-doc { padding: 22px 26px; }
-.preview-doc h1 { font-size: 24px; margin-bottom: 12px; }
-.preview-doc h2 { font-size: 19px; margin: 20px 0 8px; }
-.preview-doc h3 { font-size: 16px; margin: 16px 0 6px; }
-.preview-doc p { font-size: 15px; line-height: 1.65; color: var(--slate-700); margin-bottom: 12px; }
-.preview-doc strong { color: var(--text); }
-.preview-doc ul { margin: 0 0 12px; padding-left: 22px; }
-.preview-doc li { font-size: 15px; line-height: 1.6; color: var(--slate-700); margin-bottom: 5px; }
 .preview-doc .pformula { background: var(--slate-100); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 18px; margin: 14px 0; text-align: center; font-size: 18px; font-family: 'Lexend'; color: var(--slate-800); }
 .preview-doc .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; }
 .preview-doc .frac .num { padding: 0 7px 2px; border-bottom: 2px solid currentColor; }
@@ -222,3 +216,54 @@
 .qb-qwrap { margin: 8px 0 4px; }
 .qb-expl { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
 .qb-expl-l { font: 600 11px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+
+/* ---------- Corbeille ---------- */
+/* Deliberately quiet: a safety net, not a place to work. But the count is always
+   visible even when collapsed — a bin nobody knows exists is the same as no bin. */
+.tree-trash { margin-top: 8px; border-top: 1px dashed var(--indigo-200); padding-top: 6px; }
+.tt-head { width: 100%; display: flex; align-items: center; gap: 7px; padding: 6px 4px; border: 0; background: none; cursor: pointer; font: 600 11.5px var(--font-ui); color: var(--text-muted); text-align: left; }
+.tt-head:hover { color: var(--text-soft); }
+.tt-head svg { width: 14px; height: 14px; flex: none; }
+.tt-head svg:last-child { margin-left: 0; }
+.tt-t { flex: 1; }
+.tt-n { background: var(--slate-200); color: var(--slate-600); border-radius: var(--r-pill); padding: 1px 7px; font-size: 10.5px; font-weight: 700; }
+.tt-row { display: flex; align-items: center; gap: 8px; padding: 7px 4px 7px 8px; border-radius: var(--r-sm); }
+.tt-row:hover { background: var(--slate-100); }
+.tt-main { flex: 1; min-width: 0; }
+.tt-title { display: block; font-size: 12.5px; color: var(--text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-meta { display: block; font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+.tt-acts { display: flex; align-items: center; gap: 2px; flex: none; }
+.tt-b { border: 0; background: none; cursor: pointer; font: 600 11.5px var(--font-ui); color: var(--primary); padding: 4px 6px; border-radius: var(--r-sm); }
+.tt-b:hover { background: var(--indigo-50); }
+.tt-b.danger { color: var(--text-muted); display: grid; place-items: center; padding: 4px; }
+.tt-b.danger:hover { background: var(--danger-bg); color: var(--danger-fg); }
+.tt-b svg { width: 13px; height: 13px; }
+
+/* ---------- Content tab: the lesson, read ---------- */
+/* The raw-markdown textarea that used to occupy the left half is gone — writing lives
+   in « Rédiger une leçon ». What is left is one reading column. */
+.ed-body.one-col { grid-template-columns: minmax(0, 1fr); }
+.ed-body.one-col .preview-pane { border-left: 0; }
+.preview-actions { display: flex; align-items: center; gap: 10px; }
+/* A measure, centred, so the lesson reads like the page a student gets rather than
+   like a full-width wall of text on a 27" screen. */
+.ed-body.one-col .preview-scroll.dev-desktop .preview-doc { max-width: 760px; margin: 0 auto; padding: 30px 32px 60px; }
+.preview-empty { color: var(--text-muted); font-size: 14px; font-style: italic; }
+/* Display formulas get the same boxed treatment as the student reader
+   (mirrors .lesson-doc .prose-reader .katex-display in lesson.css). */
+.preview-doc.prose-reader .katex-display { margin: 18px 0; padding: 14px; background: var(--slate-50); border: 1px solid var(--border); border-radius: 12px; }
+
+/* Copilot Enseigner, in the studio's third tab.
+   The tab is a full-height flex host: the panel fills it and scrolls INSIDE its own
+   message list, rather than being a short card floating on a page with a third of the
+   viewport empty under it. Capped at 1180px so the chat keeps a readable measure and
+   the class column stays beside it instead of drifting away on a 27" screen. */
+.ed-teachbody { display: flex; min-height: 0; overflow: hidden; padding: 16px 20px 20px; }
+.ed-teach { flex: 1; min-height: 0; max-width: 1180px; margin: 0 auto; width: 100%; display: flex; container: teach / inline-size; }
+.ed-teach > .tp { flex: 1; min-width: 0; }
+
+/* A book lesson is read-only. That is a fact about the lesson, not an alert about the
+   teacher's session, so it reads as an eyebrow like every other state in this header —
+   the actions beside it are what actually matter. */
+.preview-head .ph-lock { display: inline-flex; align-items: center; gap: 7px; cursor: help; }
+.preview-head .ph-lock svg { color: var(--text-muted); }

@@ -739,12 +739,37 @@ async function main() {
     },
   });
 
+  // ---- Révision EXETAT, offered to every 6e section ----
+  // The state exam is not a class of its own: it is the finalists' revision material.
+  // The manifest lists it under a phantom "examen · Option Sciences" track that no real
+  // class belongs to, so fan it out over the 6e sections that actually exist.
+  //
+  // 6e ONLY. It was briefly fanned out to 5e as well; the EXETAT is sat at the end of 6e,
+  // so a 5e section has no business carrying the revision volume.
+  const examBook = await prisma.subject.findUnique({ where: { slug: "sciences-1-exetat" } });
+  if (examBook) {
+    const sections = await prisma.offering.findMany({
+      where: { level: "6e" },
+      select: { level: true, field: true },
+      distinct: ["level", "field"],
+    });
+    for (const sec of sections) {
+      const has = await prisma.offering.findFirst({ where: { level: sec.level, field: sec.field, subjectSlug: examBook.slug } });
+      if (!has) await prisma.offering.create({ data: { level: sec.level, field: sec.field, subjectSlug: examBook.slug } });
+    }
+  }
+
   // ---- Teachers ----
   const teacherData = [
-    { firstName: "Grâce", lastName: "Mukendi", email: "g.mukendi@mwalimu.school", subjects: ["math"] },
+    // "exetat" is the finalists' revision track. It is deliberately on BOTH teachers:
+    // the book's nine modules span Maths, Bio, Physique, Chimie, Civisme, Géo, Histoire,
+    // Philo and langues, so it belongs to no single discipline.
+    // `gender` drives French agreement only — « Enseignante Mukendi » vs « Enseignant
+    // Lwanzo ». Before it existed the shells hard-coded the feminine for everyone.
+    { firstName: "Grâce", lastName: "Mukendi", email: "g.mukendi@mwalimu.school", gender: "F", subjects: ["math", "exetat"] },
     // Patrick also teaches the descriptive-geometry book (dessin scientifique) —
     // "geometrie" maps to geometrie-descriptive-6, offered only to 6e Math-Physique.
-    { firstName: "Patrick", lastName: "Lwanzo", email: "p.lwanzo@mwalimu.school", subjects: ["physique", "chimie", "geometrie"] },
+    { firstName: "Patrick", lastName: "Lwanzo", email: "p.lwanzo@mwalimu.school", gender: "M", subjects: ["physique", "chimie", "geometrie", "exetat"] },
   ];
   const teachers = [];
   for (const t of teacherData) {
@@ -755,6 +780,7 @@ async function main() {
           firstName: t.firstName,
           lastName: t.lastName,
           email: t.email,
+          gender: t.gender,
           disciplines: t.subjects.join(","), // what they teach → drives assignment resolution
           passwordHash: bcrypt.hashSync("teach1234", 10),
           avatarColor: avatarColor(`${t.firstName} ${t.lastName}`),
@@ -767,12 +793,18 @@ async function main() {
   // ---- Classes ----
   // `field` uses the manifest's section labels so Offering rows resolve exactly.
   const classData = [
-    { name: "5e Scientifique A", level: "5e", field: "Scientifique — Biologie-Chimie" },
-    { name: "5e Math-Physique A", level: "5e", field: "Scientifique — Math-Physique" },
-    { name: "6e Scientifique A", level: "6e", field: "Scientifique — Biologie-Chimie" },
+    // One class per section, so no « A » suffix to disambiguate. "Scientifique" was
+    // ambiguous — Math-Physique is a scientific section too — so the class carries the
+    // section it actually is. The section labels must match the manifest's exactly or
+    // Offering resolution silently finds nothing.
+    { name: "5e Bio-Chimie", level: "5e", field: "Scientifique — Biologie-Chimie" },
+    { name: "5e Math-Physique", level: "5e", field: "Scientifique — Math-Physique" },
+    { name: "5e Littéraire", level: "5e", field: "Littéraire / Pédagogique / Techniques" },
+    { name: "6e Bio-Chimie", level: "6e", field: "Scientifique — Biologie-Chimie" },
     // Math-Physique section — the only 6e track whose Offering includes the
     // Géométrie descriptive book (dessin scientifique), plus Physique + Maths 6.
-    { name: "6e Math-Physique A", level: "6e", field: "Scientifique — Math-Physique" },
+    { name: "6e Math-Physique", level: "6e", field: "Scientifique — Math-Physique" },
+    { name: "6e Littéraire", level: "6e", field: "Littéraire / Pédagogique / Techniques" },
   ];
   const classes = [];
   for (const c of classData) {
@@ -806,28 +838,42 @@ async function main() {
   // · 2 behind · 3 inactive). The first four of each class are the narrative-bearing
   // students referenced by submissions/feedback (kept identical). Extra students give
   // each class a DISTINCT, realistic profile so the dashboard tells a real story:
-  //   5e Scientifique A → solid · 5e Math-Physique A → mid · 6e Scientifique A → needs support.
+  //   5e Bio-Chimie → solid · 5e Math-Physique → mid · 6e Bio-Chimie → needs support
+  //   5e Littéraire → steady · 6e Littéraire → scattered under exam pressure.
   const CLASS_ROSTER: Record<string, { name: string; arch: number }[]> = {
-    "5e Scientifique A": [
+    "5e Bio-Chimie": [
       { name: "Amani Kabasele", arch: 0 }, { name: "Jonathan Kasongo", arch: 1 },
       { name: "Divine Mapendo", arch: 2 }, { name: "Josué Mugisho", arch: 3 },
       { name: "Gloire Mwanza", arch: 0 }, { name: "Sylvie Kabwe", arch: 0 },
       { name: "Daniel Lwamba", arch: 0 }, { name: "Chantal Byamungu", arch: 1 },
     ],
-    "5e Math-Physique A": [
+    "5e Math-Physique": [
       { name: "Grâce Bisimwa", arch: 0 }, { name: "Esther Nshombo", arch: 1 },
       { name: "Christian Bahati", arch: 2 }, { name: "Sarah Wabiwa", arch: 3 },
       { name: "Rachel Maombi", arch: 1 }, { name: "Joseph Ilunga", arch: 0 },
     ],
-    "6e Scientifique A": [
+    "6e Bio-Chimie": [
       { name: "Espoir Mwamba", arch: 0 }, { name: "Patrick Lumière", arch: 1 },
       { name: "Bénédicte Furaha", arch: 2 }, { name: "Emmanuel Cirhuza", arch: 3 },
       { name: "Nadine Shukuru", arch: 2 }, { name: "Olivier Mumba", arch: 3 },
       { name: "Prince Kasereka", arch: 2 },
     ],
-    "6e Math-Physique A": [
+    "6e Math-Physique": [
       { name: "Élie Mukendi", arch: 0 }, { name: "Josaphat Kalume", arch: 1 },
       { name: "Merveille Ntumba", arch: 2 }, { name: "Gédéon Salumu", arch: 3 },
+    ],
+    // The two littéraire sections. Their own profiles, distinct from the three above:
+    // 5e steady (mostly 0/1), 6e under exam pressure and more scattered (1/2 heavy).
+    "5e Littéraire": [
+      { name: "Ange Tshibangu", arch: 0 }, { name: "Deborah Nsimire", arch: 1 },
+      { name: "Fiston Bulambo", arch: 1 }, { name: "Naomi Kavira", arch: 2 },
+      { name: "Isaac Mbayo", arch: 0 }, { name: "Rebecca Mwavita", arch: 1 },
+      { name: "Trésor Kambale", arch: 3 },
+    ],
+    "6e Littéraire": [
+      { name: "Judith Riziki", arch: 0 }, { name: "Alain Mulumba", arch: 1 },
+      { name: "Céline Wivine", arch: 2 }, { name: "Samuel Baguma", arch: 1 },
+      { name: "Pascaline Ngoy", arch: 2 }, { name: "Éric Muhindo", arch: 3 },
     ],
   };
   const pinHash = bcrypt.hashSync("1234", 10);

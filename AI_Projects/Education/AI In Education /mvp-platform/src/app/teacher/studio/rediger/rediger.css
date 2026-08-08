@@ -135,10 +135,14 @@
 .rd-ctxbox summary { font: 600 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; margin-bottom: 8px; }
 
 /* ---- context cards ---- */
-.rd-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; margin-bottom: 10px; }
-.rd-card-l { display: flex; align-items: center; gap: 6px; font: 600 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px; }
-.rd-card-l svg { width: 13px; height: 13px; }
-.rd-card select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text); }
+/* The outline pane's blocks. Named .rd-side, NOT .rd-card: the start screen's lesson
+   cards further down this file own .rd-card, and one of their rules is height:100%.
+   Sharing the name grew a two-line warning into a 1204px block that filled the pane
+   and lost its amber background to the later rule. Two components, two names. */
+.rd-side { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; margin-bottom: 10px; }
+.rd-side-l { display: flex; align-items: center; gap: 6px; font: 600 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px; }
+.rd-side-l svg { width: 13px; height: 13px; }
+.rd-side select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text); }
 .rd-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 3px 9px; border-radius: 999px; font: 600 11.5px var(--font-ui); }
 .rd-pill.on { background: var(--indigo-50); color: var(--indigo-700); }
 .rd-pill svg { width: 12px; height: 12px; }
@@ -147,10 +151,15 @@
 .rd-ctx li { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; padding: 3px 0; }
 .rd-ctx span { color: var(--text-muted); }
 .rd-ctx b { font-weight: 600; text-align: right; }
-.rd-warn { background: var(--warning-bg); border-color: var(--warning-fg); }
-.rd-warn .rd-card-l { color: var(--warning-fg); }
-.rd-warn ul { margin: 0; padding-left: 16px; }
-.rd-warn li { font-size: 12px; line-height: 1.5; color: var(--text); margin-bottom: 3px; }
+/* « À relire » — a soft amber panel, not a siren. The pane is 240px wide, so each
+   issue gets its whole width: the text on its own lines, the fix under it. Bullets are
+   gone — a disc, wrapped prose and a button all competed for the same narrow column and
+   the button ended up stranded mid-sentence. */
+.rd-warn { background: var(--warning-bg); border-color: color-mix(in srgb, var(--warning-fg) 35%, transparent); }
+.rd-warn .rd-side-l { color: var(--warning-fg); }
+.rd-warn ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.rd-warn li { font-size: 12px; line-height: 1.5; color: var(--text); display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.rd-warn li + li { border-top: 1px solid color-mix(in srgb, var(--warning-fg) 18%, transparent); padding-top: 9px; }
 
 /* ---- rail tabs ---- */
 .rd-railtabs { flex: none; display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); }
@@ -203,34 +212,54 @@
 .rd-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100vh; color: var(--text-muted); font-size: 14px; }
 .rd-empty svg { width: 22px; height: 22px; }
 
-/* ---- start screen (reached from the sidebar, no lesson chosen yet) ---- */
-/* ---- start screen ----
+/* ---- start screen (reached from the sidebar, no lesson chosen yet) ----
    Wider than the 640px column it was: two "Nouvelle leçon" rows carrying nothing but a
    name told a teacher nothing about which was which, so each lesson is now a card with
    the things that actually distinguish them — what it says, how long it is, when it was
-   last touched — and cards need room to sit side by side. */
-.rd-start { max-width: 1040px; margin: 0 auto; padding: 40px 28px 72px; }
-.rd-start-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
-.rd-start h1 { font: 600 25px var(--font-head); margin: 0 0 6px; }
+   last touched — and cards need room to sit side by side.
+
+   Two zones, like a document picker: a white band carries the header and « Commencer »,
+   the lesson list sits on the warm paper desk below. As one flat column the two
+   new-lesson cards read as debris floating in a void.
+
+   `.rd-startpage` is the theme host and paints edge to edge; `.rd-start-in` is the
+   measured column. Those used to be ONE element, so `teacher-page`'s warm --bg painted
+   a 1040px stripe down the middle of the app's cool body — two visible seams. A theme
+   host must always be full-bleed. */
+.rd-startpage { min-height: 100vh; }
+.rd-start-in { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+/* The brand wash, not white: white is the DOCUMENT colour here — the lesson page, the
+   cards — so a white band said "page" about a piece of chrome. indigo-50 fading into the
+   paper desk is the idiom the studio tree already uses for « Ma bibliothèque » (see
+   .tree-lib): it marks the teacher's own authoring space. It resolves into the warm --bg
+   by the bottom edge, so the cool tint never meets the warm desk as a hard seam. */
+.rd-start-band { background: linear-gradient(180deg, var(--indigo-50), var(--bg)); border-bottom: 1px solid var(--border); }
+.rd-start-band .rd-start-in { padding-top: 36px; padding-bottom: 30px; }
+.rd-start-list { padding-top: 30px; padding-bottom: 72px; }
+
+.rd-start-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.rd-startpage h1 { font: 600 25px var(--font-head); margin: 0 0 6px; }
 .rd-start-sub { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6; max-width: 56ch; }
 .rd-start-back { display: inline-flex; align-items: center; gap: 5px; flex: none; padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text-soft); white-space: nowrap; }
 .rd-start-back:hover { color: var(--text); border-color: var(--border-strong); }
 .rd-start-back svg { width: 14px; height: 14px; }
 
-.rd-start section { margin-bottom: 34px; }
-.rd-start h2 { font: 600 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+.rd-startpage h2 { font: 600 12px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
 .rd-start-h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .rd-start-h2 h2 { margin: 0; }
 .rd-start-count { font: 600 10.5px var(--font-ui); color: var(--text-muted); background: var(--surface-2); border-radius: 999px; padding: 2px 8px; }
-.rd-start-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .rd-start-none { font-size: 13px; color: var(--text-muted); margin: 0; }
 
 /* « Commencer » is one card per subject rather than a row of buttons: a teacher with
-   three subjects is choosing which lesson to write, not pressing a control. */
-.rd-newcard { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 190px; padding: 14px 16px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); background: var(--surface); cursor: pointer; text-align: left; transition: border-color .12s, background .12s, transform .12s; }
-.rd-newcard:hover { border-color: var(--indigo-400); background: var(--indigo-50); transform: translateY(-1px); }
-.rd-newcard-i { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-bottom: 6px; border-radius: var(--r-sm); background: var(--indigo-600, var(--indigo-700)); color: #fff; }
-.rd-newcard-i svg { width: 15px; height: 15px; }
+   three subjects is choosing which lesson to write, not pressing a control. Same track
+   sizing as the lesson grid below, so the two sections share one column rhythm instead
+   of a short flex row trailing off into space. */
+.rd-start-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+/* White on the wash: white is the blank page these buttons promise. */
+.rd-newcard { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; padding: 13px 16px; border: 1px dashed var(--indigo-200); border-radius: var(--r-md); background: var(--surface); cursor: pointer; text-align: left; transition: border-color .12s, box-shadow .12s, transform .12s; }
+.rd-newcard:hover { border-color: var(--indigo-400); box-shadow: 0 2px 10px color-mix(in srgb, var(--indigo-600) 14%, transparent); transform: translateY(-1px); }
+.rd-newcard-i { grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: var(--r-sm); background: var(--indigo-600, var(--indigo-700)); color: #fff; }
+.rd-newcard-i svg { width: 17px; height: 17px; }
 .rd-newcard-t { font: 600 13.5px var(--font-ui); color: var(--text); }
 .rd-newcard-h { font: 400 11.5px var(--font-ui); color: var(--text-muted); }
 
@@ -253,9 +282,11 @@
 .rd-card-dot { opacity: .55; }
 
 @media (max-width: 700px) {
-  .rd-start { padding: 28px 18px 56px; }
+  .rd-start-in { padding-left: 18px; padding-right: 18px; }
+  .rd-start-band .rd-start-in { padding-top: 26px; padding-bottom: 22px; }
+  .rd-start-list { padding-top: 22px; padding-bottom: 56px; }
   .rd-start-hd { flex-direction: column; gap: 14px; }
-  .rd-start-grid { grid-template-columns: 1fr; }
+  .rd-start-grid, .rd-start-row { grid-template-columns: 1fr; }
 }
 
 /* ---- tablet drawers ---- */
@@ -272,24 +303,6 @@
   .rd-body { display: block; }
   .lw-canvas { overflow: visible; background: #fff; padding: 0; }
   .lw-page { box-shadow: none; border: 0; max-width: none; padding: 0; }
-}
-
-/* On a tablet the scarce resource is HEIGHT — 768px, minus the title bar, the menu bar
-   and the symbol keyboard, does not leave a lesson worth reading. So both panels become
-   drawers rather than columns, reachable from the bar at the foot.
-   ────
-   This block lives at the END of the file on purpose. It used to sit in the middle,
-   where later base rules at equal specificity overrode it — so on a tablet the
-   « Contexte » button stayed display:none, leaving the context cards closed with no way
-   to reopen them. A media query has no specificity of its own; source order is the only
-   thing deciding it, so it has to come last. */
-@media (max-width: 1024px) {
-  .rd-titlebar { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
-  .rd-server { display: none; }
-  .rd-title { flex: 1 1 200px; font-size: 16px; }
-  .rd-menubar { overflow-x: auto; }
-  .rd-body { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) !important; }
-  .rd-drawer { width: min(420px, 92vw); }
 }
 
 /* A problem that stops publication should say so where the teacher reads it, not only
@@ -310,8 +323,30 @@
 
 /* Each « À relire » warning carries its own fix, so the teacher acts where they read
    rather than translating the warning into a Copilot prompt themselves. */
-.rd-warn li { margin-bottom: 8px; }
-.rd-warn-fix { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 8px; border: 1px solid var(--warning-fg); border-radius: var(--r-sm); background: transparent; font: 600 11px var(--font-ui); color: var(--warning-fg); cursor: pointer; }
+.rd-warn-fix { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--warning-fg); border-radius: var(--r-sm); background: transparent; font: 600 11px var(--font-ui); color: var(--warning-fg); cursor: pointer; }
 .rd-warn-fix:hover:not(:disabled) { background: var(--warning-fg); color: var(--surface); }
 .rd-warn-fix:disabled { opacity: .6; cursor: default; }
 .rd-warn-fix svg { width: 12px; height: 12px; }
+
+/* Copilot Enseigner in the rail: it manages its own scrolling (the message list
+   scrolls, the header and composer stay put), so the pane must not add a second
+   scroller around it or the composer drifts off the bottom. */
+.rd-pane-body:has(> .tp) { overflow: hidden; padding: 10px; display: flex; container: teach / inline-size; }
+.rd-pane-body > .tp { flex: 1; min-width: 0; }
+/* On a tablet the scarce resource is HEIGHT — 768px, minus the title bar, the menu bar
+   and the symbol keyboard, does not leave a lesson worth reading. So both panels become
+   drawers rather than columns, reachable from the bar at the foot.
+   ────
+   This block lives at the END of the file on purpose. It used to sit in the middle,
+   where later base rules at equal specificity overrode it — so on a tablet the
+   « Contexte » button stayed display:none, leaving the context cards closed with no way
+   to reopen them. A media query has no specificity of its own; source order is the only
+   thing deciding it, so it has to come last. */
+@media (max-width: 1024px) {
+  .rd-titlebar { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+  .rd-server { display: none; }
+  .rd-title { flex: 1 1 200px; font-size: 16px; }
+  .rd-menubar { overflow-x: auto; }
+  .rd-body { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) !important; }
+  .rd-drawer { width: min(420px, 92vw); }
+}

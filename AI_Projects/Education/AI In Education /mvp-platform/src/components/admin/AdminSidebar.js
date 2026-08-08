@@ -1,6 +1,24 @@
 "use client";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { BrandMark, Avatar } from "@/components/ui/chrome";
+import { roleLabel, withCivility } from "@/lib/gender";
+
+// The admin's own identity. Both sidebar lines were the literal string "Super
+// administrateur" — the account name and its role, printed twice, neither of them read
+// from the session. The teacher shells have always fetched theirs; this one didn't.
+function useAdminIdentity() {
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/me/profile/")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && d?.user) setMe(d.user); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  return me;
+}
 
 // Single source of truth for the admin console's tabs — used by the console's
 // own sidebar AND anywhere else an admin works (e.g. the content Studio), so an
@@ -26,6 +44,11 @@ export const ADMIN_TABS = [
 //   /admin?tab=… so the admin lands back on the right admin tab.
 // `active` is a tab key, or "studio" when the content Studio is open.
 export default function AdminSidebar({ active, onSelect, pendingCount = 0 }) {
+  const me = useAdminIdentity();
+  // Not "Administrateur" while loading — that is the role line, and repeating it is the
+  // bug being fixed. A neutral placeholder holds the row until the session answers.
+  const name = `${me?.firstName || ""} ${me?.lastName || ""}`.trim() || "Compte administrateur";
+
   return (
     <aside className="t-side">
       <div className="t-side-top">
@@ -58,10 +81,12 @@ export default function AdminSidebar({ active, onSelect, pendingCount = 0 }) {
       </nav>
       <div className="t-side-foot">
         <div className="t-userbox">
-          <Avatar name="Super administrateur" size="avatar-sm" />
+          <Avatar name={name} size="avatar-sm" />
           <a className="meta" href="/profile/" style={{ textDecoration: "none", color: "inherit" }}>
-            <div className="un">Super administrateur</div>
-            <div className="ur">Super administrateur</div>
+            <div className="un">{withCivility(me?.gender, name)}</div>
+            {/* Which admin account this is — the email — is the tooltip, matching how the
+                teacher footer keeps its book list out of the line and in the title. */}
+            <div className="ur" title={me?.email || ""}>{roleLabel("ADMIN", me?.gender)}</div>
           </a>
           <a className="lo" href="/api/auth/logout/" title="Se déconnecter">
             <Icon name="logout" />

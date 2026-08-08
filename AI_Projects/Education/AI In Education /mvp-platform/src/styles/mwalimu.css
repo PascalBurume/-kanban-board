@@ -323,6 +323,48 @@ a { color: var(--primary); text-decoration: none; }
 .subj-chimie { background: var(--chimie-bg); color: var(--chimie); }
 .subj-physique { background: var(--physique-bg); color: var(--physique); }
 
+/* ---------- Confirmation dialog ---------- */
+/* Replaces window.confirm for destructive actions — see src/lib/confirm.js for
+   why. Above the toast layer: a toast must never cover the question. */
+.cfm-scrim {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--slate-900) 34%, transparent);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  animation: cfm-fade .14s ease-out;
+}
+.cfm {
+  width: min(100%, 420px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  padding: 20px 22px 16px;
+  animation: cfm-pop .16s cubic-bezier(.2, .8, .2, 1);
+}
+.cfm-head { display: flex; align-items: center; gap: 10px; }
+.cfm-head h2 { font: 600 16px/1.3 var(--font-ui); color: var(--text); margin: 0; }
+.cfm-ic { display: inline-flex; color: var(--danger-fg); }
+.cfm-ic svg { width: 20px; height: 20px; }
+.cfm-msg { margin: 9px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--text-muted); }
+.cfm-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+/* 42px tall — the same touch target the tablet chrome uses. */
+.cfm-btn {
+  min-height: 42px; padding: 0 18px;
+  border-radius: var(--r-md); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font: 600 13.5px var(--font-ui); cursor: pointer;
+}
+.cfm-btn:hover { background: var(--surface-2); }
+.cfm-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.cfm-danger { background: var(--danger-fg); border-color: var(--danger-fg); color: #fff; }
+.cfm-danger:hover { filter: brightness(1.08); background: var(--danger-fg); }
+.cfm-ok { background: var(--primary); border-color: var(--primary); color: #fff; }
+.cfm-ok:hover { filter: brightness(1.08); background: var(--primary); }
+@keyframes cfm-fade { from { opacity: 0; } }
+@keyframes cfm-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+
 /* ---------- Toast ---------- */
 /* Bottom-centred. The wrap ignores pointer events so a toast never blocks a
    click on the content it floats over. */
@@ -354,6 +396,16 @@ a { color: var(--primary); text-decoration: none; }
   .toast { background: var(--primary); text-shadow: none; }
 }
 .toast svg { width: 18px; height: 18px; }
+/* The action sits inside the pill, separated by a hairline rather than a gap so it
+   reads as part of the same message. 34px keeps it thumb-sized on a tablet. */
+.toast-action {
+  margin-left: 4px; padding: 0 12px; min-height: 34px;
+  border: 0; border-left: 1px solid color-mix(in srgb, #fff 30%, transparent);
+  border-radius: 0; background: none; color: #fff;
+  font: 700 13px var(--font-ui); letter-spacing: .01em; cursor: pointer;
+}
+.toast-action:hover { background: color-mix(in srgb, #fff 14%, transparent); }
+.toast-action:disabled { opacity: .55; cursor: default; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---------- Modal ---------- */

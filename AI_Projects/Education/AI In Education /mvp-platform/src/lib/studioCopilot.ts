@@ -1,5 +1,6 @@
 import type { SessionUser } from "./session";
 import { getModulesContentForAI, renderModuleContext } from "./projectCopilot";
+import { stripFigures } from "./rag";
 import { getViewableLesson } from "./studio";
 import {
   ollamaGenerate,
@@ -58,7 +59,7 @@ function titleFromStrayMarker(raw: string, keys: string[]): string {
 // Fallback when the studio has no class in scope (admin's "tous les manuels"):
 // infer "6e" vs "5e" from the slug. Wrong for books shared across levels, which
 // is why callers pass the selected class's real level whenever they have one.
-function levelFromSubject(subjectSlug: string): string {
+export function levelFromSubject(subjectSlug: string): string {
   return /\b6|[-_]6/.test(subjectSlug) ? "6e" : "5e";
 }
 
@@ -71,7 +72,11 @@ const SOURCE_CHARS = 4000;
 async function renderSourceLesson(user: SessionUser, lessonId: string): Promise<string> {
   const lesson = await getViewableLesson(user, lessonId).catch(() => null);
   if (!lesson?.contentMd?.trim()) return "";
-  const body = lesson.contentMd.length > SOURCE_CHARS ? lesson.contentMd.slice(0, SOURCE_CHARS) + "\n…(leçon tronquée)" : lesson.contentMd;
+  // Strip the figures before truncating: an épure is thousands of characters of
+  // path data that tell the model nothing, and on the illustrated books they were
+  // consuming most of the budget meant for the lesson. The figcaption survives.
+  const prose = stripFigures(lesson.contentMd);
+  const body = prose.length > SOURCE_CHARS ? prose.slice(0, SOURCE_CHARS) + "\n…(leçon tronquée)" : prose;
   return [
     `L'enseignant écrit un COMPLÉMENT à cette leçon du manuel : « ${lesson.title} ».`,
     "Reste sur CE sujet précis : reprends ses notations et son vocabulaire, et apporte ce qu'elle n'a pas (une situation concrète, un exemple de plus, une explication différente). Ne recopie pas la leçon.",

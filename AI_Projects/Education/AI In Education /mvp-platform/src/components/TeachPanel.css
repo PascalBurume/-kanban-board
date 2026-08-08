@@ -1,0 +1,196 @@
+/* « Copilot Enseigner ».
+   Same visual language as the student Copilot (.cp-* in CarnetCopilot.css): the indigo
+   gradient avatar, the tailed bubbles, the primary-filled user turn. What is different
+   is the second column — the class signals the coach is reading — which is what fills
+   the space this panel used to leave empty in the studio tab.
+
+   Sizing is fluid on purpose: the same component has to work in a 280px rail and in a
+   1000px tab, so nothing here assumes a width and the container query is a class the
+   component sets, not a media query on the viewport. */
+
+.tp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+  height: 100%;
+}
+/* The query container is the HOST, not .tp. A container query cannot style its own
+   container — declaring container-type on .tp let it switch the child panel on while
+   silently ignoring the grid-template-columns meant to make room for it. */
+/* Two columns as soon as there is room for both. Below this the class panel folds
+   into the disclosure under the header instead. */
+@container teach (min-width: 860px) {
+  .tp.has-class { grid-template-columns: minmax(0, 1fr) 300px; }
+  .tp.has-class > .tp-class { display: flex; }
+  .tp .tp-classtoggle, .tp .tp-classinline { display: none; }
+}
+.tp > .tp-class { display: none; }
+
+/* ── the chat card ── */
+.tp-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+}
+
+.tp-head { flex: none; display: flex; align-items: center; gap: 11px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+/* The Copilot mark, identical to .cp-avatar. */
+.tp-av { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--indigo-500), var(--indigo-700)); box-shadow: 0 2px 6px color-mix(in srgb, var(--indigo-600) 30%, transparent); }
+.tp-av svg { width: 19px; height: 19px; }
+.tp-id { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tp-id b { font: 700 14.5px var(--font-ui); color: var(--text); }
+.tp-id small { font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-reset { border: 0; background: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: var(--r-sm); display: grid; place-items: center; flex: none; }
+.tp-reset:hover { background: var(--slate-100); color: var(--text); }
+.tp-reset svg { width: 16px; height: 16px; }
+
+/* ── the narrow-layout disclosure ── */
+.tp-classtoggle { flex: none; width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 16px; border: 0; border-bottom: 1px solid var(--border); background: var(--indigo-50); color: var(--indigo-700); font: 600 12px var(--font-ui); cursor: pointer; text-align: left; }
+.tp-classtoggle:hover { background: var(--indigo-100); }
+.tp-classtoggle span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-classtoggle svg { width: 14px; height: 14px; flex: none; }
+.tp-classinline { flex: none; border-bottom: 1px solid var(--border); background: var(--surface-2); max-height: 300px; overflow-y: auto; }
+.tp-classinline .tp-class { border: 0; background: none; box-shadow: none; padding: 4px 16px 14px; display: flex; }
+
+/* ── messages ── */
+/* overflow-x hidden, not auto: a single wide display formula must scroll inside its
+   own bubble, never widen the whole conversation column. */
+.tp-msgs { flex: 1; min-height: 160px; overflow-y: auto; overflow-x: hidden; padding: 16px; display: flex; flex-direction: column; gap: 13px; }
+
+.tp-welcome { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 9px; margin: auto 0; padding: 20px 22px; color: var(--text-soft); }
+.tp-welcome-av { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; color: var(--indigo-600); background: var(--indigo-50); border: 1px solid var(--indigo-100); }
+.tp-welcome-av svg { width: 23px; height: 23px; }
+.tp-welcome p { margin: 0; font-size: 13.5px; line-height: 1.6; max-width: 44ch; }
+.tp-welcome b { color: var(--text); font-weight: 650; }
+.tp-welcome-s { font-size: 12px !important; color: var(--text-muted); }
+
+.tp-msg { display: flex; gap: 9px; max-width: 92%; min-width: 0; }
+.tp-msg.user { align-self: flex-end; }
+.tp-mav { width: 27px; height: 27px; border-radius: 9px; flex: none; display: grid; place-items: center; background: var(--indigo-100); color: var(--indigo-700); margin-top: 2px; }
+.tp-mav svg { width: 14px; height: 14px; }
+.tp-bubble { min-width: 0; padding: 10px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.tp-msg.assistant .tp-bubble { background: var(--slate-100); color: var(--slate-800); border-bottom-left-radius: 4px; }
+.tp-msg.user .tp-bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.tp-bubble p:first-child { margin-top: 0; }
+.tp-bubble p:last-child { margin-bottom: 0; }
+.tp-bubble p { margin: 0 0 7px; }
+.tp-bubble ul, .tp-bubble ol { margin: 7px 0; padding-left: 19px; }
+.tp-bubble li { margin-bottom: 4px; }
+.tp-bubble h1, .tp-bubble h2, .tp-bubble h3, .tp-bubble h4 { font-size: 13.5px; font-weight: 700; margin: 12px 0 5px; }
+.tp-bubble h1:first-child, .tp-bubble h2:first-child, .tp-bubble h3:first-child { margin-top: 0; }
+.tp-bubble code { background: color-mix(in srgb, var(--slate-900) 7%, transparent); padding: 1px 4px; border-radius: 4px; font-size: 12.5px; }
+.tp-msg.user .tp-bubble code { background: color-mix(in srgb, #fff 20%, transparent); }
+/* A small model sometimes wraps a whole sentence in $\text{…}$, which KaTeX renders
+   as one unbreakable run. Let it scroll inside the bubble rather than push the whole
+   conversation column wider than its pane. */
+.tp-bubble .katex { font-size: 1em; max-width: 100%; }
+.tp-bubble p > .katex { display: inline-block; overflow-x: auto; overflow-y: hidden; vertical-align: bottom; }
+.tp-bubble .katex-display { overflow-x: auto; overflow-y: hidden; margin: 8px 0; padding-bottom: 2px; }
+.tp-bubble table { display: block; max-width: 100%; overflow-x: auto; }
+.tp-bubble pre { max-width: 100%; overflow-x: auto; }
+
+.tp-dots { display: inline-flex; gap: 4px; padding: 3px 2px; }
+.tp-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--slate-400); animation: tp-b 1.2s infinite; }
+.tp-dots i:nth-child(2) { animation-delay: .2s; }
+.tp-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes tp-b { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-2px); } }
+
+.tp-running { align-self: stretch; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; }
+
+/* ── the composed lesson ── */
+.tp-draft { align-self: stretch; display: flex; flex-direction: column; gap: 10px; background: var(--indigo-50); border: 1px solid var(--indigo-200); border-radius: var(--r-md); padding: 14px; }
+.tp-draft-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--indigo-700); font-weight: 700; }
+.tp-draft-b { display: inline-flex; align-items: center; gap: 6px; }
+.tp-draft-b svg { width: 13px; height: 13px; }
+.tp-draft-h > span:last-child { text-transform: none; letter-spacing: 0; color: var(--text-muted); font-weight: 500; }
+.tp-draft-t { margin: 0; font: 650 15px var(--font-head, var(--font-ui)); color: var(--text); line-height: 1.35; }
+.tp-warn { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.tp-warn li { display: flex; align-items: flex-start; gap: 6px; font-size: 11.5px; line-height: 1.45; color: var(--warning-fg); background: var(--warning-bg); border-radius: var(--r-sm); padding: 6px 8px; }
+.tp-warn svg { width: 13px; height: 13px; flex: none; margin-top: 1px; }
+.tp-preview { max-height: 320px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 13px 15px; font-size: 13px; }
+.tp-note { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--indigo-700); }
+.tp-acts { display: flex; flex-wrap: wrap; gap: 7px; }
+.tp-acts .btn svg { width: 14px; height: 14px; }
+
+.tp-err { flex: none; display: flex; align-items: center; gap: 7px; margin: 0 16px 10px; font-size: 12px; color: var(--danger-fg); background: var(--danger-bg); border-radius: var(--r-sm); padding: 8px 10px; }
+.tp-err svg { width: 14px; height: 14px; flex: none; }
+
+/* ── composer ── */
+.tp-foot { flex: none; border-top: 1px solid var(--border); background: var(--surface-2); padding: 11px 16px 13px; display: flex; flex-direction: column; gap: 9px; }
+
+.tp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tp-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-pill); padding: 6px 11px; font: 600 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; text-align: left; transition: color .12s, border-color .12s, background .12s; }
+.tp-chip svg { width: 13px; height: 13px; color: var(--indigo-400); flex: none; }
+.tp-chip:hover:not(:disabled) { color: var(--indigo-700); border-color: var(--indigo-300); background: var(--indigo-50); }
+.tp-chip:hover:not(:disabled) svg { color: var(--indigo-600); }
+.tp-chip:disabled { opacity: .5; cursor: default; }
+
+.tp-input { display: flex; gap: 7px; }
+.tp-input input { flex: 1; min-width: 0; border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: 10px 13px; font: 400 13.5px var(--font-ui); color: var(--text); background: var(--surface); }
+.tp-input input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+/* 40px — thumb-sized, matching the tablet chrome's targets. */
+.tp-send { width: 40px; height: 40px; flex: none; border: 0; border-radius: var(--r-md); background: var(--primary); color: #fff; cursor: pointer; display: grid; place-items: center; transition: background .12s; }
+.tp-send:hover:not(:disabled) { background: var(--primary-hover); }
+.tp-send:disabled { opacity: .4; cursor: default; }
+.tp-send svg { width: 17px; height: 17px; }
+
+.tp-compose { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.tp-composebtn { display: inline-flex; align-items: center; gap: 7px; border: 1px dashed var(--border-strong); background: none; color: var(--text-muted); border-radius: var(--r-md); padding: 8px 13px; font: 650 12.5px var(--font-ui); cursor: not-allowed; }
+.tp-composebtn svg { width: 14px; height: 14px; }
+/* The unlock is the moment the second agent becomes available — it should look like
+   something opened, not like a button that was there all along. */
+.tp-compose.ready .tp-composebtn { border-style: solid; border-color: transparent; cursor: pointer; color: #fff; background: linear-gradient(135deg, var(--indigo-500), var(--indigo-700)); box-shadow: 0 2px 8px color-mix(in srgb, var(--indigo-600) 28%, transparent); animation: tp-unlock .32s cubic-bezier(.2, .8, .2, 1); }
+.tp-compose.ready .tp-composebtn:hover:not(:disabled) { filter: brightness(1.07); }
+.tp-composebtn:disabled { opacity: .75; }
+.tp-compose.ready .tp-composebtn:disabled { opacity: .6; }
+.tp-hint { font-size: 11px; color: var(--text-muted); }
+@keyframes tp-unlock { from { opacity: .4; transform: scale(.96); } }
+
+/* ── « Ce que dit votre classe » ── */
+.tp-class {
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  padding: 15px 16px;
+}
+.tp-class-h { display: flex; align-items: center; gap: 7px; margin: 0; font: 700 11px var(--font-ui); text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+.tp-class-h svg { width: 14px; height: 14px; }
+.tp-class-empty { margin: 0; font-size: 12px; line-height: 1.55; color: var(--text-muted); }
+.tp-class-foot { margin: auto 0 0; display: flex; align-items: flex-start; gap: 6px; font-size: 11px; line-height: 1.45; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--border); }
+.tp-class-foot svg { width: 12px; height: 12px; flex: none; margin-top: 1px; color: var(--indigo-400); }
+
+.tp-gauge { display: flex; flex-direction: column; gap: 6px; }
+.tp-gauge-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-soft); }
+.tp-gauge-n { font: 700 17px var(--font-ui); }
+.tp-gauge-n.ok { color: var(--success-fg); }
+.tp-gauge-n.mid { color: var(--warning-fg); }
+.tp-gauge-n.low { color: var(--danger-fg); }
+.tp-gauge-bar { height: 7px; border-radius: var(--r-pill); background: var(--slate-200); overflow: hidden; }
+.tp-gauge-fill { display: block; height: 100%; border-radius: var(--r-pill); background: var(--slate-400); transition: width .4s cubic-bezier(.2, .8, .2, 1); }
+.tp-gauge-fill.ok { background: var(--success); }
+.tp-gauge-fill.mid { background: var(--warning); }
+.tp-gauge-fill.low { background: var(--danger-fg); }
+.tp-gauge-sub { font-size: 11px; color: var(--text-muted); }
+
+.tp-block { display: flex; flex-direction: column; gap: 7px; }
+.tp-block-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 600 11.5px var(--font-ui); color: var(--text-soft); }
+.tp-count { background: var(--indigo-50); color: var(--indigo-700); border-radius: var(--r-pill); padding: 1px 8px; font-size: 10.5px; font-weight: 700; }
+
+.tp-qs, .tp-notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tp-qs li { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; line-height: 1.45; color: var(--text-soft); background: var(--surface-2); border-radius: var(--r-sm); padding: 7px 9px; }
+.tp-q-t { flex: 1; min-width: 0; }
+.tp-q-m { flex: none; font-weight: 700; color: var(--indigo-600); font-size: 11px; }
+.tp-notes li { display: flex; flex-direction: column; gap: 3px; font-size: 11.5px; line-height: 1.45; border-left: 2px solid var(--indigo-200); padding: 2px 0 2px 9px; }
+.tp-note-m { color: var(--text-soft); font-style: italic; }
+.tp-note-w { font-size: 10.5px; color: var(--text-muted); }

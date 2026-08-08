@@ -948,12 +948,9 @@ export default function StudioClient({ initialIsAdmin = false }) {
               <Icon name="file" />
               <span className="lbl">Rédiger une leçon</span>
             </a>
-            <a href="/teacher/studio/latex/">
-              <Icon name="func" />
-              <span className="lbl">Atelier LaTeX</span>
-            </a>
             {/* Keep in sync with NAV in components/ui/TeacherShell.js — this
-                page predates the shell and renders its own sidebar. */}
+                page predates the shell and renders its own sidebar.
+                Atelier LaTeX is absent from both on purpose: see the note there. */}
             <a href="/teacher/exercises/">
               <Icon name="book" />
               <span className="lbl">Exercices</span>

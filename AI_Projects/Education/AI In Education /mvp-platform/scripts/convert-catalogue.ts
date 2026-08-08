@@ -18,7 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DRAWINGS } from "../src/lib/figureDrawings";
 import { CATALOGUE } from "../src/lib/figureCatalogue";
-import { renderEpure } from "../src/lib/epure";
+import { renderEpure, transformPathD } from "../src/lib/epure";
 
 const H = 240; // the catalogue's box; y is flipped about it so specs stay maths-oriented
 const flip = (y: number) => Math.round((H - y) * 100) / 100;
@@ -34,8 +34,16 @@ const attrs = (tag: string): Record<string, string> => {
 };
 const n = (v?: string, d = 0) => (v == null || v === "" || Number.isNaN(Number(v)) ? d : Number(v));
 
-/** Flip every "x y" pair in path data about the box. */
-const flipPath = (d: string) => d.replace(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g, (_m, a, b) => `${r2(Number(a))} ${flip(Number(b))}`);
+/**
+ * SVG coordinates → the teacher's, y upward.
+ *
+ * This was the same "flip every second number" regex renderEpure used, and it is why the
+ * catalogue shipped arcs reading `A26 214 0 240 1`: radii, rotation and both flags
+ * mangled as though they were coordinates. Both sides now go through the one transform
+ * that knows what each parameter of each command means. It is its own inverse about a
+ * fixed box, which is exactly the direction wanted here.
+ */
+const flipPath = (d: string) => transformPathD(d, { sx: r2, sy: flip });
 
 /** An arrowhead emitted by A(): a filled 3-point triangle whose fill equals its stroke. */
 function isArrowHead(a: Record<string, string>) {

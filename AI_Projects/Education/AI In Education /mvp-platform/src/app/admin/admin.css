@@ -141,6 +141,40 @@ table.matrix tbody tr:hover td { background: var(--indigo-50); }
 .status-live { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--success-fg); }
 .status-live .sdot { background: var(--success); animation: pulse 2.4s infinite; }
 
+/* ---------- Derived server state ----------
+   The server pill was the literal string "En bon état", so it would have
+   claimed good health on a disk at 99% with no backup ever taken. It is
+   computed now, and these are the three ways it can read. */
+.adm-state { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
+.adm-state .sdot { animation: pulse 2.4s infinite; }
+.adm-state.ok { color: var(--success-fg); }
+.adm-state.ok .sdot { background: var(--success); }
+.adm-state.warn { color: var(--warning-fg); }
+.adm-state.warn .sdot { background: var(--warning); }
+.adm-state.critical { color: var(--danger-fg); }
+.adm-state.critical .sdot { background: var(--danger); }
+
+.tone-ok { color: var(--text); }
+.tone-warn { color: var(--warning-fg); }
+.tone-critical { color: var(--danger-fg); }
+.hrow .hv small { font-family: var(--font-ui); font-weight: 600; color: var(--text-muted); font-size: 12px; }
+
+/* Storage needs its denominator visible, so the row stacks and carries a bar. */
+.hrow-stack { flex-direction: column; align-items: stretch; gap: 8px; }
+.hrow-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.adm-bar { height: 8px; border-radius: 999px; background: var(--slate-200); overflow: hidden; }
+.adm-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--success); transition: width .3s ease; }
+.adm-bar > span.tone-warn { background: var(--warning); }
+.adm-bar > span.tone-critical { background: var(--danger); }
+
+.adm-fixnow { display: flex; align-items: center; gap: 9px; width: 100%; margin-top: 14px; padding: 11px 13px;
+  border: 1px solid var(--danger); border-radius: var(--r-md); background: var(--danger-bg);
+  font: 600 12.5px var(--font-ui); color: var(--danger-fg); cursor: pointer; text-align: left; }
+.adm-fixnow:hover { background: var(--danger); color: #fff; }
+.adm-fixnow:hover svg { color: #fff; }
+.adm-fixnow svg { width: 15px; height: 15px; flex: none; }
+.adm-fixnow > svg:last-child { margin-left: auto; }
+
 /* audit log */
 .audit-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
 .audit-row:last-child { border-bottom: 0; }

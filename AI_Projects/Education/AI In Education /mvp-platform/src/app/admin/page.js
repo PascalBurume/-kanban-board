@@ -24,12 +24,36 @@ const TAB_NAMES = {
 };
 
 // Static presentation for KPI cards; values come from the API.
+// Storage used to sit here as a bare "446,7 Go" — a figure with no denominator
+// that no one can act on. It belongs with the other health signals, where its
+// total and its percentage are shown alongside it.
 const KPI_DEFS = [
   { key: "teachers", ic: "user", c: "var(--indigo-600)", bg: "var(--indigo-100)", label: "Enseignants" },
   { key: "students", ic: "users", c: "var(--math)", bg: "var(--math-bg)", label: "Élèves" },
   { key: "classes", ic: "folder", c: "var(--sptic)", bg: "var(--sptic-bg)", label: "Classes" },
-  { key: "storageGB", ic: "database", c: "var(--warning)", bg: "var(--warning-bg)", label: "Stockage utilisé", suffix: " Go" },
 ];
+
+// Derived server state → how the header pill reads. Never hard-coded: the pill
+// said "En bon état" unconditionally, and would have said it on a full disk.
+const STATE_META = {
+  ok: { label: "En bon état", cls: "ok" },
+  warn: { label: "À surveiller", cls: "warn" },
+  critical: { label: "Action requise", cls: "critical" },
+};
+
+function fmtGo(n) {
+  return typeof n === "number" ? n.toLocaleString("fr-FR", { maximumFractionDigits: 1 }) : "—";
+}
+
+// "Sauvegarde" is the highest-stakes line on an air-gapped server holding the
+// only copy of a school's work, and the overview never showed it at all.
+function backupLine(backup, lastBackupAt) {
+  if (!backup || backup.state === "never") return { text: "Jamais effectuée", tone: "critical" };
+  const when = lastBackupAt ? new Date(lastBackupAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+  if (backup.days === 0) return { text: `Aujourd’hui${when ? ` · ${when}` : ""}`, tone: "ok" };
+  const ago = `il y a ${backup.days} jour${backup.days > 1 ? "s" : ""}`;
+  return { text: `${ago}${when ? ` · ${when}` : ""}`, tone: backup.state === "stale" ? "warn" : "ok" };
+}
 
 // audit action → icon/colour styling for the activity feed.
 const ACTION_STYLE = {
@@ -103,13 +127,36 @@ const ACTION_LABELS = {
   STUDENT_CREATE: "Ajout d’élève", STUDENT_DELETE: "Suppression d’élève",
   TEACHER_CREATE: "Ajout d’enseignant",
   ASSIGNMENT_SET: "Affectation", BACKUP: "Sauvegarde",
+  // Eleven of the nineteen action types in the journal had no French label and
+  // fell through to the raw enum. They were easy to miss while the feed was
+  // mostly "Déconnexion"; filtering session churn out of the overview puts
+  // them front and centre, so "LESSON_COMPANION_SET" now had to become words.
+  LESSON_CREATE: "Création de leçon", LESSON_EDIT: "Modification de leçon",
+  LESSON_DELETE: "Suppression de leçon", LESSON_UNDELETE: "Restauration de leçon",
+  LESSON_PUBLISH: "Publication de leçon", LESSON_UNPUBLISH: "Dépublication de leçon",
+  LESSON_COMPANION_SET: "Complément rattaché",
+  LESSON_CONNECT: "Leçon reliée", LESSON_DISCONNECT: "Leçon déliée",
+  QUIZ_EDIT: "Modification de quiz",
+  EXERCISE_CREATE: "Création d’exercice",
+  BOOK_EXERCISE_FIX: "Correction d’exercice", BOOK_EXERCISE_FIX_REVERT: "Correction annulée",
+  PROJECT_GROUP_CREATE: "Création de groupe", PROJECT_GROUP_ASSIGN: "Projet attribué",
 };
 const TARGET_LABELS = {
   staff: "personnel", student: "élève", students: "élèves", teacher: "enseignant",
   class: "classe", system: "système", assignment: "affectation",
+  lesson: "leçon", exercise: "exercice", "book-exercise": "exercice du manuel",
+  project: "projet", project_group: "groupe",
 };
 const actionLabel = (a) => ACTION_LABELS[a] || a;
 const targetLabel = (t) => TARGET_LABELS[t] || t;
+// The row prints the action then the target, which reads "Création de leçon
+// leçon" now that the lesson actions name their object. Append the target only
+// when the label has not already said it.
+const extraTarget = (action, targetType) => {
+  if (!targetType) return null;
+  const t = targetLabel(targetType);
+  return actionLabel(action).toLowerCase().includes(t.toLowerCase()) ? null : t;
+};
 
 function AuditRow({ a }) {
   const st = styleForAction(a.action);
@@ -121,10 +168,10 @@ function AuditRow({ a }) {
       <div className="audit-body">
         <div className="at">
           {actionLabel(a.action)}
-          {a.targetType ? (
+          {extraTarget(a.action, a.targetType) ? (
             <>
               {" "}
-              <b>{targetLabel(a.targetType)}</b>
+              <b>{extraTarget(a.action, a.targetType)}</b>
             </>
           ) : null}
         </div>
@@ -783,7 +830,7 @@ export default function AdminConsole() {
 
           {/* OVERVIEW */}
           <div className={`adm-panel ${tab === "overview" ? "active" : ""}`.trim()}>
-            <div className="kpi-grid" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+            <div className="kpi-grid">
               {KPI_DEFS.map((k) => (
                 <div className="card kpi" key={k.label}>
                   <div className="kt">
@@ -821,47 +868,73 @@ export default function AdminConsole() {
                     {ovHealth.ollamaOnline ? "En ligne" : "Hors ligne"}
                   </span>
                 </div>
+                {/* The "État" row repeated the pill above it, and the database
+                    size belonged with the server, not the tutor. */}
                 <div className="hrow">
                   <span className="hl">Modèle</span>
                   <span className="hv">{ovHealth.model || "—"}</span>
                 </div>
                 <div className="hrow">
-                  <span className="hl">État</span>
-                  <span className="hv">{ovHealth.ollamaOnline ? "En ligne" : "Hors ligne"}</span>
+                  <span className="hl">Sert</span>
+                  <span className="hv">Copilot élève · Copilot enseignant</span>
                 </div>
-                <div className="hrow">
-                  <span className="hl">Taille de la base de données</span>
-                  <span className="hv">{ovHealth.dbSizeMB != null ? `${ovHealth.dbSizeMB} MB` : "—"}</span>
-                </div>
-              </div>
-              <div className="card health-card">
-                <div className="hh">
-                  <span className="hic" style={{ background: "var(--indigo-100)", color: "var(--indigo-700)" }}>
-                    <Icon name="server" />
-                  </span>
-                  <div>
-                    <h3>Serveur</h3>
-                    <div className="hs">Local · LAN</div>
+                {!ovHealth.ollamaOnline && (
+                  <div className="hrow">
+                    <span className="hl">Conséquence</span>
+                    <span className="hv tone-warn">Leçons et quiz restent accessibles</span>
                   </div>
-                  <span className="grow" />
-                  <span className="status-live">
-                    <span className="sdot" />
-                    En bon état
-                  </span>
-                </div>
-                <div className="hrow">
-                  <span className="hl">Stockage utilisé</span>
-                  <span className="hv">{kpis.storageGB != null ? `${kpis.storageGB} Go` : "—"}</span>
-                </div>
-                <div className="hrow">
-                  <span className="hl">Classes</span>
-                  <span className="hv">{kpis.classes ?? "—"}</span>
-                </div>
-                <div className="hrow">
-                  <span className="hl">Élèves</span>
-                  <span className="hv">{kpis.students ?? "—"}</span>
-                </div>
+                )}
               </div>
+              {(() => {
+                const st = STATE_META[ovHealth.state] || STATE_META.ok;
+                const sto = ovHealth.storage || {};
+                const stoBand = sto.pct >= 90 ? "critical" : sto.pct >= 75 ? "warn" : "ok";
+                const bk = backupLine(ovHealth.backup, ovHealth.lastBackupAt);
+                return (
+                  <div className="card health-card">
+                    <div className="hh">
+                      <span className="hic" style={{ background: "var(--indigo-100)", color: "var(--indigo-700)" }}>
+                        <Icon name="server" />
+                      </span>
+                      <div>
+                        <h3>Serveur</h3>
+                        <div className="hs">Local · LAN · hors ligne</div>
+                      </div>
+                      <span className="grow" />
+                      <span className={`adm-state ${st.cls}`}>
+                        <span className="sdot" />
+                        {overview ? st.label : "…"}
+                      </span>
+                    </div>
+                    <div className="hrow hrow-stack">
+                      <div className="hrow-top">
+                        <span className="hl">Stockage</span>
+                        <span className={`hv tone-${stoBand}`}>
+                          {sto.pct != null ? `${sto.pct} %` : "—"}
+                          <small>{sto.totalGB ? ` · ${fmtGo(sto.freeGB)} Go libres sur ${fmtGo(sto.totalGB)}` : ""}</small>
+                        </span>
+                      </div>
+                      <div className="adm-bar">
+                        <span className={`tone-${stoBand}`} style={{ width: `${Math.min(100, sto.pct || 0)}%` }} />
+                      </div>
+                    </div>
+                    <div className="hrow">
+                      <span className="hl">Dernière sauvegarde</span>
+                      <span className={`hv tone-${bk.tone}`}>{overview ? bk.text : "—"}</span>
+                    </div>
+                    <div className="hrow">
+                      <span className="hl">Base de données</span>
+                      <span className="hv">{ovHealth.dbSizeMB != null ? `${ovHealth.dbSizeMB} MB` : "—"}</span>
+                    </div>
+                    {ovHealth.backup?.state === "never" && (
+                      <button className="adm-fixnow" onClick={() => showTab("system")}>
+                        <Icon name="database" /> Aucune sauvegarde n’a jamais été faite — en lancer une
+                        <Icon name="chevR" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
             <div className="card panel" style={{ marginTop: "24px" }}>
               <div className="panel-head">
@@ -874,7 +947,10 @@ export default function AdminConsole() {
               </div>
               <div>
                 {recent.length ? (
-                  recent.slice(0, 4).map((a) => <AuditRow a={a} key={a.id} />)
+                  /* Already filtered and capped server-side by notableAudit —
+                     slicing again here is what hid the substance behind
+                     sign-outs when the API sent eight unfiltered rows. */
+                  recent.map((a) => <AuditRow a={a} key={a.id} />)
                 ) : (
                   <p className="muted" style={{ padding: "20px", textAlign: "center" }}>
                     {overview ? "Aucune activité récente" : "Chargement…"}

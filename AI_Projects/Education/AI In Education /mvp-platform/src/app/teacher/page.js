@@ -6,7 +6,7 @@ import TeacherShell, { useTeacherBadges } from "@/components/ui/TeacherShell";
 import { OfflinePill } from "@/components/ui/chrome";
 import { avatarColor, initials } from "@/lib/icons";
 import BarChart from "@/components/ui/BarChart";
-import { RANGES, triageClasses } from "@/lib/dashboard";
+import { RANGES, triageClasses, formatMinutes as fmtMinutes } from "@/lib/dashboard";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 function capitalize(s) {
@@ -79,12 +79,6 @@ function bucketTitle(b, granularity) {
   if (granularity === "day") return capitalize(DAY_FULL_FMT.format(start));
   return `Semaine du ${DM_LONG_FMT.format(start)}${end ? ` au ${DM_LONG_FMT.format(end)}` : ""}`;
 }
-function fmtMinutes(min) {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return h ? `${h} h${m ? ` ${m}` : ""}` : `${m} min`;
-}
-
 export default function TeacherDashboard() {
   const [chartKey, setChartKey] = useState("Lessons");
   const [range, setRange] = useState("7j");

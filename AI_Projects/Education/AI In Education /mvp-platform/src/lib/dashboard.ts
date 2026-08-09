@@ -65,6 +65,24 @@ export function bucketSeries(series: number[], size: number): number[] {
   return out;
 }
 
+// ---- duration ----
+
+/**
+ * Minutes → a French duration, e.g. "45 min", "1 h", "19 h 03".
+ *
+ * The minutes are zero-padded because this form drops the unit after the hour:
+ * unpadded, 1143 rendered as "19 h 3", which reads as a truncation rather than
+ * three minutes. The other duration formatters in the app keep an "m" suffix
+ * ("19h 3m") and so don't have the ambiguity.
+ */
+export function formatMinutes(min: number): string {
+  const total = Math.max(0, Math.round(Number(min) || 0));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (!h) return `${m} min`;
+  return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
+}
+
 // ---- class triage ----
 
 export type AlertType = "ok" | "warning" | "danger";

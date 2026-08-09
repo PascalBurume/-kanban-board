@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { RANGES, parseRange, bucketDays, bucketSeries, triageClasses } from "../dashboard";
+import { RANGES, parseRange, bucketDays, bucketSeries, triageClasses, formatMinutes } from "../dashboard";
 
 const seq = (n: number, from = 1) => Array.from({ length: n }, (_, i) => i + from);
 const isoDays = (n: number) =>
@@ -75,6 +75,35 @@ describe("bucketSeries", () => {
   it("lines up one-for-one with bucketDays", () => {
     const days = isoDays(28);
     expect(bucketSeries(seq(28), 7)).toHaveLength(bucketDays(days, 7).length);
+  });
+});
+
+describe("formatMinutes", () => {
+  it("uses minutes under the hour", () => {
+    expect(formatMinutes(0)).toBe("0 min");
+    expect(formatMinutes(5)).toBe("5 min");
+    expect(formatMinutes(59)).toBe("59 min");
+  });
+  it("drops the minutes when there are none", () => {
+    expect(formatMinutes(60)).toBe("1 h");
+    expect(formatMinutes(120)).toBe("2 h");
+  });
+  // The bug: 1143 rendered "19 h 3", which reads as a truncated number.
+  it("zero-pads single-digit minutes", () => {
+    expect(formatMinutes(63)).toBe("1 h 03");
+    expect(formatMinutes(1143)).toBe("19 h 03");
+  });
+  it("leaves two-digit minutes alone", () => {
+    expect(formatMinutes(272)).toBe("4 h 32");
+    expect(formatMinutes(3753)).toBe("62 h 33");
+  });
+  it("never emits a bare hour with a trailing space", () => {
+    for (let m = 0; m <= 600; m++) expect(formatMinutes(m)).toBe(formatMinutes(m).trim());
+  });
+  it("coerces junk and negatives to zero rather than NaN", () => {
+    for (const v of [-5, NaN, undefined as never, null as never, "x" as never]) {
+      expect(formatMinutes(v)).toBe("0 min");
+    }
   });
 });
 

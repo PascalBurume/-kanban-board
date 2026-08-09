@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { audit } from "./auth";
+import { RANGES, DEFAULT_RANGE, bucketDays, bucketSeries, type RangeKey } from "./dashboard";
 
 const DAY = 86400000;
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
@@ -403,36 +404,38 @@ export async function resolveFeedback(teacherId: string, feedbackId: string) {
 }
 
 // ---- Overview (dashboard) ----
-export async function teacherOverview(teacherId: string) {
+export async function teacherOverview(teacherId: string, range: RangeKey = DEFAULT_RANGE) {
   const classes = await teacherClasses(teacherId);
   const weekAgo = new Date(Date.now() - 7 * DAY);
 
-  let allStudents: (StudentMetrics & { classId?: string })[] = [];
-  const classCards = [] as {
-    id: string; name: string; level: string; field: string | null; studentCount: number; avgProgress: number;
-    avgQuiz: number | null; copilotCount: number; onTrack: number; behind: number; inactive: number; activeWeek: number;
-    alert: { type: "ok" | "warning" | "danger"; text: string };
-  }[];
-
-  for (const c of classes) {
-    const totalLessons = await classLessonTotal(c.id);
-    const enr = await prisma.enrollment.findMany({ where: { classId: c.id }, include: { student: true } });
-    const metrics = await Promise.all(enr.map((e) => studentMetrics(e.student, totalLessons)));
-    allStudents = allStudents.concat(metrics.map((m) => ({ ...m, classId: c.id })));
-    const avgProgress = metrics.length ? Math.round(metrics.reduce((s, m) => s + m.progressPct, 0) / metrics.length) : 0;
-    const quizVals = metrics.map((m) => m.avgQuiz).filter((v): v is number => v != null);
-    const avgQuiz = quizVals.length ? Math.round(quizVals.reduce((s, v) => s + v, 0) / quizVals.length) : null;
-    const copilotCount = metrics.reduce((s, m) => s + m.copilotCount, 0);
-    const onTrack = metrics.filter((m) => m.status === "ok").length;
-    const behind = metrics.filter((m) => m.status === "behind").length;
-    const inactive = metrics.filter((m) => m.status === "inactive").length;
-    const activeWeek = metrics.filter((m) => m.lastActiveDays != null && m.lastActiveDays <= 7).length;
-    let alert: { type: "ok" | "warning" | "danger"; text: string };
-    if (inactive > 0) alert = { type: "danger", text: `${inactive} élève${inactive > 1 ? "s" : ""} inactif${inactive > 1 ? "s" : ""} 7+ j` };
-    else if (behind > 0) alert = { type: "warning", text: `${behind} élève${behind > 1 ? "s" : ""} en difficulté` };
-    else alert = { type: "ok", text: "Classe sur la bonne voie" };
-    classCards.push({ id: c.id, name: c.name, level: c.level, field: c.field, studentCount: enr.length, avgProgress, avgQuiz, copilotCount, onTrack, behind, inactive, activeWeek, alert });
-  }
+  // One class at a time meant a six-class teacher paid six round trips before
+  // the first student was even read. The classes don't depend on each other.
+  const perClass = await Promise.all(
+    classes.map(async (c) => {
+      const totalLessons = await classLessonTotal(c.id);
+      const enr = await prisma.enrollment.findMany({ where: { classId: c.id }, include: { student: true } });
+      const metrics = await Promise.all(enr.map((e) => studentMetrics(e.student, totalLessons)));
+      const avgProgress = metrics.length ? Math.round(metrics.reduce((s, m) => s + m.progressPct, 0) / metrics.length) : 0;
+      const quizVals = metrics.map((m) => m.avgQuiz).filter((v): v is number => v != null);
+      const avgQuiz = quizVals.length ? Math.round(quizVals.reduce((s, v) => s + v, 0) / quizVals.length) : null;
+      const copilotCount = metrics.reduce((s, m) => s + m.copilotCount, 0);
+      const onTrack = metrics.filter((m) => m.status === "ok").length;
+      const behind = metrics.filter((m) => m.status === "behind").length;
+      const inactive = metrics.filter((m) => m.status === "inactive").length;
+      const activeWeek = metrics.filter((m) => m.lastActiveDays != null && m.lastActiveDays <= 7).length;
+      let alert: { type: "ok" | "warning" | "danger"; text: string };
+      if (inactive > 0) alert = { type: "danger", text: `${inactive} élève${inactive > 1 ? "s" : ""} inactif${inactive > 1 ? "s" : ""} 7+ j` };
+      else if (behind > 0) alert = { type: "warning", text: `${behind} élève${behind > 1 ? "s" : ""} en difficulté` };
+      else alert = { type: "ok", text: "Classe sur la bonne voie" };
+      return {
+        card: { id: c.id, name: c.name, level: c.level, field: c.field, studentCount: enr.length, avgProgress, avgQuiz, copilotCount, onTrack, behind, inactive, activeWeek, alert },
+        metrics: metrics.map((m) => ({ ...m, classId: c.id })),
+      };
+    }),
+  );
+  const classCards = perClass.map((p) => p.card);
+  const classNameById = new Map(classCards.map((c) => [c.id, c.name]));
+  const allStudents: (StudentMetrics & { classId?: string })[] = perClass.flatMap((p) => p.metrics);
 
   const studentIds = [...new Set(allStudents.map((s) => s.id))];
 
@@ -441,42 +444,76 @@ export async function teacherOverview(teacherId: string) {
   const inactive7 = allStudents.filter((m) => m.status === "inactive").length;
   const copilotWeek = await prisma.copilotMessage.count({ where: { role: "user", createdAt: { gte: weekAgo }, thread: { studentId: { in: studentIds } } } });
 
-  // Watchlist — most at-risk students
-  const watchlist = allStudents
+  // Watchlist — most at-risk students. The list is capped for the dashboard,
+  // but `watchTotal` is the real figure: the panel's badge used to report the
+  // length of the slice, so a teacher with 26 at-risk students was told "6".
+  const atRisk = allStudents
     .filter((m) => m.status !== "ok")
     .map((m) => {
       const reason = m.status === "inactive" ? `Inactif ${m.lastActiveDays ?? "?"} j` : m.avgQuiz !== null && m.avgQuiz < 55 ? `Quiz moyen ${m.avgQuiz}%` : `Progression ${m.progressPct}%`;
-      return { id: m.id, firstName: m.firstName, lastName: m.lastName, avatarColor: m.avatarColor, status: m.status, reason, classId: m.classId };
+      // The class name travels with the row: every watchlist entry otherwise
+      // read "Inactif 15 j" with nothing to say which room to go and look in.
+      return { id: m.id, firstName: m.firstName, lastName: m.lastName, avatarColor: m.avatarColor, status: m.status, reason, classId: m.classId, className: classNameById.get(m.classId ?? "") ?? null };
     })
-    .sort((a, b) => (a.status === "inactive" ? -1 : 1) - (b.status === "inactive" ? -1 : 1))
-    .slice(0, 6);
+    .sort((a, b) => (a.status === "inactive" ? -1 : 1) - (b.status === "inactive" ? -1 : 1));
+  const watchTotal = atRisk.length;
+  const watchlist = atRisk.slice(0, 6);
 
-  // Top copilot themes — by lesson (real counts; clustering is Phase 5)
-  const themeThreads = await prisma.copilotThread.findMany({
-    where: { studentId: { in: studentIds } },
-    include: { lesson: { include: { module: { include: { subject: true } } } }, messages: { where: { role: "user" }, select: { id: true } } },
+  const def = RANGES[range];
+  const since = new Date(Date.now() - def.days * DAY);
+
+  // Top copilot themes — by lesson, over the selected range.
+  //
+  // This used to hydrate every thread the teacher's students had ever opened,
+  // with every user message on each, and count them in Node. That set only
+  // grows: by the end of a school year it is the most expensive thing on the
+  // page, and "most asked since September" stops describing today's class
+  // anyway. Now it groups in SQL over the window and reads titles for the
+  // handful of lessons that actually place.
+  const msgGroups = await prisma.copilotMessage.groupBy({
+    by: ["threadId"],
+    where: { role: "user", createdAt: { gte: since }, thread: { studentId: { in: studentIds } } },
+    _count: { _all: true },
   });
-  const themeMap = new Map<string, { label: string; subject: string; count: number }>();
-  for (const t of themeThreads) {
-    const key = t.lessonId;
-    const e = themeMap.get(key) ?? { label: t.lesson.title, subject: t.lesson.module?.subject.name ?? "—", count: 0 };
-    e.count += t.messages.length;
-    themeMap.set(key, e);
+  const threadRows = msgGroups.length
+    ? await prisma.copilotThread.findMany({ where: { id: { in: msgGroups.map((g) => g.threadId) } }, select: { id: true, lessonId: true } })
+    : [];
+  const lessonOfThread = new Map(threadRows.map((t) => [t.id, t.lessonId]));
+  const countByLesson = new Map<string, number>();
+  for (const g of msgGroups) {
+    const lessonId = lessonOfThread.get(g.threadId);
+    if (!lessonId) continue;
+    countByLesson.set(lessonId, (countByLesson.get(lessonId) ?? 0) + g._count._all);
   }
-  const topThemes = [...themeMap.values()].sort((a, b) => b.count - a.count).slice(0, 4);
+  const themeTotal = countByLesson.size;
+  const ranked = [...countByLesson.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const themeLessons = ranked.length
+    ? await prisma.lesson.findMany({ where: { id: { in: ranked.map(([id]) => id) } }, select: { id: true, title: true, module: { select: { subject: { select: { name: true } } } } } })
+    : [];
+  const lessonById = new Map(themeLessons.map((l) => [l.id, l]));
+  const topThemes = ranked.map(([id, count]) => ({
+    label: lessonById.get(id)?.title ?? "—",
+    subject: lessonById.get(id)?.module?.subject.name ?? "—",
+    count,
+  }));
 
-  // Weekly activity — last 7 days
-  const since = new Date(Date.now() - 7 * DAY);
+  // Activity over the selected range, bucketed so the bar count stays readable.
   const [completions, sessions, attempts] = await Promise.all([
     prisma.progress.findMany({ where: { studentId: { in: studentIds }, status: "COMPLETED", completedAt: { gte: since } }, select: { completedAt: true } }),
     prisma.sessionLog.findMany({ where: { studentId: { in: studentIds }, startedAt: { gte: since } }, select: { startedAt: true, seconds: true } }),
     prisma.quizAttempt.findMany({ where: { studentId: { in: studentIds }, createdAt: { gte: since } }, select: { createdAt: true } }),
   ]);
   const days: string[] = [];
-  for (let i = 6; i >= 0; i--) days.push(dayKey(new Date(Date.now() - i * DAY)));
-  const lessonsSeries = days.map((d) => completions.filter((c) => c.completedAt && dayKey(c.completedAt) === d).length);
-  const minutesSeries = days.map((d) => Math.round(sessions.filter((s) => dayKey(s.startedAt) === d).reduce((sum, s) => sum + s.seconds, 0) / 60));
-  const quizSeries = days.map((d) => attempts.filter((a) => dayKey(a.createdAt) === d).length);
+  for (let i = def.days - 1; i >= 0; i--) days.push(dayKey(new Date(Date.now() - i * DAY)));
+  const perDay = { lessons: new Map<string, number>(), seconds: new Map<string, number>(), quizzes: new Map<string, number>() };
+  const bump = (m: Map<string, number>, k: string, by = 1) => m.set(k, (m.get(k) ?? 0) + by);
+  for (const c of completions) if (c.completedAt) bump(perDay.lessons, dayKey(c.completedAt));
+  for (const s of sessions) bump(perDay.seconds, dayKey(s.startedAt), s.seconds);
+  for (const a of attempts) bump(perDay.quizzes, dayKey(a.createdAt));
+
+  const buckets = bucketDays(days, def.bucketDays);
+  const series = (m: Map<string, number>, scale = (v: number) => v) =>
+    bucketSeries(days.map((d) => m.get(d) ?? 0), def.bucketDays).map(scale);
 
   return {
     kpis: {
@@ -488,12 +525,16 @@ export async function teacherOverview(teacherId: string) {
     },
     classes: classCards,
     watchlist,
+    watchTotal,
     topThemes,
+    themeTotal,
     weekly: {
-      days: days.map((d) => d.slice(5)), // MM-DD
-      lessons: lessonsSeries,
-      minutes: minutesSeries,
-      quizzes: quizSeries,
+      range,
+      granularity: def.bucketDays === 1 ? ("day" as const) : ("week" as const),
+      buckets,
+      lessons: series(perDay.lessons),
+      minutes: series(perDay.seconds, (v) => Math.round(v / 60)),
+      quizzes: series(perDay.quizzes),
     },
   };
 }

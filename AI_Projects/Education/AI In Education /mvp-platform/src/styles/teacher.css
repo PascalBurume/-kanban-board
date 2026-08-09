@@ -129,8 +129,11 @@
 .t-iconbtn .dot-badge { position: absolute; top: 7px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid var(--surface); }
 
 /* Narrow widths: the status pill is decorative, drop it so the crumb and
-   actions never collide; tighten header padding to buy room. */
-@media (max-width: 960px) {
+   actions never collide; tighten header padding to buy room.
+   The threshold is 1200, not 960, because the sidebar is still 248px wide
+   here: a 1024px tablet — the device this is deployed on — left the header
+   only 776px and the breadcrumb ellipsised down to "Ens… / Ta…". */
+@media (max-width: 1200px) {
   .t-top { padding: 12px 18px; gap: 12px; }
   .t-top .offline-pill { display: none; }
 }

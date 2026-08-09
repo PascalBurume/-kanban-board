@@ -1,7 +1,13 @@
-.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; margin-top: 22px; }
-@media (max-width: 1100px) { .dash-grid { grid-template-columns: 1fr; } }
+/* The working area: the week and the classes on the left, the three growing
+   lists in a rail on the right. The rail is where every unbounded collection
+   lives, so growth is confined to one column instead of stretching the page. */
+.db-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 22px; align-items: start; margin-top: 24px; }
+.db-main { min-width: 0; }
+.db-rail { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+@media (max-width: 1180px) { .db-grid { grid-template-columns: 1fr; } }
 
 .sec-h { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 26px 0 14px; }
+.db-main > .sec-h:first-child { margin-top: 0; }
 .sec-h h2 { font-size: 18px; }
 .sec-h .sub { font-size: 13px; color: var(--text-muted); }
 
@@ -37,9 +43,11 @@
 
 .tclass .tc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .tclass .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-.tclass .tc-pill { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); white-space: nowrap; flex: none; background: var(--warning-bg); color: var(--warning-fg); }
-.tclass .tc-pill.ok { background: var(--success-bg); color: var(--success-fg); }
-.tclass .tc-pill.danger { background: var(--danger-bg); color: var(--danger-fg); }
+/* Scoped to .tclass, this quietly rendered as bare text inside the compact
+   class rows — the pill is the row's only alert signal, so it is shared. */
+.tc-pill { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); white-space: nowrap; flex: none; background: var(--warning-bg); color: var(--warning-fg); }
+.tc-pill.ok { background: var(--success-bg); color: var(--success-fg); }
+.tc-pill.danger { background: var(--danger-bg); color: var(--danger-fg); }
 
 /* watchlist */
 .watch-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
@@ -80,18 +88,36 @@
 .fb-done-tag svg { width: 15px; height: 15px; }
 
 /* ============================================================
-   Dashboard — hero + "Priorités du jour" + polish
+   Band 1 — « Aujourd’hui »
+   ------------------------------------------------------------
+   The greeting, the actions and the context numbers used to be three stacked
+   blocks costing 545 px before any content, on tablets 768 px tall. They are
+   one card now, and — this is the point — its height does not depend on how
+   much data the school has accumulated. Only the rail below grows.
    ============================================================ */
-.dash-hero { margin-bottom: 18px; }
-.dash-date { font: 700 12px var(--font-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--indigo-600); margin-bottom: 7px; }
-.dash-greet h1 { font-size: 32px; letter-spacing: -.02em; }
-.dash-greet p { margin-top: 6px; font-size: 15px; }
+.db-today { background: linear-gradient(180deg, var(--indigo-50), var(--surface) 78%); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-xs); overflow: hidden; }
+.db-today-main { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 20px 22px 18px; }
+.db-date { font: 700 11.5px var(--font-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--indigo-600); margin-bottom: 5px; }
+.db-greet h1 { font-size: 27px; letter-spacing: -.02em; line-height: 1.15; }
+.db-greet p { margin-top: 4px; font-size: 14px; }
+.db-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* priority synthesis */
-.dash-prio { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 24px; }
-.dash-prio-label { display: inline-flex; align-items: center; gap: 7px; font: 700 12px var(--font-ui); color: var(--text-soft); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
-.dash-prio-label svg { width: 15px; height: 15px; color: var(--indigo-600); }
-.prio-chips { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Context numbers: one strip, not five cards. */
+.db-stats { display: flex; flex-wrap: wrap; gap: 0 28px; padding: 11px 22px; border-top: 1px solid var(--border); background: var(--surface); }
+.db-stat { display: inline-flex; align-items: baseline; gap: 7px; padding: 3px 0; font-size: 12.5px; color: var(--text-muted); font-weight: 600; text-decoration: none; }
+a.db-stat:hover { color: var(--primary); }
+a.db-stat:hover b { color: var(--primary); }
+.db-stat .icon { align-self: center; }
+.db-stat svg { width: 14px; height: 14px; color: var(--text-muted); }
+.db-stat b { font: 700 16px var(--font-head); color: var(--text); line-height: 1; }
+
+@media (max-width: 640px) {
+  .db-today-main { padding: 16px; }
+  .db-greet h1 { font-size: 22px; }
+  .db-stats { gap: 0 18px; padding: 10px 16px; }
+}
+
+/* priority chips */
 .prio-chip { display: inline-flex; align-items: center; gap: 11px; padding: 9px 13px 9px 9px; border-radius: 14px; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-xs); transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
 .prio-chip:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
 .prio-chip .pic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none; }
@@ -130,6 +156,52 @@
 .card-foot-link { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--border); font: 600 13px var(--font-ui); color: var(--primary); text-decoration: none; transition: color .12s ease, gap .14s ease; }
 .card-foot-link:hover { color: var(--primary-hover); gap: 8px; }
 .card-foot-link svg { width: 15px; height: 15px; }
+
+/* ============================================================
+   Band 2 — range control + the chart
+   ============================================================ */
+.seg-tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 3px; box-shadow: var(--sh-xs); flex: none; }
+.seg-tabs button { border: 0; background: transparent; font: 600 12.5px var(--font-ui); color: var(--text-soft); padding: 6px 14px; border-radius: var(--r-pill); cursor: pointer; white-space: nowrap; transition: background .14s ease, color .14s ease; }
+.seg-tabs button:hover { color: var(--text); }
+.seg-tabs button.active { background: linear-gradient(135deg, var(--indigo-500), var(--indigo-700)); color: #fff; }
+
+.db-chart { position: relative; transition: opacity .16s ease; }
+/* Only the chart dims while a new range loads — the rest of the page holds
+   still rather than flashing back to skeletons for a one-panel control. */
+.db-chart.busy { opacity: .5; pointer-events: none; }
+.pill-tabs-right { position: absolute; top: 14px; right: 16px; z-index: 1; }
+.db-chart-empty { text-align: center; padding: 40px 0; font-size: 14px; }
+.db-empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
+.db-none { padding: 16px 4px; font-size: 13.5px; }
+
+/* ============================================================
+   Band 2b — the classes that didn’t earn a card
+   ============================================================ */
+.db-rest { margin-top: 14px; padding-top: 4px; padding-bottom: 4px; }
+.crow { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; }
+.crow:last-child { border-bottom: 0; }
+.crow:hover .cr-name { color: var(--primary); }
+.crow .subject-tile.sm { width: 30px; height: 30px; border-radius: 9px; flex: none; }
+.crow .subject-tile.sm svg { width: 16px; height: 16px; }
+.cr-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; gap: 1px; }
+.cr-name small { font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
+.cr-bar { width: 90px; height: 6px; border-radius: var(--r-pill); background: var(--slate-200); overflow: hidden; flex: none; }
+.cr-bar i { display: block; height: 100%; border-radius: var(--r-pill); }
+.cr-v { font: 700 14px var(--font-head); width: 40px; text-align: right; flex: none; }
+.crow > .icon svg { width: 15px; height: 15px; color: var(--text-muted); }
+@media (max-width: 620px) { .cr-bar { display: none; } .crow .tc-pill { display: none; } }
+
+.db-more { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 12px; padding: 10px; border: 1px dashed var(--border); border-radius: var(--r-md); background: transparent; font: 600 13px var(--font-ui); color: var(--text-soft); cursor: pointer; transition: border-color .14s ease, color .14s ease, background .14s ease; }
+.db-more:hover { border-color: var(--indigo-300, var(--indigo-200)); color: var(--primary); background: var(--indigo-50); }
+.db-more svg { width: 14px; height: 14px; }
+
+/* Rail growth guards: one verbose student must not be able to push the two
+   panels below them off the screen. */
+.fb-msg { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.watch-row { text-decoration: none; color: inherit; }
+.watch-row .info .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.theme-row .tt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.theme-row .tt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* weekly-activity day detail (click a bar) */
 .day-detail { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }

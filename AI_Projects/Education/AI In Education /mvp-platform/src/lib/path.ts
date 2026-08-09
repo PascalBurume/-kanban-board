@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { BADGE_HINTS } from "./badges";
+import { earnedBadgeSlugs } from "./studentDashboard";
 
 // Subjects a class actually studies — driven by the curriculum (Offering:
 // level + field → books), the SAME source the admin studio uses, so the
@@ -243,11 +244,20 @@ export async function buildStudentPath(userId: string) {
   }
   const weekMinutes = weekDays.reduce((sum, w) => sum + w.minutes, 0);
 
+  // Badges: a stored award, or what the record earns on its own. See
+  // earnedBadgeSlugs for why deriving is necessary — every fact it needs is
+  // already computed above, so this costs nothing extra.
   const badgeDefs = await prisma.badge.findMany({ orderBy: { name: "asc" } });
   const awards = await prisma.badgeAward.findMany({ where: { studentId: userId }, select: { badgeId: true } });
   const earned = new Set(awards.map((a) => a.badgeId));
+  const derived = earnedBadgeSlugs({
+    completedLessons: done,
+    bestQuizScore: quizBest.reduce((m, q) => Math.max(m, q._max.score ?? 0), 0),
+    streak,
+    projectSubmissions: projectSubs.length,
+  });
   const badges = badgeDefs.map((b) => {
-    const isEarned = earned.has(b.id);
+    const isEarned = earned.has(b.id) || derived.has(b.slug);
     const badge: { slug: string; name: string; icon: string | null; earned: boolean; hint: string; sub?: string } = {
       slug: b.slug,
       name: b.name,

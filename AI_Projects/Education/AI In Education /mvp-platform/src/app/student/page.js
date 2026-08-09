@@ -7,6 +7,7 @@ import Icon from "@/components/ui/Icon";
 import Ring from "@/components/ui/Ring";
 import BarChart from "@/components/ui/BarChart";
 import { BrandMark, OfflinePill, LangToggle, Avatar } from "@/components/ui/chrome";
+import { triageModules } from "@/lib/studentDashboard";
 import { toast } from "@/lib/toast";
 
 function fmtWeek(min) {
@@ -79,14 +80,21 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [openSubjects, setOpenSubjects] = useState(() => new Set()); // slugs of expanded courses (independent)
+  // Within an expanded course, the finished and not-yet-started modules stay
+  // folded until asked for — see triageModules.
+  const [showDone, setShowDone] = useState(() => new Set());
+  const [showRest, setShowRest] = useState(() => new Set());
   const initOpen = useRef(false);
 
-  const toggleSubject = (slug) =>
-    setOpenSubjects((prev) => {
+  const toggleIn = (setter) => (slug) =>
+    setter((prev) => {
       const next = new Set(prev);
       next.has(slug) ? next.delete(slug) : next.add(slug);
       return next;
     });
+  const toggleSubject = toggleIn(setOpenSubjects);
+  const toggleDone = toggleIn(setShowDone);
+  const toggleRest = toggleIn(setShowRest);
 
   useEffect(() => {
     Promise.all([
@@ -255,11 +263,46 @@ export default function StudentDashboard() {
                         </div>
                         <span className="mod-subj-chev"><Icon name={open ? "chevD" : "chevR"} /></span>
                       </button>
-                      {open && (
-                        <div className="mod-grid">
-                          {s.chapters.map((c) => <ChapterCard key={c.moduleId} c={c} accent={s.color} />)}
-                        </div>
-                      )}
+                      {open && (() => {
+                        const t = triageModules(s.chapters, 6);
+                        const seeDone = showDone.has(s.slug);
+                        const seeRest = showRest.has(s.slug);
+                        const cards = [
+                          ...t.focus,
+                          ...(seeRest ? t.rest : []),
+                          ...(seeDone ? t.done : []),
+                        ];
+                        return (
+                          <>
+                            {t.focus.length === 0 && !seeDone && !seeRest && (
+                              <p className="mod-allclear">
+                                <Icon name="trophy" /> Tous les modules de ce cours sont terminés 🎉
+                              </p>
+                            )}
+                            {cards.length > 0 && (
+                              <div className="mod-grid">
+                                {cards.map((c) => <ChapterCard key={c.moduleId} c={c} accent={s.color} />)}
+                              </div>
+                            )}
+                            {(t.done.length > 0 || t.rest.length > 0) && (
+                              <div className="mod-more">
+                                {t.rest.length > 0 && (
+                                  <button className="mod-more-btn" onClick={() => toggleRest(s.slug)} aria-expanded={seeRest}>
+                                    <Icon name={seeRest ? "chevD" : "chevR"} />
+                                    {seeRest ? "Masquer" : "Voir"} les {t.rest.length} modules à venir
+                                  </button>
+                                )}
+                                {t.done.length > 0 && (
+                                  <button className="mod-more-btn done" onClick={() => toggleDone(s.slug)} aria-expanded={seeDone}>
+                                    <Icon name={seeDone ? "chevD" : "check"} />
+                                    {seeDone ? "Masquer" : "Revoir"} les {t.done.length} modules terminés
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </section>
                   );
                 })

@@ -26,8 +26,13 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
 
   // Award badges on first ever completion of this lesson.
   if (firstTime) {
+    // `=== 1` made this reachable for exactly one request in a student's life:
+    // any completion arriving by another route (a seed, an import, a restore)
+    // pushed the count past 1 and locked the badge out for good. awardBadge
+    // upserts, so re-asserting it every time is a no-op that also self-heals
+    // a student who missed the window.
     const completedCount = await prisma.progress.count({ where: { studentId: u.userId, status: "COMPLETED" } });
-    if (completedCount === 1) await awardBadge(u.userId, "first-module");
+    if (completedCount >= 1) await awardBadge(u.userId, "first-module");
     // A completion extends today's streak — award the 7-day badge if reached.
     if ((await currentStreak(u.userId)) >= 7) await awardBadge(u.userId, "streak-7");
     await audit("LESSON_COMPLETE", { actorId: u.userId, actorName: `${u.firstName} ${u.lastName}`, targetType: "lesson", targetId: lesson.id });

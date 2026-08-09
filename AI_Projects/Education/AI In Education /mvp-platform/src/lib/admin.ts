@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import { hashSecret } from "./auth";
 import { teacherClasses, classLessonTotal } from "./teacher";
+import { backupStatus, serverState, notableAudit } from "./adminDashboard";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -53,11 +54,32 @@ export async function adminOverview() {
     prisma.classGroup.count({ where: { isArchived: false } }),
   ]);
   const health = await systemHealth();
-  const recent = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 });
+  // Read well past the four the overview shows: notableAudit drops sign-ins and
+  // sign-outs, and on a busy day those alone can fill the first eight rows.
+  const recent = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 40 });
+  const backup = backupStatus(health.lastBackup?.at ?? null, new Date());
   return {
     kpis: { teachers, students, classes, storageGB: health.storage.usedGB },
-    health: { ollamaOnline: health.ollama.online, model: health.ollama.model, dbSizeMB: health.db.sizeMB },
-    recent: recent.map((r) => ({ id: r.id, action: r.action, actorName: r.actorName, targetType: r.targetType, createdAt: r.createdAt.toISOString() })),
+    health: {
+      ollamaOnline: health.ollama.online,
+      model: health.ollama.model,
+      dbSizeMB: health.db.sizeMB,
+      // usedGB alone answers nothing: the overview showed "446,7 Go" with no
+      // way to tell half a disk from the last of it. The denominator was
+      // already computed here and thrown away.
+      storage: health.storage,
+      backup,
+      lastBackupAt: health.lastBackup?.at ?? null,
+      state: serverState({
+        storagePct: health.storage.pct,
+        ollamaOnline: health.ollama.online,
+        backup: backup.state,
+      }),
+    },
+    recent: notableAudit(
+      recent.map((r) => ({ id: r.id, action: r.action, actorName: r.actorName, targetType: r.targetType, createdAt: r.createdAt.toISOString() })),
+      6,
+    ),
   };
 }
 

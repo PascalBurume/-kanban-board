@@ -51,7 +51,11 @@ describe.skipIf(!present)("the seeded book corpus", () => {
     expect(lessons.length).toBeGreaterThan(300);
   });
 
-  it("never throws on real lesson text", () => {
+  // The explicit timeouts here and below are the corpus's, not a slow assertion:
+  // parsing every lesson costs seconds and the corpus grows with each book that is
+  // transcribed (481 → 598 when maths-6 and chimie-5 gained their illustrated
+  // lessons). The default 5 s turns "we added a book" into three red tests.
+  it("never throws on real lesson text", { timeout: 30_000 }, () => {
     for (const l of lessons) {
       expect(() => canEditVisually(l.md), `threw on ${where(l)}`).not.toThrow();
     }
@@ -64,7 +68,7 @@ describe.skipIf(!present)("the seeded book corpus", () => {
   //
   // Six lessons failed this before empty formulas, adjacent runs and consecutive lists
   // were canonicalised on the parse side. It must stay at zero.
-  it("refuses lessons only for named unsupported constructs, never for drift", () => {
+  it("refuses lessons only for named unsupported constructs, never for drift", { timeout: 30_000 }, () => {
     const drifted = lessons.filter((l) => !canEditVisually(l.md).ok && mdToDoc(l.md).unsupported.length === 0);
     const detail = drifted.slice(0, 5).map(where).join("\n  ");
     expect(drifted.length, `serialiser drift on:\n  ${detail}`).toBe(0);
@@ -83,7 +87,7 @@ describe.skipIf(!present)("the seeded book corpus", () => {
   // A floor, not an equality: this number should only ever go up as the editor learns
   // tables (then ~74% → ~87%) and inline SVG (→ ~100%). It was 73% before the
   // serialiser fixes and must never fall back.
-  it("keeps at least 94% of lessons visually editable", () => {
+  it("keeps at least 94% of lessons visually editable", { timeout: 30_000 }, () => {
     const refused = lessons.filter((l) => !canEditVisually(l.md).ok);
     const rate = (lessons.length - refused.length) / lessons.length;
     const byReason = new Map<string, number>();

@@ -46,6 +46,11 @@ mark { @apply bg-yellow-200 rounded px-0.5; }
    figures; the box hugs its content instead of spanning the whole column. */
 .prose-reader figure.ai-figure { margin: 1.5rem auto; padding: 12px 14px; width: fit-content; max-width: min(100%, 520px); background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.04); overflow-x: auto; }
 .prose-reader figure.ai-figure svg { display: block; margin: 0 auto; width: 100%; max-width: 492px; height: auto; }
+/* Photographs and diagrams lifted from the scan. Their width/height attributes
+   carry the size the injector chose (small diagrams scaled up, large photographs
+   held to the column); this only centres them and lets a narrow screen shrink
+   them without distorting the aspect ratio. */
+.prose-reader figure.ai-figure img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .prose-reader figure.ai-figure figcaption { margin-top: 10px; font-size: 13px; line-height: 1.45; color: #475569; text-align: center; }
 .prose-reader .ai-badge { display: block; margin-top: 8px; font-size: 11.5px; line-height: 1.4; color: #64748b; font-style: italic; }
 .prose-reader .fig-omissions { display: block; margin-top: 5px; font-size: 11px; line-height: 1.4; color: #94a3b8; }

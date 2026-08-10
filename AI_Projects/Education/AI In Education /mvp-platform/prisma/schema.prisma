@@ -177,6 +177,7 @@ model Lesson {
   chunks         LessonChunk[]
   teachThreads   TeachThread[]
   exerciseLinks  ExerciseLink[]
+  bookExerciseLinks BookExerciseLink[]
 
   @@unique([moduleId, slug])
 }
@@ -610,6 +611,29 @@ model BookExerciseFix {
   solutionMd  String   @default("")
   editedById  String? // User id (audit-style, no FK)
   updatedAt   DateTime @updatedAt
+}
+
+// A teacher's answer to "which lesson does this book exercise belong to?".
+//
+// Book exercises live in files, not in the database, so they cannot use
+// ExerciseLink (which has a foreign key to Exercise). They key on the same plain
+// exId as BookExerciseFix. The chapter link is already implicit — an exercise sits
+// in a chapter by construction — so only the lesson is worth recording.
+//
+// Like a fix, a link is global: the book is the same book for every class, and a
+// teacher who places an exercise under a lesson is stating something about the
+// book, not about their own group.
+model BookExerciseLink {
+  id          String   @id @default(cuid())
+  exId        Int // id in public/content/exercises.json or exercises-book.json
+  lessonId    String
+  createdById String? // User id (audit-style, no FK)
+  createdAt   DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([exId, lessonId])
+  @@index([lessonId])
 }
 
 model Exercise {

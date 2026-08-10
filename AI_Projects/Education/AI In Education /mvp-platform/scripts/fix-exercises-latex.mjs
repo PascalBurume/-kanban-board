@@ -35,3 +35,28 @@ for (const key of Object.keys(clean)) {
 
 fs.writeFileSync(FILE, JSON.stringify(clean), "utf8");
 console.log(`fix-exercises-latex: entries=${Object.keys(clean).length} changed=${changed}`);
+
+// The verbatim exercises (exercises-book.json) go through the same validate/
+// repair/degrade pass. They are the book's own text, so this only ever touches
+// math that would otherwise render as a red KaTeX error — a transcription can
+// still emit a malformed span, and the reader gains nothing from seeing it raw.
+const BOOK = path.join(APP, "public", "content", "exercises-book.json");
+if (fs.existsSync(BOOK)) {
+  const book = JSON.parse(fs.readFileSync(BOOK, "utf8"));
+  let items = 0, touchedItems = 0;
+  for (const chapter of Object.values(book)) {
+    for (const it of chapter.items || []) {
+      items++;
+      let touched = false;
+      for (const field of ["statement", "solution"]) {
+        const before = it[field] || "";
+        if (!before) continue;
+        const after = fixContent(before);
+        if (after !== before) { it[field] = after; touched = true; }
+      }
+      if (touched) touchedItems++;
+    }
+  }
+  fs.writeFileSync(BOOK, JSON.stringify(book, null, 1), "utf8");
+  console.log(`fix-exercises-latex: book entries=${items} changed=${touchedItems}`);
+}

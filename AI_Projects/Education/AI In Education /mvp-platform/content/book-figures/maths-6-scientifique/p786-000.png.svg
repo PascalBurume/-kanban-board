@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 440" role="img" aria-label="Coordonnées cartésiennes dans l'espace : le point P de coordonnées x, y, z et sa projection K dans le plan xOy">
+  <rect width="540" height="440" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round">
+    <line x1="215" y1="285" x2="215" y2="25"/>
+    <path d="M215 25l-6 12M215 25l6 12"/>
+    <line x1="215" y1="285" x2="500" y2="285"/>
+    <path d="M500 285l-12-6M500 285l-12 6"/>
+    <line x1="215" y1="285" x2="55" y2="425"/>
+    <path d="M55 425l4-14M55 425l14-4"/>
+  </g>
+  <!-- OP, et le pavé pointillé qui le décompose en x, y, z. -->
+  <g fill="none" stroke="#111" stroke-width="2" stroke-linecap="round">
+    <line x1="215" y1="285" x2="368" y2="163"/>
+    <path d="M368 163l-14 1M368 163l0-13"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M215 95L368 163"/>
+    <path d="M368 163V370"/>
+    <path d="M215 285L368 370"/>
+    <path d="M140 370H368"/>
+    <path d="M368 370L455 300"/>
+  </g>
+  <g fill="#111"><circle cx="368" cy="163" r="3.4"/><circle cx="368" cy="370" r="3.4"/></g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="200" y="20">Z</text>
+    <text x="508" y="291">Y</text>
+    <text x="34" y="438">X</text>
+    <text x="190" y="279">O</text>
+    <text x="376" y="156">P(x, y, z)</text>
+    <text x="374" y="392">K(x,y)</text>
+    <text x="222" y="90" font-style="italic">z</text>
+    <text x="118" y="366" font-style="italic">x</text>
+    <text x="452" y="322" font-style="italic">y</text>
+    <text x="258" y="232" font-style="italic">u</text>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.2"><path d="M255 216h12"/></g>
+</svg>

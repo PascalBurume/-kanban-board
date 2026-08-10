@@ -13,6 +13,10 @@ import { customExercisesForChapter, customCountsByModule } from "./exercises";
 export interface ExerciseItem {
   id: number;
   book: string;
+  // The manual's own title ("Maîtriser les Maths 5"), as opposed to `book`, which
+  // is the subject slug. Written by build-exercises.mjs from the module's
+  // front-matter; optional because the older OCR payloads predate it.
+  bookTitle?: string;
   subject: string;
   moduleTitle: string;
   module: number;
@@ -52,6 +56,48 @@ function cleanMap(): Record<string, CleanEntry> {
   return _clean!;
 }
 
+// Exercises lifted verbatim from a transcribed source (scripts/build-source-
+// exercises.mjs), keyed "book:moduleOrder". Where a book has these, they are the
+// book's own statements and worked solutions — nothing was generated — so they
+// take precedence over the OCR + LLM path entirely.
+type BookItem = { id: number; n: number; section: string; solved: boolean; statement: string; solution: string };
+type BookChapter = { meta: Record<string, string>; items: BookItem[] };
+let _book: Record<string, BookChapter> | null = null;
+function bookMap(): Record<string, BookChapter> {
+  if (_book) return _book;
+  try {
+    const file = path.join(process.cwd(), "public", "content", "exercises-book.json");
+    _book = JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    _book = {};
+  }
+  return _book!;
+}
+
+// Shape a verbatim entry like the OCR-derived ones so every consumer is unchanged.
+// `reconstructed: false` here is a statement of fact, not a default: no model saw
+// this text.
+function fromBook(subjectSlug: string, moduleOrder: number, chapter: BookChapter) {
+  const m = chapter.meta ?? {};
+  return chapter.items.map((it) => ({
+    id: it.id,
+    book: subjectSlug,
+    bookTitle: m.bookTitle ?? "",
+    subject: m.subject ?? "",
+    moduleTitle: m.moduleTitle ?? "",
+    module: moduleOrder,
+    lessonPath: m.lessonPath ?? "",
+    section: it.section,
+    n: it.n,
+    quality: "clean" as const,
+    text: it.statement,
+    solution: it.solution || "",
+    reconstructed: false,
+    complete: true,
+    issues: [] as string[],
+  }));
+}
+
 // All exercises for a chapter (book + module). A cleaned version, when present,
 // replaces the garbled OCR text and is marked quality:"clean".
 //
@@ -60,6 +106,9 @@ function cleanMap(): Record<string, CleanEntry> {
 // from unreadable OCR. The latter can contain invented mathematics, so the UI
 // must never present it as the book's own answer key.
 export function matchExercises(subjectSlug: string, moduleOrder: number) {
+  const verbatim = bookMap()[`${subjectSlug}:${Number(moduleOrder)}`];
+  if (verbatim?.items?.length) return fromBook(subjectSlug, Number(moduleOrder), verbatim);
+
   const clean = cleanMap();
   return allExercises()
     .filter((e) => e.book === subjectSlug && Number(e.module) === Number(moduleOrder))
@@ -81,8 +130,18 @@ export function matchExercises(subjectSlug: string, moduleOrder: number) {
 }
 
 // Raw book exercise by JSON id — used to validate a teacher correction target.
+// Verbatim entries are searched too, otherwise « Corriger cet exercice » would
+// 404 on exactly the books whose text we trust most.
 export function findBookExercise(id: number) {
-  return allExercises().find((e) => Number(e.id) === id) ?? null;
+  const hit = allExercises().find((e) => Number(e.id) === id);
+  if (hit) return hit;
+  for (const [key, chapter] of Object.entries(bookMap())) {
+    const it = chapter.items?.find((x) => Number(x.id) === id);
+    if (!it) continue;
+    const [book, order] = key.split(":");
+    return fromBook(book, Number(order), chapter).find((e) => e.id === id) ?? null;
+  }
+  return null;
 }
 
 // Same list, with teacher corrections (BookExerciseFix) merged on top. A fix

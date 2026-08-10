@@ -395,9 +395,11 @@ export async function lessonForEdit(user: SessionUser, lessonId: string) {
   const bookLessons = isOwn && subject
     ? (await prisma.lesson.findMany({
         where: { authorId: null, status: "PUBLISHED", moduleId: { not: null }, module: { subjectSlug: subject.slug } },
-        select: { id: true, title: true, module: { select: { title: true } } },
+        // moduleId rides along so the studio can group a lesson with its chapter
+        // siblings without matching on the title, which is not guaranteed unique.
+        select: { id: true, title: true, moduleId: true, module: { select: { title: true } } },
         orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
-      })).map((b) => ({ id: b.id, title: b.title, moduleTitle: b.module?.title ?? "" }))
+      })).map((b) => ({ id: b.id, title: b.title, moduleId: b.moduleId, moduleTitle: b.module?.title ?? "" }))
     : [];
 
   return {

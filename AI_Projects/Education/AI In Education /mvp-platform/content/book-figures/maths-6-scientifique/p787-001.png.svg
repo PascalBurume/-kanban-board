@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 430" role="img" aria-label="Coordonnées cylindriques : le point P au-dessus de sa projection K, le rayon rho et l'angle phi">
+  <rect width="520" height="430" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round">
+    <line x1="205" y1="265" x2="205" y2="20"/>
+    <path d="M205 20l-6 12M205 20l6 12"/>
+    <line x1="205" y1="265" x2="490" y2="265"/>
+    <path d="M490 265l-12-6M490 265l-12 6"/>
+    <line x1="205" y1="265" x2="45" y2="410"/>
+    <path d="M45 410l4-14M45 410l14-4"/>
+  </g>
+  <!-- P se projette en K ; le sommet du segment vertical de P rejoint l'axe Oz. -->
+  <g fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round">
+    <line x1="205" y1="45" x2="345" y2="150"/>
+    <line x1="345" y1="150" x2="345" y2="350"/>
+    <line x1="205" y1="265" x2="345" y2="350"/>
+    <line x1="345" y1="350" x2="440" y2="290"/>
+    <line x1="130" y1="350" x2="345" y2="350"/>
+  </g>
+  <!-- φ se mesure de la direction Ox jusqu'à OK, en passant par le bas. -->
+  <path d="M153 312 A70 70 0 0 0 265 301" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M265 301l-13 1M265 301l-7-11" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>
+  <g fill="#111">
+    <circle cx="345" cy="150" r="3.4"/><circle cx="345" cy="350" r="3.4"/><circle cx="440" cy="290" r="3"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="191" y="16">z</text>
+    <text x="498" y="271">y</text>
+    <text x="30" y="426">x</text>
+    <text x="180" y="259">O</text>
+    <text x="352" y="144" font-weight="700">P</text>
+    <text x="350" y="374">K</text>
+    <text x="446" y="284">L</text>
+    <text x="108" y="372" font-style="italic">x</text>
+    <text x="196" y="340" font-style="italic">φ</text>
+    <text x="272" y="318" font-style="italic">ρ</text>
+    <text x="228" y="374" font-style="italic">y</text>
+  </g>
+</svg>

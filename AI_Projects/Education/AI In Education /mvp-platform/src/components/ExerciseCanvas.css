@@ -71,7 +71,20 @@
 .exc-group-title { flex: 1; font: 600 12.5px var(--font-ui); color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .exc-chev { color: var(--text-muted); display: flex; flex: none; }
 .exc-chev svg { width: 15px; height: 15px; }
+/* Which lessons a chapter's exercises belong to. Muted against the exercise
+   count beside it: the count is what the row is about, this is context. */
+.exc-group-les { font: 600 11px var(--font-ui); color: var(--text-muted); flex: none; }
 .exc-group-list { padding: 2px 8px 8px; max-height: 320px; overflow-y: auto; }
+.exc-group-les-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 6px 8px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.exc-group-les-l { display: inline-flex; align-items: center; gap: 5px; font: 700 9.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); width: 100%; }
+.exc-group-les-l svg { width: 12px; height: 12px; }
+.exc-lchip { font: 600 11px var(--font-ui); padding: 2px 8px; border-radius: var(--r-pill); background: #ecebfb; color: var(--indigo-700); text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-lchip:hover { background: var(--indigo-100, #dcd9f7); }
+.exc-lchip.muted { background: var(--slate-100); color: var(--text-muted); }
+/* The lesson a book exercise was filed under, on its row. Capped so a long lesson
+   title cannot push the tag and the chevron off the end of the row. */
+.exc-blink { display: inline-flex; align-items: center; gap: 4px; flex: none; max-width: 42%; font: 600 10.5px var(--font-ui); padding: 2px 7px; border-radius: var(--r-pill); background: #ecebfb; color: var(--indigo-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-blink svg { width: 10px; height: 10px; flex: none; }
 .exc-brow { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: var(--r-sm); cursor: pointer; }
 .exc-brow:hover { background: var(--indigo-50); }
 .exc-bnum { width: 24px; height: 24px; flex: none; display: grid; place-items: center; font: 700 11px var(--font-ui); border-radius: var(--r-sm); background: var(--slate-100); color: var(--text-soft); }

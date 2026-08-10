@@ -41,6 +41,12 @@ export function chunkLesson(subjectName: string, lessonTitle: string, contentMd:
   const parts = sections.length > 0 ? sections : [clean.trim()];
   const chunks: string[] = [];
   for (const part of parts) {
+    // A lesson that is almost entirely figures strips down to nothing, and the
+    // empty-content guard upstream does not catch it: its contentMd is not blank,
+    // its text is. Without this, such a lesson contributes a chunk that is only
+    // the "«Subject › Title»" prefix — a content-free vector that answers weakly
+    // to everything.
+    if (part.trim().length < 20) continue;
     if (part.length <= CHUNK_SIZE) {
       chunks.push(prefix + part);
     } else {

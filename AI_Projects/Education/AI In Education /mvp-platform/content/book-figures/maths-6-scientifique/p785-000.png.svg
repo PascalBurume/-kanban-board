@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" role="img" aria-label="Repère orthonormé Oxyz avec les vecteurs unitaires i, j et k">
+  <rect width="420" height="300" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="150" y1="170" x2="150" y2="40"/>
+    <path d="M150 40l-6 12M150 40l6 12"/>
+    <line x1="150" y1="170" x2="390" y2="170"/>
+    <path d="M390 170l-12-6M390 170l-12 6"/>
+    <line x1="150" y1="170" x2="45" y2="255"/>
+    <path d="M45 255l4-13M45 255l13-4"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="3" stroke-linecap="round">
+    <line x1="150" y1="170" x2="150" y2="120"/>
+    <path d="M150 120l-5 10M150 120l5 10"/>
+    <line x1="150" y1="170" x2="215" y2="170"/>
+    <path d="M215 170l-10-5M215 170l-10 5"/>
+    <line x1="150" y1="170" x2="107" y2="205"/>
+    <path d="M107 205l3-11M107 205l11-3"/>
+  </g>
+  <circle cx="150" cy="170" r="3.2" fill="#111"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="136" y="34">z</text>
+    <text x="398" y="176">y</text>
+    <text x="26" y="268">x</text>
+    <text x="126" y="163">O</text>
+    <text x="160" y="112" font-style="italic">k</text>
+    <text x="196" y="190" font-style="italic">j</text>
+    <text x="112" y="222" font-style="italic">i</text>
+  </g>
+  <!-- Overbars: the book writes the unit vectors as k̄, j̄, ī. i runs along x and
+       j along y — the standard assignment, checked against the scan rather than
+       assumed, since this book labels its plane axes j and k. -->
+  <g fill="none" stroke="#111" stroke-width="1.3">
+    <path d="M163 100h9"/><path d="M199 178h9"/><path d="M115 210h9"/>
+  </g>
+</svg>

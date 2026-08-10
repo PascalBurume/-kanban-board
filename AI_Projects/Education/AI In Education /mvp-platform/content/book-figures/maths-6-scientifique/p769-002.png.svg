@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 400" role="img" aria-label="Symétrique de M par rapport à la droite d : la perpendiculaire p coupe d en I et porte l'image M prime">
+  <rect width="560" height="400" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="25" y1="250" x2="530" y2="250"/>
+    <path d="M530 250l-12-6M530 250l-12 6"/>
+    <line x1="250" y1="390" x2="250" y2="20"/>
+    <path d="M250 20l-6 12M250 20l6 12"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1" stroke-linecap="round">
+    <path d="M120 245v10M185 245v10M315 245v10M380 245v10M445 245v10"/>
+    <path d="M245 180h10M245 115h10M245 310h10"/>
+  </g>
+  <!-- d ≡ 2x + 3y − 6 = 0, et p la perpendiculaire menée par M. -->
+  <line x1="60" y1="60" x2="500" y2="290" fill="none" stroke="#111" stroke-width="2.1" stroke-linecap="round"/>
+  <line x1="322" y1="268" x2="425" y2="55" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="5 4"/>
+  <g fill="none" stroke="#111" stroke-width="1.1" stroke-dasharray="3 3">
+    <path d="M250 268H322M322 268V250"/>
+  </g>
+  <g fill="#111">
+    <circle cx="371" cy="160" r="3.4"/><circle cx="322" cy="268" r="3.4"/><circle cx="396" cy="118" r="3.4"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#111">
+    <text x="538" y="270">x</text>
+    <text x="236" y="16">y</text>
+    <text x="224" y="272">O</text>
+    <text x="120" y="76" font-weight="700">d</text>
+    <text x="432" y="52" font-style="italic">p</text>
+    <text x="348" y="158" font-style="italic">I</text>
+    <text x="404" y="112">M′</text>
+    <text x="300" y="296">M(25/26 , −4/13)</text>
+  </g>
+</svg>

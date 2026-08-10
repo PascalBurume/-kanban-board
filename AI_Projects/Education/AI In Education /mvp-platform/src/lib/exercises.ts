@@ -40,8 +40,16 @@ function toDto(e: {
 // The full canvas payload for one class: its books, each with modules (level-
 // filtered), lessons, the chapter's book exercises, and the teacher's custom
 // exercises for that subject. Mirrors studioTree()'s scoping.
+// « Révision EXETAT » is the national end-of-secondary exam, not a course with a
+// manual. Its book is a collection of past papers spanning nine disciplines, so
+// "the exercises of this chapter" means nothing there — and it is assigned to
+// every teacher, which put an empty extra tab in front of all of them. It stays
+// available everywhere else (studio, programme); it is only the exercises canvas
+// that has nothing to say about it.
+const EXAM_ONLY_SUBJECTS = ["sciences-1-exetat"];
+
 export async function exercisesTree(user: SessionUser, classId?: string | null) {
-  let slugs = await editableSubjectSlugs(user);
+  let slugs = (await editableSubjectSlugs(user)).filter((s) => !EXAM_ONLY_SUBJECTS.includes(s));
   let classLevel: string | null = null;
 
   if (classId) {
@@ -84,13 +92,22 @@ export async function exercisesTree(user: SessionUser, classId?: string | null) 
     customBySubject.get(e.subjectSlug)!.push(e);
   }
 
+  // Teacher-placed "this exercise belongs to that lesson" links for book
+  // exercises. Fetched in one query and grouped by exId rather than per exercise:
+  // a maths-6 chapter alone carries 871 of them.
+  const bookLinkRows = await prisma.bookExerciseLink.findMany({
+    select: { id: true, exId: true, lessonId: true, lesson: { select: { title: true } } },
+  });
+  const bookLinks = new Map<number, { id: string; lessonId: string; lessonTitle: string }[]>();
+  for (const r of bookLinkRows) {
+    const list = bookLinks.get(r.exId) ?? [];
+    list.push({ id: r.id, lessonId: r.lessonId, lessonTitle: r.lesson.title });
+    bookLinks.set(r.exId, list);
+  }
+
   return {
-    subjects: await Promise.all(subjects.map(async (s) => ({
-      slug: s.slug,
-      name: s.name,
-      icon: s.icon,
-      color: s.color,
-      modules: await Promise.all(s.modules.map(async (m) => ({
+    subjects: await Promise.all(subjects.map(async (s) => {
+      const modules = await Promise.all(s.modules.map(async (m) => ({
         id: m.id,
         title: m.title,
         order: m.order,
@@ -105,10 +122,24 @@ export async function exercisesTree(user: SessionUser, classId?: string | null) 
           complete: e.complete,
           text: e.text,
           solution: e.solution || "",
+          links: bookLinks.get(Number(e.id)) ?? [],
+          bookTitle: e.bookTitle ?? "",
         })),
-      }))),
-      custom: (customBySubject.get(s.slug) ?? []).map((e) => toDto(e, user.userId)),
-    }))),
+      })));
+      // One subject is one manual, so the title of any of its exercises is the
+      // title of the book. Taken from the first that carries one — the older OCR
+      // payloads predate the field, and a subject with no exercises has none.
+      const bookTitle = modules.flatMap((m) => m.bookExercises).find((e) => e.bookTitle)?.bookTitle ?? "";
+      return {
+        slug: s.slug,
+        name: s.name,
+        icon: s.icon,
+        color: s.color,
+        bookTitle,
+        modules,
+        custom: (customBySubject.get(s.slug) ?? []).map((e) => toDto(e, user.userId)),
+      };
+    })),
     classLevel,
   };
 }

@@ -8,6 +8,7 @@ import { useAgentStream, AgentSteps } from "@/components/TeacherAgentPanel";
 // constant, but it also reaches for auth, the database and Ollama — importing it here
 // pulls next/headers into the client bundle and the whole page fails to build.
 import { checkLatex, LATEX_INSTRUCTION_MAX } from "@/lib/latexCheck";
+import { rotateChips } from "@/lib/copilotSuggestions";
 import "@/components/AgentSteps.css";
 import "./StudioComposePanel.css";
 
@@ -171,12 +172,20 @@ function FormulaCopilot({ subjectSlug, classLevel, getSelectedTex, onApply }) {
 
 // Copilot APS for lesson authoring. Drives the editor through callbacks so generated
 // content is saved by the editor's normal autosave.
-export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLessonId = null, allowContent = true, contentReady, getContent, onApplyContent, onApplyTitle, onApplyQuiz, onInsertText, suggestions, fixRequest, getSelectedTex, onApplyFormula }) {
+export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLessonId = null, allowContent = true, contentReady, getContent, onApplyContent, onApplyTitle, onApplyQuiz, onInsertText, suggestions, suggestionsGrain = "chapter", fixRequest, getSelectedTex, onApplyFormula }) {
   const [busy, setBusy] = useState("");
   const [result, setResult] = useState(null); // { action, ... }
   const [error, setError] = useState("");
   const [topic, setTopic] = useState("");
   const [instruction, setInstruction] = useState("");
+
+  // Three chips at a time out of the manual's whole pool. The window only moves when
+  // the teacher asks it to: these are click targets that fill the topic field and can
+  // launch a minutes-long generation, so a chip must not move under the cursor.
+  const [chipCursor, setChipCursor] = useState(0);
+  // A new pool — the teacher picked a different manual lesson — starts from the top,
+  // otherwise a stale cursor would open them mid-chapter.
+  useEffect(() => { setChipCursor(0); }, [suggestions]);
 
   // A « À relire » warning can ask for its own fix. The request arrives with a nonce
   // rather than just a string so that clicking the same warning twice runs twice —
@@ -226,10 +235,29 @@ export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLe
             </button>
           </div>
           <div className="cp-hint">
-            {suggestions?.length ? "Depuis votre manuel — cliquez pour partir de ce chapitre :" : "Un thème précis donne une meilleure leçon qu'un thème large. Essayez :"}
-            {(suggestions?.length ? suggestions : TOPIC_EXAMPLES).map((t) => (
-              <button key={t} className="cp-chip" onClick={() => setTopic(t)}>{t}</button>
-            ))}
+            {/* « autres » sits on the label, not at the end of the chips: chip widths
+                change every press, so a trailing button walks away from the cursor
+                and the second press misses it. The label never moves. */}
+            <span className="cp-hint-l">
+              {!suggestions?.length
+                ? "Un thème précis donne une meilleure leçon qu'un thème large. Essayez :"
+                : suggestionsGrain === "lesson"
+                  ? "Depuis votre manuel — cliquez pour partir de cette leçon :"
+                  : "Depuis votre manuel — cliquez pour partir de ce chapitre :"}
+              {(suggestions?.length ?? 0) > 3 && (
+                <button className="cp-more" onClick={() => setChipCursor((c) => c + 3)}
+                  title="Voir d'autres thèmes de votre manuel">
+                  <Icon name="refresh" /> autres
+                </button>
+              )}
+            </span>
+            {/* Live region: the button swaps these labels in place while keeping focus
+                itself, so nothing else would announce the change. */}
+            <span className="cp-chips" aria-live="polite">
+              {rotateChips(suggestions?.length ? suggestions : TOPIC_EXAMPLES, chipCursor, 3).map((t) => (
+                <button key={t} className="cp-chip" onClick={() => setTopic(t)}>{t}</button>
+              ))}
+            </span>
           </div>
         </>
       )}

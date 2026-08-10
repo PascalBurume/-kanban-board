@@ -80,3 +80,55 @@ export function rotateChips(pool, cursor = 0, count = 3) {
 export function suggestChips(ctx = {}) {
   return chipPool(ctx).slice(0, 4);
 }
+
+// ---- studio: topics drawn from the teacher's own manual ----
+
+const dedupe = (a) => [...new Set(a.filter(Boolean))];
+
+// Which chapter a book lesson belongs to. moduleId when the payload carries one;
+// the chapter title otherwise, so an older response still groups into chapters
+// instead of collapsing every lesson into one bucket.
+const chapterKey = (r) => r.moduleId ?? r.moduleTitle ?? "";
+
+/**
+ * Ordered pool of topics for the studio's « Rédiger la leçon » chips, plus the
+ * grain it ended up at so the caller can label it.
+ *
+ * With no manual lesson selected the teacher is still orienting, so the pool is
+ * CHAPTER titles spread across the book. It is interleaved in three bands, which
+ * means every window of three takes one title from each third — rotating stays
+ * broad instead of degrading into "the next three sections of chapter 1".
+ *
+ * Once a manual lesson is selected the teacher is writing against it, so the pool
+ * narrows to the LESSON titles of that chapter, the selected one first. This is
+ * the grain the panel asks for: « Statistiques » is the shapeless topic
+ * TOPIC_EXAMPLES warns about, « La médiane » is what yields a usable lesson.
+ *
+ * @param {Array<{id: string, title: string, moduleId?: string|null, moduleTitle?: string}>} rows
+ *   the book's lessons in book order
+ * @param {string|null} [sourceId] the selected manual lesson, if any
+ * @returns {{topics: string[], grain: "lesson"|"chapter"}}
+ */
+export function bookTopicPool(rows, sourceId = null) {
+  const list = (Array.isArray(rows) ? rows : []).filter((r) => r && r.title);
+  if (!list.length) return { topics: [], grain: "chapter" };
+
+  const source = sourceId ? list.find((r) => r.id === sourceId) : null;
+  if (source) {
+    const siblings = list.filter((r) => chapterKey(r) === chapterKey(source)).map((r) => r.title);
+    const topics = dedupe([source.title, ...siblings]);
+    // A one-lesson chapter has nothing to offer beyond the lesson already
+    // selected, so fall through to the book rather than show a dead single chip.
+    if (topics.length > 1) return { topics, grain: "lesson" };
+  }
+
+  const titles = dedupe(list.map((r) => r.moduleTitle || r.title));
+  if (titles.length <= 3) return { topics: titles, grain: "chapter" };
+  const step = titles.length / 3;
+  const bands = [0, 1, 2].map((i) => titles.slice(Math.floor(i * step), Math.floor((i + 1) * step)));
+  const topics = [];
+  for (let k = 0; k < Math.max(...bands.map((b) => b.length)); k++) {
+    for (const b of bands) if (b[k] !== undefined) topics.push(b[k]);
+  }
+  return { topics, grain: "chapter" };
+}

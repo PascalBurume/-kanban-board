@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 520" role="img" aria-label="Équation normale d'un plan : la direction u issue de O, sa trace P dans le plan, la distance delta et les angles directeurs alpha, bêta et gamma">
+  <rect width="620" height="520" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round">
+    <line x1="185" y1="360" x2="185" y2="30"/>
+    <path d="M185 30l-6 12M185 30l6 12"/>
+    <line x1="185" y1="360" x2="575" y2="360"/>
+    <path d="M575 360l-12-6M575 360l-12 6"/>
+    <line x1="185" y1="360" x2="45" y2="492"/>
+    <path d="M45 492l4-14M45 492l14-4"/>
+  </g>
+  <!-- Le plan π, traversé par la direction u issue de O ; P en est la trace. -->
+  <path d="M105 195L250 108L515 232L370 320Z" fill="none" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/>
+  <line x1="185" y1="360" x2="522" y2="73" fill="none" stroke="#111" stroke-width="2.1" stroke-linecap="round"/>
+  <!-- Pointe pleine, orientée le long de u : deux traits perpendiculaires aux
+       axes donnaient une équerre, pas une flèche. -->
+  <path d="M530 66L509 72L516 81Z" fill="#111" stroke="#111" stroke-width="1"/>
+  <!-- δ, mesurée de Q jusqu'à M. -->
+  <g fill="none" stroke="#111" stroke-width="1.3">
+    <path d="M352 216L386 268"/>
+    <path d="M386 268L540 132"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.1" stroke-dasharray="7 4 2 4">
+    <path d="M540 132L452 428"/>
+    <path d="M540 132L523 344"/>
+    <path d="M452 428L523 344"/>
+  </g>
+  <!-- Les trois angles directeurs, chacun mesuré depuis son axe jusqu'à u, et
+       tracés à des rayons différents pour qu'aucun ne passe par l'origine. -->
+  <path d="M185 265 A95 95 0 0 0 257 298" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M261 300L248 293L251 302Z" fill="#111"/>
+  <path d="M315 360 A130 130 0 0 0 284 276" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M282 272L277 286L288 282Z" fill="#111"/>
+  <!-- α reste un grand angle — il se mesure depuis Ox — mais sur un rayon plus
+       court, pour ne pas balayer la moitié de la figure. -->
+  <path d="M116 431 A115 115 0 0 0 272 285" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M275 281L262 288L272 293Z" fill="#111"/>
+  <g fill="#111">
+    <circle cx="352" cy="216" r="3.6"/><circle cx="386" cy="268" r="3.2"/>
+    <circle cx="540" cy="132" r="3.4"/><circle cx="523" cy="344" r="3.2"/><circle cx="452" cy="428" r="3.4"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="171" y="24">z</text>
+    <text x="583" y="366">y</text>
+    <text x="26" y="506">x</text>
+    <text x="157" y="350">O</text>
+    <text x="536" y="52" font-style="italic">u</text>
+    <text x="326" y="210">P</text>
+    <text x="392" y="288">Q</text>
+    <text x="466" y="182" font-style="italic">δ</text>
+    <text x="548" y="124">M</text>
+    <text x="528" y="334">A</text>
+    <text x="440" y="450">B</text>
+    <text x="206" y="292" font-style="italic">γ</text>
+    <text x="300" y="322" font-style="italic">β</text>
+    <text x="176" y="424" font-style="italic">α</text>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.4"><path d="M533 30h14"/></g>
+</svg>

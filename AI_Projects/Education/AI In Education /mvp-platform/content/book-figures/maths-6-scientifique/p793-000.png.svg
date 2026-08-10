@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 230" role="img" aria-label="Plan pi porté par deux vecteurs issus du point A vers B et vers C">
+  <rect width="520" height="230" fill="white"/>
+  <!-- Le plan π, dessiné en perspective comme un parallélogramme. -->
+  <path d="M40 205L150 25L490 25L380 205Z" fill="none" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Les deux vecteurs directeurs, issus du même point A. -->
+  <g fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round">
+    <line x1="262" y1="165" x2="196" y2="88"/>
+    <path d="M196 88l2 15M196 88l13 3"/>
+    <line x1="262" y1="165" x2="352" y2="80"/>
+    <path d="M352 80l-15 2M352 80l-3 14"/>
+  </g>
+  <circle cx="262" cy="165" r="3.2" fill="#111"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#111">
+    <text x="170" y="102">B</text>
+    <text x="360" y="76">C</text>
+    <text x="253" y="192">A</text>
+    <text x="52" y="196" font-style="italic">π</text>
+  </g>
+</svg>

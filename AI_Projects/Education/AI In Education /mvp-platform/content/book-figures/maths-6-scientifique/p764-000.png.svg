@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 330" role="img" aria-label="Rotation dans le plan complexe : l'image z prime de z par une rotation d'angle alpha">
+  <rect width="470" height="330" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="35" y1="255" x2="440" y2="255"/>
+    <path d="M440 255l-12-6M440 255l-12 6"/>
+    <line x1="115" y1="310" x2="115" y2="30"/>
+    <path d="M115 30l-6 12M115 30l6 12"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round">
+    <line x1="115" y1="255" x2="330" y2="165"/>
+    <line x1="115" y1="255" x2="222" y2="48"/>
+  </g>
+  <!-- z and z' lie on the same circle centred at O: a rotation preserves the modulus. -->
+  <path d="M330 165 A233 233 0 0 0 222 48" fill="none" stroke="#111" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M222 48l11 4M222 48l-1 12" fill="none" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M215 255 A100 100 0 0 0 158 217" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M175 214 A72 72 0 0 0 141 187" fill="none" stroke="#111" stroke-width="1.3"/>
+  <circle cx="115" cy="255" r="3" fill="#111"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111">
+    <text x="448" y="261">x</text>
+    <text x="101" y="24">y</text>
+    <text x="95" y="278">O</text>
+    <text x="338" y="162" font-style="italic">z</text>
+    <text x="196" y="40" font-style="italic">z′</text>
+    <text x="228" y="240" font-style="italic">θ</text>
+    <text x="150" y="196" font-style="italic">α</text>
+  </g>
+</svg>

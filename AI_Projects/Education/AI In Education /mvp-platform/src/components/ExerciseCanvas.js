@@ -203,6 +203,7 @@ export default function ExerciseCanvas({ subject, search, flaggedOnly = false, o
 
         {/* ── left: exercises ── */}
         <div className="exc-col exc-col-ex">
+          {/* The book is named once above the canvas, not on every column. */}
           <div className="exc-col-h">Mes exercices <span className="exc-count">{visibleCustom.length}</span></div>
           {visibleCustom.length === 0 && (
             <div className="exc-empty">
@@ -255,6 +256,12 @@ export default function ExerciseCanvas({ subject, search, flaggedOnly = false, o
             // teacher sees them without expanding each chapter.
             const open = flaggedOnly || openGroups.has(m.id);
             const list = m.bookExercises.filter(bookMatch);
+            // Which lessons this chapter's exercises belong to. A book exercise is
+            // tied to the CHAPTER, not to one lesson, so this is the honest answer
+            // to "which lesson is this?" — the chapter's teaching lessons. The
+            // "Manuel illustré" companions are dropped: they are illustration
+            // pages, not distinct topics, and a chapter can carry eighteen of them.
+            const teach = (m.lessons ?? []).filter((l) => !/^Manuel illustr[ée]/i.test(l.title));
             return (
               <div key={m.id} className={`exc-group${open ? " open" : ""}`}>
                 <div
@@ -264,15 +271,47 @@ export default function ExerciseCanvas({ subject, search, flaggedOnly = false, o
                 >
                   <span className="exc-group-ic"><Icon name="lock" /></span>
                   <span className="exc-group-title">Ch. {m.order} — {m.title}</span>
+                  {/* Counts the chapter's whole lesson set, so this never contradicts
+                      the "N leçons" the same chapter shows in the Programme column. */}
+                  {m.lessons?.length > 0 && <span className="exc-group-les">{m.lessons.length} leçons</span>}
                   <span className="exc-count">{m.bookExercises.length}</span>
                   <span className="exc-chev"><Icon name={open ? "chevD" : "chevR"} /></span>
                 </div>
                 {open && (
                   <div className="exc-group-list">
+                    {teach.length > 0 && (
+                      <div className="exc-group-les-row">
+                        <span className="exc-group-les-l"><Icon name="book" /> Leçons de ce chapitre</span>
+                        {teach.map((l) => (
+                          <a
+                            key={l.id}
+                            className="exc-lchip"
+                            href={`/teacher/studio/?lesson=${l.id}`}
+                            title={`Ouvrir « ${l.title} » dans le studio`}
+                            onClick={(ev) => ev.stopPropagation()}
+                          >
+                            {l.title}
+                          </a>
+                        ))}
+                        {/* Said out loud rather than silently dropped — a chapter of
+                            Maths 6 can carry eighteen of these. */}
+                        {m.lessons.length > teach.length && (
+                          <span className="exc-lchip muted">+{m.lessons.length - teach.length} Manuel illustré</span>
+                        )}
+                      </div>
+                    )}
                     {list.map((e) => (
                       <div key={e.id} className={`exc-brow${advisedId === `book:${e.id}` ? " advised" : ""}`} onClick={() => onOpenBook(e, m)}>
                         <span className="exc-bnum">{e.n ?? "•"}</span>
                         <span className="exc-btitle">{e.section || `Exercice ${e.n ?? ""}`}</span>
+                        {/* The lesson a teacher filed this exercise under. The book
+                            only ever says which chapter, so this is the one place
+                            the answer is exercise-level rather than chapter-level. */}
+                        {(e.links ?? []).map((l) => (
+                          <span key={l.id} className="exc-blink" title={`Relié à « ${l.lessonTitle} »`}>
+                            <Icon name="file" /> {l.lessonTitle}
+                          </span>
+                        ))}
                         {e.fixed
                           ? <span className="exc-btag prof" title="Corrigé par un enseignant — remplace la reconstruction IA">Corrigé prof</span>
                           : e.complete === false

@@ -35,6 +35,31 @@ export function splitRep(t) {
   return { q: t.slice(0, m.index).trim(), rep: m[1].split("\n")[0].trim() };
 }
 
+/**
+ * How to label a book exercise's solution block, so the header never claims more
+ * than the text behind it is worth. Three provenances, in descending trust:
+ *
+ *   book    parsed from a structured chapter, verbatim (a teacher's own fix also
+ *           lands here — the drawer already banners that separately)
+ *   ai      an LLM rebuilt it from unreadable OCR (may be invented maths)
+ *   raw     no clean version exists — the scan's own OCR, unchecked
+ *
+ * `raw` is the one that had no label: it is not a reconstruction, so the
+ * « reconstruit » wording is wrong for it, and the plain green « Corrigé » it
+ * used to fall through to read as a verified answer key.
+ *
+ * @param {{quality?: string, reconstructed?: boolean, complete?: boolean}} ex
+ * @returns {{kind: "raw"|"ai"|"book", cls: string, icon: string, label: string}}
+ */
+export function solutionProvenance(ex = {}) {
+  if (ex.quality === "ocr") return { kind: "raw", cls: " raw", icon: "alert", label: "Corrigé — texte OCR non vérifié" };
+  // `complete === false` only ever lands on a reconstruction: the un-refined path
+  // has nothing to truncate and defaults the flag to true.
+  if (ex.complete === false) return { kind: "ai", cls: " ai", icon: "sparkles", label: "Corrigé reconstruit — incomplet" };
+  if (ex.reconstructed) return { kind: "ai", cls: " ai", icon: "sparkles", label: "Corrigé reconstruit — à vérifier" };
+  return { kind: "book", cls: " sol", icon: "check", label: "Corrigé" };
+}
+
 // Compose an answer. Returns { html?, text, sources: [record], openExercises?: path }
 export function answer({ role, q, index, exercises, lessonsCache }) {
   const fq = fold(q);

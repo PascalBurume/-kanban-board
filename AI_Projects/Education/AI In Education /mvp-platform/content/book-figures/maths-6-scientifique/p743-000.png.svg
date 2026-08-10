@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 330" role="img" aria-label="Hyperbole : la tangente t et la normale n en un point d'une branche, avec les rayons focaux issus de F et F prime">
+  <rect width="600" height="330" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="20" y1="190" x2="575" y2="190"/>
+    <path d="M575 190l-12-6M575 190l-12 6"/>
+    <line x1="280" y1="20" x2="280" y2="320"/>
+    <path d="M280 20l-6 12M280 20l6 12"/>
+  </g>
+  <!-- Sommets sur l'axe, branches ouvertes vers l'extérieur. -->
+  <path d="M110 55 C 175 105, 190 160, 190 190 C 190 220, 175 275, 110 325" fill="none" stroke="#111" stroke-width="1.9"/>
+  <path d="M470 55 C 405 105, 390 160, 390 190 C 390 220, 405 275, 470 325" fill="none" stroke="#111" stroke-width="1.9"/>
+  <!-- Les deux rayons focaux au point de contact, la tangente t et la normale n. -->
+  <g fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round">
+    <line x1="150" y1="190" x2="425" y2="120"/>
+    <line x1="425" y1="190" x2="425" y2="120"/>
+    <line x1="150" y1="200" x2="560" y2="55"/>
+    <line x1="382" y1="65" x2="452" y2="262"/>
+  </g>
+  <g fill="#111">
+    <circle cx="425" cy="120" r="3.4"/><circle cx="150" cy="190" r="3.2"/><circle cx="425" cy="190" r="3.2"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#111">
+    <text x="132" y="212">F′</text>
+    <text x="416" y="212">F</text>
+    <text x="256" y="212">O</text>
+    <text x="376" y="56" font-style="italic">n</text>
+    <text x="566" y="50" font-style="italic">t</text>
+    <text x="583" y="196">x</text>
+    <text x="266" y="16">y</text>
+  </g>
+</svg>

@@ -15,6 +15,7 @@ import { FIGURE_KINDS } from "@/lib/figures";
 import { EPURE_TEMPLATES } from "@/lib/epure";
 import { isBlankContent } from "@/lib/lessonSkeleton";
 import { lintLesson } from "@/lib/lessonLint";
+import { bookTopicPool } from "@/lib/copilotSuggestions";
 import { saveDoc, loadDoc, markSynced, deleteDoc, requestPersistence } from "@/lib/localDocs";
 import { flushPendingImages } from "@/lib/imageUpload";
 import { toast } from "@/lib/toast";
@@ -365,16 +366,11 @@ export default function RedigerClient() {
   const quizIssues = quizProblems.filter((p) => !p.suspect).length;
 
   // Suggestions drawn from the teacher's own manual rather than three hardcoded
-  // examples. Spread across the book instead of taking the first three, so the chips
-  // show the breadth of what is available rather than whatever happens to open it.
-  const suggestions = useMemo(() => {
-    const titles = bookLessons
-      .map((b) => b.moduleTitle || b.title)
-      .filter((t, i, a) => t && a.indexOf(t) === i);
-    if (titles.length <= 3) return titles;
-    const step = titles.length / 3;
-    return [0, 1, 2].map((i) => titles[Math.floor(i * step)]);
-  }, [bookLessons]);
+  // examples, and re-aimed at whichever manual lesson is selected: chapters while
+  // they are still orienting, that chapter's own lessons once they have picked one.
+  // The panel rotates through the pool, so this is the whole ordered list, not a
+  // window of three.
+  const topicPool = useMemo(() => bookTopicPool(bookLessons, sourceId), [bookLessons, sourceId]);
 
   const applyContent = useCallback((raw, mode) => {
     // Undo any collapsed LaTeX before it lands in the document. The JSON actions are
@@ -1043,7 +1039,8 @@ export default function RedigerClient() {
                   onApplyTitle={(t) => { if (t) { setTitle(t); touch(); } }}
                   onApplyQuiz={(qs, mode) => { const mapped = qs.map(quizFromApi); saveQuiz(mode === "replace" ? mapped : [...quiz, ...mapped]); setRail("quiz"); }}
                   onInsertText={(t) => applyContent(t, "append")}
-                  suggestions={suggestions}
+                  suggestions={topicPool.topics}
+                  suggestionsGrain={topicPool.grain}
                   fixRequest={fixRequest}
                   // The atelier's agent, in the rail: Copilot works on the formula the
                   // caret is sitting on, and puts its answer back over that one.
@@ -1231,6 +1228,8 @@ export default function RedigerClient() {
                   onApplyTitle={(t) => { if (t) { setTitle(t); touch(); } }}
                   onApplyQuiz={(qs, mode) => { const mapped = qs.map(quizFromApi); saveQuiz(mode === "replace" ? mapped : [...quiz, ...mapped]); }}
                   onInsertText={(t) => applyContent(t, "append")}
+                  suggestions={topicPool.topics}
+                  suggestionsGrain={topicPool.grain}
                   getSelectedTex={() => writer.current?.ed?.getSelectedTex?.() ?? ""}
                   onApplyFormula={(tex) => { writer.current?.ed?.applyFormula?.(tex); touch(); }}
                 />

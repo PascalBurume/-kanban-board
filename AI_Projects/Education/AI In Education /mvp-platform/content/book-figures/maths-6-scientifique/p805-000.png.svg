@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 400" role="img" aria-label="Plan muni de sa normale n : le vecteur u fait l'angle thêta avec n et l'angle alpha avec sa projection dans le plan">
+  <rect width="540" height="400" fill="white"/>
+  <!-- Le plan, en perspective. -->
+  <path d="M60 340L145 175L505 175L420 340Z" fill="none" stroke="#111" stroke-width="1.7" stroke-linejoin="round"/>
+  <!-- n normale au plan ; u hors du plan ; la troisième flèche est la direction
+       du plan sur laquelle u se rabat. -->
+  <g fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round">
+    <line x1="245" y1="290" x2="245" y2="35"/>
+    <path d="M245 35l-7 13M245 35l7 13"/>
+    <line x1="245" y1="290" x2="450" y2="215"/>
+    <path d="M450 215l-14-1M450 215l-5-13"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-dasharray="6 5" stroke-linecap="round">
+    <line x1="245" y1="290" x2="440" y2="70"/>
+  </g>
+  <path d="M440 70l-14 3M440 70l-3 14" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round"/>
+  <!-- θ entre n et u ; α entre u et la direction du plan. -->
+  <path d="M245 155 A135 135 0 0 0 330 195" fill="none" stroke="#111" stroke-width="1.3"/>
+  <path d="M330 250 A105 105 0 0 0 342 185" fill="none" stroke="#111" stroke-width="1.3"/>
+  <circle cx="245" cy="290" r="3.2" fill="#111"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111">
+    <text x="256" y="42" font-style="italic">n</text>
+    <text x="450" y="66" font-style="italic">u</text>
+    <text x="300" y="176" font-style="italic">θ</text>
+    <text x="344" y="228" font-style="italic">α</text>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.4">
+    <path d="M253 26h13"/><path d="M447 50h13"/>
+  </g>
+</svg>

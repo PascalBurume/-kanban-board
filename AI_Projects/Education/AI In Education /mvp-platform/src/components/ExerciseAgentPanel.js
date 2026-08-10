@@ -40,16 +40,24 @@ export default function ExerciseAgentPanel({ subject, classId, classLevel, selec
   // Live link state — after onLink refetches the tree, suggestions flip to
   // « Relié » without re-running the agent.
   const liveLinks = useMemo(() => {
-    if (selected?.kind !== "custom") return null;
-    const ex = subject?.custom?.find((e) => e.id === selected.ex.id);
+    if (!selected) return null;
+    const ex = selected.kind === "custom"
+      ? subject?.custom?.find((e) => e.id === selected.ex.id)
+      : subject?.modules
+          ?.flatMap((m) => m.bookExercises ?? [])
+          .find((e) => String(e.id) === String(selected.ex.id));
     if (!ex) return null;
     return {
-      lessons: new Set(ex.links.map((l) => l.lessonId).filter(Boolean)),
-      modules: new Set(ex.links.map((l) => l.moduleId).filter(Boolean)),
+      lessons: new Set((ex.links ?? []).map((l) => l.lessonId).filter(Boolean)),
+      modules: new Set((ex.links ?? []).map((l) => l.moduleId).filter(Boolean)),
     };
   }, [subject, selected]);
 
   const editable = selected?.kind === "custom" && selected.ex.mine;
+  // A book exercise cannot be rewritten here, but it CAN be filed under a lesson:
+  // that link is the teacher's answer to "which lesson is this?", and the book
+  // itself only ever says which chapter. The server re-checks the subject.
+  const canLink = editable || selected?.kind === "book";
 
   async function run() {
     setRanKey(key);
@@ -151,7 +159,7 @@ export default function ExerciseAgentPanel({ subject, classId, classLevel, selec
                       <i style={{ width: `${s.confidence}%` }} />
                     </span>
                     <span className="exa-conf-v">{s.confidence}%</span>
-                    {editable ? (
+                    {canLink ? (
                       linked ? (
                         <span className="exa-linked"><Icon name="check" /> Relié</span>
                       ) : (
@@ -166,8 +174,10 @@ export default function ExerciseAgentPanel({ subject, classId, classLevel, selec
                 </div>
               );
             })}
-            {!editable && advice.suggestions.length > 0 && (
-              <p className="ag-intro"><Icon name="lock" /> Exercice du manuel — la liaison est en lecture seule.</p>
+            {selected?.kind === "book" && advice.suggestions.length > 0 && (
+              <p className="ag-intro">
+                <Icon name="lock" /> L’énoncé du manuel reste en lecture seule — relier une leçon ne le modifie pas.
+              </p>
             )}
 
             <ExerciseChatBox

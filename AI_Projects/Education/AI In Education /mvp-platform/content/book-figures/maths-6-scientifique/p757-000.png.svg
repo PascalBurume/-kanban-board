@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" role="img" aria-label="Translation d'affixe v : le parallélogramme OABC montrant que C a pour affixe x plus a et y plus b">
+  <rect width="560" height="380" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="35" y1="320" x2="510" y2="320"/>
+    <path d="M510 320l-12-6M510 320l-12 6"/>
+    <line x1="80" y1="360" x2="80" y2="20"/>
+    <path d="M80 20l-6 12M80 20l6 12"/>
+  </g>
+  <!-- OACB est un parallélogramme : la somme de deux affixes se lit sur sa diagonale. -->
+  <g fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round">
+    <line x1="80" y1="320" x2="165" y2="190"/>
+    <line x1="80" y1="320" x2="370" y2="278"/>
+    <line x1="165" y1="190" x2="455" y2="148"/>
+    <line x1="370" y1="278" x2="455" y2="148"/>
+  </g>
+  <g fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round">
+    <path d="M116 265L113 278M116 265L105 272"/>
+    <path d="M225 299L214 306M225 299L212 296"/>
+    <path d="M415 208L412 221M415 208L404 215"/>
+  </g>
+  <g fill="#111">
+    <circle cx="165" cy="190" r="3.4"/><circle cx="370" cy="278" r="3.4"/><circle cx="455" cy="148" r="3.4"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#111">
+    <text x="518" y="326">x</text>
+    <text x="66" y="16">y</text>
+    <text x="56" y="342">O</text>
+    <text x="96" y="184">A(x , y)</text>
+    <text x="356" y="302">B(a , b)</text>
+    <text x="404" y="138">C′(x+a , y+b)</text>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 360" role="img" aria-label="Ellipse de sommets A, A prime, B, B prime, de foyers F et F prime, avec les directrices d et d prime et un point M">
+  <rect width="560" height="360" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="20" y1="185" x2="540" y2="185"/>
+    <path d="M540 185l-12-6M540 185l-12 6"/>
+    <line x1="280" y1="345" x2="280" y2="18"/>
+    <path d="M280 18l-6 12M280 18l6 12"/>
+  </g>
+  <!-- Directrices, one on each side, beyond the vertices. -->
+  <g fill="none" stroke="#111" stroke-width="1.5">
+    <line x1="80" y1="40" x2="80" y2="330"/>
+    <line x1="480" y1="40" x2="480" y2="330"/>
+  </g>
+  <ellipse cx="280" cy="185" rx="160" ry="95" fill="none" stroke="#111" stroke-width="1.9"/>
+  <!-- The defining property: MF + MF' is constant, so both focal radii are drawn. -->
+  <g fill="none" stroke="#111" stroke-width="1.7" stroke-linejoin="round">
+    <path d="M180 185L280 90L380 185"/>
+    <path d="M180 185L370 128L380 185"/>
+  </g>
+  <g fill="#111">
+    <circle cx="280" cy="90" r="3.4"/><circle cx="280" cy="280" r="3.4"/>
+    <circle cx="120" cy="185" r="3.4"/><circle cx="440" cy="185" r="3.4"/>
+    <circle cx="180" cy="185" r="3.4"/><circle cx="380" cy="185" r="3.4"/>
+    <circle cx="370" cy="128" r="3.4"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#111">
+    <text x="548" y="205">x</text>
+    <text x="266" y="14">y</text>
+    <text x="286" y="205">O</text>
+    <text x="66" y="34">d</text>
+    <text x="470" y="34">d′</text>
+    <text x="252" y="82">B(0 , b)</text>
+    <text x="248" y="303">B′(0 , −b)</text>
+    <text x="58" y="180">A′(−a , 0)</text>
+    <text x="444" y="180">A(a , 0)</text>
+    <text x="120" y="210">F′(−c , 0)</text>
+    <text x="360" y="210">F(c , 0)</text>
+    <text x="378" y="118">M(x , y)</text>
+  </g>
+</svg>

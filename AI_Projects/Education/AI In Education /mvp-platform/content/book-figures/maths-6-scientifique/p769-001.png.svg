@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 300" role="img" aria-label="Symétrie orthogonale d'axe Oy : le point A d'abscisse x et son image A prime d'abscisse moins x">
+  <rect width="470" height="300" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="25" y1="215" x2="440" y2="215"/>
+    <path d="M440 215l-12-6M440 215l-12 6"/>
+    <line x1="232" y1="290" x2="232" y2="20"/>
+    <path d="M232 20l-6 12M232 20l6 12"/>
+  </g>
+  <!-- Reflection in Oy: same ordinate, opposite abscissa. -->
+  <g fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4">
+    <path d="M130 128H340"/>
+    <path d="M130 128V215"/>
+    <path d="M340 128V215"/>
+  </g>
+  <g fill="#111"><circle cx="130" cy="128" r="3.4"/><circle cx="340" cy="128" r="3.4"/></g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="450" y="221">x</text>
+    <text x="218" y="16">y</text>
+    <text x="209" y="236">O</text>
+    <text x="118" y="112">A′</text>
+    <text x="334" y="112">A</text>
+    <text x="240" y="122" font-style="italic">y</text>
+    <text x="112" y="240" font-style="italic">−x</text>
+    <text x="334" y="240" font-style="italic">x</text>
+  </g>
+</svg>

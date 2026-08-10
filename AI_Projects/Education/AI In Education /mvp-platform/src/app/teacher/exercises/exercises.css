@@ -25,6 +25,14 @@
 .exp-flagbtn .exp-flagn { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); background: var(--danger-fg); color: #fff; font: 700 11px var(--font-ui); }
 
 .exp-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Which book the canvas is showing — stated once, just above it. The manual's
+   real title gets the full width here, so it no longer has to be ellipsised into
+   a column header or hidden in a tooltip. */
+.exp-book { display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: 13px; color: var(--text-soft); min-width: 0; }
+.exp-book svg { width: 15px; height: 15px; flex: none; color: var(--indigo-600); }
+.exp-book b { font: 700 13px var(--font-ui); color: var(--text); flex: none; }
+.exp-book-t { font-style: italic; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exp-book-t::before { content: "· "; font-style: normal; }
 .exp-tab { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); border-radius: var(--r-pill); padding: 7px 14px; font: 600 13px var(--font-ui); cursor: pointer; transition: all .12s; }
 .exp-tab:hover { border-color: var(--indigo-300); color: var(--text); }
 .exp-tab.on { background: var(--indigo-600); border-color: var(--indigo-600); color: #fff; }
@@ -140,6 +148,13 @@
 .exp-view-lchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
 .exp-view-lchip { font: 600 12px var(--font-ui); color: var(--text); background: var(--surface-2, var(--slate-100)); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 4px 11px; text-decoration: none; transition: border-color .12s, color .12s, background .12s; }
 a.exp-view-lchip:hover { color: var(--indigo-600); border-color: var(--indigo-400); background: var(--indigo-100); }
+/* The lesson a teacher actually filed this exercise under, versus the rest of the
+   chapter's lessons beside it. */
+.exp-view-lchip.on { background: #ecebfb; border-color: var(--indigo-400); color: var(--indigo-700); display: inline-flex; align-items: center; gap: 5px; }
+.exp-view-lchip.on a { color: inherit; text-decoration: none; }
+.exp-lchip-x { border: 0; background: transparent; color: inherit; opacity: .55; cursor: pointer; display: grid; place-items: center; padding: 1px; border-radius: 50%; }
+.exp-lchip-x:hover { opacity: 1; background: rgba(0,0,0,.08); }
+.exp-lchip-x svg { width: 11px; height: 11px; }
 .exp-view-sec { font: 700 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; }
 .exp-view-sec.sol { color: var(--success-fg); }
 .exp-view-sec svg { width: 13px; height: 13px; }
@@ -160,6 +175,7 @@ a.exp-view-lchip:hover { color: var(--indigo-600); border-color: var(--indigo-40
 .exp-view-fixed svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
 .exp-view-fixacts { display: flex; gap: 8px; }
 .exp-view-sec.ai { color: #c2410c; }
+.exp-view-sec.raw { color: #c2410c; }
 .exp-md p { margin: 0 0 10px; }
 .exp-md p:last-child { margin-bottom: 0; }
 .exp-md .katex { font-size: 1.02em; }
@@ -167,4 +183,7 @@ a.exp-view-lchip:hover { color: var(--indigo-600); border-color: var(--indigo-40
 .exp-md h2:first-child, .exp-md h3:first-child { margin-top: 0; }
 .exp-pre { white-space: pre-wrap; word-break: break-word; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: var(--text-soft); background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: var(--r-md); padding: 12px 14px; margin: 0; }
 .exp-pre.sol { border-color: var(--success); background: var(--success-bg); color: var(--success-fg); }
+/* Raw scan text. Deliberately NOT the green of a checked solution: this block is
+   unverified OCR, and the success colour was reading as the book's own answer. */
+.exp-pre.raw { border-color: #fed7aa; background: #fff7ed; color: #7c2d12; }
 .exp-view-nosol { font-size: 13px; color: var(--text-muted); font-style: italic; }

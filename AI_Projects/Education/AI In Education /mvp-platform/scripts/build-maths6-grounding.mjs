@@ -39,9 +39,11 @@ const lines = fs.readFileSync(SRC, "utf8").split("\n");
 // The body chapter heading is the LAST `CHAPITRE <roman> :` occurrence — the
 // table of contents carries an identical heading earlier. The strict `:` after
 // the exact roman keeps I≠II, V≠VI, X≠XI, etc.
+// The `#` prefix is optional: the original pdftotext dump emitted bare lines,
+// the vision transcription that replaced it emits "# CHAPITRE I : …".
 const bodyStart = (roman) => {
   let last = -1;
-  const re = new RegExp(`^CHAPITRE ${roman}\\s*:`, "i");
+  const re = new RegExp(`^#*\\s*CHAPITRE ${roman}\\s*:`, "i");
   for (let i = 0; i < lines.length; i++) if (re.test(lines[i])) last = i;
   return last;
 };

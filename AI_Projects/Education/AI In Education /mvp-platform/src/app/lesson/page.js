@@ -783,37 +783,30 @@ export default function LessonPage() {
 /* ---- Quiz card (real questions + auto-graded feedback) ---- */
 function Quiz({ quiz, answers, setAnswer, result, submitting, allAnswered, onSubmit, onRetry }) {
   const byId = result ? Object.fromEntries(result.results.map((r) => [r.questionId, r])) : null;
+  // Counted the same way allAnswered is, so "3 / 3 répondues" and an enabled
+  // « Valider » can never disagree.
+  const answered = quiz.questions.filter((q) => answers[q.id] !== undefined && answers[q.id] !== "").length;
 
   return (
-    <div className="quiz-card" style={{ marginTop: "28px" }}>
-      <div className="qh">
-        <span className="badge badge-warning">
-          <Icon name="target" /> {quiz.title || "Quiz de fin de leçon"}
+    <div className="quiz-card">
+      <div className="quiz-head">
+        <span className="badge badge-primary">
+          {/* The title is a lesson name and runs long; it needs its own element to
+              truncate in, or on a phone it slides under the close button. */}
+          <Icon name="target" /> <span className="qt">{quiz.title || "Quiz de fin de leçon"}</span>
         </span>
+        <h2>Vérification rapide</h2>
+        <p className="muted">Réponds aux questions ci-dessous pour vérifier ta compréhension.</p>
       </div>
-      <h2>Vérification rapide</h2>
-      <p className="muted">Réponds aux questions ci-dessous pour vérifier ta compréhension.</p>
 
-      {result && (
-        <div className={`quiz-feedback show ${result.score >= 50 ? "ok" : "no"}`} style={{ marginTop: "16px" }}>
-          <div className="fic">
-            <Icon name={result.score === 100 ? "trophy" : result.score >= 50 ? "check" : "x"} />
-          </div>
-          <div className="ft">
-            <b>
-              Score : {result.score}% — {result.correct}/{result.total} correctes
-            </b>
-          </div>
-        </div>
-      )}
-
+      <div className="quiz-body">
       {quiz.questions.map((q, qi) => {
         const r = byId ? byId[q.id] : null;
         const given = answers[q.id];
         return (
-          <div key={q.id} style={{ marginTop: qi === 0 ? "18px" : "26px" }}>
+          <div className="quiz-item" key={q.id}>
             <div className="quiz-q">
-              <span style={{ color: "var(--text-muted)", marginRight: "8px" }}>{qi + 1}.</span>
+              <span className="qn">{qi + 1}</span>
               <Markdown>{q.promptMd}</Markdown>
             </div>
 
@@ -832,8 +825,10 @@ function Quiz({ quiz, answers, setAnswer, result, submitting, allAnswered, onSub
                       cls += " wrong";
                       mark = <Icon name="x" />;
                     }
-                  } else if (oi === Number(given)) {
-                    cls += " correct";
+                  } else if (given !== undefined && oi === Number(given)) {
+                    // Chosen, not graded. Green here would tell the pupil they are
+                    // right before anything has been marked.
+                    cls += " picked";
                   }
                   return (
                     <button className={cls} key={oi} onClick={() => setAnswer(q.id, oi)}>
@@ -864,7 +859,7 @@ function Quiz({ quiz, answers, setAnswer, result, submitting, allAnswered, onSub
                       mark = <Icon name="x" />;
                     }
                   } else if (given === val) {
-                    cls += " correct";
+                    cls += " picked";
                   }
                   return (
                     <button className={cls} key={label} onClick={() => setAnswer(q.id, val)}>
@@ -914,19 +909,35 @@ function Quiz({ quiz, answers, setAnswer, result, submitting, allAnswered, onSub
         );
       })}
 
-      <div style={{ marginTop: "20px", display: "block" }}>
-        {!result ? (
-          <button
-            className="btn btn-primary btn-lg btn-block"
-            onClick={onSubmit}
-            disabled={submitting || !allAnswered}
-          >
-            <Icon name="check" /> {submitting ? "Envoi…" : "Valider"}
-          </button>
+      </div>
+
+      {/*
+        The action stays on screen. It used to sit at the end of the scroll, so on a
+        three-question quiz « Valider » opened 150px below the fold with nothing to
+        say it was there. The score joins it rather than living at the top of the
+        body, where reading the last explanation scrolls it out of sight.
+      */}
+      <div className="quiz-foot">
+        {result ? (
+          <>
+            <div className={`quiz-score ${result.score >= 50 ? "ok" : "no"}`}>
+              <Icon name={result.score === 100 ? "trophy" : result.score >= 50 ? "check" : "x"} />
+              <b>{result.score}%</b>
+              <span>{result.correct}/{result.total} correctes</span>
+            </div>
+            <button className="btn btn-secondary btn-lg" onClick={onRetry}>
+              <Icon name="refresh" /> Réessayer
+            </button>
+          </>
         ) : (
-          <button className="btn btn-secondary btn-lg btn-block" onClick={onRetry}>
-            <Icon name="refresh" /> Réessayer
-          </button>
+          <>
+            {/* « Réponses : 0 / 3 » rather than « 0 / 3 répondue(s) »: the participle
+                would have to agree, and it is singular at 0 as well as at 1. */}
+            <span className="quiz-progress">Réponses : {answered} / {quiz.questions.length}</span>
+            <button className="btn btn-primary btn-lg" onClick={onSubmit} disabled={submitting || !allAnswered}>
+              <Icon name="check" /> {submitting ? "Envoi…" : "Valider"}
+            </button>
+          </>
         )}
       </div>
     </div>

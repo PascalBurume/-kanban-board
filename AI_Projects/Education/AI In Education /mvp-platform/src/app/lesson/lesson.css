@@ -108,14 +108,25 @@
 
 /* QUIZ card */
 .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-sm); padding: 26px; }
-.quiz-card .qh { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.quiz-card .qh .badge { }
 .quiz-card h2 { font-size: 22px; margin: 10px 0 6px; }
-.quiz-q { font-size: 18px; font-weight: 600; margin: 18px 0; }
-.quiz-opts { display: flex; flex-direction: column; gap: 10px; }
-.quiz-opt { display: flex; align-items: center; gap: 14px; padding: 15px 18px; border: 1.5px solid var(--border-strong); border-radius: var(--r-md); cursor: pointer; font-size: 15.5px; font-weight: 500; background: var(--surface); transition: all .14s ease; text-align: left; }
+/* The number sits beside the question, not on a line of its own above it. */
+.quiz-q { display: flex; align-items: baseline; gap: 11px; font-size: 17px; font-weight: 600; line-height: 1.45; margin: 18px 0 14px; }
+.quiz-q .qn { flex: none; min-width: 22px; height: 22px; border-radius: 7px; background: var(--indigo-50); color: var(--primary); font-size: 12px; font-weight: 700; display: grid; place-items: center; transform: translateY(2px); }
+.quiz-q > .prose-reader { flex: 1; min-width: 0; }
+.quiz-opts { display: flex; flex-direction: column; gap: 9px; }
+.quiz-opt { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border: 1.5px solid var(--border); border-radius: var(--r-md); cursor: pointer; font-size: 15.5px; font-weight: 500; background: var(--surface); transition: border-color .14s ease, background .14s ease, box-shadow .14s ease; text-align: left; }
 .quiz-opt:hover { border-color: var(--indigo-300); background: var(--indigo-50); }
-.quiz-opt .key { width: 30px; height: 30px; border-radius: 8px; background: var(--slate-100); display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--text-soft); flex: none; }
+.quiz-opt:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.18); }
+.quiz-opt .key { width: 30px; height: 30px; border-radius: 8px; background: var(--slate-100); display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--text-soft); flex: none; transition: background .14s ease, color .14s ease; }
+
+/*
+  Chosen, not yet marked. This used to reuse .correct — the pupil picked an answer
+  and the card turned the same green it uses for "this one was right", telling them
+  they were correct before anything had been graded. Selection is the brand indigo;
+  green and red are reserved for what the marking says.
+*/
+.quiz-opt.picked { border-color: var(--primary); background: var(--indigo-50); box-shadow: 0 0 0 3px rgba(79,70,229,.10); }
+.quiz-opt.picked .key { background: var(--primary); color: #fff; }
 .quiz-opt .opt-md { flex: 1; min-width: 0; }
 .quiz-opt .opt-md .prose-reader, .quiz-opt .opt-md .prose-reader p { margin: 0; }
 .quiz-opt .opt-md .katex { font-size: 1.05em; }
@@ -287,8 +298,59 @@
 .quiz-cta .qc-body p { font-size: 13.5px; color: var(--text-soft); margin: 3px 0 0; }
 
 /* ---------- Quiz + rating popups ---------- */
-.quiz-modal { width: min(680px, 100%); max-height: 88vh; overflow-y: auto; position: relative; padding: 8px; }
-.quiz-modal .quiz-card { border: 0; box-shadow: none; }
+/*
+  The modal is a shell, not a scrolling box.
+  It used to be the scroller itself, which cost it three things at once: a 15px
+  platform scrollbar drawn square inside a 22px-radius card, a close button that
+  scrolled out of reach because it is absolutely positioned within it, and a
+  « Valider » that opened 150px below the fold with nothing to say it was there.
+  Header and footer are now fixed and only the questions move.
+*/
+.quiz-modal { width: min(680px, 100%); max-height: min(88vh, 760px); position: relative; padding: 0; overflow: hidden; display: flex; }
+.quiz-modal .quiz-card { border: 0; box-shadow: none; padding: 0; display: flex; flex-direction: column; min-height: 0; width: 100%; }
+
+.quiz-head { padding: 26px 60px 18px 28px; border-bottom: 1px solid var(--border); flex: none; }
+.quiz-head .badge { max-width: 100%; }
+.quiz-head .badge .qt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.quiz-head h2 { font-size: 21px; margin: 12px 0 5px; letter-spacing: -.01em; }
+.quiz-head .muted { font-size: 14px; margin: 0; }
+
+.quiz-body { overflow-y: auto; overscroll-behavior: contain; padding: 4px 28px 20px; flex: 1 1 auto; min-height: 0; }
+/* Inset and quiet, so the bar reads as part of the card rather than the OS. */
+.quiz-body { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.quiz-body::-webkit-scrollbar { width: 10px; }
+.quiz-body::-webkit-scrollbar-track { background: transparent; }
+.quiz-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; border: 3px solid var(--surface); }
+.quiz-body::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.quiz-item + .quiz-item { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border); }
+
+.quiz-foot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  /* No corner radius of its own: .quiz-modal is overflow:hidden, so the shell's
+     radius already clips this — repeating it here would be a second copy of a
+     number that lives on .modal. */
+  padding: 16px 28px; border-top: 1px solid var(--border); background: var(--surface);
+}
+.quiz-foot .btn { flex: none; }
+.quiz-progress { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+.quiz-score { display: inline-flex; align-items: center; gap: 9px; font-size: 14px; color: var(--text-soft); }
+.quiz-score svg { width: 19px; height: 19px; }
+.quiz-score b { font-size: 19px; letter-spacing: -.01em; }
+.quiz-score.ok { color: var(--success); } .quiz-score.ok b { color: var(--success); }
+.quiz-score.no { color: var(--danger); } .quiz-score.no b { color: var(--danger); }
+.quiz-score span { color: var(--text-muted); font-weight: 600; }
+
+@media (max-width: 560px) {
+  .quiz-head { padding: 20px 52px 14px 18px; }
+  .quiz-body { padding: 4px 18px 16px; }
+  .quiz-foot { padding: 12px 18px; gap: 10px; }
+  /* « 2/3 correctes » beside the button wrapped to two lines and pushed the bar
+     to twice its height; on this width the percentage carries the meaning. */
+  .quiz-score span { display: none; }
+  .quiz-score { flex: none; }
+  .quiz-foot .btn { flex: 0 1 auto; }
+}
 .rating-modal { width: min(520px, 100%); position: relative; }
 .modal-x { position: absolute; top: 12px; right: 12px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); cursor: pointer; display: grid; place-items: center; }
 .modal-x:hover { color: var(--text); background: var(--slate-100); }

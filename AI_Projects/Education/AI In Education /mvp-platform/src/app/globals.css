@@ -20,10 +20,18 @@ body { @apply bg-slate-50 text-ink antialiased; }
 /* Scroll wide tables inside their own box (see Markdown.js) instead of clipping. */
 .prose-reader .md-table-wrap { @apply my-4 overflow-x-auto rounded-lg border border-slate-200; -webkit-overflow-scrolling: touch; }
 .prose-reader table { @apply w-full text-sm my-4 border-collapse; }
-/* Wrapped table sizes to its content, still filling the box when it's narrow;
-   nowrap cells keep set notation like {a,b,c} on one line as the table scrolls. */
-.prose-reader .md-table-wrap table { @apply my-0 border-0; width: max-content; min-width: 100%; }
-.prose-reader .md-table-wrap th, .prose-reader .md-table-wrap td { @apply whitespace-nowrap; }
+/* The table fills the box and lays its columns out to fit. It sized to `max-content`
+   with every cell `nowrap` before, which was right for the sign and variation tables
+   (short cells, genuinely wide) but wrong for the book's prose tables: three sentences
+   of 90 characters were pushed onto one unbreakable line, so the third column sat off
+   the right edge behind a scrollbar. Sentences now wrap; a table that still cannot fit
+   overflows and the wrapper scrolls exactly as before. */
+.prose-reader .md-table-wrap table { @apply my-0 border-0; min-width: 100%; }
+.prose-reader .md-table-wrap th, .prose-reader .md-table-wrap td { white-space: normal; }
+/* What must never break is a formula — KaTeX lays out its own boxes and a line break
+   through the middle of one is unreadable. This is the guarantee the blanket nowrap
+   was really providing. */
+.prose-reader .md-table-wrap .katex { white-space: nowrap; }
 .prose-reader th, .prose-reader td { @apply border border-slate-300 px-2 py-1 text-left; }
 .prose-reader thead th { @apply bg-slate-50 font-semibold; }
 /* Worked calculations (ASCII math, long division…) read as a clean light block,

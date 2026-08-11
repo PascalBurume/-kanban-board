@@ -6,6 +6,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { renderFigure, parseFigure } from "@/lib/figures";
 import { sanitizeHast } from "@/lib/mdSanitize";
+import { dropBlankTableRows } from "@/lib/mdTables";
 
 // Exercise statements and worked solutions put each sub-item ("a) …", "b) …")
 // on its own line separated by a single newline, which Markdown folds into one
@@ -64,7 +65,7 @@ export default function Markdown({ children, breaks = false }) {
     <div className="prose-reader max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeRaw, sanitizeHast, [rehypeKatex, { throwOnError: false, strict: false }]]}
+        rehypePlugins={[rehypeRaw, sanitizeHast, dropBlankTableRows, [rehypeKatex, { throwOnError: false, strict: false }]]}
         components={components}
       >
         {src}

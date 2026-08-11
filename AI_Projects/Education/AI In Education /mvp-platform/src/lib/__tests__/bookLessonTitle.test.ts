@@ -233,3 +233,55 @@ describe("titleGroups", () => {
     expect(out.every((t) => typeof t === "string" && t.length > 0)).toBe(true);
   });
 });
+
+describe("cleanHeading — the scan runs two numbers together", () => {
+  it("keeps the ordinal when the article number swallowed it", () => {
+    // The book prints "98. 3ᵉ MÉTHODE"; the scan writes "98.3 e MÉTHODE", and taking
+    // "98.3" as the section number left the lesson called "E méthode".
+    expect(cleanHeading("98.3 e MÉTHODE.")).toBe("3e MÉTHODE");
+    expect(cleanHeading("164.4 ° EXEMPLE.")).toBe("4° EXEMPLE");
+  });
+
+  it("still strips a genuine two-part section number", () => {
+    expect(cleanHeading("1.2 Notions de concentration")).toBe("Notions de concentration");
+    expect(cleanHeading("2.3.4 Courbes de neutralisation")).toBe("Courbes de neutralisation");
+  });
+});
+
+describe("titleGroups — chapters that number nothing", () => {
+  it("uses the chapter's own heading rather than a name that says nothing", () => {
+    const out = titleGroups([[]], lexicon, { spare: [["INÉQUATIONS TRIGONOMÉTRIQUES"]] });
+    expect(out[0]).toBe("Inéquations trigonométriques");
+  });
+
+  it("still falls back when there is no heading at all", () => {
+    expect(titleGroups([[]], lexicon, { spare: [[]] })).toEqual(["Extrait du manuel"]);
+  });
+
+  it("prefers a numbered section over the spare", () => {
+    const out = titleGroups([["1.1. THEORIE ATOMIQUE"]], lexicon, { spare: [["EXERCICES"]] });
+    expect(out[0]).toBe("Théorie atomique");
+  });
+
+  it("prefers continuing the previous lesson over the spare", () => {
+    const out = titleGroups([["1.1. THEORIE ATOMIQUE"], []], lexicon, { spare: [[], ["EXERCICES"]] });
+    expect(out[1]).toBe("Théorie atomique (suite)");
+  });
+});
+
+describe("unshout — titles opening on an ordinal", () => {
+  it("keeps the ordinal suffix lower-case", () => {
+    expect(unshout("3e MÉTHODE", lexicon)).toBe("3e méthode");
+    expect(unshout("2e EXEMPLE", lexicon)).toBe("2e exemple");
+  });
+
+  it("treats the ordinal itself as the opening word", () => {
+    // "4° exemple" already begins with its first word; capitalising past the ordinal
+    // would leave a stray capital in the middle of the title.
+    expect(unshout("4° EXEMPLE", lexicon)).toBe("4° exemple");
+  });
+
+  it("leaves an ordinary title's first letter capitalised", () => {
+    expect(unshout("THEORIE ATOMIQUE", lexicon)).toBe("Théorie atomique");
+  });
+});

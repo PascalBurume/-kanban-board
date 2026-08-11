@@ -40,6 +40,9 @@ const SUBJECTS = [
   { key: "anglais", re: /^#+\s*\**\s*(?:IX\s*\.?\s*)?\**\s*ANGLAIS\s+et\s+FRAN[CÇ]AIS\s*\.?\s*\**\s*$/i },
 ];
 
+// A heading that names a sitting of the exam.
+const SESSION = /^#{1,6}\s.*\b(?:ex[eé]tat|session)\b/i;
+
 const ANSWER_GRID = /^#+\s*\**\s*GRILLE\s+DES\s+R[EÉ]PONSES/i;
 
 const lines = fs.readFileSync(SRC, "utf8").split("\n");
@@ -63,6 +66,11 @@ injectBookFigures({
   bookTitle: "Exemplaire Sciences 1 — Items de l'Examen d'État",
   book: "sciences-1-exetat",
   locate,
+  // One sitting, one lesson. These are past papers: a teacher looks for "Exétat 2019",
+  // and a lesson holding two sittings under the name of the first hides the second —
+  // three of the maths sittings were invisible that way. Only a session heading forces
+  // the break; the sub-headings inside a paper stay with it.
+  startsLesson: (section) => SESSION.test(section.split("\n", 1)[0] ?? ""),
   // A lesson here is a sitting of the exam, so it takes the session's own heading —
   // "Exétat 2019 (Série 1)". The default rule wants a numbered section and would find
   // none, leaving every lesson called "Extrait du manuel (suite 7)".

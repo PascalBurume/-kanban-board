@@ -8,11 +8,63 @@
 
 export const DEFAULT_CHIPS = ["Explique autrement", "Donne un exemple", "Interroge-moi"];
 
-// Trim an objective/notion to a chip-sized fragment.
+// A maths span, display first so `$$…$$` is matched whole rather than as two
+// empty inline ones.
+const MATHS = /\$\$[\s\S]*?\$\$|\$[^$]*\$/g;
+
+// Emphasis markers, outside of maths. `$a_1$` and `$x^*$` are content: an
+// underscore or star inside a formula belongs to the formula, so the stripper
+// walks the string in maths / not-maths spans and only touches the latter.
+function unmark(s) {
+  return String(s || "")
+    .split(/(\$\$[\s\S]*?\$\$|\$[^$]*\$)/)
+    .map((part, i) =>
+      i % 2
+        ? part
+        // Outside maths a star or backtick is always markup. An underscore is only
+        // markup at a word edge, so « oxydo_réduction » keeps its own.
+        : part.replace(/[*`]/g, "").replace(/(?<!\w)_+|_+(?!\w)/g, ""))
+    .join("");
+}
+
+/**
+ * Trim an objective/notion to a chip-sized fragment.
+ *
+ * A notion is written « **Terme** : sa définition » — 1,167 of the corpus's 1,685
+ * are — so the bolded term IS the notion and the rest is its gloss. Taking the term
+ * alone gives « Explique : Proposition conditionnelle » where clamping the raw line
+ * gave « Explique : **Proposition conditionnelle**: Une affi… »: the markers reached
+ * the button unrendered on 309 of the 351 lessons that show a chip, and the words
+ * that survived the 40-character cut were the definition's first few rather than the
+ * thing being defined.
+ *
+ * The chip is also the prompt the student sends, so this is what the Copilot is
+ * asked about, not just what the button reads.
+ */
 function clamp(s, n = 40) {
-  const t = String(s || "").replace(/\s+/g, " ").trim();
+  const raw = String(s || "").replace(/\s+/g, " ").trim();
+  const term = /^\*\*([^*]+?)\*\*/.exec(raw);
+  // « **Équation du second degré :** » puts the colon inside the emphasis; it
+  // introduces the gloss that the term has just been split from, so it goes too.
+  const t = unmark(term ? term[1] : raw)
+    .replace(/\s+/g, " ").trim()
+    .replace(/^[:—–-]\s*/, "")
+    .replace(term ? /\s*[:;,—–-]+$/ : /(?!)/, "");
   if (!t) return "";
-  return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t;
+  if (t.length <= n) return t;
+
+  // Never end inside a formula. The chip is the prompt as well as the label, so a
+  // cut at « $\sin(\theta) = \frac{\text{opp… » sends the Copilot a LaTeX fragment
+  // that closes nowhere. Back off to before the span opens; when that would leave
+  // nothing to click — the notion IS the formula — keep it whole and overlong
+  // instead, which the button ellipsises on its own.
+  let end = n - 1;
+  for (const m of t.matchAll(MATHS)) {
+    const from = m.index, to = m.index + m[0].length;
+    if (end > from && end < to) { end = from; break; }   // the cut lands inside it
+  }
+  const cut = t.slice(0, end).trimEnd().replace(/[:;,—–-]+$/, "").trimEnd();
+  return cut.length >= 8 ? cut + "…" : t;
 }
 
 // Ordered pool of contextual suggestions (most relevant first). All inputs

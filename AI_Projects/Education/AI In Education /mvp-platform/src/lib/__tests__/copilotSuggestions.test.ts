@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bookTopicPool, rotateChips } from "../copilotSuggestions";
+import { bookTopicPool, chipPool, rotateChips } from "../copilotSuggestions";
 
 // A book: `chapters` chapters of `per` lessons each, in book order, named so the
 // assertions can read the shape off the title ("C2·L3" = chapter 2, lesson 3).
@@ -122,5 +122,48 @@ describe("rotateChips over a manual pool", () => {
         expect(new Set(w).size).toBe(w.length);
       }
     }
+  });
+});
+
+// A chip is the button's label AND the prompt the student sends, so whatever
+// reaches it is read by a pupil and by the Copilot. Notions are raw markdown
+// lifted from « ## Notions clés », which is where the markers come from.
+describe("chipPool — notions reach the chip as prose", () => {
+  const first = (notion: string) =>
+    (chipPool({ tab: "lesson", lesson: { title: "T", notions: [notion] } }) as string[])[0];
+
+  it("names the notion rather than quoting its definition", () => {
+    expect(first("**Proposition conditionnelle**: Une affirmation de la forme \"Si P, alors Q\""))
+      .toBe("Explique : Proposition conditionnelle");
+  });
+
+  it("drops a colon the emphasis swallowed", () => {
+    expect(first("**Équation du second degré :** Une équation de la forme ax²+bx+c=0"))
+      .toBe("Explique : Équation du second degré");
+  });
+
+  it("strips emphasis a notion carries without a leading term", () => {
+    expect(first("*italique* et `code` et __gras__")).toBe("Explique : italique et code et gras");
+  });
+
+  it("leaves maths alone — the underscore in $u_n$ belongs to the formula", () => {
+    expect(first("Une suite $u_n$ définie par récurrence"))
+      .toBe("Explique : Une suite $u_n$ définie par récurrence");
+  });
+
+  it("never cuts inside a formula", () => {
+    const chip = first("En considérant un triangle rectangle $ABC$ d'hypoténuse $AC$ et de côtés $AB$ et $BC$");
+    expect(chip.replace(/\$\$[\s\S]*?\$\$|\$[^$]*\$/g, "")).not.toContain("$");
+  });
+
+  it("keeps a formula whole rather than clipping it to an ellipsis", () => {
+    // Backing off the cut would leave nothing to click, so the chip runs long.
+    const notion = "$\\sin(\\theta) = \\frac{\\text{opposé}}{\\text{hypoténuse}}$";
+    expect(first(notion)).toBe(`Explique : ${notion}`);
+  });
+
+  it("handles display maths as one span, not two empty inline ones", () => {
+    const notion = "$$4\\text{Na} + \\text{O}_2 \\longrightarrow 2\\text{Na}_2\\text{O}$$";
+    expect(first(notion).replace(/\$\$[\s\S]*?\$\$|\$[^$]*\$/g, "")).not.toContain("$");
   });
 });

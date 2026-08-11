@@ -17,7 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
-import { pooledLexicon, titleGroups, titleCandidates, anyHeading } from "./book-lesson-title.mjs";
+import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings } from "./book-lesson-title.mjs";
 import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
@@ -163,6 +163,11 @@ for (const ch of CHAPTERS) {
   // Named after the book's own sections — see scripts/book-lesson-title.mjs.
   const titles = titleGroups(groups.map(headingsOf), lexicon, {
     taken: mod.lessons.map((l) => l.title),
+    named: groups.map((g) => {
+      const text = g.join("\n\n");
+      const pick = (re) => [...text.matchAll(re)].map((m) => m[1].trim());
+      return namedHeadings({ major: pick(/^##\s+(.+)$/gm), minor: pick(/^###\s+(.+)$/gm) });
+    }),
     spare: groups.map((g) => {
       const text = g.join("\n\n");
       const pick = (re) => [...text.matchAll(re)].map((m) => m[1].trim());

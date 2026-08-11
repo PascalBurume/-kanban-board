@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // The pipeline module is plain .mjs; its JSDoc carries the types.
-import { buildLexicon, isShouted, unshout, restoreDiacritics, cleanHeading, lessonTitle, titleCandidates, titleGroups } from "../../../scripts/book-lesson-title.mjs";
+import { buildLexicon, isShouted, unshout, restoreDiacritics, cleanHeading, lessonTitle, titleCandidates, titleGroups, namedHeadings } from "../../../scripts/book-lesson-title.mjs";
 
 // A stand-in for the book's body text: correctly spelled prose, repeated enough to
 // count as evidence. This is exactly the signal the real lexicon runs on.
@@ -283,5 +283,39 @@ describe("unshout — titles opening on an ordinal", () => {
 
   it("leaves an ordinary title's first letter capitalised", () => {
     expect(unshout("THEORIE ATOMIQUE", lexicon)).toBe("Théorie atomique");
+  });
+});
+
+describe("unshout — the preposition à the scan flattened to A", () => {
+  it("restores it before a noun phrase", () => {
+    expect(unshout("INEQUATIONS DU PREMIER DEGRE A UNE INCONNUE", lexicon)).toContain("à une inconnue");
+    expect(unshout("APPLICATIONS DES DERIVEES A D'AUTRES DISCIPLINES", lexicon)).toContain("à d'autres");
+    expect(unshout("SOLUTIONS A PARTIR DE LA COURBE", lexicon)).toContain("à partir");
+  });
+
+  it("leaves a point label alone", () => {
+    // "A" here names a vertex, not a preposition — nothing that looks like a noun
+    // phrase follows it.
+    expect(unshout("TANGENTE EN A ET EN B", lexicon)).toContain(" A ");
+    expect(unshout("LE POINT A", lexicon)).toMatch(/A$/);
+  });
+
+  it("does not touch a title that opens on A", () => {
+    expect(unshout("A UNE INCONNUE", lexicon)).toMatch(/^A/);
+  });
+});
+
+describe("namedHeadings", () => {
+  it("accepts a heading that names something on its own", () => {
+    expect(namedHeadings({ major: [], minor: ["BIBLIOGRAPHIE", "ANNEXE : tables"] }))
+      .toEqual(["BIBLIOGRAPHIE", "ANNEXE : tables"]);
+  });
+
+  it("rejects the labels that mark a step inside a section", () => {
+    expect(namedHeadings({ major: [], minor: ["Résolution", "Remarque", "Exercices", "Exemple"] })).toEqual([]);
+  });
+
+  it("rejects a heading too short to be a name", () => {
+    expect(namedHeadings({ major: [], minor: ["Notion", "a) x"] })).toEqual([]);
   });
 });

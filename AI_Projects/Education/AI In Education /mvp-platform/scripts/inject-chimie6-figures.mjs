@@ -17,7 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
-import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings } from "./book-lesson-title.mjs";
+import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
 import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
@@ -161,7 +161,16 @@ for (const ch of CHAPTERS) {
     "des reconstructions vérifiées d'après le scan, non le document original.\n\n";
 
   // Named after the book's own sections — see scripts/book-lesson-title.mjs.
+  let opened = "";
+  const context = groups.map((g) => {
+    const hs = [...g.join("\n\n").matchAll(/^#{2,3}\s+(.+)$/gm)].map((m) => m[1].trim());
+    const before = opened;
+    const real = hs.filter(opensSection);
+    if (real.length) opened = real[real.length - 1];
+    return before;
+  });
   const titles = titleGroups(groups.map(headingsOf), lexicon, {
+    context,
     taken: mod.lessons.map((l) => l.title),
     named: groups.map((g) => {
       const text = g.join("\n\n");

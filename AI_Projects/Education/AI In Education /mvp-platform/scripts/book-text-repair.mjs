@@ -103,6 +103,57 @@ export function trimTrailingHeadings(text) {
   return lines.slice(0, end).join("\n");
 }
 
+const TEXT_IN_SVG = /<text[^>]*>([^<]*)<\/text>/g;
+const GEOMETRY = /<circle|<ellipse|<line |<polyline|<polygon|<img/;
+
+/**
+ * Is this "figure" a crop of the page that carries nothing?
+ *
+ * The transcription cuts the scan into regions, and some of those catch only the page
+ * number and the scanner's watermark — a figure whose whole content is "277 Scanned by
+ * CamScanner". It draws nothing and says nothing.
+ *
+ * A figure with no text at all is NOT this: an unlabelled diagram is still a diagram.
+ */
+export function carriesNothing(block) {
+  const texts = [...String(block).matchAll(TEXT_IN_SVG)].map((m) => m[1]);
+  if (!texts.length) return false;
+  const joined = texts.join(" ");
+  const watermark = /scanned\s*(?:by|with)\s*camscanner/i.test(joined);
+  const words = joined
+    .replace(/scanned\s*(?:by|with)\s*camscanner/gi, "")
+    .replace(/[\d\s.,;:—–\-()]/g, "");
+  if (words) return false;                       // real words: keep it
+  // The watermark belongs to the scanner, never to the book, so a crop carrying it and
+  // nothing else is page furniture however many strokes it contains — this one draws a
+  // rule under the watermark, which was enough to look like a diagram.
+  if (watermark) return true;
+  return !GEOMETRY.test(block) && (block.match(/<path/g) ?? []).length <= 2;
+}
+
+/**
+ * Drop figures that repeat, and figures that carry nothing.
+ *
+ * Only byte-identical repeats. Figures that merely LOOK alike are routinely distinct —
+ * "a ≠ b ≠ c" and "a = b ≠ c" are two crystal systems, "B(x₂,y₂)" and "B(x₁,y₁)" two
+ * different points — and 17 pairs across the corpus sit above 90% similarity while
+ * saying different things. Dropping on resemblance would delete real content.
+ */
+export function dropRedundantFigures(text) {
+  const src = String(text);
+  if (!src.includes('<figure class="ai-figure"')) return src;
+  const seen = new Set();
+  let dropped = 0;
+  const out = src.replace(FIGURE_BLOCK, (block) => {
+    if (carriesNothing(block)) { dropped++; return ""; }
+    const key = block.replace(/\s+/g, " ").trim();
+    if (seen.has(key)) { dropped++; return ""; }
+    seen.add(key);
+    return block;
+  });
+  return dropped ? out.replace(/\n{3,}/g, "\n\n") : src;
+}
+
 const captionOf = (block) => {
   const m = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(block);
   return m ? m[1] : "";

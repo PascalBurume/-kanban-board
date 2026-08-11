@@ -271,10 +271,12 @@ export default function ExerciseCanvas({ subject, search, flaggedOnly = false, o
                 >
                   <span className="exc-group-ic"><Icon name="lock" /></span>
                   <span className="exc-group-title">Ch. {m.order} — {m.title}</span>
-                  {/* Counts the chapter's whole lesson set, so this never contradicts
-                      the "N leçons" the same chapter shows in the Programme column. */}
-                  {m.lessons?.length > 0 && <span className="exc-group-les">{m.lessons.length} leçons</span>}
-                  <span className="exc-count">{m.bookExercises.length}</span>
+                  <span className="exc-group-meta">
+                    {/* Counts the chapter's whole lesson set, so this never contradicts
+                        the "N leçons" the same chapter shows in the Programme column. */}
+                    {m.lessons?.length > 0 && <span className="exc-group-les">{m.lessons.length} leçons</span>}
+                    <span className="exc-count">{m.bookExercises.length}</span>
+                  </span>
                   <span className="exc-chev"><Icon name={open ? "chevD" : "chevR"} /></span>
                 </div>
                 {open && (

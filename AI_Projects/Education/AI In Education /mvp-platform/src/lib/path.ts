@@ -317,3 +317,79 @@ export async function subjectLessonOrder(subjectSlug: string): Promise<string[]>
   });
   return modules.flatMap((m) => m.lessons.map((l) => l.id));
 }
+
+// A student's own schooling, for /profile: the class they are enrolled in and the
+// books that class studies, each with how far they have got.
+//
+// Deliberately built from the SAME primitives as buildStudentPath —
+// accessibleSubjectSlugs for which books, PUBLISHED lessons across every module of
+// each book for the total, Progress.COMPLETED for done, subjects with no lessons
+// dropped. If these two ever disagree, a student sees one number for a book on the
+// dashboard and a different one on their profile, which is worse than showing
+// nothing. What it does NOT do is the rest of buildStudentPath's work — no XP, no
+// badges, no sessions, no projects — none of which this page shows.
+export interface SchoolingBook {
+  slug: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  modules: number;
+  total: number;
+  done: number;
+  pct: number;
+}
+export async function studentSchooling(userId: string) {
+  const cls = await getStudentClass(userId);
+  if (!cls) return null;
+
+  const slugs = await accessibleSubjectSlugs(cls.id);
+  const [subjects, progressRows, lead] = await Promise.all([
+    prisma.subject.findMany({
+      where: { slug: { in: slugs } },
+      orderBy: { order: "asc" },
+      include: {
+        modules: {
+          orderBy: { order: "asc" },
+          include: { lessons: { where: { status: "PUBLISHED" }, select: { id: true } } },
+        },
+      },
+    }),
+    prisma.progress.findMany({ where: { studentId: userId, status: "COMPLETED" }, select: { lessonId: true } }),
+    // The titulaire owns the class as a whole. A student's own page is the one place
+    // that says who that is — the dashboard never names them.
+    prisma.teacherAssignment.findFirst({
+      where: { classId: cls.id, isLead: true },
+      select: { teacher: { select: { firstName: true, lastName: true, gender: true } } },
+    }),
+  ]);
+
+  const doneIds = new Set(progressRows.map((p) => p.lessonId));
+  const books: SchoolingBook[] = [];
+  for (const s of subjects) {
+    const lessonIds = s.modules.flatMap((m) => m.lessons.map((l) => l.id));
+    if (lessonIds.length === 0) continue;
+    const done = lessonIds.filter((id) => doneIds.has(id)).length;
+    books.push({
+      slug: s.slug,
+      name: s.name,
+      icon: s.icon,
+      color: s.color,
+      // Only modules that actually carry a published lesson — an empty chapter is
+      // not something the student has.
+      modules: s.modules.filter((m) => m.lessons.length > 0).length,
+      total: lessonIds.length,
+      done,
+      pct: Math.round((done / lessonIds.length) * 100),
+    });
+  }
+
+  return {
+    className: cls.name,
+    level: cls.level,
+    field: cls.field,
+    titulaire: lead?.teacher ? { firstName: lead.teacher.firstName, lastName: lead.teacher.lastName, gender: lead.teacher.gender } : null,
+    books,
+    totalLessons: books.reduce((n, b) => n + b.total, 0),
+    doneLessons: books.reduce((n, b) => n + b.done, 0),
+  };
+}

@@ -219,6 +219,19 @@ a { color: var(--primary); text-decoration: none; }
   .brand-mark svg { width: 18px; height: 18px; }
   .offline-pill { width: 32px; height: 32px; }
 }
+/* Phones: drop the wordmark, keep the mark.
+   The student header carries four nav pills now that Anatomie 3D joined them,
+   and at 375px the row measured 447px against a 375px viewport. Nothing
+   scrolled — it was simply cut off, and what fell off the right edge was the
+   profile chip, so a student on a phone had no way to reach /profile/ at all.
+   The wordmark is the only thing in that row that costs 82px and does no work:
+   the mark beside it already says Mwalimu, and it stays a link home. Same
+   font-size:0 as the offline pill above, so the text is still there to be read
+   aloud. Tightening the row gap covers the rest. */
+@media (max-width: 430px) {
+  .brand { font-size: 0; gap: 0; }
+  .app-header .row { gap: 10px; }
+}
 
 /* ---------- Buttons ---------- */
 .btn {
@@ -454,11 +467,17 @@ a { color: var(--primary); text-decoration: none; }
   .mod-more-btn,
   .practice-nav,
   .cn-tooltoggle,
-  .cp-chip {
+  .cp-chip,
+  /* .brand is a link home. It used to be a wide target because it carried the
+     wordmark; once phones drop that text it is just the 30px mark, so it needs
+     the floor as much as the icon buttons do. */
+  .brand {
     min-height: 42px;
   }
   /* Icon-only round buttons need width too, or they stay 42×30. */
   .practice-nav { min-width: 42px; }
+  /* Same for the brand once it is mark-only on a phone (38px without this). */
+  .brand { min-width: 42px; justify-content: center; }
 
   /* Removes the ~300ms wait a browser holds to see if a tap is a double-tap. */
   a, button, select, [role="button"] { touch-action: manipulation; }

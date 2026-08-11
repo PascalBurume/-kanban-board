@@ -18,7 +18,8 @@ const CIVILITIES = [
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [teaching, setTeaching] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", locale: "fr", avatarColor: COLORS[0], gender: null });
+  const [schooling, setSchooling] = useState(null);
+  const [form, setForm] = useState({ firstName: "", lastName: "", avatarColor: COLORS[0], gender: null });
   const [saving, setSaving] = useState(false);
 
   // Credential change
@@ -37,10 +38,10 @@ export default function ProfilePage() {
         if (d?.user) {
           setUser(d.user);
           setTeaching(d.teaching || null);
+          setSchooling(d.schooling || null);
           setForm({
             firstName: d.user.firstName || "",
             lastName: d.user.lastName || "",
-            locale: d.user.locale || "fr",
             avatarColor: d.user.avatarColor || COLORS[0],
             gender: d.user.gender ?? null,
           });
@@ -116,7 +117,6 @@ export default function ProfilePage() {
   const dirty =
     form.firstName !== (user.firstName || "") ||
     form.lastName !== (user.lastName || "") ||
-    form.locale !== (user.locale || "fr") ||
     form.avatarColor !== (user.avatarColor || COLORS[0]) ||
     form.gender !== (user.gender ?? null);
 
@@ -159,7 +159,7 @@ export default function ProfilePage() {
 
       <div className="profile-in profile-body">
         <section className="profile-card">
-          <div className="pf-head"><h2>Profil</h2></div>
+          <div className="pf-head"><h2><span className="pf-ic"><Icon name="user" /></span> Profil</h2></div>
           <div className="pf-grid">
             <div className="field">
               <label>Prénom</label>
@@ -210,17 +210,11 @@ export default function ProfilePage() {
             </div>
             <p className="pf-hint">L’aperçu en haut de page suit votre choix.</p>
           </div>
-          <div className="field">
-            <label>Langue</label>
-            <div className="seg">
-              <button className={form.locale === "fr" ? "active" : ""} onClick={() => setForm((f) => ({ ...f, locale: "fr" }))}>Français</button>
-              {/* Disabled, deliberately: `locale` is stored and round-tripped but NOTHING
-                  reads it — there is no i18n layer, so choosing English changed the
-                  database and not one word on screen. A control that lies is worse than
-                  one that waits. */}
-              <button className="soon" disabled title="L’interface n’est pas encore traduite">English</button>
-            </div>
-          </div>
+          {/* No language control. It offered Français and a disabled English, and the
+              `locale` it wrote is read by nothing — there is no i18n layer. The platform
+              is French; a switch that promises otherwise is a promise the product does
+              not keep. The column and the API field stay, harmless, for the day there
+              is something to translate. */}
           <div className="pf-actions">
             <button className="btn btn-primary" onClick={saveProfile} disabled={saving || !dirty}>
               {saving ? "Enregistrement…" : "Enregistrer les modifications"}
@@ -229,10 +223,62 @@ export default function ProfilePage() {
           </div>
         </section>
 
+        {/* The student mirror of « Enseignement ». The dashboard shows the books as
+            work to get through; here they are stated as what the student HAS —
+            which class, whose class, and how much of each book is behind them. */}
+        {schooling && schooling.books.length > 0 && (
+          <section className="profile-card">
+            <div className="pf-head">
+              <h2><span className="pf-ic"><Icon name="book" /></span> Ma classe</h2>
+              <span className="pf-teach-sum">
+                {schooling.doneLessons} / {schooling.totalLessons} leçons
+              </span>
+            </div>
+
+            <div className="pf-class">
+              <div className="pf-class-id">
+                <span className="pf-class-n">{schooling.className}</span>
+                {schooling.field && <span className="pf-class-f">{schooling.field}</span>}
+              </div>
+              {schooling.titulaire && (
+                <span className="pf-class-t">
+                  <Icon name="user" />
+                  Titulaire&nbsp;: {withCivility(schooling.titulaire.gender, `${schooling.titulaire.firstName} ${schooling.titulaire.lastName}`)}
+                </span>
+              )}
+            </div>
+
+            <ul className="pf-books">
+              {schooling.books.map((b) => (
+                <li key={b.slug}>
+                  <span className="pf-book-ic" style={b.color ? { background: `${b.color}1a`, color: b.color } : undefined}>
+                    <Icon name={b.icon || "book"} />
+                  </span>
+                  <div className="pf-book-t">
+                    <span className="pf-book-n">{b.name}</span>
+                    <span className="pf-book-m">
+                      {b.modules} chapitre{b.modules > 1 ? "s" : ""} · {b.total} leçon{b.total > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="pf-book-p">
+                    {/* The bar is decoration over the number, not a substitute for it —
+                        the count is what a parent looking over a shoulder reads. */}
+                    <span className="pf-bar" aria-hidden="true">
+                      <i style={{ width: `${b.pct}%`, background: b.color || "var(--primary)" }} />
+                    </span>
+                    <span className="pf-book-c">{b.done}/{b.total}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="pf-hint">Vos manuels sont définis par votre classe.</p>
+          </section>
+        )}
+
         {teaching && teaching.classes.length > 0 && (
           <section className="profile-card">
             <div className="pf-head">
-              <h2>Enseignement</h2>
+              <h2><span className="pf-ic"><Icon name="users" /></span> Enseignement</h2>
               <span className="pf-teach-sum">
                 {teaching.classes.length} classe{teaching.classes.length > 1 ? "s" : ""} · {subjectCount} matière{subjectCount > 1 ? "s" : ""}
               </span>
@@ -261,7 +307,7 @@ export default function ProfilePage() {
         {canChangeCredential && (
         <section className="profile-card">
           <div className="pf-head">
-            <h2>Sécurité</h2>
+            <h2><span className="pf-ic"><Icon name="lock" /></span> Sécurité</h2>
             <span className="pf-teach-sum">{isStudent ? "Code PIN à 4 chiffres" : "8 caractères minimum"}</span>
           </div>
           <div className="field">
@@ -308,7 +354,7 @@ export default function ProfilePage() {
             a loose sentence. It is the Sécurité section for them — give it the section. */}
         {user.role === "TEACHER" && (
           <section className="profile-card">
-            <div className="pf-head"><h2>Sécurité</h2></div>
+            <div className="pf-head"><h2><span className="pf-ic"><Icon name="lock" /></span> Sécurité</h2></div>
             <p className="pf-note">
               <Icon name="lock" />
               <span>Votre mot de passe est géré par l’administrateur. Contactez-le pour le réinitialiser.</span>

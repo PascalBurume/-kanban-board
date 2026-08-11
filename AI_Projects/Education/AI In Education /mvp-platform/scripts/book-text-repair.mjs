@@ -1,0 +1,199 @@
+// Repairs for what a page scan leaves in the text once the pages are gone.
+//
+// A printed book carries furniture that only makes sense on paper: the title repeated
+// across the top of every page, and a caption like "Fig. 7" printed under a drawing.
+// Flatten the pages into one stream and both become debris — the running head lands in
+// the middle of a proof, and the caption sits alone with nothing beside it, reading
+// exactly like a figure that failed to arrive.
+//
+// Neither is guesswork: a running head is identified by repeating across the book, and a
+// caption by the figure it names.
+
+const FIG_LABEL = /^\s*(?:Fig\.?|FIG\.?|Figure)\s*\.?\s*(\d{1,3})\s*\.?\s*$/;
+const FIGURE_BLOCK = /<figure class="ai-figure">[\s\S]*?<\/figure>/g;
+
+/**
+ * Standalone lines that repeat across the whole book are its running head.
+ *
+ * Frequency is the whole test, and it has to be measured over the book rather than the
+ * chapter: "TRIGONOMÉTRIE" tops 82 pages, while a real heading is written once. Lines
+ * introduced by "#" are exempt — those are headings the transcription already
+ * recognised, and "EXERCICES" is printed once per chapter for a reason.
+ *
+ * @param {string} text  the whole book
+ * @param {number} min   how many repeats before a line counts as furniture
+ * @returns {Set<string>} the lines to drop
+ */
+export function findRunningHeads(text, min = 5) {
+  const lines = String(text).split("\n");
+
+  // What the book uses as a title somewhere. Frequency alone is not enough to identify
+  // page furniture: the EXETAT item bank tags each question with the sitting it came
+  // from — "(EXETAT 2020)", fifteen times over — and those are the provenance of the
+  // question, not decoration. A running head reproduces a heading; a tag never is one.
+  const asHeading = new Set();
+  for (const raw of lines) {
+    const m = /^#{1,6}\s+(.*\S)\s*$/.exec(raw);
+    if (m) asHeading.add(norm(m[1]));
+  }
+
+  const counts = new Map();
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#") || line.startsWith("<") || line.startsWith(">")) continue;
+    if (line.length > 60) continue;
+    // Only the shouted lines: a running head is set in caps, and requiring that keeps a
+    // repeated ordinary sentence ("On a donc :") out of it.
+    const letters = line.replace(/[^A-Za-zÀ-ÿ]/g, "");
+    if (letters.length < 4) continue;
+    if (letters.replace(/[^A-ZÀ-Þ]/g, "").length / letters.length < 0.9) continue;
+    // A bracketed line, or one carrying a year, is a provenance tag — "(EXETAT 2019)"
+    // against a question. Some of those are also written as headings in that book, so
+    // the heading test alone does not separate them. Losing a running head costs a
+    // repeated title; losing a tag costs the reader the session the question came from.
+    if (/^[^A-Za-zÀ-ÿ]*[([]/.test(line) || /\b(?:1[89]|20)\d{2}\b/.test(line)) continue;
+    if (!asHeading.has(norm(line))) continue;
+    counts.set(line, (counts.get(line) ?? 0) + 1);
+  }
+  return new Set([...counts].filter(([, n]) => n >= min).map(([l]) => l));
+}
+
+const norm = (s) =>
+  String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/** Drop the running heads from a chapter. */
+export function stripRunningHeads(text, heads) {
+  if (!heads?.size) return text;
+  return String(text)
+    .split("\n")
+    .filter((l) => !heads.has(l.trim()))
+    .join("\n");
+}
+
+/**
+ * Drop headings left dangling at the end of a chapter.
+ *
+ * A part title is printed on its own page before the chapter it opens — "DEUXIÈME
+ * PARTIE / FONCTIONS CIRCULAIRES" sits ten lines ahead of "CHAPITRE II" — so slicing at
+ * the chapter marker leaves it hanging off the end of the chapter before, announcing a
+ * section that never arrives. A chapter never really ends on a heading with nothing
+ * under it.
+ */
+export function trimTrailingHeadings(text) {
+  const lines = String(text).split("\n");
+  let end = lines.length;
+  while (end > 0) {
+    const line = lines[end - 1].trim();
+    if (!line) { end--; continue; }
+    // Page markers and rules sit between the part title and the chapter marker; if they
+    // stopped the scan the title above them would survive, which is the whole bug.
+    if (/^<!--[\s\S]*-->$/.test(line) || /^-{3,}$/.test(line)) { end--; continue; }
+    // A bare page number is furniture too, and it was stopping the scan one line short
+    // of the part title it precedes.
+    if (!/[A-Za-zÀ-ÿ]/.test(line) && line.length <= 8) { end--; continue; }
+    const isHeading = /^#{1,6}\s+\S/.test(line);
+    // A bare shouted line is the same thing without its "#": part titles are often
+    // transcribed as plain text.
+    const letters = line.replace(/[^A-Za-zÀ-ÿ]/g, "");
+    const shouted = line.length <= 60 && letters.length >= 4
+      && letters.replace(/[^A-ZÀ-Þ]/g, "").length / letters.length >= 0.9;
+    if (isHeading || shouted) { end--; continue; }
+    break;
+  }
+  return lines.slice(0, end).join("\n");
+}
+
+const captionOf = (block) => {
+  const m = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(block);
+  return m ? m[1] : "";
+};
+
+// Some of the drawings carry their own number, lettered into the SVG ("Fig. 57"). That
+// is the only reliable way to tell which figure a caption belongs to.
+const numberInside = (block) => {
+  const m = /<text[^>]*>\s*Fig\.?\s*(\d{1,3})\s*<\/text>/i.exec(block);
+  return m ? Number(m[1]) : null;
+};
+
+/**
+ * Put each figure where the book puts it: under the caption that names it.
+ *
+ * The transcription emits the caption as a bare "Fig. 7" line, in the flow of the prose
+ * where the book printed it, and the drawing itself somewhere later in the section. A
+ * reader meets the caption with nothing under it and reasonably concludes the figure is
+ * missing — which is what a teacher reported of the trigonometry book, where 63 of these
+ * are stranded.
+ *
+ * Figures that letter their own number are matched by it; the rest are paired with the
+ * remaining captions in the order both appear. A caption with no figure to claim is
+ * dropped — it names a drawing that is not in this transcription, and an empty label
+ * helps nobody. A figure no caption claims is left exactly where it was.
+ */
+export function anchorFigures(text) {
+  const src = String(text);
+  const blocks = src.match(FIGURE_BLOCK) ?? [];
+  const lines = src.split("\n");
+  // No figures at all: every caption here names one this transcription does not have,
+  // and a bare "Fig. 12" is precisely what reads as a figure that failed to load.
+  if (!blocks.length) {
+    const kept = lines.filter((l) => !FIG_LABEL.test(l));
+    return kept.length === lines.length ? src : kept.join("\n");
+  }
+  const labels = [];
+  lines.forEach((l, i) => {
+    const m = FIG_LABEL.exec(l);
+    if (m) labels.push({ line: i, num: Number(m[1]) });
+  });
+  if (!labels.length) return src;
+
+  const free = blocks.map((block, i) => ({ block, i, num: numberInside(block), taken: false }));
+  const claim = new Map(); // line index → figure block
+
+  // First pass: a figure that says which one it is.
+  for (const label of labels) {
+    const hit = free.find((f) => !f.taken && f.num === label.num);
+    if (hit) { hit.taken = true; claim.set(label.line, hit); label.done = true; }
+  }
+  // Second pass: everything else, in the order both appear.
+  for (const label of labels) {
+    if (label.done) continue;
+    const hit = free.find((f) => !f.taken && f.num === null);
+    if (hit) { hit.taken = true; claim.set(label.line, hit); label.done = true; }
+  }
+
+  // Rebuild: the claimed figures move to their caption, and are removed from where the
+  // transcription had parked them.
+  const moved = new Set([...claim.values()].map((f) => f.i));
+  let seen = -1;
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isFigure = line.includes('<figure class="ai-figure"');
+    if (isFigure) {
+      seen++;
+      if (moved.has(seen)) continue; // it now lives under its caption
+      out.push(line);
+      continue;
+    }
+    const claimed = claim.get(i);
+    if (claimed) {
+      out.push(withCaptionNumber(claimed.block, FIG_LABEL.exec(line)[1]));
+      continue;
+    }
+    if (FIG_LABEL.test(line)) continue; // stranded caption: nothing to show under it
+    out.push(line);
+  }
+  return out.join("\n");
+}
+
+/** Give the figure the number the book printed under it, if its caption lacks one. */
+function withCaptionNumber(block, num) {
+  const caption = captionOf(block);
+  if (/\bFig\.?\s*\d/i.test(caption)) return block;
+  if (!caption) {
+    return block.replace("</figure>", `<figcaption>Fig. ${num}</figcaption></figure>`);
+  }
+  return block.replace(caption, `Fig. ${num} — ${caption.replace(/^\s+/, "")}`);
+}
+
+export const __test__ = { FIG_LABEL, numberInside, withCaptionNumber };

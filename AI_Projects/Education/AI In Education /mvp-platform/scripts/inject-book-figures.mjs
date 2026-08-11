@@ -15,6 +15,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pooledLexicon, titleGroups, titleCandidates } from "./book-lesson-title.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
+import { recap } from "./lesson-recap.mjs";
 
 // normalizeHeadings() has already sorted the chapter's headings into two levels: "## "
 // for the sections the book numbered itself ("1.2", "III.4"), "### " for everything
@@ -140,6 +142,13 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
   // text thousands of times. See scripts/book-lesson-title.mjs.
   const lexicon = pooledLexicon(path.join(appRoot, "content/sources"));
 
+  // Which lines are this book's page furniture. Measured over the whole book, because
+  // repetition is what identifies them.
+  const runningHeads = findRunningHeads(lines.join("\n"));
+  if (runningHeads.size) {
+    console.log(`${label}: ${runningHeads.size} running head(s) dropped — ${[...runningHeads].slice(0, 3).map((h) => JSON.stringify(h)).join(", ")}`);
+  }
+
   // Photographs the transcription referenced but never shipped. Their filenames
   // are unusable — chimie-5 reuses six names across thirty-four references — so
   // scripts/extract-book-images.mjs resolved each one against the PDF and wrote a
@@ -236,7 +245,11 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     const jsonPath = path.join(refined, ch.file);
     if (start < 0 || !fs.existsSync(jsonPath)) { console.log(`${label}: skip ${ch.file} (roman ${ch.roman})`); continue; }
 
-    const body = clean(normalizeHeadings(prepFigures(lines.slice(start + 1, end).join("\n"))));
+    // Page furniture goes first — the running head has to be gone before the text is
+    // split into sections, or it lands at the top of one and reads like its title. Then
+    // each figure moves under the caption that names it.
+    const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(start + 1, end).join("\n"), runningHeads));
+    const body = clean(normalizeHeadings(anchorFigures(prepFigures(chapterText))));
 
     const textLenOf = (s) => stripFigs(s).length;
     const figsOf = (s) => (s.match(/<figure class="ai-figure/g) || []).length;
@@ -289,7 +302,9 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
         order: base + 1 + i,
         estMinutes: 25,
         degraded: true,
-        contentMd: intro + g.join("\n\n"),
+        // « À retenir » closes the lesson with the results it states, in the book's own
+        // words. It is omitted where the lesson states none rather than padded.
+        contentMd: intro + g.join("\n\n") + recap(g.join("\n\n"), titles[i]),
         quiz: null,
       });
     });

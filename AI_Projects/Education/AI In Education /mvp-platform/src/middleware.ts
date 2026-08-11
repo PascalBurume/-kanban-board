@@ -58,5 +58,20 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/student/:path*", "/lesson/:path*", "/practice/:path*", "/projects/:path*", "/module/:path*", "/teacher/:path*", "/admin/:path*", "/profile/:path*"],
+  // Every prefix in RULES must appear here or its rule is dead code: the matcher
+  // decides whether the middleware runs at all. /anatomie was added to RULES and
+  // not to this list, so the atlas skipped the sliding `lastActivity` refresh —
+  // a student who explored specimens for fifteen minutes was signed out on their
+  // next click, having been active the whole time.
+  matcher: [
+    "/student/:path*",
+    "/lesson/:path*",
+    "/practice/:path*",
+    "/projects/:path*",
+    "/module/:path*",
+    "/anatomie/:path*",
+    "/teacher/:path*",
+    "/admin/:path*",
+    "/profile/:path*",
+  ],
 };

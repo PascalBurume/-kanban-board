@@ -14,6 +14,7 @@ import { repairLatex } from "@/lib/latexRepair";
 import { FIGURE_KINDS } from "@/lib/figures";
 import { EPURE_TEMPLATES } from "@/lib/epure";
 import { isBlankContent } from "@/lib/lessonSkeleton";
+import { studentPreviewHref } from "@/lib/previewHref";
 import { lintLesson } from "@/lib/lessonLint";
 import { bookTopicPool } from "@/lib/copilotSuggestions";
 import { saveDoc, loadDoc, markSynced, deleteDoc, requestPersistence } from "@/lib/localDocs";
@@ -113,6 +114,12 @@ export default function RedigerClient() {
   const [loadError, setLoadError] = useState("");
   const [start, setStart] = useState(null);
   const [localDraft, setLocalDraft] = useState(null);
+  // The class the studio was last scoped to, so « Vue élève » previews the compléments
+  // that class actually reads. This page has no class picker of its own.
+  const [previewClassId, setPreviewClassId] = useState(null);
+  useEffect(() => {
+    setPreviewClassId(window.localStorage.getItem("studio.classId") || null);
+  }, []);
 
   // Panels. Both fold away on a tablet: 768px of height spent on context is height not
   // spent on the lesson.
@@ -659,7 +666,7 @@ export default function RedigerClient() {
       switch (id) {
         case "save": return void save({ force: true });
         case "publish": return void togglePublish();
-        case "preview": return void window.open(`/lesson/?id=${lessonId}`, "_blank", "noopener");
+        case "preview": return void window.open(studentPreviewHref(lessonId, previewClassId), "_blank", "noopener");
         case "print": return void window.print();
         case "settings": return void writer.current?.openSettings?.();
         case "studio": return void (window.location.href = "/teacher/studio/");
@@ -707,7 +714,7 @@ export default function RedigerClient() {
         default: return undefined;
       }
     },
-    [applyContent, save, lessonId]
+    [applyContent, save, lessonId, previewClassId]
   );
 
   // Ctrl+S is muscle memory, and the browser's own Save-page dialog is never what a
@@ -871,7 +878,7 @@ export default function RedigerClient() {
         </span>
         <a
           className="btn btn-secondary btn-sm"
-          href={meta.moduleId ? `/lesson/?id=${lessonId}` : "#"}
+          href={meta.moduleId ? studentPreviewHref(lessonId, previewClassId) : "#"}
           target="_blank"
           rel="noopener noreferrer"
           style={meta.moduleId ? undefined : { pointerEvents: "none", opacity: 0.5 }}

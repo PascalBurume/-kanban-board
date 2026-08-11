@@ -7,6 +7,7 @@ import { BrandMark } from "@/components/ui/chrome";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { avatarColor, initials } from "@/lib/icons";
 import { isBlankContent } from "@/lib/lessonSkeleton";
+import { studentPreviewHref } from "@/lib/previewHref";
 import { toast } from "@/lib/toast";
 import { confirmDialog } from "@/lib/confirm";
 import { StudioComposePanel } from "@/components/StudioComposePanel";
@@ -1294,7 +1295,7 @@ export default function StudioClient({ initialIsAdmin = false }) {
                   )}
                   <a
                     className="btn btn-secondary btn-sm"
-                    href={currentId && currentModuleId ? `/lesson/?id=${currentId}` : "#"}
+                    href={currentId && currentModuleId ? studentPreviewHref(currentId, selectedClassId) : "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     title={currentId && !currentModuleId ? "Reliez la leçon à un module pour la prévisualiser côté élève" : "Aperçu côté élève"}

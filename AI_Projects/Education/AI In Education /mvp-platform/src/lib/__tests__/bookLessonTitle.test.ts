@@ -339,3 +339,20 @@ describe("restoreDiacritics — accents live in the lower-case form", () => {
     expect(restoreDiacritics("Taylor", names)).toBe("Taylor");
   });
 });
+
+describe("cleanHeading — sub-point labels", () => {
+  it("drops the letter that labels a sub-point", () => {
+    expect(cleanHeading("d) Éléments directeurs en fonction des coefficients")).toBe("Éléments directeurs en fonction des coefficients");
+    expect(cleanHeading("i) Podaire d'un point")).toBe("Podaire d'un point");
+    expect(cleanHeading("b. Aire d'une surface")).toBe("Aire d'une surface");
+  });
+
+  it("keeps a numeric ordinal, which means something", () => {
+    expect(cleanHeading("4° exemple")).toBe("4° exemple");
+    expect(cleanHeading("2° Méthode de Volhard-Charpentier")).toBe("2° Méthode de Volhard-Charpentier");
+  });
+
+  it("leaves an ordinary title starting with a short word alone", () => {
+    expect(cleanHeading("Le plan")).toBe("Le plan");
+  });
+});

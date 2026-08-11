@@ -20,6 +20,9 @@ const NAV = [
   // the open lesson. The /teacher/studio/latex/ route is still live: bookmarks work.
   { href: "/teacher/exercises/", icon: "book", label: "Exercices" },
   { href: "/teacher/projects/", icon: "layers", label: "Projets", badge: "toCorrect" },
+  // Shared reference tool — the same page students open, so a teacher can
+  // project it in class and drill the exact specimen the class will revise on.
+  { href: "/anatomie/", icon: "svt", label: "Anatomie 3D" },
 ];
 
 // Shared loader so every teacher page shows the same live badge counts.

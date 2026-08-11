@@ -44,6 +44,14 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // don't touch cross-origin
 
+  // 3D specimens (/models/anatomy/*.glb) are ~81 MB across 44 files. Never put
+  // them in Cache Storage: "offline" here means no internet, not no server —
+  // the LAN box that serves this page also serves the models, so caching them
+  // buys nothing and risks blowing the origin's storage quota, which would
+  // evict the carnet and studio shells that genuinely cannot refetch. The HTTP
+  // cache still spares the repeat download within a session.
+  if (url.pathname.startsWith("/models/")) return;
+
   // Cache-first for immutable static assets.
   if (isStaticAsset(url)) {
     e.respondWith(

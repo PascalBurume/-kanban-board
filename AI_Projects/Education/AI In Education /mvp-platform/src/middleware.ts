@@ -18,6 +18,8 @@ const RULES: { prefix: string; role?: Role | null; roles?: Role[] }[] = [
   { prefix: "/projects", role: "STUDENT" },
   { prefix: "/module", role: "STUDENT" },
   { prefix: "/profile", role: null },
+  // Reference tools, open to every signed-in role.
+  { prefix: "/anatomie", role: null },
 ];
 
 function redirect(req: NextRequest, to: string) {

@@ -3,7 +3,6 @@ import "./lesson.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Markdown from "@/components/Markdown";
-import { LangToggle } from "@/components/ui/chrome";
 import { toast } from "@/lib/toast";
 import { useFullscreen } from "@/lib/fullscreen";
 import UnderstandingRating from "@/components/UnderstandingRating";
@@ -432,9 +431,6 @@ export default function LessonPage() {
   }
 
 
-  const onLangNotice = () =>
-    toast("Le français complet arrive — interface en anglais pour cette revue.", { icon: "info" });
-
   /* ---- loading / error shells ---- */
   if (loadState === "loading" || loadState === "error") {
     return (
@@ -548,11 +544,6 @@ export default function LessonPage() {
                       <span className="lm-ic"><Icon name="eye" /></span>
                       <span className="lm-label">{isFull ? "Quitter le plein écran" : "Plein écran"}</span>
                     </button>
-                    <div className="lm-row">
-                      <span className="lm-ic"><Icon name="settings" /></span>
-                      <span className="lm-label">Langue</span>
-                      <LangToggle onNotice={onLangNotice} />
-                    </div>
                   </div>
                 </>
               )}

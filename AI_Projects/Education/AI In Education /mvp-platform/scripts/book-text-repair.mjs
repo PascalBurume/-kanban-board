@@ -154,6 +154,105 @@ export function dropRedundantFigures(text) {
   return dropped ? out.replace(/\n{3,}/g, "\n\n") : src;
 }
 
+const svgTexts = (block) => {
+  const out = [];
+  for (const m of String(block).matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)) {
+    const a = m[1], v = m[2].trim();
+    if (!v) continue;
+    const n = (k) => {
+      const g = new RegExp(`\\b${k}="(-?[\\d.]+)"`).exec(a);
+      return g ? Number.parseFloat(g[1]) : 0;
+    };
+    out.push({ x: n("x"), y: n("y"), size: n("font-size") || 16, value: v });
+  }
+  return out;
+};
+
+/**
+ * Is this figure only a picture of printed text — no drawing in it at all?
+ *
+ * The question matters because the same strokes mean different things. A short horizontal
+ * line is a fraction bar in a maths book and an orbital box in a chemistry one; a
+ * four-point path is a radical sign or an arrow. So the test is deliberately strict: no
+ * shape primitives, no curves, no long paths, and every line must be doing the one job a
+ * fraction bar does — carrying text above it and text below it.
+ */
+export function isTextPicture(block) {
+  const s = String(block);
+  if (/<circle|<ellipse|<polyline|<polygon|<img|<image|<textPath/.test(s)) return false;
+  for (const m of s.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)) {
+    if (/[CQAZcqaz]/.test(m[1])) return false;                       // a curve is a drawing
+    if ((m[1].match(/[ML]/g) ?? []).length > 6) return false;        // a long path is a shape
+  }
+  const texts = svgTexts(s);
+  if (!texts.length) return false;
+  const median = texts.map((t) => t.size).sort((a, b) => a - b)[Math.floor(texts.length / 2)] || 16;
+  for (const m of s.matchAll(/<line\b([^>]*)>/g)) {
+    const a = m[1];
+    const n = (k) => {
+      const g = new RegExp(`\\b${k}="(-?[\\d.]+)"`).exec(a);
+      return g ? Number.parseFloat(g[1]) : 0;
+    };
+    const y1 = n("y1"), y2 = n("y2");
+    if (Math.abs(y1 - y2) > 2) return false;                          // an axis, not a bar
+    const y = (y1 + y2) / 2, lo = Math.min(n("x1"), n("x2")) - 8, hi = Math.max(n("x1"), n("x2")) + 8;
+    const span = median * 2.2;
+    const above = texts.some((t) => t.x >= lo && t.x <= hi && t.y < y && y - t.y < span);
+    const below = texts.some((t) => t.x >= lo && t.x <= hi && t.y > y && t.y - y < span);
+    if (!above || !below) return false;                               // nothing to divide
+  }
+  return true;
+}
+
+const bagOfWords = (s) => new Set((String(s).toLowerCase().match(/[a-zà-ÿ0-9]{3,}/g) ?? []));
+
+/**
+ * Drop a picture of text whose words the chapter already states in type.
+ *
+ * The transcription sometimes emits a page region as a figure AND transcribes the same
+ * region as text. The reader then meets a blurry crop of a question printed in full just
+ * below it — which is what a teacher reported of the asymptotes exercise, where seven
+ * crops sat between the statement and its four functions.
+ *
+ * Judged over the whole chapter, not one lesson: the packer splits a chapter afterwards,
+ * and the crop and the text it repeats routinely land in different lessons.
+ *
+ * `keep` lists captions that must survive regardless — the escape hatch for a figure a
+ * teacher has looked at and wants back.
+ */
+// What the caption says the crop IS. The stroke test cannot tell an orbital box from a
+// fraction bar — both are a short horizontal line with letters near it — so the caption
+// casts the deciding vote. Of the nine crops the stroke test alone accepted, six turned
+// out to be drawings: a probability tree, a projection construction, and orbital diagrams
+// for silicon and phosphorus. Every one of them says so in its own caption.
+const CALLS_ITSELF_AN_EXERCISE = /\bexercices?\b/i;
+const CALLS_ITSELF_A_DRAWING = /\bsch[ée]mas?\b|\bdiagrammes?\b|\bgraphiques?\b|\bprojection\b|\bcourbes?\b|\brepr[ée]sentation\b/i;
+
+/**
+ * @param {string} text
+ * @param {{keep?: string[]}} [opts]  `keep` — caption fragments that must survive
+ * @returns {{text: string, dropped: string[]}}
+ */
+export function dropFiguresAlreadyInText(text, { keep = [] } = {}) {
+  const src = String(text);
+  if (!src.includes('<figure class="ai-figure"')) return { text: src, dropped: [] };
+  const prose = bagOfWords(src.replace(FIGURE_BLOCK, " "));
+  const dropped = [];
+  const out = src.replace(FIGURE_BLOCK, (block) => {
+    if (!isTextPicture(block)) return block;
+    const caption = captionOf(block).replace(/<[^>]+>/g, "").trim();
+    if (keep.some((k) => caption.includes(k))) return block;
+    if (!CALLS_ITSELF_AN_EXERCISE.test(caption) || CALLS_ITSELF_A_DRAWING.test(caption)) return block;
+    const own = bagOfWords(svgTexts(block).map((t) => t.value).join(" "));
+    if (own.size < 4) return block;                                   // too little to judge
+    const covered = [...own].filter((w) => prose.has(w)).length / own.size;
+    if (covered < 0.9) return block;
+    dropped.push(caption);
+    return "";
+  });
+  return { text: dropped.length ? out.replace(/\n{3,}/g, "\n\n") : src, dropped };
+}
+
 const captionOf = (block) => {
   const m = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(block);
   return m ? m[1] : "";

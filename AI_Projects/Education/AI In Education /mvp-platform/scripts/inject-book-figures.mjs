@@ -15,8 +15,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures } from "./book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, dropFiguresAlreadyInText } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
+import { applyCorrections } from "./book-corrections.mjs";
 
 // normalizeHeadings() has already sorted the chapter's headings into two levels: "## "
 // for the sections the book numbered itself ("1.2", "III.4"), "### " for everything
@@ -233,6 +234,7 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
       + "des reconstructions vérifiées d'après le scan, non le document original.\n\n";
 
   let totalLessons = 0, totalFigs = 0;
+  const droppedCrops = [];
   for (const ch of chapters) {
     const start = chapIdx(ch.roman, ch.index);
     // A chapter runs to the next one that was actually located, so a missing
@@ -249,7 +251,15 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // split into sections, or it lands at the top of one and reads like its title. Then
     // each figure moves under the caption that names it.
     const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(start + 1, end).join("\n"), runningHeads));
-    const body = clean(normalizeHeadings(anchorFigures(dropRedundantFigures(prepFigures(chapterText)))));
+    const deduped = dropRedundantFigures(prepFigures(chapterText));
+    // A crop of text the chapter already prints is noise; see book-text-repair.mjs.
+    const { text: pruned, dropped } = dropFiguresAlreadyInText(deduped);
+    for (const caption of dropped) droppedCrops.push({ chapter: ch.file, caption });
+    const cleaned = clean(normalizeHeadings(anchorFigures(pruned)));
+    // Readings the book itself contradicts; see scripts/book-corrections.mjs.
+    const fixed = applyCorrections(cleaned, book ?? path.basename(refined));
+    for (const fix of fixed.applied) console.log(`${label}: corrected — ${fix.find.slice(0, 60)}`);
+    const body = fixed.text;
 
     const textLenOf = (s) => stripFigs(s).length;
     const figsOf = (s) => (s.match(/<figure class="ai-figure/g) || []).length;
@@ -337,6 +347,7 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     totalLessons += groups.length; totalFigs += countFigs(body);
     console.log(`${label}: ${ch.roman.padEnd(5)} ${ch.file.padEnd(52)} → +${groups.length} lessons, ${countFigs(body)} figs`);
   }
+  for (const d of droppedCrops) console.log(`${label}: dropped crop — ${d.chapter.replace(/\.json$/, "")} — ${d.caption.slice(0, 96)}`);
   console.log(
     `${label}: TOTAL +${totalLessons} illustrated lessons, ${totalFigs} figures across ${chapters.length} chapters`
     + (restored || dropped ? ` · ${restored} photo(s) restored from the manual${dropped ? `, ${dropped} unresolved` : ""}` : "")

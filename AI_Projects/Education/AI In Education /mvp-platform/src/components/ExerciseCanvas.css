@@ -26,8 +26,10 @@
 .exc-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 6px 2px; }
 
 /* ── custom exercise cards ── */
-.exc-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 13px; box-shadow: var(--sh-xs); transition: box-shadow .15s, border-color .15s, transform .15s; }
-.exc-card:hover { border-color: var(--indigo-200); box-shadow: var(--sh-sm); transform: translateY(-1px); }
+/* Compact card scale — the canvas stacks dozens of these, so it keeps its
+   density and borrows only the family's shadow ramp and hover feel. */
+.exc-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius-sm); padding: 11px 13px; box-shadow: var(--card-shadow-sm); transition: box-shadow .16s ease, border-color .16s ease, transform .16s ease; }
+.exc-card:hover { border-color: var(--indigo-200); box-shadow: var(--card-shadow-sm-hover); transform: translateY(var(--card-lift-sm)); }
 .exc-card:hover .exc-card-x, .exc-card:hover .exc-card-ai { opacity: 1; }
 .exc-card.busy { opacity: .6; pointer-events: none; }
 /* Selected into the Copilot panel. */

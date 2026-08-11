@@ -86,6 +86,30 @@
   /* Spacing scale */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
   --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px;
+
+  /* ---------- Content cards ----------
+     One card language for the whole app. Chapter cards, project cards and
+     exercise cards had each grown their own: 16px vs 14px radii, var(--border)
+     vs a hardcoded #e7e9f2, an accent on the top edge vs the left vs none, and
+     hover lifts of 1, 2 and 3px. Side by side they read as three products.
+
+     The accent stays per-card (--accent carries the subject colour) but is spent
+     on one element inside the card rather than a band around it: 3px of
+     saturated colour on all 22 cards of a grid shouts louder than the titles. */
+  --card-radius: 18px;
+  --card-pad: 18px;
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 12px rgba(15, 23, 42, .04);
+  --card-shadow-hover: 0 2px 4px rgba(15, 23, 42, .05), 0 12px 28px rgba(15, 23, 42, .10);
+  --card-lift: -3px;
+
+  /* Compact scale, for dense tool surfaces — the exercise canvas, board columns,
+     anything that stacks dozens of rows. Same shadow ramp and hover feel so it
+     reads as the same family, tighter geometry so a list of thirty does not
+     become a page of thirty posters. */
+  --card-radius-sm: 12px;
+  --card-shadow-sm: 0 1px 2px rgba(15, 23, 42, .05);
+  --card-shadow-sm-hover: 0 2px 6px rgba(15, 23, 42, .08);
+  --card-lift-sm: -1px;
 }
 
 * { box-sizing: border-box; }
@@ -421,6 +445,37 @@ a { color: var(--primary); text-decoration: none; }
 }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* ---------- Touch ----------
+   Measured on a 375px phone: no page overflowed and nothing was wider than the
+   viewport, so the layout was already sound. What was small was the targets —
+   pills and buttons landing at 30–36px against the 44px a fingertip actually
+   covers. These raise the floor to 42px on touch pointers only.
+
+   Named classes rather than a blanket `button` rule on purpose: the lesson
+   editor's ribbon, the épure tables and the exercise canvas pack deliberately
+   small controls into dense rows, and inflating those would push their tools
+   off screen — a worse outcome than a slightly small button. Those surfaces get
+   the tablet chrome (TabletChrome, the 44px symbol keyboard) instead.
+
+   `pointer: coarse` rather than a width query: a 1024px tablet is still touched,
+   and a narrow desktop window is still moused. */
+@media (pointer: coarse) {
+  .btn,
+  .back-pill,
+  .mod-more-btn,
+  .practice-nav,
+  .cn-tooltoggle,
+  .cp-chip,
+  .lang-toggle button {
+    min-height: 42px;
+  }
+  /* Icon-only round buttons need width too, or they stay 42×30. */
+  .practice-nav { min-width: 42px; }
+
+  /* Removes the ~300ms wait a browser holds to see if a tap is a double-tap. */
+  a, button, select, [role="button"] { touch-action: manipulation; }
+}
 
 /* utility for hidden */
 [hidden] { display: none !important; }

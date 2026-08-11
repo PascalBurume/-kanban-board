@@ -191,11 +191,37 @@
 .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px;
   padding: 16px; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); background: var(--slate-50, #f8fafc); }
 @media (max-width: 720px) { .mod-subj-prog { display: none; } }
-.chap-card { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-xs); text-decoration: none; color: inherit; transition: transform .14s, box-shadow .14s, border-color .14s; }
-.chap-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); border-color: var(--accent, #4f46e5); }
+/* Same card language as the practice grid — shared tokens, the subject tint in
+   the corner, one hover distance. These two sit one click apart and used to
+   differ in radius, resting shadow and lift. */
+.chap-card {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  text-decoration: none; color: inherit;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.chap-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent, #4f46e5) 9%, transparent), transparent 46%);
+}
+.chap-card > * { position: relative; }
+.chap-card:hover {
+  transform: translateY(var(--card-lift));
+  box-shadow: var(--card-shadow-hover);
+  border-color: color-mix(in srgb, var(--accent, #4f46e5) 45%, var(--border));
+}
+.chap-card:focus-visible { outline: 2px solid var(--accent, #4f46e5); outline-offset: 2px; }
 .chap-card .prog-ring .pct { font-size: 13px; }
-.chap-locked { opacity: .7; cursor: pointer; }
-.chap-locked:hover { transform: none; box-shadow: var(--sh-xs); border-color: var(--border); }
+/* A locked module still has to look like a card, just an inert one — no lift, no
+   accent, and the tint dropped so it reads as unavailable rather than dimmed. */
+.chap-locked { opacity: .72; cursor: pointer; }
+.chap-locked::before { display: none; }
+.chap-locked:hover { transform: none; box-shadow: var(--card-shadow); border-color: var(--border); }
 .cc-body { flex: 1; min-width: 0; }
 .cc-top { display: flex; align-items: center; justify-content: space-between; }
 .cc-code { font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent, #4f46e5); }

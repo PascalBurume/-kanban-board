@@ -101,7 +101,39 @@
   .md-lesson-row { gap: 10px; padding: 11px 12px; }
   .md-lmin { display: none; }
 
+  /* Hiding the duration was not enough. The row still carried the status node,
+     the title, « Évaluer » and « Ouvrir » on one line, leaving the title 105px
+     on a 375px screen — "Raisonnement par contraposition" came out three lines
+     tall in a column narrower than the words in it.
+
+     « Ouvrir » goes instead. It points at the same lesson as the title next to
+     it, so on a phone it was a second tap target for the same destination, paid
+     for out of the title's width. The title link is the affordance — 260px wide
+     and 37px tall here, a better target than the 20px chevron it replaces.
+
+     Wrapping the actions onto a second line was the first attempt and it was
+     worse: rows went from 48px to 122px, so barely five lessons fit a screen. */
+  .md-open { display: none; }
+
   /* Prev/next module buttons → icon-only chevrons so both fit. */
   .md-navbtn { font-size: 0; gap: 0; padding: 10px; }
   .md-navbtn svg { width: 18px; height: 18px; }
+}
+
+/* ---------- Touch targets in the lesson list ----------
+   Measured on a phone: the lesson title was a 23px-tall link and "Ouvrir" 20px,
+   inside a 48px row. The row is big enough; the *links* were not, so most of the
+   row was dead space and opening a lesson — the whole point of this page — was a
+   precision tap.
+
+   A single overlay link across the row would have been simpler and wrong: the
+   row also carries the « Évaluer » button, and a full-bleed ::after would have
+   swallowed it. Each control grows instead.
+
+   pointer: coarse only — on a mouse the current density is right, and taller
+   rows would mean fewer lessons visible per screen for no gain. */
+@media (pointer: coarse) {
+  .md-ltitle { padding: 5px 0; }
+  .md-open { min-height: 42px; padding: 0 10px; }
+  .md-understood { min-height: 40px; padding: 5px 14px; }
 }

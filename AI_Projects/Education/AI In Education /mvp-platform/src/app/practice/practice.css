@@ -29,22 +29,79 @@
 .subj-head h2 { font-size: 19px; margin: 0; }
 .subj-count { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
 
-/* chapter cards */
-.chap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.chap-card { display: flex; flex-direction: column; gap: 8px; padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg, 16px); text-decoration: none; color: inherit; box-shadow: var(--sh-sm); transition: transform .14s, box-shadow .14s, border-color .14s; border-top: 3px solid var(--accent, #4f46e5); }
-.chap-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border-color: var(--accent, #4f46e5); }
-.chap-top { display: flex; align-items: center; justify-content: space-between; }
-.chap-n { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent, #4f46e5); }
-.chap-done { width: 22px; height: 22px; border-radius: 50%; background: var(--success); color: #fff; display: grid; place-items: center; }
-.chap-done svg { width: 14px; height: 14px; }
-.chap-card h3 { font-size: 16px; margin: 0; line-height: 1.3; }
+/* ---------- chapter cards ----------
+   Rebuilt on the shared card tokens. The old card was a white rectangle with a
+   3px accent stripe on top; across a 22-chapter grid that is 22 saturated bands
+   competing with 22 titles, and the card itself said nothing until you read it.
+
+   Now the accent is spent once, on the chapter number, and the card earns its
+   shape from depth instead of a stripe. The header row is a baseline so the
+   number and the completion mark align on the same line as the eye scans down
+   the column. */
+.chap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(264px, 1fr)); gap: 16px; }
+.chap-card {
+  position: relative;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: var(--card-pad);
+  background: var(--surface);
+  border: 1px solid var(--card-border, var(--border));
+  border-radius: var(--card-radius);
+  text-decoration: none; color: inherit;
+  box-shadow: var(--card-shadow);
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  overflow: hidden;
+}
+/* A tint of the subject colour, strongest at the top-left corner and gone by the
+   middle — enough to tell two subjects apart in peripheral vision without
+   painting a band across the card. */
+.chap-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent, #4f46e5) 9%, transparent), transparent 46%);
+  opacity: .85; transition: opacity .16s ease;
+}
+.chap-card > * { position: relative; }
+.chap-card:hover {
+  transform: translateY(var(--card-lift));
+  box-shadow: var(--card-shadow-hover);
+  border-color: color-mix(in srgb, var(--accent, #4f46e5) 45%, var(--border));
+}
+.chap-card:hover::before { opacity: 1; }
+.chap-card:focus-visible { outline: 2px solid var(--accent, #4f46e5); outline-offset: 2px; }
+
+.chap-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.chap-n {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: color-mix(in srgb, var(--accent, #4f46e5) 88%, black);
+  background: color-mix(in srgb, var(--accent, #4f46e5) 12%, transparent);
+  padding: 3px 9px; border-radius: var(--r-pill);
+}
+/* A finished chapter is reassurance, not an alarm: a tinted check reads at a
+   glance without a filled green disc pulling the eye off the title. */
+.chap-done {
+  width: 22px; height: 22px; border-radius: 50%; flex: none;
+  background: var(--success-bg); color: var(--success-fg);
+  display: grid; place-items: center;
+}
+.chap-done svg { width: 13px; height: 13px; }
+.chap-card h3 { font-size: 16px; margin: 2px 0 0; line-height: 1.32; letter-spacing: -.01em; }
 .chap-meta { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-muted); font-size: 12.5px; }
 .chap-meta span { display: inline-flex; align-items: center; gap: 5px; }
 .chap-meta svg { width: 14px; height: 14px; }
 .chap-sims { display: flex; gap: 6px; flex-wrap: wrap; }
-.sim-tag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--indigo-50, #eef2ff); color: var(--indigo-700, #4338ca); }
-.chap-go { margin-top: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--accent, #4f46e5); }
-.chap-go svg { width: 15px; height: 15px; }
+.sim-tag {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: var(--r-pill);
+  background: var(--surface-2); color: var(--text-soft); border: 1px solid var(--border);
+}
+/* margin-top:auto keeps this on the card's floor, so the action sits on one line
+   across a row whatever the title length. The separator turns a floating link
+   into a footer. */
+.chap-go {
+  margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700; color: var(--accent, #4f46e5);
+}
+.chap-go svg { width: 15px; height: 15px; transition: transform .16s ease; }
+.chap-card:hover .chap-go svg { transform: translateX(3px); }
 
 /* chapter workspace */
 .chap-hero { position: relative; overflow: hidden; padding: 26px 26px; border-radius: var(--r-lg, 16px); color: #fff; margin-bottom: 18px; background: linear-gradient(120deg, var(--accent, #4f46e5), color-mix(in srgb, var(--accent, #4f46e5) 60%, #111827)); box-shadow: var(--sh-md); }
@@ -181,4 +238,20 @@
   .sim-slider { grid-template-columns: 56px 1fr 46px; gap: 8px; }
   .ws-tabs { gap: 6px; }
   .ws-tab { padding: 8px 12px; font-size: 13px; }
+}
+
+/* The header carries the brand, a Projets pill, the status pill and a « Tableau
+   de bord » back link. At 375px that is 32px more than fits, and the back link
+   — last in the row and shrinkable — took the hit: three lines inside a pill,
+   clipped at the edge. Same failure as the student dashboard header, same cure:
+   hold the pills' width and drop labels rather than let them buckle. */
+.back-pill { white-space: nowrap; flex: none; }
+@media (max-width: 560px) {
+  /* Icon-only. Both destinations are also in the dashboard's own nav one tap
+     away, so the labels are the cheapest thing in the row to lose. */
+  .app-header .back-pill { font-size: 0; gap: 0; padding: 0; width: 42px; height: 42px; justify-content: center; border-radius: 50%; }
+  .app-header .back-pill svg { width: 18px; height: 18px; }
+  .practice-page .app-header { gap: 8px; padding: 10px 12px; }
+  .practice-page .brand { font-size: 0; gap: 0; }
+  .practice-page .brand .brand-mark { font-size: 16px; }
 }

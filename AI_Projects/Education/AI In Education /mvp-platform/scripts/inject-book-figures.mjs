@@ -14,7 +14,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings } from "./book-lesson-title.mjs";
+import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
 import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
@@ -292,7 +292,18 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // Name each lesson after the book section it opens with. "Manuel illustré (1)…(14)"
     // told a teacher nothing about what was inside; the section headings are right here
     // in the text we just packed.
+    // The last heading opened at or before each group — what a headingless group is
+    // actually continuing.
+    let opened = "";
+    const context = groups.map((g) => {
+      const hs = [...g.join("\n\n").matchAll(/^#{2,3}\s+(.+)$/gm)].map((m) => m[1].trim());
+      const before = opened;
+      const real = hs.filter(opensSection);
+      if (real.length) opened = real[real.length - 1];
+      return before;
+    });
     const titles = titleGroups(groups.map(namesOf), lexicon, {
+      context,
       taken: mod.lessons.map((l) => l.title),
       named: groups.map((g) => namedHeadings(allHeadings(g))),
       spare: groups.map((g) => anyHeading(allHeadings(g))),

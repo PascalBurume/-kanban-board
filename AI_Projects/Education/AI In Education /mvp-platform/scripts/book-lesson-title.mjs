@@ -275,6 +275,23 @@ const GENERIC = new Set([
  * "Introduction (suite 1…6)". A heading that is not one of the step labels above, and is
  * long enough to be a name, is worth more than another "(suite)".
  */
+// Labels for a step inside a single worked item — the answer to one exercise, a note on
+// one result. These open nothing, so they must not become the section a later piece is
+// said to continue: a run of exercises reading "Résolution (suite 5)" is no better than
+// the section title it replaced. "Exercices résolus" is NOT one of these — that heading
+// does open a section, and naming its pieces after it is exactly right.
+const STEP = new Set([
+  "resolution", "resolutions", "solution", "solutions", "remarque", "remarques",
+  "reponse", "reponses", "corrige", "corriges", "demonstration", "preuve", "note", "notes",
+]);
+
+/** Does this heading open a section a later piece could be said to continue? */
+export function opensSection(heading) {
+  const t = cleanHeading(heading);
+  if (!t) return false;
+  return !STEP.has(stripAccents(t).toLowerCase().replace(/[^a-z ]/g, "").trim());
+}
+
 /** @param {{major?: string[], minor?: string[]}} arg @returns {string[]} */
 export function namedHeadings({ major = [], minor = [] }) {
   return [...major, ...minor].filter((h) => {
@@ -337,25 +354,38 @@ function qualify(title) {
  *
  * @param {string[][]} groups   per lesson, its section headings (best first)
  * @param {Map<string, any>} lexicon  from buildLexicon()/pooledLexicon()
- * @param {{taken?: string[], fallback?: string, spare?: string[][], named?: string[][]}|string} [opts]
+ * @param {{taken?: string[], fallback?: string, spare?: string[][], named?: string[][], context?: string[]}|string} [opts]
  *   `taken` — titles already used in this module; `named` — per group, headings that
- *   name something even unnumbered; `spare` — per group, any heading at
+ *   name something even unnumbered; `context` — per group, the last heading opened at
+ *   or before it; `spare` — per group, any heading at
  *   all, used only when nothing is numbered and there is nothing to continue;
  *   `fallback` — when even that is empty. A bare string is read as `fallback`.
  * @returns {string[]}
  */
 export function titleGroups(groups, lexicon, opts = {}) {
-  const { taken = [], fallback = "Extrait du manuel", spare = [], named = [] } =
+  const { taken = [], fallback = "Extrait du manuel", spare = [], named = [], context = [] } =
     typeof opts === "string" ? { fallback: opts } : opts;
   const used = new Set(taken.map((t) => String(t).trim().toLowerCase()));
   const out = [];
   let carry = null;
   for (const [gi, numbered] of groups.entries()) {
-    // A section the book numbered, else a heading that names something on its own,
-    // else continue the lesson before, else any heading at all.
+    // A section the book numbered, else a heading that names something on its own.
     let t = lessonTitle({ numbered, lexicon, carry: null })
-      ?? lessonTitle({ numbered: named[gi] ?? [], lexicon, carry: null })
-      ?? lessonTitle({ numbered: [], lexicon, carry });
+      ?? lessonTitle({ numbered: named[gi] ?? [], lexicon, carry: null });
+
+    if (!t) {
+      // Nothing of its own: this group continues something. What it continues is the
+      // last section OPENED before it — not the section the previous lesson happened to
+      // be named after. A chapter's closing exercises, split across several lessons,
+      // were reading "Position de la courbe … (suite 5)" when the pieces were an
+      // exercise the book states three sections later.
+      const opened = cleanHeading(context[gi] ?? "");
+      const base = opened ? truncate(isShouted(opened) ? unshout(opened, lexicon) : restoreDiacritics(opened, lexicon)) : null;
+      const carriedBase = carry?.replace(/\s*\(suite(?:\s+\d+)?\)$/, "") ?? null;
+      // A different section has been opened since: start a fresh chain on its name
+      // rather than extending the old one. The first piece takes the name plainly.
+      t = base && base !== carriedBase ? base : lessonTitle({ numbered: [], lexicon, carry });
+    }
     if (!t) t = lessonTitle({ numbered: spare[gi] ?? [], lexicon, carry: null });
     if (!t) t = carry ? `${carry} (suite)` : fallback;
     if (used.has(t.toLowerCase())) t = qualify(t);

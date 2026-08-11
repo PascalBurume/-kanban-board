@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // The pipeline module is plain .mjs; its JSDoc carries the types.
-import { buildLexicon, isShouted, unshout, restoreDiacritics, cleanHeading, lessonTitle, titleCandidates, titleGroups, namedHeadings } from "../../../scripts/book-lesson-title.mjs";
+import { buildLexicon, isShouted, unshout, restoreDiacritics, cleanHeading, lessonTitle, titleCandidates, titleGroups, namedHeadings, opensSection } from "../../../scripts/book-lesson-title.mjs";
 
 // A stand-in for the book's body text: correctly spelled prose, repeated enough to
 // count as evidence. This is exactly the signal the real lexicon runs on.
@@ -354,5 +354,53 @@ describe("cleanHeading — sub-point labels", () => {
 
   it("leaves an ordinary title starting with a short word alone", () => {
     expect(cleanHeading("Le plan")).toBe("Le plan");
+  });
+});
+
+describe("opensSection", () => {
+  it("rejects the label for a step inside one worked item", () => {
+    for (const h of ["Résolution", "Solution", "Remarque", "Corrigé", "Démonstration"]) {
+      expect(opensSection(h), h).toBe(false);
+    }
+  });
+
+  it("accepts a heading that does open a section", () => {
+    // "Exercices résolus" opens the run of exercises; naming its pieces after it is
+    // exactly right, which is why it is not a step label.
+    for (const h of ["Exercices résolus", "Exercices", "1.2 Concentration", "ANNEXE"]) {
+      expect(opensSection(h), h).toBe(true);
+    }
+  });
+});
+
+describe("titleGroups — a headingless run continues what was last opened", () => {
+  it("names the pieces after the section actually opened, not the lesson before", () => {
+    // The chapter states a section, then opens its exercises, then the packer splits the
+    // exercises across several lessons with no headings of their own. Those pieces are
+    // exercises — calling them "Position de la courbe … (suite 5)" says otherwise.
+    const out = titleGroups(
+      [["2. Position de la courbe"], [], [], []],
+      lexicon,
+      { context: ["", "Exercices résolus", "Exercices résolus", "Exercices résolus"] },
+    );
+    expect(out).toEqual([
+      "Position de la courbe",
+      "Exercices résolus",
+      "Exercices résolus (suite)",
+      "Exercices résolus (suite 2)",
+    ]);
+  });
+
+  it("keeps continuing the same section when nothing new was opened", () => {
+    const out = titleGroups([["2. Position de la courbe"], [], []], lexicon, {
+      context: ["", "2. Position de la courbe", "2. Position de la courbe"],
+    });
+    expect(out[1]).toBe("Position de la courbe (suite)");
+    expect(out[2]).toBe("Position de la courbe (suite 2)");
+  });
+
+  it("falls back to the previous title when no section was opened at all", () => {
+    const out = titleGroups([["1.1. THEORIE ATOMIQUE"], []], lexicon, { context: ["", ""] });
+    expect(out[1]).toBe("Théorie atomique (suite)");
   });
 });

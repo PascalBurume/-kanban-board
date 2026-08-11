@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // Plain .mjs pipeline module.
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures } from "../../../scripts/book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, isTextPicture, dropFiguresAlreadyInText } from "../../../scripts/book-text-repair.mjs";
 
 const fig = (inner = "") => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>Un cercle.</figcaption></figure>`;
 
@@ -199,5 +199,66 @@ describe("dropRedundantFigures — the scanner's watermark", () => {
   it("keeps a real diagram that happens to carry the watermark too", () => {
     const src = crop('<circle/><text>Le cercle trigonométrique</text><text>Scanned by CamScanner</text>');
     expect(dropRedundantFigures(src)).toBe(src);
+  });
+});
+
+describe("isTextPicture", () => {
+  const fig = (inner: string) => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>c</figcaption></figure>`;
+
+  it("accepts a formula: text over a bar over text", () => {
+    const src = fig('<text x="10" y="40" font-size="20">3x</text><line x1="8" y1="50" x2="60" y2="50"/><text x="10" y="70" font-size="20">x</text>');
+    expect(isTextPicture(src)).toBe(true);
+  });
+
+  it("rejects a line with nothing to divide — an orbital box, not a fraction", () => {
+    const src = fig('<text x="10" y="40" font-size="20">Si</text><line x1="80" y1="40" x2="120" y2="40"/>');
+    expect(isTextPicture(src)).toBe(false);
+  });
+
+  it("rejects an axis", () => {
+    const src = fig('<text x="10" y="40" font-size="20">y</text><line x1="8" y1="10" x2="8" y2="90"/>');
+    expect(isTextPicture(src)).toBe(false);
+  });
+
+  it("rejects curves and long paths", () => {
+    expect(isTextPicture(fig('<text x="1" y="1">a</text><path d="M0 0 C 1 1 2 2 3 3"/>'))).toBe(false);
+    expect(isTextPicture(fig('<text x="1" y="1">a</text><path d="M0 0 L1 1 L2 2 L3 3 L4 4 L5 5 L6 6 L7 7"/>'))).toBe(false);
+  });
+
+  it("rejects shape primitives outright", () => {
+    expect(isTextPicture(fig('<text x="1" y="1">O</text><circle cx="1" cy="1" r="5"/>'))).toBe(false);
+  });
+});
+
+describe("dropFiguresAlreadyInText", () => {
+  const exercise = (caption: string) =>
+    `<figure class="ai-figure"><svg><text x="10" y="40" font-size="20">Déterminer les asymptotes des fonctions</text></svg>`
+    + `<figcaption>${caption}</figcaption></figure>`;
+  const prose = "Déterminer les asymptotes des fonctions\n\n";
+
+  it("drops a crop of an exercise the chapter already prints", () => {
+    const src = prose + exercise("Exercice demandant de déterminer les asymptotes.");
+    const out = dropFiguresAlreadyInText(src);
+    expect(out.dropped).toHaveLength(1);
+    expect(out.text).not.toContain("<figure");
+  });
+
+  it("keeps a drawing, however much vocabulary it shares with the prose", () => {
+    // The caption casts the deciding vote: the strokes alone cannot tell an orbital
+    // diagram from a fraction.
+    for (const caption of ["Schéma des orbitales du silicium.", "Diagramme de l'atome.", "Projection du segment."]) {
+      const out = dropFiguresAlreadyInText(prose + exercise(caption));
+      expect(out.dropped, caption).toHaveLength(0);
+    }
+  });
+
+  it("keeps a crop whose text the chapter does NOT print", () => {
+    const out = dropFiguresAlreadyInText("Rien à voir.\n\n" + exercise("Exercice sur les asymptotes."));
+    expect(out.dropped).toHaveLength(0);
+  });
+
+  it("honours an explicit keep", () => {
+    const src = prose + exercise("Exercice demandant de déterminer les asymptotes.");
+    expect(dropFiguresAlreadyInText(src, { keep: ["déterminer les asymptotes"] }).dropped).toHaveLength(0);
   });
 });

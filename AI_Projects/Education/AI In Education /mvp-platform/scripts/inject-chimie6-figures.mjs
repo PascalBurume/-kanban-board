@@ -18,7 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures } from "./book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, dropFiguresAlreadyInText } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "..");
@@ -117,7 +117,9 @@ for (const ch of CHAPTERS) {
   if (ch.start < 0 || ch.end < 0 || ch.start >= ch.end || !fs.existsSync(jsonPath)) { console.log(`inject-chimie6: skip ${ch.file} (roman ${ch.roman})`); continue; }
 
   const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(ch.start + 1, ch.end).join("\n"), runningHeads));
-  const body = clean(normalizeHeadings(anchorFigures(dropRedundantFigures(prepFigures(chapterText)))));
+  const { text: pruned, dropped } = dropFiguresAlreadyInText(dropRedundantFigures(prepFigures(chapterText)));
+  for (const caption of dropped) console.log(`inject-chimie6: dropped crop — ${ch.file.replace(/\.json$/, "")} — ${caption.slice(0, 96)}`);
+  const body = clean(normalizeHeadings(anchorFigures(pruned)));
 
   const textLenOf = (s) => stripFigs(s).length;
   const figsOf = (s) => (s.match(/<figure class="ai-figure/g) || []).length;

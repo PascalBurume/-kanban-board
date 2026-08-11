@@ -137,7 +137,10 @@ a.db-stat:hover b { color: var(--primary); }
 
 /* section headers */
 .sec-h h2 { font-size: 19px; position: relative; }
-.sec-h .link { display: inline-flex; align-items: center; gap: 3px; }
+/* nowrap + flex:none: as a shrinkable flex child next to a two-line section
+   heading, this broke to "Tout / voir" on a phone. Two words and an arrow have
+   nowhere useful to wrap to — the heading beside it should give up width first. */
+.sec-h .link { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; flex: none; }
 
 /* ============================================================
    Dashboard clarity — section subtitles, chart headline, footer links

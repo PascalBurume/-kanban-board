@@ -22,24 +22,41 @@ const HELLO =
 // completed makes the offer one the assistant can honour straight away.
 function greeting(rec) {
   if (!rec?.totalDone) return HELLO;
-  const done = rec.finishedModules ?? [];
   const bits = [];
-  if (done.length > 1) bits.push(`Tu as terminé ${done.length} modules, dont « ${done[0]} » et « ${done[1]} ».`);
-  else if (done.length === 1) bits.push(`Tu as terminé le module « ${done[0]} ».`);
-  else if (rec.lastLessons?.length) bits.push(`Ta dernière leçon terminée : « ${rec.lastLessons[0]} ».`);
+  // Lead with where the student actually is. Opening on the count of finished
+  // modules described a history; this describes the work in front of them.
+  if (rec.current) {
+    const where = rec.current.lesson ? ` (en cours : « ${rec.current.lesson} »)` : "";
+    bits.push(`Tu en es à « ${rec.current.module} », ${rec.current.doneCount}/${rec.current.lessonCount} leçons${where}.`);
+  } else if (rec.lastLessons?.length) {
+    bits.push(`Ta dernière leçon terminée : « ${rec.lastLessons[0]} ».`);
+  } else if (rec.finishedModules?.length) {
+    bits.push(`Tu as terminé le module « ${rec.finishedModules[0]} ».`);
+  }
   if (rec.weakest) bits.push(`Ton quiz le plus faible est « ${rec.weakest.lesson} » (${rec.weakest.score}/100).`);
   bits.push("Je peux te faire réviser tout ça, même si ton carnet est encore vide.");
   return `Bonjour 👋 ${bits.join(" ")}`;
 }
 
-/** Chips pointing at the student's own record, ahead of the generic ones. */
+/**
+ * Chips anchored on the work in progress, then the generic ones.
+ *
+ * The first version offered `finishedModules[0]`, which is the first module in
+ * curriculum order — fixed for the whole year. It read as a label rather than a
+ * suggestion, because it never changed no matter what the student was doing.
+ */
 function chipsFor(rec) {
   if (!rec?.totalDone) return CHIPS;
   const out = [];
+  if (rec.current?.lesson) out.push(`Explique « ${rec.current.lesson} »`);
+  if (rec.current?.module) out.push(`Interroge-moi sur « ${rec.current.module} »`);
   if (rec.weakest) out.push(`Révise « ${rec.weakest.lesson} »`);
-  const mod = rec.finishedModules?.[0] ?? rec.inProgressModules?.[0];
-  if (mod) out.push(`Interroge-moi sur « ${mod} »`);
-  return [...out, ...CHIPS].slice(0, 5);
+  // Nothing in flight: fall back to the most recent lesson, still more current
+  // than the first module of the year.
+  if (!out.length && rec.lastLessons?.length) out.push(`Révise « ${rec.lastLessons[0]} »`);
+  // De-duplicate: a weak quiz on the lesson in progress would otherwise appear twice.
+  const seen = new Set();
+  return [...out, ...CHIPS].filter((c) => !seen.has(c) && seen.add(c)).slice(0, 5);
 }
 
 // Study assistant docked beside the notebook. Two things make it different from the

@@ -31,7 +31,21 @@ export async function GET(req: Request) {
 
   try {
     const rec = await getStudyRecord(u.userId, classId, notebook?.subjectSlug);
+    // `current` is the point of this payload. Keyed off the module actually being
+    // worked, not the first finished one — that is fixed in curriculum order, so
+    // the suggestion never changed and read as decoration rather than a
+    // suggestion. Falls back to the last lesson completed, which is still "what
+    // I am on" rather than "what I did in September".
+    const active = rec.modules.find((m) => !m.finished && (m.inProgress.length > 0 || m.doneCount > 0));
     return NextResponse.json({
+      current: active
+        ? {
+            module: active.name,
+            lesson: active.inProgress[0] ?? null,
+            doneCount: active.doneCount,
+            lessonCount: active.lessonCount,
+          }
+        : null,
       finishedModules: rec.modules.filter((m) => m.finished).map((m) => m.name),
       inProgressModules: rec.modules.filter((m) => !m.finished && m.doneCount > 0).map((m) => m.name),
       weakest: rec.weakest[0] ?? null,

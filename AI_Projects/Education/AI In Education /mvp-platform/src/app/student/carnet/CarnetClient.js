@@ -63,6 +63,7 @@ export default function CarnetClient() {
   const [md, setMd] = useState("");
   const [tab, setTab] = useState("contenu");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [ribbonOpen, setRibbonOpen] = useState(true);
   const [copilotOpen, setCopilotOpen] = useState(false);
   // Panel width. 320px is fine for a chip and one sentence, and cramped for a
   // worked answer with a formula in it — which is most of what this panel
@@ -348,6 +349,17 @@ export default function CarnetClient() {
         <button className="cn-sidetoggle" onClick={() => setSidebarOpen((o) => !o)} aria-expanded={sidebarOpen}>
           <Icon name="layers" /> {sidebarOpen ? "Masquer" : "Carnets"}
         </button>
+        {/* The second thing worth folding away. The ribbon wraps to four rows on a
+            laptop and takes more height than the text under it — which is the wrong
+            trade when the student is re-reading rather than writing. */}
+        <button
+          className="cn-sidetoggle"
+          onClick={() => setRibbonOpen((o) => !o)}
+          aria-expanded={ribbonOpen}
+          title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils"}
+        >
+          <Icon name="edit" /> {ribbonOpen ? "Barre d'outils" : "Outils"}
+        </button>
         <input
           className="cn-title"
           value={title}
@@ -418,6 +430,7 @@ export default function CarnetClient() {
               onChange={(v) => { if (v === md) return; edit({ contentMd: v }); }}
               saveState={saveLabel(status, lastSyncedAt)}
               onReady={onWriterReady}
+              ribbonHidden={!ribbonOpen}
             />
           </div>
 

@@ -165,16 +165,19 @@ export function formatStudyRecord(rec: StudyRecord): string {
   const finished = rec.modules.filter((m) => m.finished);
   const partial = rec.modules.filter((m) => !m.finished);
 
-  if (finished.length) {
-    lines.push(`Modules TERMINÉS (${finished.length}) : ${nameList(finished, 14)}`);
-  }
+  // In progress goes FIRST. The finished list is history; this is the work in
+  // front of the student, and it is what a suggestion should be built on.
   if (partial.length) {
-    lines.push("", "Modules EN COURS :");
+    lines.push("EN COURS EN CE MOMENT (c'est ici qu'en est l'élève) :");
     for (const m of partial.slice(0, 4)) {
       const bits = [`${m.doneCount}/${m.lessonCount} leçons faites`];
-      if (m.inProgress.length) bits.push(`en cours : ${m.inProgress.slice(0, 3).join(" · ")}`);
+      if (m.inProgress.length) bits.push(`leçon ouverte : ${m.inProgress.slice(0, 3).join(" · ")}`);
       lines.push(`- ${m.name} (${m.subjectName}) — ${bits.join(" ; ")}`);
     }
+    lines.push("");
+  }
+  if (finished.length) {
+    lines.push(`Modules déjà TERMINÉS (${finished.length}) : ${nameList(finished, 14)}`);
   }
   if (rec.weakest.length) {
     lines.push(

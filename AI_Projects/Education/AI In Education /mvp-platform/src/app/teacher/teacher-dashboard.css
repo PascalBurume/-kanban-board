@@ -151,7 +151,11 @@ a.db-stat:hover b { color: var(--primary); }
 .panel-head .badge, .panel-head .link { margin-top: 2px; flex: none; }
 
 /* weekly-activity headline number */
-.chart-headline { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+/* One row: the count on the left, the range tabs on the right. flex-wrap means a
+   narrow card stacks them instead of letting either shrink into the other. */
+.db-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.db-chart-head .pill-tabs { margin-left: auto; flex: none; }
+.chart-headline { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .ch-num { font: 700 32px var(--font-head); letter-spacing: -.02em; color: var(--indigo-700); line-height: 1; }
 .ch-noun { font-size: 12.5px; color: var(--text-soft); font-weight: 600; line-height: 1.25; }
 
@@ -172,7 +176,9 @@ a.db-stat:hover b { color: var(--primary); }
 /* Only the chart dims while a new range loads — the rest of the page holds
    still rather than flashing back to skeletons for a one-panel control. */
 .db-chart.busy { opacity: .5; pointer-events: none; }
-.pill-tabs-right { position: absolute; top: 14px; right: 16px; z-index: 1; }
+/* .pill-tabs-right removed: absolutely positioning the tabs over the card corner
+   is what let the chart headline slide underneath them. They live in
+   .db-chart-head now, which cannot overlap because it is a real row. */
 .db-chart-empty { text-align: center; padding: 40px 0; font-size: 14px; }
 .db-empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
 .db-none { padding: 16px 4px; font-size: 13.5px; }

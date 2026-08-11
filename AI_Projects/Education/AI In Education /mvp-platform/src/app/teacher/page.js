@@ -254,12 +254,24 @@ export default function TeacherDashboard() {
             </div>
           </div>
           <div className={`card panel db-chart${chartLoading ? " busy" : ""}`}>
-            <div className="pill-tabs pill-tabs-right">
-              {CHART_KEYS.map((key) => (
-                <button key={key} className={chartKey === key ? "active" : ""} onClick={() => setChartKey(key)}>
-                  {CHART_LABELS[key]}
-                </button>
-              ))}
+            {/* Headline and tabs are siblings in one row. The tabs used to be
+                absolutely positioned in the corner, so the headline flowed under
+                them and — with the tabs above it in the stacking order — the
+                count's label was simply painted over. */}
+            <div className="db-chart-head">
+              {!chartEmpty && (
+                <div className="chart-headline">
+                  <span className="ch-num">{rangeTotalLabel}</span>
+                  <span className="ch-noun">{chartMeta.noun}<br />sur {RANGES[range].label.toLowerCase()}</span>
+                </div>
+              )}
+              <div className="pill-tabs">
+                {CHART_KEYS.map((key) => (
+                  <button key={key} className={chartKey === key ? "active" : ""} onClick={() => setChartKey(key)}>
+                    {CHART_LABELS[key]}
+                  </button>
+                ))}
+              </div>
             </div>
             {chartEmpty ? (
               <p className="muted db-chart-empty">
@@ -267,10 +279,6 @@ export default function TeacherDashboard() {
               </p>
             ) : (
               <>
-                <div className="chart-headline">
-                  <span className="ch-num">{rangeTotalLabel}</span>
-                  <span className="ch-noun">{chartMeta.noun}<br />sur {RANGES[range].label.toLowerCase()}</span>
-                </div>
                 <BarChart
                   data={buckets.map((b, i) => ({ label: bucketLabel(b, granularity), value: values[i], highlight: i === selBar }))}
                   formatValue={chartKey === "Time" ? fmtMinutes : (v) => String(v)}

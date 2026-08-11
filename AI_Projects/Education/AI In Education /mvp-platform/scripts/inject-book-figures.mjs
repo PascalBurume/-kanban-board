@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, dropFiguresAlreadyInText } from "./book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, dropFiguresAlreadyInText, dropUnrenderablePaths } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 import { applyCorrections } from "./book-corrections.mjs";
 
@@ -251,7 +251,7 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // split into sections, or it lands at the top of one and reads like its title. Then
     // each figure moves under the caption that names it.
     const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(start + 1, end).join("\n"), runningHeads));
-    const deduped = dropRedundantFigures(prepFigures(chapterText));
+    const deduped = dropRedundantFigures(dropUnrenderablePaths(prepFigures(chapterText)));
     // A crop of text the chapter already prints is noise; see book-text-repair.mjs.
     const { text: pruned, dropped } = dropFiguresAlreadyInText(deduped);
     for (const caption of dropped) droppedCrops.push({ chapter: ch.file, caption });

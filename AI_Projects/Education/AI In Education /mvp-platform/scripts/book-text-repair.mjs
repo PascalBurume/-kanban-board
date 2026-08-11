@@ -154,6 +154,33 @@ export function dropRedundantFigures(text) {
   return dropped ? out.replace(/\n{3,}/g, "\n\n") : src;
 }
 
+// Path data is commands and numbers. Anything else in a `d` attribute is not a shape the
+// browser can draw — it refuses the whole element and logs an error.
+const DRAWABLE = /^[\sMmZzLlHhVvCcSsQqTtAa0-9eE.,+-]*$/;
+
+/**
+ * Drop `<path>` elements the browser cannot render.
+ *
+ * A figure recreated by a model can come back with a word where a coordinate belongs —
+ * `d="M340 410V sixty"`. The browser parses the attribute, hits the word, and discards
+ * the element, so the path was never on screen; all it does is put "Expected number" in
+ * the console of every pupil who opens the lesson.
+ *
+ * Removing it is therefore a no-op on the drawing and a fix for the console. The rule is
+ * deliberately narrow: only paths whose data is *not drawable at all* go, never one that
+ * merely looks odd. One path in the 9,435 across the corpus qualifies — the invisible
+ * (`opacity="0"`) twin of the y-axis in Trigonométrie fig. 13, whose visible counterpart
+ * on the very next line draws that axis correctly.
+ */
+export function dropUnrenderablePaths(text) {
+  const src = String(text);
+  if (!src.includes("<path")) return src;
+  return src.replace(/<path\b[^>]*\/?>/g, (el) => {
+    const d = /\sd="([^"]*)"/.exec(el);
+    return d && !DRAWABLE.test(d[1]) ? "" : el;
+  });
+}
+
 const svgTexts = (block) => {
   const out = [];
   for (const m of String(block).matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)) {

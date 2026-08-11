@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // Plain .mjs pipeline module.
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, isTextPicture, dropFiguresAlreadyInText } from "../../../scripts/book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures, isTextPicture, dropFiguresAlreadyInText, dropUnrenderablePaths } from "../../../scripts/book-text-repair.mjs";
 
 const fig = (inner = "") => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>Un cercle.</figcaption></figure>`;
 
@@ -150,6 +150,29 @@ describe("trimTrailingHeadings — page numbers", () => {
   it("does not mistake a numeric answer for furniture", () => {
     const src = "La réponse est :\n\n$$x = 1234567890$$";
     expect(trimTrailingHeadings(src)).toBe(src);
+  });
+});
+
+describe("dropUnrenderablePaths", () => {
+  it("drops a path whose data carries a word where a coordinate belongs", () => {
+    const src = '<path d="M340 410V sixty" opacity="0"/><path d="M340 405V61"/>';
+    expect(dropUnrenderablePaths(src)).toBe('<path d="M340 405V61"/>');
+  });
+
+  it("keeps every form of real path data", () => {
+    const src = '<path d="M 0 0 L 10 5 z"/><path d="M390 255 A50 50 0 0 0 381 226"/>'
+      + '<path d="M-1.5,2.25e3H4"/>';
+    expect(dropUnrenderablePaths(src)).toBe(src);
+  });
+
+  it("leaves elements that are not paths alone", () => {
+    const src = '<text x="1" y="2">sixty</text><circle cx="1" cy="1" r="1"/>';
+    expect(dropUnrenderablePaths(src)).toBe(src);
+  });
+
+  it("keeps a path that has no data attribute at all", () => {
+    const src = '<path fill="#161616"/>';
+    expect(dropUnrenderablePaths(src)).toBe(src);
   });
 });
 

@@ -27,6 +27,8 @@
 .hero .prog-ring .pct { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-head); font-weight: 700; font-size: 20px; }
 .hero-body { flex: 1; position: relative; }
 .hero-body .eyebrow { font-size: 12.5px; font-weight: 600; color: var(--indigo-200); text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; gap: 8px; }
+/* An <Icon> with no size rule lays out at 0×0, so the play glyph was invisible. */
+.hero-body .eyebrow svg { width: 14px; height: 14px; }
 .hero-body h2 { color: #fff; font-size: 23px; margin: 8px 0 4px; }
 .hero-body .meta { color: var(--indigo-100); font-size: 14px; display: flex; gap: 16px; }
 .hero-body .meta span { display: inline-flex; align-items: center; gap: 6px; }
@@ -37,6 +39,7 @@
 /* section head */
 .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .sec-head h2 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+.sec-head h2 svg { width: 18px; height: 18px; }
 .overall { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-soft); font-weight: 600; }
 .overall .pbar { width: 140px; }
 

@@ -7,6 +7,22 @@
 html, body { height: 100%; }
 body { @apply bg-slate-50 text-ink antialiased; }
 
+/*
+  Icon size floor.
+
+  <Icon> renders <span class="icon"><svg viewBox="0 0 24 24"></span> and leaves
+  the size to CSS, so a call site with no rule of its own lays the icon out at
+  0×0: in the DOM, absent from the screen. Nothing warns about it — « Projets
+  appliqués » styles itself from scratch and sized none of them, so 11 of its 12
+  icons were blank and the page simply looked as though it had been designed
+  without any; the lesson and dashboard eyebrows had lost theirs the same way.
+
+  :where() carries no specificity at all, so this is a floor rather than a rule:
+  every selector already sizing an icon — down to `.brand-mark svg` — still wins,
+  whatever the source order. It only decides what happens where nobody chose.
+*/
+:where(.icon > svg) { width: 16px; height: 16px; }
+
 /* Reading view typography */
 .prose-reader { @apply leading-relaxed; }
 .prose-reader h1 { @apply text-2xl font-bold mt-2 mb-4 text-slate-900; }

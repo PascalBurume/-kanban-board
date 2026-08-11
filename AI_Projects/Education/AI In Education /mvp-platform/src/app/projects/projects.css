@@ -1,5 +1,11 @@
 /* Projets appliqués — student hub + workspace. Self-contained styling. */
 .proj-page { min-height: 100vh; background: #f6f7fb; color: #0f172a; }
+
+/* Icons here take the 16px floor from globals.css; these sit in a tile or a
+   heading and need to be larger than that. */
+.proj-hero .ph-ic .icon svg { width: 26px; height: 26px; }
+.subj-head .subj-ic .icon svg { width: 18px; height: 18px; }
+.coach-head .icon svg { width: 18px; height: 18px; }
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px; background: #fff; border-bottom: 1px solid #e7e9f2; position: sticky; top: 0; z-index: 20;

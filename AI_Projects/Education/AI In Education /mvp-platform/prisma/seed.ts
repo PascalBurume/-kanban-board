@@ -26,7 +26,7 @@ function avatarColor(name: string) {
 type SubjStyle = { icon: string; color: string };
 function subjectStyle(label: string, id: string): SubjStyle {
   const s = (label + " " + id).toLowerCase();
-  if (/(math|alg|géom|geom)/.test(s)) return { icon: "math", color: "#2563eb" };
+  if (/(math|alg|géom|geom|trigo)/.test(s)) return { icon: "math", color: "#2563eb" };
   if (/(chim)/.test(s)) return { icon: "chimie", color: "#0d9488" };
   if (/(phys|électr|electr)/.test(s)) return { icon: "physique", color: "#ea580c" };
   if (/(bio|svt|vie|terre|nature)/.test(s)) return { icon: "svt", color: "#16a34a" };
@@ -45,7 +45,7 @@ function levelFromClassId(id: string): string {
 function familyFromSlug(slug: string): string {
   if (/geom/.test(slug)) return "geometrie";
   if (/exetat|sciences-1/.test(slug)) return "exetat";
-  if (/math/.test(slug)) return "math";
+  if (/math|trigo/.test(slug)) return "math";
   if (/chim/.test(slug)) return "chimie";
   if (/phys|electr/.test(slug)) return "physique";
   return "autre";
@@ -848,6 +848,16 @@ async function main() {
       const has = await prisma.offering.findFirst({ where: { level: sec.level, field: sec.field, subjectSlug: examBook.slug } });
       if (!has) await prisma.offering.create({ data: { level: sec.level, field: sec.field, subjectSlug: examBook.slug } });
     }
+
+    // The fan-out has to reach the MODULES too, or the two halves disagree: the offering
+    // says every 6e section carries the revision volume, while each module still claims
+    // classLevel "examen" — the phantom track — and the tree filters it out of every real
+    // class. Null is the documented value for a book shared across levels, and the
+    // offering above is what actually decides who sees it.
+    await prisma.module.updateMany({
+      where: { subjectSlug: examBook.slug, classLevel: "examen" },
+      data: { classLevel: null },
+    });
   }
 
   // ---- Teachers ----
@@ -907,6 +917,10 @@ async function main() {
   // pick the teacher's discipline among them. A 6e class can only ever get the
   // 6e book — the old `subjectsForIcon(icon)[0]` heuristic gave every class the
   // first-created math book (Maths 5), including 6e Scientifique A.
+  // Titulaire is one teacher per class — not one per book they happen to carry there.
+  // Grâce teaches two disciplines (maths and the EXETAT revision volume), so without
+  // this the 6e classes ended up with two titulaires, both her.
+  const leadClaimed = new Set<string>();
   for (let ti = 0; ti < teachers.length; ti++) {
     const t = teachers[ti];
     for (const discipline of teacherData[ti].subjects) {
@@ -915,11 +929,19 @@ async function main() {
           where: { level: c.level, field: c.field ?? "" },
           include: { subject: { select: { family: true } } },
         });
-        const match = offered.find((o) => o.subject.family === discipline);
-        if (!match) continue; // this class's section doesn't study that discipline
-        await prisma.teacherAssignment.create({
-          data: { teacherId: t.id, classId: c.id, subjectSlug: match.subjectSlug, isLead: ti === 0 },
-        });
+        // EVERY book of that discipline the section carries, not just the first. The 6e
+        // scientific sections now study two maths books — Maîtriser les Maths 6 and the
+        // Trigonométrie course — and `find` silently handed the teacher whichever was
+        // created first, leaving the other with no teacher and so invisible in the studio.
+        const matches = offered.filter((o) => o.subject.family === discipline);
+        if (!matches.length) continue; // this class's section doesn't study that discipline
+        for (const match of matches) {
+          const lead = ti === 0 && !leadClaimed.has(c.id);
+          if (lead) leadClaimed.add(c.id);
+          await prisma.teacherAssignment.create({
+            data: { teacherId: t.id, classId: c.id, subjectSlug: match.subjectSlug, isLead: lead },
+          });
+        }
       }
     }
   }

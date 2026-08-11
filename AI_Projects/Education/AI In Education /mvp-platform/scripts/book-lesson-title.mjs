@@ -98,9 +98,18 @@ function entry(key, lexicon) {
   return null;
 }
 
-/** The book's spelling, ignoring case — used where the caller re-cases it itself. */
+/**
+ * The book's spelling, ignoring case — used where the caller re-cases it itself.
+ *
+ * The lower-case form is asked first, because that is where French keeps its accents:
+ * this corpus writes "Etats" 34 times and "états" 21, the capital having lost its mark
+ * every time, so the more frequent spelling is the damaged one. Asking the lower-case
+ * form for the marks and re-casing gives "États".
+ */
 function lookup(key, lexicon) {
-  return entry(key, lexicon)?.form ?? null;
+  const hit = entry(key, lexicon);
+  if (!hit) return null;
+  return hit.lowerCount >= MIN_EVIDENCE ? hit.lower : hit.form;
 }
 
 function respell(word, lexicon) {

@@ -319,3 +319,23 @@ describe("namedHeadings", () => {
     expect(namedHeadings({ major: [], minor: ["Notion", "a) x"] })).toEqual([]);
   });
 });
+
+describe("restoreDiacritics — accents live in the lower-case form", () => {
+  // French drops the accent from a capital, so a word the book usually writes
+  // capitalised has its most frequent spelling damaged. The lower-case spelling is the
+  // one that kept its marks.
+  const lex = buildLexicon(["Etats", "Etats", "Etats", "Etats", "états", "états", "états"].join(" "));
+
+  it("takes the marks from the spelling that has them", () => {
+    expect(restoreDiacritics("Etats excités", lex)).toBe("États excités");
+  });
+
+  it("still refuses when the letters differ", () => {
+    expect(restoreDiacritics("Etage", lex)).toBe("Etage");
+  });
+
+  it("falls back to the dominant form with no lower-case evidence", () => {
+    const names = buildLexicon(["Taylor", "Taylor", "Taylor"].join(" "));
+    expect(restoreDiacritics("Taylor", names)).toBe("Taylor");
+  });
+});

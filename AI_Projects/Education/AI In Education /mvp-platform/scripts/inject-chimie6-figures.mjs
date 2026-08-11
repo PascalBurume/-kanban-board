@@ -18,6 +18,8 @@ import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 import { pooledLexicon, titleGroups, titleCandidates } from "./book-lesson-title.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
+import { recap } from "./lesson-recap.mjs";
 
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "content/sources/chimie-6-notions.md");
@@ -29,6 +31,7 @@ const lines = fs.readFileSync(SRC, "utf8").split("\n");
 
 // The books are their own dictionary for restoring the accents shouted headings lost.
 const lexicon = pooledLexicon(path.join(ROOT, "content/sources"));
+const runningHeads = findRunningHeads(lines.join("\n"));
 
 const headingsOf = (group) => {
   const text = group.join("\n\n");
@@ -113,7 +116,8 @@ for (const ch of CHAPTERS) {
   const jsonPath = path.join(REFINED, ch.file);
   if (ch.start < 0 || ch.end < 0 || ch.start >= ch.end || !fs.existsSync(jsonPath)) { console.log(`inject-chimie6: skip ${ch.file} (roman ${ch.roman})`); continue; }
 
-  const body = clean(normalizeHeadings(prepFigures(lines.slice(ch.start + 1, ch.end).join("\n"))));
+  const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(ch.start + 1, ch.end).join("\n"), runningHeads));
+  const body = clean(normalizeHeadings(anchorFigures(prepFigures(chapterText))));
 
   const textLenOf = (s) => stripFigs(s).length;
   const figsOf = (s) => (s.match(/<figure class="ai-figure/g) || []).length;
@@ -167,7 +171,7 @@ for (const ch of CHAPTERS) {
       order: base + 1 + i,
       estMinutes: 25,
       degraded: true,
-      contentMd: intro + g.join("\n\n"),
+      contentMd: intro + g.join("\n\n") + recap(g.join("\n\n"), titles[i]),
       quiz: null,
     });
   });

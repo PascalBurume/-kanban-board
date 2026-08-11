@@ -14,6 +14,18 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { pooledLexicon, titleGroups, titleCandidates } from "./book-lesson-title.mjs";
+
+// normalizeHeadings() has already sorted the chapter's headings into two levels: "## "
+// for the sections the book numbered itself ("1.2", "III.4"), "### " for everything
+// else. A group of packed sections is named from the first of those it contains.
+const allHeadings = (group) => {
+  const text = group.join("\n\n");
+  const pick = (re) => [...text.matchAll(re)].map((m) => m[1].trim());
+  return { major: pick(/^##\s+(.+)$/gm), minor: pick(/^###\s+(.+)$/gm) };
+};
+
+const headingsOf = (group) => titleCandidates(allHeadings(group));
 
 const ROMANS = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI","XXII"];
 
@@ -56,6 +68,12 @@ function clean(text) {
   const out = text
     .replace(/^<!--\s*page[^>]*-->\s*$/gim, "")
     .replace(/^\s*Scanned by CamScanner\s*$/gim, "")
+    // The transcription platform annotates figures whose vision reading disagrees with
+    // the OCR — "[[VIS?]] A vision reading disagrees on 3 labels — check the scan". That
+    // is a note to whoever proofreads the book, not something a pupil should read under
+    // a diagram, and it was reaching them: 15 seeded lessons carried one.
+    .replace(/<div class="fig-flags">[\s\S]*?<\/div>/g, "")
+    .replace(/\[\[(?:VIS|FIG)\?[^\]]*\]\]/g, "")
     .replace(/^.*(?:\[\{"|box_2d).*$/gm, "")                            // OCR JSON-garbage lines (Ch XII corruption)
     .replace(/!\[img-\d+[^\]]*\]\([^)]*\)\s*/g, "")                     // drop stray/unconverted image placeholders
     .replace(/^\s*\d{1,3}\s*$/gm, "")
@@ -104,20 +122,29 @@ function displayWidth(natural) {
   return Math.round(Math.min(COLUMN, Math.max(natural, target)));
 }
 
-export function injectBookFigures({ src, refined, label, bookTitle, book }) {
+export function injectBookFigures({ src, refined, label, bookTitle, book, locate, intro: introText, headings }) {
+  // A book whose sections are not numbered supplies its own rule for which headings may
+  // name a lesson — the EXETAT manual is divided by exam session, not by "1.2".
+  const namesOf = headings ? (group) => headings(allHeadings(group)) : headingsOf;
   if (!fs.existsSync(src) || !fs.existsSync(refined)) {
     console.log(`${label}: source or refined dir missing — skipping.`);
     return;
   }
   let lines = fs.readFileSync(src, "utf8").split("\n");
 
+  // ROOT is two levels up from public/content/refined/<book>.
+  const appRoot = path.resolve(path.dirname(refined), "../../..");
+
+  // The books are their own dictionary: headings are SHOUTED and the scan drops the
+  // accents from capitals, but the same words run correctly spelled through the body
+  // text thousands of times. See scripts/book-lesson-title.mjs.
+  const lexicon = pooledLexicon(path.join(appRoot, "content/sources"));
+
   // Photographs the transcription referenced but never shipped. Their filenames
   // are unusable — chimie-5 reuses six names across thirty-four references — so
   // scripts/extract-book-images.mjs resolved each one against the PDF and wrote a
   // manifest keyed by the reference's ORDINAL in this file. Rewrite them here, in
   // that same order, before clean() would otherwise drop them.
-  // ROOT is two levels up from public/content/refined/<book>.
-  const appRoot = path.resolve(path.dirname(refined), "../../..");
   const srcDir = path.join(appRoot, "content/book-images", book ?? "");
   const manifestPath = path.join(appRoot, "content/book-images/manifest.json");
   const outDir = path.join(appRoot, "public/content/img", book ?? "");
@@ -171,34 +198,39 @@ export function injectBookFigures({ src, refined, label, bookTitle, book }) {
   // trailing page number — the rule this started with — works only for a TOC
   // whose every entry carries one, and chimie-5's does not: four of its ten
   // chapters would have resolved to the table of contents.
-  const chapIdx = (roman) => {
-    if (!roman) return lines.length;
-    let last = -1;
-    const re = new RegExp(`^#*\\s*CHAPITRE\\s+${roman}\\s*:`, "i");
-    for (let i = 0; i < lines.length; i++) if (re.test(lines[i])) last = i;
-    return last;
-  };
+  //
+  // Books that are not organised into numbered chapters pass their own locator:
+  // the EXETAT manual divides by school subject ("# I. MATHEMATIQUE.", "# **CHIMIE.**").
+  const chapIdx = locate
+    ? (_roman, i) => locate(i, lines)
+    : (roman) => {
+        if (!roman) return lines.length;
+        let last = -1;
+        const re = new RegExp(`^#*\\s*CHAPITRE\\s+${roman}\\s*:`, "i");
+        for (let j = 0; j < lines.length; j++) if (re.test(lines[j])) last = j;
+        return last;
+      };
 
   // Chapters I…N map in order to module-1…module-N (sorted by numeric prefix).
   const files = fs.readdirSync(refined)
     .filter((f) => /^module-\d+-.*\.json$/.test(f))
     .sort((a, b) => Number(a.match(/^module-(\d+)/)[1]) - Number(b.match(/^module-(\d+)/)[1]));
   const chapters = files.map((file, i) => ({
-    roman: ROMANS[i], nextRoman: ROMANS[i + 1] || null, file, prefix: file.replace(/\.json$/, ""),
+    roman: ROMANS[i], nextRoman: ROMANS[i + 1] || null, file, prefix: file.replace(/\.json$/, ""), index: i,
   }));
 
-  const intro =
-    `> Contenu et figures tirés du manuel *${bookTitle}* — les figures sont ` +
-    "des reconstructions vérifiées d'après le scan, non le document original.\n\n";
+  const intro = introText
+    ?? `> Contenu et figures tirés du manuel *${bookTitle}* — les figures sont `
+      + "des reconstructions vérifiées d'après le scan, non le document original.\n\n";
 
   let totalLessons = 0, totalFigs = 0;
   for (const ch of chapters) {
-    const start = chapIdx(ch.roman);
+    const start = chapIdx(ch.roman, ch.index);
     // A chapter runs to the next one that was actually located, so a missing
     // heading widens its predecessor rather than collapsing it to nothing.
     let end = lines.length;
-    for (let d = ROMANS.indexOf(ch.roman) + 1; d < chapters.length; d++) {
-      const s = chapIdx(ROMANS[d]);
+    for (let d = ch.index + 1; d < chapters.length; d++) {
+      const s = chapIdx(ROMANS[d], d);
       if (s > start) { end = s; break; }
     }
     const jsonPath = path.join(refined, ch.file);
@@ -244,13 +276,16 @@ export function injectBookFigures({ src, refined, label, bookTitle, book }) {
     mod.lessons = mod.lessons.filter((l) => !/manuel-illustre/.test(l.slug));
     const base = mod.lessons.length;
 
-    // Sequential numbering — clean and consistent; the lessons already sit under
-    // their module (e.g. "Statistiques"), so a "(1)/(2)…" suffix reads clearly and
-    // avoids mislabelling from stray section-number references in the OCR text.
+    // Name each lesson after the book section it opens with. "Manuel illustré (1)…(14)"
+    // told a teacher nothing about what was inside; the section headings are right here
+    // in the text we just packed.
+    const titles = titleGroups(groups.map(namesOf), lexicon, {
+      taken: mod.lessons.map((l) => l.title),
+    });
     groups.forEach((g, i) => {
       mod.lessons.push({
         slug: `${ch.prefix}-${base + 1 + i}-manuel-illustre-${i + 1}`,
-        title: groups.length > 1 ? `Manuel illustré (${i + 1})` : "Manuel illustré",
+        title: titles[i],
         order: base + 1 + i,
         estMinutes: 25,
         degraded: true,

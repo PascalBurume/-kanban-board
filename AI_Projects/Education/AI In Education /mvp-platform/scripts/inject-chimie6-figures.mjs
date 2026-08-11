@@ -17,6 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
+import { pooledLexicon, titleGroups, titleCandidates } from "./book-lesson-title.mjs";
 
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "content/sources/chimie-6-notions.md");
@@ -25,6 +26,15 @@ const REFINED = path.join(ROOT, "public/content/refined/chimie-6");
 if (!fs.existsSync(SRC) || !fs.existsSync(REFINED)) { console.log("inject-chimie6: source or refined dir missing — skipping."); process.exit(0); }
 
 const lines = fs.readFileSync(SRC, "utf8").split("\n");
+
+// The books are their own dictionary for restoring the accents shouted headings lost.
+const lexicon = pooledLexicon(path.join(ROOT, "content/sources"));
+
+const headingsOf = (group) => {
+  const text = group.join("\n\n");
+  const pick = (re) => [...text.matchAll(re)].map((m) => m[1].trim());
+  return titleCandidates({ major: pick(/^##\s+(.+)$/gm), minor: pick(/^###\s+(.+)$/gm) });
+};
 
 // Body chapter heading = LAST `# Chapitre <roman>` occurrence (each part carries an
 // identical heading in its mini-TOC before its body). \b keeps I≠II, V≠VI, etc.
@@ -146,10 +156,14 @@ for (const ch of CHAPTERS) {
     "> Contenu et figures tirés du manuel *Notions de Chimie 6* — les figures sont " +
     "des reconstructions vérifiées d'après le scan, non le document original.\n\n";
 
+  // Named after the book's own sections — see scripts/book-lesson-title.mjs.
+  const titles = titleGroups(groups.map(headingsOf), lexicon, {
+    taken: mod.lessons.map((l) => l.title),
+  });
   groups.forEach((g, i) => {
     mod.lessons.push({
       slug: `${ch.prefix}-${base + 1 + i}-manuel-illustre-${i + 1}`,
-      title: groups.length > 1 ? `Manuel illustré (${i + 1})` : "Manuel illustré",
+      title: titles[i],
       order: base + 1 + i,
       estMinutes: 25,
       degraded: true,

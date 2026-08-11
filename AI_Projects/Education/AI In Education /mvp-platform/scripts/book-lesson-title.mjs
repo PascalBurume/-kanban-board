@@ -215,6 +215,10 @@ export function cleanHeading(raw) {
     }
   }
   t = t.replace(/\([^()]*\)/g, (p) => (MATH_DEBRIS.test(p) ? " " : p));
+  // "d) Éléments directeurs …" — the letter labels a sub-point within a section and
+  // carries nothing once the section is gone. Numeric ordinals stay: "4° exemple" and
+  // "2° Méthode de Volhard-Charpentier" mean the fourth and the second.
+  t = t.replace(/^[a-zA-Z]\s*[).]\s+(?=\S)/, "");
   t = t.replace(/\s{2,}/g, " ").replace(/\s+([,;:])/g, "$1").trim();
   t = t.replace(/\b([dlnjcstDLNJCST])['’]\s+/g, "$1'");    // "d' auto" — the scan's spacing
   t = t.replace(/^[\s:.\-—–]+/, "").replace(/[\s:.\-—–]+$/, "");

@@ -162,7 +162,11 @@ export function unshout(s, lexicon) {
   // evidence of its own. Any single letter before an apostrophe is an elision.
   out = out.replace(/(^|[^A-Za-zÀ-ÿ])([A-Z])(['’])/g, (m, pre, letter, apo) => `${pre}${letter.toLowerCase()}${apo}`);
   // Capitalise the opening word — unless the book's own spelling of it is deliberately
-  // lower-case, as in "pH des solutions".
+  // lower-case, as in "pH des solutions". A title opening on an ordinal keeps its
+  // suffix lower-case: "3e méthode", never "3E méthode".
+  // "3e méthode" already opens on its first word; capitalising past the ordinal would
+  // put a stray capital mid-title.
+  if (/^\s*\d+\s*(?:e|er|re|ère|ème|eme|ᵉ|°)(?=[\s.,;:)]|$)/i.test(out)) return out;
   const first = out.match(/[A-Za-zÀ-ÿ]+/);
   if (first && first[0] === first[0].toLowerCase()) return out.replace(/[a-zà-ÿ]/, (c) => c.toUpperCase());
   return out;
@@ -179,7 +183,20 @@ export function cleanHeading(raw) {
   t = t.replace(/\$[^$]*\$/g, " ");                       // whole formulas, if still marked
   t = t.replace(/[*_`]{1,3}/g, "");                       // the scan bolds whole headings
   const m = SEC_NUM.exec(t);
-  if (m) t = m[2];
+  if (m) {
+    // "98.3 e MÉTHODE" is article 98 and its 3ᵉ method: the scan ran the two numbers
+    // together. Taking "98.3" as the section number leaves "e MÉTHODE", so when what
+    // survives opens on an ordinal ending, strip only the first number and keep the
+    // second where it belongs.
+    // The boundary is a lookahead, not \b: "°" is not a word character, so \b never
+    // fires after it and "164.4 ° EXEMPLE" slipped straight through.
+    if (/^\s*(?:e|er|re|ère|ème|eme|ᵉ|°)(?=[\s.,;:)]|$)/i.test(m[2])) {
+      t = t.replace(/^\s*\d+\s*\.\s*/, "")
+        .replace(/^(\d+)\s*(e|er|re|ère|ème|eme|ᵉ|°)(?=[\s.,;:)]|$)\.?/i, "$1$2");
+    } else {
+      t = m[2];
+    }
+  }
   t = t.replace(/\([^()]*\)/g, (p) => (MATH_DEBRIS.test(p) ? " " : p));
   t = t.replace(/\s{2,}/g, " ").replace(/\s+([,;:])/g, "$1").trim();
   t = t.replace(/\b([dlnjcstDLNJCST])['’]\s+/g, "$1'");    // "d' auto" — the scan's spacing
@@ -215,6 +232,18 @@ export function titleCandidates({ major = [], minor = [] }) {
   // group has none — normalizeHeadings only promotes multi-part numbers like "1.2", so
   // a plain "2. Equations" stays at "### " — do the numbered sub-headings get a turn.
   return [...major, ...minor.filter((h) => NUMBERED.test(h.trim()))];
+}
+
+/**
+ * Headings to fall back on when a chapter numbers nothing at all.
+ *
+ * Two of the trigonometry chapters carry only their own title and "EXERCICES", so the
+ * numbered-section rule found nothing and the opening lesson was called "Extrait du
+ * manuel". The chapter's own title names it far better; this is only ever reached
+ * when the ranked candidates and the continuation chain have both come up empty.
+ */
+export function anyHeading({ major = [], minor = [] }) {
+  return [...major, ...minor];
 }
 
 /**
@@ -258,19 +287,23 @@ function qualify(title) {
  *
  * @param {string[][]} groups   per lesson, its section headings (best first)
  * @param {Map<string, any>} lexicon  from buildLexicon()/pooledLexicon()
- * @param {{taken?: string[], fallback?: string}|string} [opts]
- *   `taken` — titles already used in this module; `fallback` — when the very first
- *   group names nothing. A bare string is read as `fallback`.
+ * @param {{taken?: string[], fallback?: string, spare?: string[][]}|string} [opts]
+ *   `taken` — titles already used in this module; `spare` — per group, any heading at
+ *   all, used only when nothing is numbered and there is nothing to continue;
+ *   `fallback` — when even that is empty. A bare string is read as `fallback`.
  * @returns {string[]}
  */
 export function titleGroups(groups, lexicon, opts = {}) {
-  const { taken = [], fallback = "Extrait du manuel" } =
+  const { taken = [], fallback = "Extrait du manuel", spare = [] } =
     typeof opts === "string" ? { fallback: opts } : opts;
   const used = new Set(taken.map((t) => String(t).trim().toLowerCase()));
   const out = [];
   let carry = null;
-  for (const numbered of groups) {
+  for (const [gi, numbered] of groups.entries()) {
     let t = lessonTitle({ numbered, lexicon, carry });
+    // Nothing numbered and nothing to continue: use whatever heading the chapter does
+    // have before falling back to a name that says nothing.
+    if (!t) t = lessonTitle({ numbered: spare[gi] ?? [], lexicon, carry: null });
     if (!t) t = carry ? `${carry} (suite)` : fallback;
     if (used.has(t.toLowerCase())) t = qualify(t);
     // Still taken (the module has a "… — manuel" of its own, or two groups opened on

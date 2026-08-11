@@ -2,6 +2,7 @@ import { prisma } from "./db";
 import type { SessionUser } from "./session";
 import { BLANK_CONTENT } from "./lessonSkeleton";
 import { archiveAndDelete, restoreArchive, purgeArchive } from "./lessonArchive";
+import { withoutBlankQuestions } from "./quizContent";
 
 // Subjects a user may edit: ADMIN → all; TEACHER → their assigned subjects.
 export async function editableSubjectSlugs(user: SessionUser): Promise<string[]> {
@@ -574,8 +575,12 @@ export async function saveQuiz(user: SessionUser, lessonId: string, data: { titl
     await prisma.quiz.update({ where: { id: quiz.id }, data: { title: data.title } });
   }
   await prisma.question.deleteMany({ where: { quizId: quiz.id } });
+  // The editor adds a question as an empty row, and this panel autosaves — so an
+  // untouched row used to be written as a real question. Only wholly empty ones are
+  // dropped: a prompt still being typed is work in progress, not noise.
+  const questions = withoutBlankQuestions(data.questions);
   let order = 0;
-  for (const q of data.questions) {
+  for (const q of questions) {
     await prisma.question.create({
       data: {
         quizId: quiz.id,
@@ -588,7 +593,7 @@ export async function saveQuiz(user: SessionUser, lessonId: string, data: { titl
       },
     });
   }
-  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "QUIZ_EDIT", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ count: data.questions.length }) } });
+  await prisma.auditLog.create({ data: { actorId: user.userId, actorName: `${user.firstName} ${user.lastName}`, action: "QUIZ_EDIT", targetType: "lesson", targetId: lessonId, metaJson: JSON.stringify({ count: questions.length }) } });
   return { quizId: quiz.id };
 }
 

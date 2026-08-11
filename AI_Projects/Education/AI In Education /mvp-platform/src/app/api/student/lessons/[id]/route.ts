@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import type { SessionUser } from "@/lib/session";
 import { getAccessibleLesson, subjectLessonOrder, getStudentClass } from "@/lib/path";
 import { companionsForStudent, getViewableLesson, classScope } from "@/lib/studio";
+import { withoutBlankQuestions } from "@/lib/quizContent";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +17,16 @@ async function quizFor(lessonId: string) {
     include: { questions: { orderBy: { order: "asc" } } },
   });
   if (!quiz) return null;
+  // A question with nothing in it renders as a blank prompt over blank buttons, and
+  // « Valider » stays disabled until the pupil "answers" it. saveQuiz no longer writes
+  // one, but drafts written before that still can, so it is filtered here as well as
+  // there. A quiz left with no questions is no quiz.
+  const questions = withoutBlankQuestions(quiz.questions);
+  if (!questions.length) return null;
   return {
     id: quiz.id,
     title: quiz.title,
-    questions: quiz.questions.map((q) => ({
+    questions: questions.map((q) => ({
       id: q.id,
       type: q.type,
       promptMd: q.promptMd,

@@ -3,6 +3,7 @@ import "./lesson.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Markdown from "@/components/Markdown";
+import ResizeGrip from "@/components/ui/ResizeGrip";
 import { toast } from "@/lib/toast";
 import { useFullscreen } from "@/lib/fullscreen";
 import UnderstandingRating from "@/components/UnderstandingRating";
@@ -108,6 +109,20 @@ export default function LessonPage() {
   /* ---- copilot panel ---- */
   const [collapsed, setCollapsed] = useState(false);
   const [active, setActive] = useState(true); // copilot active / paused
+  // Panel width. 380 was fixed, and a Copilot answer here is mostly worked maths —
+  // a rendered KaTeX display does not reflow, so at 380px a long formula either
+  // scrolls sideways or sets one term per line. Remembered per device: it is a
+  // screen-size preference, not account data.
+  const [copilotW, setCopilotW] = useState(380);
+  // Suspends the column transition mid-drag, or the panel eases 250ms behind the
+  // pointer and the whole thing feels like it is made of rubber.
+  const [resizing, setResizing] = useState(false);
+
+  // After mount, so the server render and the first client render agree.
+  useEffect(() => {
+    const saved = Number(window.localStorage.getItem("mwalimu.lesson.copilotW"));
+    if (Number.isFinite(saved) && saved >= 300 && saved <= 680) setCopilotW(saved);
+  }, []);
 
   /* ---- time on lesson (active-only heartbeat) ---- */
   const [secs, setSecs] = useState(0);
@@ -552,7 +567,11 @@ export default function LessonPage() {
         </div>
 
         {/* Body */}
-        <div className={`lesson-body ${collapsed ? "collapsed" : ""}`.trim()} id="body">
+        <div
+          className={`lesson-body ${collapsed ? "collapsed" : ""} ${resizing ? "is-resizing" : ""}`.replace(/\s+/g, " ").trim()}
+          id="body"
+          style={{ "--cop-w": `${copilotW}px` }}
+        >
           <div className="content-scroll" ref={scrollRef}>
             <div className="steps-bar" style={{ position: "sticky", top: 0, zIndex: 3 }}>
               <div className="steps-track">
@@ -639,6 +658,18 @@ export default function LessonPage() {
 
           {/* Copilot — on-device tutor (streams from /api/copilot/message) */}
           <aside className="copilot">
+            <ResizeGrip
+              value={copilotW}
+              min={300}
+              max={680}
+              side="left"
+              label="Largeur du Copilot"
+              onChange={(v) => { setResizing(true); setCopilotW(v); }}
+              onCommit={(v) => {
+                setResizing(false);
+                window.localStorage.setItem("mwalimu.lesson.copilotW", String(v));
+              }}
+            />
             <div className="cop-head">
               <span className="cop-avatar">
                 <Icon name="sparkles" />

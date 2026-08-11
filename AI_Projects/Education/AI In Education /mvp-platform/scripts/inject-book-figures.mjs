@@ -14,7 +14,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { pooledLexicon, titleGroups, titleCandidates, anyHeading } from "./book-lesson-title.mjs";
+import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings } from "./book-lesson-title.mjs";
 import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
@@ -294,6 +294,7 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // in the text we just packed.
     const titles = titleGroups(groups.map(namesOf), lexicon, {
       taken: mod.lessons.map((l) => l.title),
+      named: groups.map((g) => namedHeadings(allHeadings(g))),
       spare: groups.map((g) => anyHeading(allHeadings(g))),
     });
     groups.forEach((g, i) => {

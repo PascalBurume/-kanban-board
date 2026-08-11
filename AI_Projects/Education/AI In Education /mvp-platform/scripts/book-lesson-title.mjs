@@ -161,6 +161,14 @@ export function unshout(s, lexicon) {
   // Elided articles: the scan writes "ETAGE D'OXYDATION", and "D" is too short to carry
   // evidence of its own. Any single letter before an apostrophe is an elision.
   out = out.replace(/(^|[^A-Za-zÀ-ÿ])([A-Z])(['’])/g, (m, pre, letter, apo) => `${pre}${letter.toLowerCase()}${apo}`);
+  // A lone "A" is either the preposition à — the book drops the accent from capitals,
+  // giving "INÉQUATIONS DU PREMIER DEGRÉ A UNE INCONNUE" — or the name of a point. What
+  // follows tells them apart: the preposition introduces a noun phrase, a point label
+  // does not. "TANGENTE EN A ET EN B" is left alone.
+  out = out.replace(
+    /(\S\s+)[AÀ](\s+(?:une?|l[ea]s?|des?|du|deux|trois|quatre|plusieurs|cette?|ces|partir|[ld]['’]))/gi,
+    (m, before, after) => `${before}à${after}`,
+  );
   // Capitalise the opening word — unless the book's own spelling of it is deliberately
   // lower-case, as in "pH des solutions". A title opening on an ordinal keeps its
   // suffix lower-case: "3e méthode", never "3E méthode".
@@ -234,6 +242,35 @@ export function titleCandidates({ major = [], minor = [] }) {
   return [...major, ...minor.filter((h) => NUMBERED.test(h.trim()))];
 }
 
+// Headings that label a step inside a section rather than naming one. A lesson called
+// "Résolution" tells a teacher nothing; continuing the previous title tells them more.
+const GENERIC = new Set([
+  "resolution", "resolutions", "remarque", "remarques", "solution", "solutions",
+  "exemple", "exemples", "reponse", "reponses", "corrige", "corriges", "suite",
+  "demonstration", "preuve", "note", "notes", "application", "applications",
+  "conclusion", "introduction", "definition", "definitions", "propriete", "proprietes",
+  "theoreme", "theoremes", "consequence", "consequences", "exercice", "exercices",
+  "resolus", "exercices resolus", "objectifs", "notions cles",
+]);
+
+/**
+ * Headings that name something in their own right, even unnumbered.
+ *
+ * The last chapter of a book absorbs its back matter, and those sections carry real
+ * names — "ANNEXE", "QUELQUES QUESTIONS DES EXAMENS D'ÉTAT", "BIBLIOGRAPHIE" — but no
+ * numbering, so the ranked candidates missed them and seven lessons in a row were called
+ * "Introduction (suite 1…6)". A heading that is not one of the step labels above, and is
+ * long enough to be a name, is worth more than another "(suite)".
+ */
+/** @param {{major?: string[], minor?: string[]}} arg @returns {string[]} */
+export function namedHeadings({ major = [], minor = [] }) {
+  return [...major, ...minor].filter((h) => {
+    const t = cleanHeading(h);
+    if (t.length < 8) return false;
+    return !GENERIC.has(stripAccents(t).toLowerCase().replace(/[^a-z ]/g, "").trim());
+  });
+}
+
 /**
  * Headings to fall back on when a chapter numbers nothing at all.
  *
@@ -287,22 +324,25 @@ function qualify(title) {
  *
  * @param {string[][]} groups   per lesson, its section headings (best first)
  * @param {Map<string, any>} lexicon  from buildLexicon()/pooledLexicon()
- * @param {{taken?: string[], fallback?: string, spare?: string[][]}|string} [opts]
- *   `taken` — titles already used in this module; `spare` — per group, any heading at
+ * @param {{taken?: string[], fallback?: string, spare?: string[][], named?: string[][]}|string} [opts]
+ *   `taken` — titles already used in this module; `named` — per group, headings that
+ *   name something even unnumbered; `spare` — per group, any heading at
  *   all, used only when nothing is numbered and there is nothing to continue;
  *   `fallback` — when even that is empty. A bare string is read as `fallback`.
  * @returns {string[]}
  */
 export function titleGroups(groups, lexicon, opts = {}) {
-  const { taken = [], fallback = "Extrait du manuel", spare = [] } =
+  const { taken = [], fallback = "Extrait du manuel", spare = [], named = [] } =
     typeof opts === "string" ? { fallback: opts } : opts;
   const used = new Set(taken.map((t) => String(t).trim().toLowerCase()));
   const out = [];
   let carry = null;
   for (const [gi, numbered] of groups.entries()) {
-    let t = lessonTitle({ numbered, lexicon, carry });
-    // Nothing numbered and nothing to continue: use whatever heading the chapter does
-    // have before falling back to a name that says nothing.
+    // A section the book numbered, else a heading that names something on its own,
+    // else continue the lesson before, else any heading at all.
+    let t = lessonTitle({ numbered, lexicon, carry: null })
+      ?? lessonTitle({ numbered: named[gi] ?? [], lexicon, carry: null })
+      ?? lessonTitle({ numbered: [], lexicon, carry });
     if (!t) t = lessonTitle({ numbered: spare[gi] ?? [], lexicon, carry: null });
     if (!t) t = carry ? `${carry} (suite)` : fallback;
     if (used.has(t.toLowerCase())) t = qualify(t);

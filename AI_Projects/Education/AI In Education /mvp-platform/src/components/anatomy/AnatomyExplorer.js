@@ -202,10 +202,17 @@ export default function AnatomyExplorer({ user }) {
   return (
     <div className={`an-shell${isFull ? " is-full" : ""}${railOpen ? " rail-open" : ""}`} ref={shellRef}>
       <header className="an-top">
-        <Link href={isStaff ? "/teacher/" : "/student/"} className="an-back">
-          <span className="an-back-txt">
-            <Home size={13} /> Tableau de bord
-          </span>
+        {/* The icon sits OUTSIDE the label. It used to be inside it, and the
+            phone rule hides the label — which hid the icon with it and left the
+            atlas with no way back to the dashboard at all on a small screen. */}
+        <Link
+          href={isStaff ? "/teacher/" : "/student/"}
+          className="an-back"
+          aria-label="Revenir au tableau de bord"
+          title="Revenir au tableau de bord"
+        >
+          <Home size={16} />
+          <span className="an-back-txt">Tableau de bord</span>
         </Link>
         <div className="an-title">
           <h1>Atlas d'anatomie</h1>

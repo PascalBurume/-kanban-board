@@ -123,7 +123,25 @@
 .grow { flex: 1; }
 
 .ws-stage { background: transparent; }
-.ws-stage.is-full { background: var(--bg, #f8fafc); padding: 24px; overflow-y: auto; }
+/* Fixed overlay, not just a background swap. The old rule assumed the browser
+   would do the covering via the Fullscreen API; when that is refused — an
+   embedded webview, iOS Safari on a non-video element — the class applied and
+   the stage stayed exactly where it was, which is the "Plein écran does nothing"
+   report. See lib/fullscreen.js for the fallback that sets this. */
+.ws-stage.is-full {
+  position: fixed; inset: 56px 0 0; z-index: 120;
+  background: var(--bg, #f8fafc);
+  padding: 24px; overflow-y: auto;
+}
+/* The « Quitter » button lives in .ws-tabs, a SIBLING of the stage — so a
+   full-bleed overlay buries the only way out. The tab bar is pinned above it
+   and the stage starts below, which keeps the exit reachable by tap. Esc also
+   works (lib/fullscreen.js binds it) but a phone has no Esc. */
+.ws-tabs:has(~ .ws-stage.is-full) {
+  position: fixed; inset: 0 0 auto; z-index: 121;
+  margin: 0; padding: 9px 16px; min-height: 56px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
 .ws-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px; color: var(--text-muted); text-align: center; }
 .ws-empty svg { width: 30px; height: 30px; }
 

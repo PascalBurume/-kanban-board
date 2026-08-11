@@ -38,6 +38,14 @@
     radial-gradient(circle at 48% 22%, rgba(255, 255, 255, 0.96), transparent 34%),
     linear-gradient(135deg, #f7f1e8, #fdf9f2 48%, #f2e9dd);
 }
+/* Fullscreen. The shell had no .is-full rule at all after the design port, so
+   when the browser did grant fullscreen the layout was unchanged, and when it
+   refused (see lib/fullscreen.js) nothing happened either way. Fixed-position
+   overlay covers both: the real API just removes the browser chrome around it. */
+.an-shell.is-full {
+  position: fixed; inset: 0; z-index: 200;
+  height: 100vh; height: 100dvh;
+}
 .an-shell *,
 .an-shell *::before,
 .an-shell *::after { box-sizing: border-box; }
@@ -90,9 +98,18 @@
   padding: 14px 24px;
   border-bottom: 1px solid var(--line);
 }
-.an-back { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--muted); }
-.an-back-txt { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
-.an-back:hover .an-back-txt { color: var(--coral); }
+/* The only route out of the atlas, so it is a real target rather than a line of
+   text: bordered, 38px tall, and it keeps its icon when the label goes. */
+.an-back {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  min-height: 38px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: var(--r-pill, 999px);
+  background: rgba(255, 255, 255, 0.45);
+  text-decoration: none; color: var(--muted);
+  transition: color .14s, border-color .14s, background .14s;
+}
+.an-back:hover { color: var(--coral); border-color: color-mix(in srgb, var(--coral), transparent 55%); background: #fff; }
+.an-back-txt { font-size: 12px; white-space: nowrap; }
 .an-title { flex: 1; min-width: 0; }
 .an-title h1 {
   margin: 0;
@@ -863,8 +880,11 @@
   .an-title p { white-space: normal; }
 }
 @media (max-width: 640px) {
-  .an-top { padding: 12px 14px; gap: 12px; }
+  .an-top { padding: 12px 14px; gap: 10px; }
+  /* Words only. The icon stays — hiding the whole link left no way out of the
+     atlas on a phone, which is how this was shipped and caught. */
   .an-back-txt { display: none; }
+  .an-back { padding: 0; width: 42px; min-height: 42px; justify-content: center; border-radius: 50%; }
   .an-top .offline-pill { display: none; }
   .an-tools { left: 10px; width: 54px; }
   .an-tool { height: 52px; font-size: 8.5px; }

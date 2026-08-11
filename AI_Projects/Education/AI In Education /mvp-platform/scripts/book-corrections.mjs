@@ -32,6 +32,22 @@ export const CORRECTIONS = [
       + "asymptote formula f(x)/x. The transcription folded the solution's ÷x into the "
       + "statement.",
   },
+  {
+    book: "maths-5-scientifique",
+    // The same exercise. Its statement runs over two printed lines, and the crop of the
+    // second line was transcribed a second time, leaving its tail stranded between the
+    // full statement and the functions it introduces.
+    find:
+      "des courbes représentatives de chacune des fonctions suivantes :\n\n"
+      + "des fonctions suivantes :\n\n",
+    replace: "des courbes représentatives de chacune des fonctions suivantes :\n\n",
+    source:
+      "Maîtriser les Maths 5, p. 277, exercice 2. The page sets the statement over two "
+      + "lines, « … des courbes représentatives de chacune / des fonctions suivantes : », "
+      + "and the crop of the second line was transcribed on its own as well as within the "
+      + "whole. The full statement immediately above carries the same words, so only the "
+      + "orphan is dropped. It occurs exactly once in the book.",
+  },
 ];
 
 /** Apply this book's corrections. Returns the text and what was changed. */

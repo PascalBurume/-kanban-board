@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Icon from "./Icon";
-import { BrandMark, OfflinePill, LangToggle, Avatar } from "./chrome";
-import { toast } from "@/lib/toast";
+import { BrandMark, OfflinePill, Avatar } from "./chrome";
 
 // Canonical teacher app shell — sidebar nav + sticky topbar. New teacher pages
 // render through this so the nav, badges and account footer stay consistent.
@@ -115,7 +114,6 @@ export default function TeacherShell({ active = "", crumbGroup = "Enseignement",
             {right ?? (
               <>
                 <OfflinePill label="Serveur local connecté" />
-                <LangToggle onNotice={() => toast("Le français complet arrive — interface en anglais pour cette revue.", { icon: "info" })} />
                 <a
                   className="t-iconbtn"
                   href="/teacher/"

@@ -168,7 +168,6 @@
   .t-app:not(.collapsed) .t-scrim { display: block; position: fixed; inset: 0; z-index: 70; background: rgba(15, 23, 42, .42); }
 
   .t-top { padding: 10px 14px; gap: 10px; }
-  .t-top .lang-toggle { display: none; }
   .t-crumb b { font-size: 16px; }
   /* Page action buttons in the top bar → icon-only squares so the bar never
      overflows (their labels would otherwise push the crumb/burger off-screen). */

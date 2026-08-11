@@ -347,7 +347,6 @@ function StaffModal({ role = "teacher", onClose }) {
 }
 
 export default function LoginPage() {
-  const [lang, setLang] = useState("fr");
   const [step, setStep] = useState(1);
   const [cls, setCls] = useState(null);
   const [student, setStudent] = useState(null);
@@ -367,13 +366,6 @@ export default function LoginPage() {
   }, []);
 
   const showTopPill = step > 1;
-
-  function pickLang(l) {
-    setLang(l);
-    if (l === "en") {
-      toast("L’anglais arrive bientôt.", { icon: "info" });
-    }
-  }
 
   return (
     <div className="login-page">
@@ -407,10 +399,6 @@ export default function LoginPage() {
               {showTopPill && (
                 <span className="offline-pill"><span className="dot" /> Serveur local connecté</span>
               )}
-              <div className="lang-toggle">
-                <button className={lang === "fr" ? "active" : ""} onClick={() => pickLang("fr")}>FR</button>
-                <button className={lang === "en" ? "active" : ""} onClick={() => pickLang("en")}>EN</button>
-              </div>
             </div>
           </div>
 

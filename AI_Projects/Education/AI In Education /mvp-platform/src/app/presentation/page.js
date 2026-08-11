@@ -1,11 +1,11 @@
 import Marketing from "./Marketing";
 
-// Public presentation route. The same marketing page is also served at "/"
-// for anonymous visitors (see src/app/page.js).
+// Public presentation route. "/" no longer shows this — it redirects to the
+// role home or to /login/ (see src/app/page.js).
 export const metadata = {
-  title: "Mwalimu — Offline learning platform for secondary schools",
+  title: "Mwalimu — La plateforme d’apprentissage hors ligne des écoles secondaires",
   description:
-    "The full Congolese secondary-school curriculum with an AI tutor that works with no internet, on the school's local server.",
+    "Tout le programme du secondaire congolais avec un tuteur IA qui fonctionne sans internet, sur le serveur local de l’école.",
 };
 
 export default function PresentationPage() {

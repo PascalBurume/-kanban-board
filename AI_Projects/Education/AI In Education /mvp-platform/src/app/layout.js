@@ -36,9 +36,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata = {
-  title: "Mwalimu — Offline learning platform",
+  title: "Mwalimu — Plateforme d’apprentissage hors ligne",
   description:
-    "A fully offline learning platform for secondary schools in the DRC, with an on-device AI tutor inside every lesson.",
+    "Une plateforme d’apprentissage entièrement hors ligne pour les écoles secondaires de la RDC, avec un tuteur IA embarqué dans chaque leçon.",
   manifest: "/manifest.webmanifest",
 };
 
@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
         "});}";
 
   return (
-    <html lang="en" className={`${lexend.variable} ${inter.variable} ${cormorant.variable} ${dmSans.variable}`}>
+    <html lang="fr" className={`${lexend.variable} ${inter.variable} ${cormorant.variable} ${dmSans.variable}`}>
       <body>
         {children}
         <script dangerouslySetInnerHTML={{ __html: swScript }} />

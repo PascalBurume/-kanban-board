@@ -6,7 +6,7 @@ import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import Ring from "@/components/ui/Ring";
 import BarChart from "@/components/ui/BarChart";
-import { BrandMark, OfflinePill, LangToggle, Avatar } from "@/components/ui/chrome";
+import { BrandMark, OfflinePill, Avatar } from "@/components/ui/chrome";
 import { triageModules } from "@/lib/studentDashboard";
 import { toast } from "@/lib/toast";
 
@@ -162,11 +162,6 @@ export default function StudentDashboard() {
             <Icon name="svt" /> Anatomie 3D
           </a>
           <OfflinePill label="Serveur local connecté" />
-          <LangToggle
-            onNotice={() =>
-              toast("Le français complet arrive — interface en anglais pour cette revue.", { icon: "info" })
-            }
-          />
           <a className="user-chip" href="/profile/" style={{ textDecoration: "none", color: "inherit" }}>
             <Avatar name={data ? `${data.student.firstName} ${data.student.lastName}` : ""} size="avatar-sm" />
             <div className="col" style={{ gap: 0 }}>

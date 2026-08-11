@@ -1,0 +1,913 @@
+/* Simulation d'anatomie — /anatomie
+ *
+ * The design is ported from Pascal's anatomy explorer
+ * (github.com/PascalBurume/anatomy, branch atelier-revision-4, app/globals.css):
+ * its warm-paper tokens, 26px panels, Garamond part names, viewer glow, tool
+ * rail and hotspot callouts. Rules for views this page does not have — the
+ * learning cards, compare tray, lesson modals — were left behind rather than
+ * carried over dead.
+ *
+ * Everything is scoped under .an-shell. The source app owns its whole document;
+ * here it is one page inside Mwalimu, and a bare `body`/`h2`/`button` rule would
+ * repaint the carnet and the studio. The tokens are redeclared on .an-shell for
+ * the same reason: on :root they would be global.
+ */
+
+.an-shell {
+  --ink: #2f2a27;
+  --muted: #8d847c;
+  --canvas: #f7f0e7;
+  --paper: rgba(255, 251, 244, 0.82);
+  --line: rgba(117, 91, 70, 0.18);
+  --coral: #eb7c6b;
+  --lavender: #8d6bcc;
+  --sage: #769d74;
+  --shadow: 0 18px 48px rgba(87, 62, 43, 0.06);
+  --serif: var(--font-serif), "Cormorant Garamond", Georgia, serif;
+  --sans: var(--font-sans), "DM Sans", system-ui, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  background:
+    radial-gradient(circle at 48% 22%, rgba(255, 255, 255, 0.96), transparent 34%),
+    linear-gradient(135deg, #f7f1e8, #fdf9f2 48%, #f2e9dd);
+}
+/* Fullscreen on this page had to mean something more than "cover the viewport",
+   because the atlas already does: the shell is height:100dvh with no page chrome
+   around it, so `position: fixed; inset: 0` changed precisely nothing. Measured
+   before and after — shell, stage, canvas and both rails came back identical to
+   the pixel. The button toggled a class and the student saw no difference, which
+   is indistinguishable from a broken button.
+
+   So it is a focus mode: the two rails fold away and the specimen takes the
+   full width — 571px to about 1200px on a laptop, better than double. The
+   header stays, because the tool rail's « Quitter » and the header's way back
+   are the only exits and one of them should always be in view. Fixed
+   positioning is kept for the case where the browser refuses real fullscreen. */
+.an-shell.is-full {
+  position: fixed; inset: 0; z-index: 200;
+  height: 100vh; height: 100dvh;
+}
+.an-shell.is-full .an-body { grid-template-columns: minmax(0, 1fr); }
+.an-shell.is-full .an-library,
+.an-shell.is-full .an-info { display: none; }
+.an-shell *,
+.an-shell *::before,
+.an-shell *::after { box-sizing: border-box; }
+/* :where() so this carries no specificity at all. As a plain `.an-shell button`
+   it is (0,1,1) and beats every single-class component rule — which is how the
+   Vérifier button ended up with ink text on an ink background. This is a floor:
+   it only decides where nothing else does. */
+.an-shell :where(button) { font: inherit; color: inherit; }
+
+/* Scrollbars.
+   The platform default is a grey slab with square ends and a light-grey track.
+   Against 26px paper panels and warm cream it reads as a piece of another
+   application bolted to the edge of each column — the single loudest thing on
+   the page. These are thin, rounded, track-less and tinted to the same warm
+   brown as the borders, so a column looks scrolled rather than framed.
+
+   Firefox gets the standard two properties; WebKit and Blink need the vendor
+   pseudo-elements, and take the same values. */
+.an-shell :where(.an-lib, .an-info, .an-cop-log) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(117, 91, 70, 0.26) transparent;
+}
+.an-shell :where(.an-lib, .an-info, .an-cop-log)::-webkit-scrollbar { width: 8px; height: 8px; }
+.an-shell :where(.an-lib, .an-info, .an-cop-log)::-webkit-scrollbar-track { background: transparent; }
+.an-shell :where(.an-lib, .an-info, .an-cop-log)::-webkit-scrollbar-thumb {
+  background: rgba(117, 91, 70, 0.22);
+  border-radius: 999px;
+  /* Inset with a transparent border so the thumb floats clear of the panel's
+     rounded edge instead of touching it. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.an-shell :where(.an-lib, .an-info, .an-cop-log):hover::-webkit-scrollbar-thumb {
+  background: rgba(117, 91, 70, 0.34);
+  background-clip: content-box;
+}
+.an-shell :where(.an-lib, .an-info, .an-cop-log)::-webkit-scrollbar-corner { background: transparent; }
+.an-shell button:focus-visible,
+.an-shell input:focus-visible,
+.an-shell canvas:focus-visible { outline: 2px solid var(--lavender); outline-offset: 3px; }
+
+/* ---------- topbar ----------
+   Mwalimu's, not theirs: a student needs to know which app they are in and how
+   to get out. Only the type and the rule underneath come from the atlas. */
+.an-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--line);
+}
+/* The only route out of the atlas, so it is a real target rather than a line of
+   text: bordered, 38px tall, and it keeps its icon when the label goes. */
+.an-back {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  min-height: 38px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: var(--r-pill, 999px);
+  background: rgba(255, 255, 255, 0.45);
+  text-decoration: none; color: var(--muted);
+  transition: color .14s, border-color .14s, background .14s;
+}
+.an-back:hover { color: var(--coral); border-color: color-mix(in srgb, var(--coral), transparent 55%); background: #fff; }
+.an-back-txt { font-size: 12px; white-space: nowrap; }
+.an-title { flex: 1; min-width: 0; }
+.an-title h1 {
+  margin: 0;
+  font: 500 clamp(22px, 1.8vw, 30px)/1 var(--serif);
+  letter-spacing: 0.01em;
+}
+.an-title p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.an-top-right { display: flex; align-items: center; gap: 12px; }
+.an-rail-btn {
+  display: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 11px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+/* ---------- workspace ---------- */
+.an-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 285px minmax(420px, 1fr) 340px;
+  gap: 18px;
+  padding: 16px 24px 20px;
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+}
+.an-library,
+.an-stage,
+.an-info {
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  min-height: 0;
+}
+.an-library { padding: 16px 14px 14px; display: flex; flex-direction: column; }
+.an-info { overflow-y: auto; overscroll-behavior: contain; }
+
+.an-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px 10px;
+  flex: none;
+}
+.an-panel-head > span,
+.an-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---------- search ---------- */
+.an-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 0 11px;
+  background: rgba(255, 255, 255, 0.5);
+  flex: none;
+}
+.an-search:focus-within { border-color: color-mix(in srgb, var(--lavender), transparent 50%); background: #fff; }
+.an-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 9px 0;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--ink);
+}
+.an-search input::placeholder { color: var(--muted); }
+.an-search button { border: 0; background: transparent; cursor: pointer; color: var(--muted); display: grid; place-items: center; padding: 2px; }
+
+/* ---------- specimen library ---------- */
+.an-lib { flex: 1; overflow-y: auto; overscroll-behavior: contain; margin-top: 10px; padding-right: 2px; }
+.an-group + .an-group { margin-top: 18px; }
+.an-group h2 {
+  margin: 0 0 6px;
+  padding: 0 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.an-group ul { list-style: none; margin: 0; padding: 0; }
+
+/* The rail row is a small specimen card: the thumbnail is the identity, which is
+   what a glyph on a colour chip never managed. */
+.an-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.an-item:hover { border-color: color-mix(in srgb, var(--accent), transparent 55%); background: rgba(255, 255, 255, 0.45); }
+.an-item.is-sel { border-color: color-mix(in srgb, var(--accent), transparent 35%); background: rgba(255, 255, 255, 0.8); }
+.an-thumb {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 38% 30%, #fff, color-mix(in srgb, var(--accent), white 86%));
+}
+.an-thumb img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.an-thumb .an-glyph { font-size: 20px; color: var(--accent); line-height: 1; }
+.an-item-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 1px; }
+.an-item-txt b { font: 500 14px/1.15 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-item-txt small { color: var(--muted); font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-item-n { font-size: 9.5px; color: var(--muted); flex: none; }
+.an-empty, .an-rail-locked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- viewer ---------- */
+.an-stage {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background:
+    radial-gradient(circle at 55% 45%, rgba(255, 255, 255, 0.92), rgba(255, 250, 242, 0.72) 45%, rgba(246, 236, 224, 0.7)),
+    var(--paper);
+}
+.an-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 90px rgba(124, 82, 51, 0.04);
+}
+.an-glow {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  left: 50%;
+  top: 47%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--organ-accent), transparent 94%);
+  filter: blur(72px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.an-viewport { position: absolute; inset: 0; }
+.an-viewport canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+
+/* ---------- tool rail ---------- */
+.an-tools {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  width: 62px;
+  padding: 8px 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(253, 250, 244, 0.82);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 30px rgba(75, 54, 40, 0.08);
+}
+.an-tool {
+  height: 58px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--ink);
+  font: 500 9px/1 var(--serif);
+}
+.an-tool:hover:not(:disabled) { background: rgba(116, 89, 67, 0.06); }
+.an-tool.is-on { color: var(--coral); background: rgba(238, 124, 106, 0.08); }
+.an-tool:disabled { opacity: 0.35; cursor: not-allowed; }
+.an-tool-sep { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
+
+/* Views + hint sit bottom-centre, out of the rail's way. */
+.an-views {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(253, 250, 244, 0.82);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 30px rgba(75, 54, 40, 0.08);
+}
+.an-views button {
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 6px 11px;
+  cursor: pointer;
+  font: 500 11px var(--serif);
+  color: var(--ink);
+}
+.an-views button:hover { background: rgba(116, 89, 67, 0.07); }
+/* Sits over the specimen, so it needs its own surface — as bare text it read as
+   a caption printed across the organ. */
+.an-hint {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(253, 250, 244, 0.78);
+  backdrop-filter: blur(10px);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---------- hotspot labels ----------
+   The leader line `i` is rotated by the viewer each frame; the chip is a real
+   button so the name itself is the hit target. */
+.an-pins { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.an-pin { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity 0.18s ease; }
+.an-pin[data-visible="false"] { opacity: 0; visibility: hidden; }
+.an-pin i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1px;
+  transform-origin: 0 50%;
+  background: var(--pin);
+  opacity: 0.5;
+}
+.an-pin button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  padding: 3px 9px 4px;
+  border: 1px solid rgba(116, 89, 67, 0.14);
+  border-radius: 9px;
+  background: rgba(255, 252, 247, 0.93);
+  backdrop-filter: blur(9px);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pin), transparent 84%), 0 5px 14px rgba(83, 59, 42, 0.1);
+  color: var(--ink);
+  font: 500 11px/1.35 var(--serif);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.an-pin button:hover { background: #fff; box-shadow: 0 0 0 1px var(--pin), 0 7px 18px rgba(83, 59, 42, 0.14); }
+.an-pin.is-sel button {
+  background: var(--ink);
+  color: #fdfaf4;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--pin), 0 7px 18px rgba(83, 59, 42, 0.18);
+}
+/* A drill marker names nothing — that is the question. */
+.an-pin.is-blank button {
+  padding: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 600 11px var(--sans);
+  color: var(--ink);
+  background: rgba(255, 252, 247, 0.96);
+}
+.an-pin.is-blank.is-pulse button { animation: an-pulse 1.9s ease-out infinite; }
+@keyframes an-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pin) 55%, transparent); }
+  70% { box-shadow: 0 0 0 13px color-mix(in srgb, var(--pin) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pin) 0%, transparent); }
+}
+.an-pin.is-right button { background: color-mix(in srgb, var(--sage), white 72%); border-color: var(--sage); }
+.an-pin.is-wrong button { background: color-mix(in srgb, var(--coral), white 74%); border-color: var(--coral); }
+
+/* ---------- loading ---------- */
+.an-load {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  width: min(280px, 74%);
+  text-align: center;
+  color: var(--muted);
+  font-size: 11.5px;
+  z-index: 2;
+}
+.an-load p { margin: 8px 0 0; }
+.an-load-bar { height: 3px; border-radius: 999px; background: rgba(117, 91, 70, 0.14); overflow: hidden; }
+.an-load-bar i { display: block; height: 100%; background: var(--coral); border-radius: 999px; transition: width 0.18s ease-out; }
+.an-boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  align-content: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.an-spin {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(117, 91, 70, 0.18);
+  border-top-color: var(--coral);
+  border-radius: 50%;
+  animation: an-spin 0.8s linear infinite;
+}
+@keyframes an-spin { to { transform: rotate(360deg); } }
+
+.an-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 40px;
+  color: var(--muted);
+}
+.an-fallback h2 { margin: 0; font: 500 18px var(--serif); color: var(--ink); }
+.an-fallback p { margin: 0; max-width: 42ch; font-size: 12.5px; line-height: 1.6; }
+
+/* ---------- info panel ---------- */
+.an-card { padding: 18px 18px 16px; border-bottom: 1px solid var(--line); }
+.an-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.an-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 9px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--sys), black 22%);
+  background: color-mix(in srgb, var(--sys), transparent 86%);
+}
+.an-sheet-link, .an-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 10.5px;
+  color: var(--lavender);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.an-sheet-link:hover, .an-back-link:hover { text-decoration: underline; }
+.an-back-link { color: var(--muted); margin-bottom: 10px; }
+.an-card h2 { margin: 0; font: 500 26px/1.1 var(--serif); }
+.an-latin { margin: 3px 0 0; font-size: 11px; font-style: italic; color: var(--muted); }
+.an-role { margin: 12px 0 0; font-size: 13px; line-height: 1.6; color: color-mix(in srgb, var(--ink), var(--muted) 25%); }
+.an-card h3 {
+  margin: 18px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.an-para { margin: 0 0 10px; font-size: 12.8px; line-height: 1.65; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
+
+/* Plate viewer — the four illustration slots beyond the thumbnail. */
+.an-plates { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); }
+.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; }
+.an-plate-tabs button {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 9px;
+  padding: 4px 9px;
+  font: 500 10.5px var(--serif);
+  color: var(--muted);
+  cursor: pointer;
+}
+.an-plate-tabs button:hover { background: rgba(116, 89, 67, 0.06); color: var(--ink); }
+.an-plate-tabs button.is-on { color: var(--ink); border-color: var(--line); background: rgba(255, 255, 255, 0.7); }
+.an-plate {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 38% 30%, #fff, color-mix(in srgb, var(--accent), white 88%));
+}
+.an-plate img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+
+.an-facts { margin: 16px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.an-facts > div { min-width: 0; }
+.an-facts dt { text-transform: uppercase; letter-spacing: 0.1em; font-size: 8.5px; font-weight: 600; color: var(--muted); }
+.an-facts dd { margin: 3px 0 0; font-size: 12px; line-height: 1.45; }
+.an-fun {
+  margin: 16px 0 0;
+  display: flex;
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(141, 107, 204, 0.07);
+  font-size: 12.2px;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--ink), var(--muted) 20%);
+}
+.an-fun svg { flex: none; margin-top: 2px; color: var(--lavender); }
+
+/* ---------- hotspot list ---------- */
+.an-hs-list { display: flex; flex-direction: column; gap: 3px; }
+.an-hs {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.an-hs:hover { background: rgba(255, 255, 255, 0.6); }
+.an-hs.is-sel { border-color: color-mix(in srgb, var(--pin), transparent 45%); background: rgba(255, 255, 255, 0.85); }
+.an-hs-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 5px; background: var(--pin); }
+.an-hs b { display: block; font: 500 13px var(--serif); }
+.an-hs em { display: block; font-style: normal; font-size: 10.5px; color: var(--muted); }
+.an-hs-body { margin-top: 14px; padding-left: 14px; border-left: 2px solid var(--line); }
+.an-hs-body p { margin: 0 0 10px; font-size: 12.6px; line-height: 1.68; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
+.an-hs-body p:last-child { margin-bottom: 0; }
+
+.an-cond-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.an-cond-chips span {
+  font-size: 10.5px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+/* ---------- calque à annoter ---------- */
+.an-calque { padding: 18px; }
+.an-calque > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.an-calque h2 { margin: 0; font: 500 19px var(--serif); display: flex; align-items: center; gap: 8px; }
+.an-score { font: 600 12px var(--sans); color: var(--coral); background: rgba(238, 124, 106, 0.1); border-radius: 999px; padding: 3px 11px; }
+.an-calque-intro { margin: 0 0 14px; font-size: 12.2px; line-height: 1.55; color: var(--muted); }
+.an-tags { display: flex; flex-direction: column; gap: 7px; }
+.an-tag { display: flex; align-items: center; gap: 9px; }
+.an-tag-n {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pin), white 72%);
+  border: 1px solid color-mix(in srgb, var(--pin), transparent 45%);
+  font: 600 10px var(--sans);
+}
+.an-tag select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  font: 400 12.5px var(--sans);
+  color: var(--ink);
+  cursor: pointer;
+}
+.an-tag select:focus { outline: 2px solid var(--lavender); outline-offset: 1px; }
+.an-tag.is-right select { border-color: var(--sage); background: color-mix(in srgb, var(--sage), white 86%); }
+.an-tag.is-wrong select { border-color: var(--coral); background: color-mix(in srgb, var(--coral), white 88%); }
+.an-tag-mark { flex: none; width: 16px; display: grid; place-items: center; }
+.an-tag.is-right .an-tag-mark { color: var(--sage); }
+.an-tag.is-wrong .an-tag-mark { color: var(--coral); }
+.an-calque-actions { display: flex; gap: 8px; margin-top: 16px; }
+.an-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 13px;
+  padding: 11px;
+  background: var(--ink);
+  color: #fdfaf4;
+  font: 500 12.5px var(--sans);
+  cursor: pointer;
+}
+.an-btn:hover { background: #1f1b19; }
+.an-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.an-btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.an-btn-ghost:hover { background: rgba(116, 89, 67, 0.06); color: var(--ink); }
+.an-corrige { margin: 14px 0 0; padding: 11px 13px; border-radius: 13px; background: rgba(118, 157, 116, 0.1); font-size: 12.2px; line-height: 1.55; }
+
+/* ---------- révision ---------- */
+.an-quiz { padding: 18px; display: flex; flex-direction: column; gap: 13px; }
+.an-quiz > header { display: flex; align-items: center; justify-content: space-between; }
+.an-quiz h2 { margin: 0; font: 500 19px var(--serif); display: flex; align-items: center; gap: 8px; }
+.an-quiz-q { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.an-quiz-opts { display: flex; flex-direction: column; gap: 7px; }
+.an-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.6);
+  font: 500 12.5px var(--serif);
+  text-align: left;
+  cursor: pointer;
+}
+.an-opt:hover:not(:disabled) { border-color: var(--lavender); background: #fff; }
+.an-opt:disabled { cursor: default; }
+.an-opt.is-right { border-color: var(--sage); background: color-mix(in srgb, var(--sage), white 84%); }
+.an-opt.is-wrong { border-color: var(--coral); background: color-mix(in srgb, var(--coral), white 86%); }
+.an-quiz-after { display: flex; flex-direction: column; gap: 11px; }
+.an-quiz-role { margin: 0; padding: 10px 12px; border-radius: 13px; background: rgba(255, 255, 255, 0.7); font-size: 12.2px; line-height: 1.55; }
+.an-quiz-quit { border: 0; background: transparent; color: var(--muted); font-size: 11.5px; cursor: pointer; text-decoration: underline; align-self: center; }
+
+/* ---------- copilot ----------
+   Mwalimu's own chat pattern (.cp-* in practice.css): an avatar per turn, a
+   tailed bubble, the student on the right. Violet rather than the app's indigo,
+   because everything around it here is warm paper and indigo reads as a foreign
+   component pasted into the atlas. */
+.an-copilot {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  --violet: #7c58bd;
+  --violet-soft: #8d6bcc;
+  --violet-wash: rgba(141, 107, 204, 0.09);
+}
+.an-cop-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--violet-wash), transparent);
+}
+.an-cop-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--violet-soft), var(--violet));
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(124, 88, 189, 0.28);
+}
+.an-cop-id { min-width: 0; }
+.an-cop-id b { display: block; font: 500 15px var(--serif); }
+.an-cop-id small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 26ch;
+}
+.an-cop-log { flex: 1; overflow-y: auto; padding: 15px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- messages ---------- */
+.an-msg { display: flex; gap: 9px; max-width: 94%; }
+.an-msg.me { align-self: flex-end; flex-direction: row-reverse; }
+.an-msg-av {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--violet-wash);
+  color: var(--violet);
+}
+.an-msg.me .an-msg-av { background: rgba(117, 91, 70, 0.1); color: var(--muted); }
+.an-bubble {
+  padding: 10px 13px;
+  border-radius: 15px;
+  font-size: 12.8px;
+  line-height: 1.6;
+  min-width: 0;
+}
+.an-msg:not(.me) .an-bubble {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 5px;
+  color: var(--ink);
+}
+.an-msg.me .an-bubble {
+  background: linear-gradient(135deg, var(--violet-soft), var(--violet));
+  border-bottom-right-radius: 5px;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(124, 88, 189, 0.2);
+}
+
+/* Markdown body. The prompt asks for a bold opening line, a few bullets and an
+   optional italic note; these are the only rules that shape needs. */
+.an-bubble > :first-child { margin-top: 0; }
+.an-bubble > :last-child { margin-bottom: 0; }
+.an-bubble p { margin: 0 0 8px; }
+.an-bubble strong { font-weight: 600; color: color-mix(in srgb, var(--violet), black 18%); }
+.an-msg.me .an-bubble strong { color: #fff; }
+.an-bubble em { color: var(--muted); font-style: italic; }
+.an-bubble ul, .an-bubble ol { margin: 8px 0; padding-left: 0; list-style: none; }
+.an-bubble ol { counter-reset: an-li; }
+.an-bubble li { position: relative; padding-left: 16px; margin-bottom: 5px; }
+.an-bubble li:last-child { margin-bottom: 0; }
+.an-bubble ul li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--violet-soft);
+}
+.an-bubble ol li { counter-increment: an-li; }
+.an-bubble ol li::before {
+  content: counter(an-li) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--violet-soft);
+}
+.an-bubble code {
+  font-size: 11.5px;
+  background: rgba(117, 91, 70, 0.08);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+.an-cop-empty p { margin: 0 0 11px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.an-cop-tips { display: flex; flex-direction: column; gap: 5px; }
+.an-cop-tips button {
+  border: 1px dashed var(--line);
+  background: transparent;
+  border-radius: 12px;
+  padding: 8px 11px;
+  font: 400 11.5px var(--sans);
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+.an-cop-tips button:hover:not(:disabled) { border-style: solid; border-color: var(--violet-soft); color: var(--violet); background: var(--violet-wash); }
+.an-cop-tips button:disabled { opacity: 0.45; cursor: not-allowed; }
+.an-dots { display: inline-flex; gap: 4px; padding: 3px 0; }
+.an-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--violet-soft); animation: an-blink 1.1s infinite; }
+.an-dots i:nth-child(2) { animation-delay: 0.18s; }
+.an-dots i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes an-blink { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
+.an-cop-src { margin: 0; display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 10px; color: var(--muted); }
+.an-cop-err { margin: 0; padding: 8px 11px; border-radius: 12px; background: color-mix(in srgb, var(--coral), white 86%); color: color-mix(in srgb, var(--coral), black 30%); font-size: 12px; }
+.an-cop-form { display: flex; gap: 8px; padding: 11px 18px 16px; border-top: 1px solid var(--line); flex: none; }
+.an-cop-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  font: 400 12.5px var(--sans);
+  color: var(--ink);
+  outline: 0;
+}
+.an-cop-form input:focus { border-color: var(--violet-soft); background: #fff; }
+.an-cop-form button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet-soft), var(--violet));
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(124, 88, 189, 0.26);
+}
+.an-cop-form button:disabled { background: rgba(117, 91, 70, 0.22); box-shadow: none; cursor: not-allowed; }
+
+/* ---------- system sheet ---------- */
+.an-retenir { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.an-retenir li { position: relative; padding-left: 15px; font-size: 12.6px; line-height: 1.55; }
+.an-retenir li::before { content: ""; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
+
+/* ---------- responsive ----------
+   Under 1150px the three panels stop being columns: the library becomes a
+   drawer so the specimen keeps the width, and the reading falls underneath,
+   which is the order anyway — look, then read. */
+@media (max-width: 1150px) {
+  .an-shell { height: auto; min-height: 100dvh; overflow: visible; }
+  .an-body { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+  .an-rail-btn { display: grid; }
+  .an-library {
+    position: fixed;
+    z-index: 40;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 290px;
+    border-radius: 0 26px 26px 0;
+    transform: translateX(-101%);
+    transition: transform 0.22s ease;
+    background: #fdfaf4;
+  }
+  .rail-open .an-library { transform: none; }
+  .an-stage { min-height: 58dvh; }
+  .an-info { overflow: visible; }
+  .an-title p { white-space: normal; }
+}
+@media (max-width: 640px) {
+  .an-top { padding: 12px 14px; gap: 10px; }
+  /* Words only. The icon stays — hiding the whole link left no way out of the
+     atlas on a phone, which is how this was shipped and caught. */
+  .an-back-txt { display: none; }
+  .an-back { padding: 0; width: 42px; min-height: 42px; justify-content: center; border-radius: 50%; }
+  .an-top .offline-pill { display: none; }
+  .an-tools { left: 10px; width: 54px; }
+  .an-tool { height: 52px; font-size: 8.5px; }
+  .an-stage { min-height: 52dvh; }
+  .an-facts { grid-template-columns: 1fr; }
+  /* The pill is wider than the phone and half of it ("molette") means nothing
+     on touch. Drag-to-turn needs no caption anyway. */
+  .an-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .an-spin, .an-dots i, .an-pin.is-blank.is-pulse button { animation: none; }
+  .an-library { transition: none; }
+  .an-pin { transition: none; }
+}

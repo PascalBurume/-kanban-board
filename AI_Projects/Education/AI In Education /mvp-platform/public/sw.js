@@ -44,6 +44,19 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // don't touch cross-origin
 
+  // The anatomy atlas ships ~96 MB of assets: 81 MB of GLB specimens under
+  // /models/anatomy/ and 15 MB of illustration plates under /anatomy/. Never put
+  // either in Cache Storage. "Offline" here means no internet, not no server —
+  // the LAN box that serves this page also serves these files, so caching them
+  // buys nothing and risks blowing the origin's storage quota, which would evict
+  // the carnet and studio shells that genuinely cannot refetch. The HTTP cache
+  // still spares the repeat download within a session.
+  //
+  // Note the plates would otherwise be caught by isStaticAsset() below, which
+  // matches .webp — hence the explicit bypass rather than relying on the
+  // extension rules.
+  if (url.pathname.startsWith("/models/") || url.pathname.startsWith("/anatomy/")) return;
+
   // Cache-first for immutable static assets.
   if (isStaticAsset(url)) {
     e.respondWith(

@@ -158,6 +158,9 @@ export default function StudentDashboard() {
           <a className="practice-nav" href="/student/carnet/">
             <Icon name="book" /> Mon carnet
           </a>
+          <a className="practice-nav" href="/anatomie/">
+            <Icon name="svt" /> Anatomie 3D
+          </a>
           <OfflinePill label="Serveur local connecté" />
           <LangToggle
             onNotice={() =>

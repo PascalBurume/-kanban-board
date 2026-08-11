@@ -2,11 +2,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import Icon from "@/components/ui/Icon";
-import { BrandMark, OfflinePill } from "@/components/ui/chrome";
+import {
+  BookOpen,
+  Check,
+  ClipboardCheck,
+  Home,
+  Layers,
+  Layers3,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  ScanLine,
+  Search,
+  Sparkles,
+  Target,
+  X,
+} from "lucide-react";
+import { OfflinePill } from "@/components/ui/chrome";
 import { useFullscreen } from "@/lib/fullscreen";
-import { organs, organById, fold, withArticle, ofOrgan } from "@/lib/anatomyOrgans";
+import { organs, organById, fold, ofOrgan } from "@/lib/anatomyOrgans";
 import { SYSTEM_ORDER, systemSheets } from "@/lib/anatomySystems";
+import { SpecimenThumb, PlateViewer } from "./SpecimenArt";
+import CalqueOverlay from "./CalqueOverlay";
 import AnatomyCopilot from "./AnatomyCopilot";
 import "@/styles/anatomy.css";
 
@@ -15,7 +32,7 @@ import "@/styles/anatomy.css";
 const AnatomyScene = dynamic(() => import("./AnatomyScene"), {
   ssr: false,
   loading: () => (
-    <div className="an-viewport an-boot">
+    <div className="an-boot">
       <span className="an-spin" />
       <p>Préparation du visualiseur…</p>
     </div>
@@ -39,7 +56,7 @@ function shuffle(arr, seed) {
   return a;
 }
 
-/** Organs in teaching order, grouped under the system sheets they belong to. */
+/** Specimens grouped under the system sheets, in the source app's teaching order. */
 function groupBySystem(list) {
   const bucket = new Map();
   for (const o of list) {
@@ -47,7 +64,6 @@ function groupBySystem(list) {
     bucket.get(o.system).push(o);
   }
   const ordered = SYSTEM_ORDER.filter((s) => bucket.has(s)).map((s) => [s, bucket.get(s)]);
-  // Any system the order list doesn't know about still gets shown, at the end.
   for (const [s, v] of bucket) if (!SYSTEM_ORDER.includes(s)) ordered.push([s, v]);
   return ordered;
 }
@@ -57,16 +73,26 @@ export default function AnatomyExplorer({ user }) {
   const [organId, setOrganId] = useState("heart");
   const [hotspotId, setHotspotId] = useState(null);
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState("explorer");
-  const [quiz, setQuiz] = useState(null);
-  const [score, setScore] = useState({ ok: 0, total: 0 });
-  const [webgl, setWebgl] = useState(null);
   const [railOpen, setRailOpen] = useState(false);
   const [showSystem, setShowSystem] = useState(false);
 
+  // Viewer tools
+  const [autoRotate, setAutoRotate] = useState(false);
+  const [wireframe, setWireframe] = useState(false);
+  const [crossSection, setCrossSection] = useState(false);
+
+  // Exercises. "explorer" | "calque" | "revision" — mutually exclusive, because
+  // each one wants the markers to say something different.
+  const [mode, setMode] = useState("explorer");
+  const [answers, setAnswers] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [quiz, setQuiz] = useState(null);
+  const [score, setScore] = useState({ ok: 0, total: 0 });
+
+  const [webgl, setWebgl] = useState(null);
   const sceneRef = useRef(null);
   const shellRef = useRef(null);
-  const detailRef = useRef(null);
+  const infoRef = useRef(null);
   const { isFull, toggle: toggleFull } = useFullscreen(shellRef);
 
   useEffect(() => {
@@ -74,106 +100,115 @@ export default function AnatomyExplorer({ user }) {
   }, []);
 
   const organ = organById[organId];
-  const hotspot = hotspot_of(organ, hotspotId);
+  const hotspot = organ && hotspotId ? organ.hotspots.find((h) => h.id === hotspotId) ?? null : null;
   const sheet = organ ? systemSheets[organ.system] : null;
 
   const groups = useMemo(() => {
     const q = fold(query.trim());
     if (!q) return groupBySystem(organs);
-    const hits = organs.filter(
-      (o) =>
-        fold(o.name).includes(q) ||
-        fold(o.scientificName).includes(q) ||
-        fold(o.system).includes(q) ||
-        o.hotspots.some((h) => fold(h.label).includes(q)),
+    return groupBySystem(
+      organs.filter(
+        (o) =>
+          fold(o.name).includes(q) ||
+          fold(o.scientificName).includes(q) ||
+          fold(o.system).includes(q) ||
+          o.hotspots.some((h) => fold(h.label).includes(q)),
+      ),
     );
-    return groupBySystem(hits);
   }, [query]);
 
-  const pick = useCallback((id) => {
-    setOrganId(id);
-    setHotspotId(null);
-    setRailOpen(false);
-    setShowSystem(false);
-    detailRef.current?.scrollTo({ top: 0 });
+  const resetExercise = useCallback(() => {
+    setAnswers({});
+    setChecked(false);
+    setQuiz(null);
+    setScore({ ok: 0, total: 0 });
   }, []);
+
+  const pick = useCallback(
+    (id) => {
+      setOrganId(id);
+      setHotspotId(null);
+      setRailOpen(false);
+      setShowSystem(false);
+      setCrossSection(false);
+      resetExercise();
+      infoRef.current?.scrollTo({ top: 0 });
+    },
+    [resetExercise],
+  );
 
   const pickHotspot = useCallback((id) => {
     setHotspotId(id);
     setShowSystem(false);
   }, []);
 
-  // Flying to a hotspot is a camera move, so it belongs with the selection
-  // rather than inside the scene: picking from the rail and picking from the
-  // model should land in exactly the same place.
+  // Flying to a structure is a camera move, so it lives with the selection:
+  // picking from the list and picking on the model land in the same place.
   useEffect(() => {
-    if (!hotspotId || mode === "revision") return;
+    if (!hotspotId || mode !== "explorer") return;
     const hs = organ?.hotspots.find((h) => h.id === hotspotId);
     if (hs) sceneRef.current?.focusHotspot(hs);
   }, [hotspotId, organ, mode]);
 
   // ---- révision ----
-  const nextQuestion = useCallback(
-    (forOrgan) => {
-      const own = forOrgan?.hotspots ?? [];
-      if (!own.length) return;
-      const seed = Math.floor(Math.random() * 1e9);
-      const target = shuffle(own, seed)[0];
-      // Distractors come from the same organ first; a short specimen borrows
-      // from its own system, so the choices stay plausible.
-      const sameSystem = organs
-        .filter((o) => o.system === forOrgan.system && o.id !== forOrgan.id)
-        .flatMap((o) => o.hotspots);
-      const pool = [...own.filter((h) => h.id !== target.id), ...sameSystem];
-      const seen = new Set([target.label]);
-      const distractors = [];
-      for (const h of shuffle(pool, seed + 7)) {
-        if (seen.has(h.label)) continue;
-        seen.add(h.label);
-        distractors.push(h);
-        if (distractors.length === 3) break;
-      }
-      setQuiz({ target, options: shuffle([target, ...distractors], seed + 13), answer: null });
-      setHotspotId(null);
-      sceneRef.current?.focusHotspot(target);
-    },
-    [],
-  );
+  const nextQuestion = useCallback((forOrgan) => {
+    const own = forOrgan?.hotspots ?? [];
+    if (!own.length) return;
+    const seed = Math.floor(Math.random() * 1e9);
+    const target = shuffle(own, seed)[0];
+    const sameSystem = organs
+      .filter((o) => o.system === forOrgan.system && o.id !== forOrgan.id)
+      .flatMap((o) => o.hotspots);
+    const seen = new Set([target.label]);
+    const distractors = [];
+    for (const h of shuffle([...own.filter((h) => h.id !== target.id), ...sameSystem], seed + 7)) {
+      if (seen.has(h.label)) continue;
+      seen.add(h.label);
+      distractors.push(h);
+      if (distractors.length === 3) break;
+    }
+    setQuiz({ target, options: shuffle([target, ...distractors], seed + 13), answer: null });
+    sceneRef.current?.focusHotspot(target);
+  }, []);
 
-  function startRevision() {
-    if (!organ?.hotspots.length) return;
-    setMode("revision");
-    setScore({ ok: 0, total: 0 });
-    setQuery("");
-    nextQuestion(organ);
+  function enter(next) {
+    resetExercise();
+    setHotspotId(null);
+    setMode(next);
+    if (next === "revision") nextQuestion(organ);
   }
-  function stopRevision() {
-    setMode("explorer");
-    setQuiz(null);
-  }
-  function answer(id) {
+
+  function answerQuiz(id) {
     if (!quiz || quiz.answer) return;
     setQuiz({ ...quiz, answer: id });
     setScore((s) => ({ ok: s.ok + (id === quiz.target.id ? 1 : 0), total: s.total + 1 }));
   }
 
-  // Switching specimen mid-drill restarts it on the new one.
+  // Switching specimen mid-exercise restarts it on the new one.
   useEffect(() => {
     if (mode === "revision" && organ) nextQuestion(organ);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organId]);
 
+  const marks = useMemo(() => {
+    if (mode !== "calque" || !checked || !organ) return null;
+    const out = {};
+    for (const h of organ.hotspots) if (answers[h.id]) out[h.id] = answers[h.id] === h.label ? "right" : "wrong";
+    return out;
+  }, [mode, checked, answers, organ]);
+
+  const pinMode = mode === "calque" ? "blank" : mode === "revision" ? "one" : "all";
+
   return (
     <div className={`an-shell${isFull ? " is-full" : ""}${railOpen ? " rail-open" : ""}`} ref={shellRef}>
       <header className="an-top">
         <Link href={isStaff ? "/teacher/" : "/student/"} className="an-back">
-          <BrandMark />
           <span className="an-back-txt">
-            <Icon name="home" /> Tableau de bord
+            <Home size={13} /> Tableau de bord
           </span>
         </Link>
         <div className="an-title">
-          <h1>Simulation d'anatomie</h1>
+          <h1>Atlas d'anatomie</h1>
           <p>
             {organs.length} spécimens 3D · {organs.reduce((n, o) => n + o.hotspots.length, 0)} structures repérées ·
             entièrement hors ligne
@@ -182,145 +217,192 @@ export default function AnatomyExplorer({ user }) {
         <div className="an-top-right">
           <OfflinePill />
           <button className="an-rail-btn" onClick={() => setRailOpen((v) => !v)} aria-label="Spécimens">
-            <Icon name="layers" />
+            <Layers size={16} />
           </button>
         </div>
       </header>
 
       <div className="an-body">
-        {/* ---------- left rail: the library ---------- */}
-        <aside className="an-rail an-rail-left">
+        {/* ---------- library ---------- */}
+        <aside className="an-library">
+          <div className="an-panel-head">
+            <span>Spécimens</span>
+          </div>
           <div className="an-search">
-            <Icon name="search" />
+            <Search size={14} />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Chercher un organe, une structure…"
-              disabled={mode === "revision"}
             />
             {query && (
               <button onClick={() => setQuery("")} aria-label="Effacer">
-                <Icon name="x" />
+                <X size={13} />
               </button>
             )}
           </div>
-
-          {mode === "revision" ? (
-            <p className="an-rail-locked">
-              <Icon name="eye" /> Bibliothèque masquée pendant la révision.
-            </p>
-          ) : (
-            <div className="an-lib">
-              {groups.map(([system, list]) => (
-                <section key={system} className="an-group">
-                  <h2>{system}</h2>
-                  <ul>
-                    {list.map((o) => (
-                      <li key={o.id}>
-                        <button
-                          className={`an-item${organId === o.id ? " is-sel" : ""}`}
-                          onClick={() => pick(o.id)}
-                          style={{ "--accent": o.accent }}
-                        >
-                          <span className="an-glyph">{o.icon}</span>
-                          <span className="an-item-txt">
-                            <strong>{o.name}</strong>
-                            <em>{o.scientificName}</em>
-                          </span>
-                          <span className="an-item-n">{o.hotspots.length}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-              {!groups.length && <p className="an-empty">Aucun spécimen ne correspond.</p>}
-            </div>
-          )}
+          <div className="an-lib">
+            {groups.map(([system, list]) => (
+              <section key={system} className="an-group">
+                <h2>{system}</h2>
+                <ul>
+                  {list.map((o) => (
+                    <li key={o.id}>
+                      <button
+                        className={`an-item${organId === o.id ? " is-sel" : ""}`}
+                        onClick={() => pick(o.id)}
+                        style={{ "--accent": o.accent }}
+                      >
+                        <SpecimenThumb organ={o} />
+                        <span className="an-item-txt">
+                          <b>{o.name}</b>
+                          <small>{o.scientificName}</small>
+                        </span>
+                        <span className="an-item-n">{o.hotspots.length}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+            {!groups.length && <p className="an-empty">Aucun spécimen ne correspond.</p>}
+          </div>
         </aside>
 
-        {/* ---------- centre: the specimen ---------- */}
+        {/* ---------- specimen ---------- */}
         <main className="an-stage">
+          <div className="an-glow" style={{ "--organ-accent": organ?.accent ?? "#eb7c6b" }} />
+
           {webgl === false ? (
             <div className="an-fallback">
-              <Icon name="alert" />
               <h2>La 3D n'est pas disponible sur cet appareil</h2>
               <p>
-                Ce navigateur ne prend pas en charge WebGL. La bibliothèque, les fiches détaillées et le Copilote
-                restent utilisables : choisissez un organe à gauche pour lire sa description.
+                Ce navigateur ne prend pas en charge WebGL. La bibliothèque, les planches illustrées, les fiches et le
+                Copilote restent utilisables : choisissez un organe à gauche.
               </p>
             </div>
           ) : (
-            <AnatomyScene
-              handle={sceneRef}
-              organ={organ}
-              hotspotId={hotspotId}
-              onPickHotspot={pickHotspot}
-              pinMode={mode === "revision" ? "quiz" : "all"}
-              quizHotspotId={quiz?.target?.id ?? null}
-            />
-          )}
+            <>
+              <AnatomyScene
+                handle={sceneRef}
+                organ={organ}
+                hotspotId={hotspotId}
+                onPickHotspot={pickHotspot}
+                pinMode={pinMode}
+                soloHotspotId={quiz?.target?.id ?? null}
+                marks={marks}
+                autoRotate={autoRotate}
+                wireframe={wireframe}
+                crossSection={crossSection}
+              />
 
-          <div className="an-tools">
-            <div className="an-tool-grp">
-              {VIEWS.map((v) => (
-                <button key={v.id} onClick={() => sceneRef.current?.view(v.id)}>
-                  {v.label}
+              <div className="an-tools">
+                <button
+                  className={`an-tool${autoRotate ? " is-on" : ""}`}
+                  onClick={() => setAutoRotate((v) => !v)}
+                  title="Rotation automatique"
+                >
+                  <RotateCcw size={17} />
+                  Rotation
                 </button>
-              ))}
-              <button onClick={() => sceneRef.current?.reset()} title="Recadrer">
-                <Icon name="refresh" />
-              </button>
-            </div>
-            <div className="an-tool-grp">
-              <button
-                className={mode === "revision" ? "is-on" : ""}
-                onClick={mode === "revision" ? stopRevision : startRevision}
-                disabled={!organ?.hotspots.length}
-              >
-                <Icon name="target" /> {mode === "revision" ? "Quitter la révision" : "Mode révision"}
-              </button>
-              <button onClick={toggleFull} title={isFull ? "Quitter le plein écran" : "Plein écran"}>
-                <Icon name={isFull ? "x" : "eye"} />
-              </button>
-            </div>
-          </div>
-          <p className="an-hint">
-            Faites glisser pour tourner · molette ou pincement pour zoomer · touchez une pastille pour ouvrir la
-            structure
-          </p>
+                <button
+                  className={`an-tool${crossSection ? " is-on" : ""}`}
+                  onClick={() => setCrossSection((v) => !v)}
+                  title="Coupe transversale"
+                >
+                  <ScanLine size={17} />
+                  Coupe
+                </button>
+                <button
+                  className={`an-tool${wireframe ? " is-on" : ""}`}
+                  onClick={() => setWireframe((v) => !v)}
+                  title="Calque fil de fer"
+                >
+                  <Layers3 size={17} />
+                  Fil de fer
+                </button>
+                <button
+                  className={`an-tool${mode === "calque" ? " is-on" : ""}`}
+                  onClick={() => enter(mode === "calque" ? "explorer" : "calque")}
+                  disabled={!organ?.hotspots.length}
+                  title="Calque à annoter"
+                >
+                  <ClipboardCheck size={17} />
+                  Calque
+                </button>
+                <button
+                  className={`an-tool${mode === "revision" ? " is-on" : ""}`}
+                  onClick={() => enter(mode === "revision" ? "explorer" : "revision")}
+                  disabled={!organ?.hotspots.length}
+                  title="Mode révision"
+                >
+                  <Target size={17} />
+                  Révision
+                </button>
+                <button className="an-tool an-tool-sep" onClick={toggleFull} title="Plein écran">
+                  {isFull ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+                  {isFull ? "Quitter" : "Écran"}
+                </button>
+              </div>
+
+              <p className="an-hint">
+                Faites glisser pour tourner · molette ou pincement pour zoomer
+              </p>
+              <div className="an-views">
+                {VIEWS.map((v) => (
+                  <button key={v.id} onClick={() => sceneRef.current?.view(v.id)}>
+                    {v.label}
+                  </button>
+                ))}
+                <button onClick={() => sceneRef.current?.reset()} title="Recadrer">
+                  <RotateCcw size={13} />
+                </button>
+              </div>
+            </>
+          )}
         </main>
 
-        {/* ---------- right rail: the reading ---------- */}
-        <aside className="an-rail an-rail-right" ref={detailRef}>
-          {mode === "revision" ? (
+        {/* ---------- reading ---------- */}
+        <aside className="an-info" ref={infoRef}>
+          {mode === "calque" && organ ? (
+            <CalqueOverlay
+              organ={organ}
+              answers={answers}
+              checked={checked}
+              onAnswer={(id, label) => setAnswers((a) => ({ ...a, [id]: label }))}
+              onCheck={() => setChecked(true)}
+              onReset={() => {
+                setAnswers({});
+                setChecked(false);
+              }}
+              onFocus={(hs) => sceneRef.current?.focusHotspot(hs)}
+            />
+          ) : mode === "revision" && organ ? (
             <section className="an-quiz">
               <header>
                 <h2>
-                  <Icon name="target" /> Mode révision
+                  <Target size={16} /> Mode révision
                 </h2>
                 <span className="an-score">
                   {score.ok} / {score.total}
                 </span>
               </header>
-              <p className="an-quiz-q">
-                Quelle structure {ofOrgan(organ)} est marquée sur le spécimen ?
-              </p>
+              <p className="an-quiz-q">Quelle structure {ofOrgan(organ)} porte le repère ?</p>
               <div className="an-quiz-opts">
                 {quiz?.options.map((o) => {
                   const done = !!quiz.answer;
-                  const isRight = o.id === quiz.target.id;
+                  const right = o.id === quiz.target.id;
                   const chosen = quiz.answer === o.id;
                   return (
                     <button
                       key={o.id + o.label}
-                      className={`an-opt${done && isRight ? " is-right" : ""}${done && chosen && !isRight ? " is-wrong" : ""}`}
-                      onClick={() => answer(o.id)}
+                      className={`an-opt${done && right ? " is-right" : ""}${done && chosen && !right ? " is-wrong" : ""}`}
+                      onClick={() => answerQuiz(o.id)}
                       disabled={done}
                     >
                       {o.label}
-                      {done && isRight && <Icon name="check" />}
-                      {done && chosen && !isRight && <Icon name="x" />}
+                      {done && right && <Check size={14} />}
+                      {done && chosen && !right && <X size={14} />}
                     </button>
                   );
                 })}
@@ -330,19 +412,19 @@ export default function AnatomyExplorer({ user }) {
                   <p className="an-quiz-role">
                     <strong>{quiz.target.label}</strong> — {quiz.target.detail}
                   </p>
-                  <button className="an-next" onClick={() => nextQuestion(organ)}>
-                    Structure suivante <Icon name="play" />
+                  <button className="an-btn" onClick={() => nextQuestion(organ)}>
+                    Structure suivante
                   </button>
                 </div>
               )}
-              <button className="an-quiz-quit" onClick={stopRevision}>
+              <button className="an-quiz-quit" onClick={() => enter("explorer")}>
                 Revenir à l'exploration
               </button>
             </section>
           ) : showSystem && sheet ? (
-            <section className="an-card an-sheet">
+            <section className="an-card">
               <button className="an-back-link" onClick={() => setShowSystem(false)}>
-                <Icon name="x" /> Fermer la fiche système
+                <X size={12} /> Fermer la fiche système
               </button>
               <span className="an-chip" style={{ "--sys": organ.accent }}>
                 Système
@@ -372,7 +454,7 @@ export default function AnatomyExplorer({ user }) {
                   </span>
                   {sheet && (
                     <button className="an-sheet-link" onClick={() => setShowSystem(true)}>
-                      Fiche système <Icon name="book" />
+                      Fiche système <BookOpen size={11} />
                     </button>
                   )}
                 </div>
@@ -410,11 +492,13 @@ export default function AnatomyExplorer({ user }) {
                 </dl>
 
                 <p className="an-fun">
-                  <Icon name="sparkles" /> {organ.funFact}
+                  <Sparkles size={14} /> {organ.funFact}
                 </p>
               </section>
 
-              <section className="an-card an-hotspots">
+              <PlateViewer organ={organ} />
+
+              <section className="an-card">
                 <h3>Structures repérées</h3>
                 <div className="an-hs-list">
                   {organ.hotspots.map((h) => (
@@ -426,7 +510,7 @@ export default function AnatomyExplorer({ user }) {
                     >
                       <span className="an-hs-dot" />
                       <span>
-                        <strong>{h.label}</strong>
+                        <b>{h.label}</b>
                         <em>{h.detail}</em>
                       </span>
                     </button>
@@ -442,7 +526,7 @@ export default function AnatomyExplorer({ user }) {
               </section>
 
               {!!organ.conditions?.length && (
-                <section className="an-card an-conds">
+                <section className="an-card">
                   <h3>Pathologies étudiées</h3>
                   <div className="an-cond-chips">
                     {organ.conditions.map((c) => (
@@ -459,9 +543,4 @@ export default function AnatomyExplorer({ user }) {
       </div>
     </div>
   );
-}
-
-function hotspot_of(organ, id) {
-  if (!organ || !id) return null;
-  return organ.hotspots.find((h) => h.id === id) ?? null;
 }

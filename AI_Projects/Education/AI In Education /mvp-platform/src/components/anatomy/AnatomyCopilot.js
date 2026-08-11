@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Icon from "@/components/ui/Icon";
+import { BookOpen, Send, Sparkles } from "lucide-react";
 
 const ERRORS = {
   COPILOT_DISABLED: "Votre enseignant a désactivé le Copilote pour le moment.",
@@ -120,7 +120,7 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
     <section className="an-copilot">
       <header className="an-cop-head">
         <span className="an-cop-badge">
-          <Icon name="sparkles" />
+          <Sparkles size={15} />
         </span>
         <div>
           <h3>Copilote</h3>
@@ -152,7 +152,7 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
         ))}
         {!!sources.length && (
           <p className="an-cop-src">
-            <Icon name="book" /> D'après : {sources.join(" · ")}
+            <BookOpen size={12} /> D'après : {sources.join(" · ")}
           </p>
         )}
         {err && <p className="an-cop-err">{err}</p>}
@@ -173,7 +173,7 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
           maxLength={2000}
         />
         <button type="submit" disabled={!organ || busy || !draft.trim()} aria-label="Envoyer">
-          <Icon name="send" />
+          <Send size={15} />
         </button>
       </form>
     </section>

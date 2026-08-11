@@ -1,4 +1,4 @@
-import { Lexend, Inter } from "next/font/google";
+import { Lexend, Inter, Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 import "../styles/mwalimu.css";
 import "../styles/teacher.css";
@@ -14,6 +14,24 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+// The anatomy atlas carries its own pair, from the explorer this page is ported
+// from: a Garamond for headings and part names, DM Sans for the interface. They
+// are declared here so next/font self-hosts them at build time like the other
+// two — a school server has no route to fonts.googleapis.com. Only /anatomie
+// references them, via --font-serif / --font-sans inside .an-shell.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-serif",
+  display: "swap",
+});
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -53,7 +71,7 @@ export default function RootLayout({ children }) {
         "});}";
 
   return (
-    <html lang="en" className={`${lexend.variable} ${inter.variable}`}>
+    <html lang="en" className={`${lexend.variable} ${inter.variable} ${cormorant.variable} ${dmSans.variable}`}>
       <body>
         {children}
         <script dangerouslySetInnerHTML={{ __html: swScript }} />

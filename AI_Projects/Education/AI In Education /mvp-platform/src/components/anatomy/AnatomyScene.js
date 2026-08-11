@@ -1,25 +1,35 @@
 "use client";
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+import { tween, easeInOutCubic } from "@/lib/anatomyTween";
 
-// The specimen viewport: one organ at a time, loaded from a Meshopt GLB.
+// The specimen viewport: one organ at a time, from a Meshopt GLB.
 //
-// Two rules from the classroom this ships into drive the choices here.
-//   1. Render on demand. There is no permanent requestAnimationFrame loop — a
-//      frame is drawn only when the camera, the selection or a load changes. An
-//      idle specimen costs zero GPU, which on a phone is the difference between
-//      a lesson and a flat battery.
-//   2. Light background, no dramatic lighting. This reads as a plate from an
-//      atlas that happens to turn, and it stays legible in a bright room.
+// Ported from the explorer's app/lib/three/viewer.ts, including the two things
+// my first version got wrong.
+//
+// ROTATION. OrbitControls with damping, not a hand-rolled orbit. The first
+// version drew exactly one frame per pointermove and none after release, so the
+// model tracked the finger and then stopped dead — no glide, and any dropped
+// event read as a stutter. `controls.update()` returns true while damping is
+// still settling, which is what carries the motion past the last event.
+//
+// BATTERY. Damping needs a running loop, but a running loop must not mean a
+// running GPU. The loop below is always scheduled and renders only when `dirty`
+// — set by interaction, by damping still settling, and by any tween in flight.
+// An idle specimen therefore still costs nothing, and the loop is unscheduled
+// altogether when the canvas scrolls out of view or the tab is hidden.
 
 /** Edge of the cube every model is normalised into, so the hotspot coordinates
  *  in anatomyOrgans.ts mean the same thing for all 44 specimens. */
 const FIT_SIZE = 3.8;
 const DEFAULT_ROT = [0.05, -0.28, 0];
-/** Keep the three most recent organs parsed: switching back is then instant. */
 const CACHE_LIMIT = 3;
+/** Far enough out that nothing is clipped; the sweep runs from here to 0. */
+const CLIP_OPEN = 2.6;
 
 export function webglAvailable() {
   try {
@@ -35,16 +45,22 @@ export default function AnatomyScene({
   hotspotId,
   onPickHotspot,
   handle,
-  /** "all" — every hotspot labelled. "quiz" — one unlabelled marker, which is
-   *  the whole point of a révision drill: the model has to ask the question. */
+  /** "all" — every hotspot named. "blank" — numbered anonymous markers, for a
+   *  drill where naming them is the exercise. "one" — a single blank marker. */
   pinMode = "all",
-  quizHotspotId = null,
+  /** In "one" mode, which hotspot to mark. */
+  soloHotspotId = null,
+  /** id -> "right" | "wrong", painted onto the markers after a calque is checked. */
+  marks = null,
+  autoRotate = false,
+  wireframe = false,
+  crossSection = false,
 }) {
   const mountRef = useRef(null);
   const pinRef = useRef(null);
   const api = useRef(null);
   const [progress, setProgress] = useState(0);
-  const [phase, setPhase] = useState("idle"); // idle | loading | ready | error
+  const [phase, setPhase] = useState("idle");
   const [pins, setPins] = useState([]);
 
   // ---- one-time scene construction ----
@@ -52,162 +68,151 @@ export default function AnatomyScene({
     const mount = mountRef.current;
     if (!mount) return;
 
+    // Decided once. The classroom device is the constraint: a phone, or a shared
+    // laptop with four cores. Full DPR with MSAA on those is the difference
+    // between a smooth turn and a slideshow, and nobody can see it at 42 mm.
+    const lowPower =
+      window.matchMedia("(max-width: 780px)").matches || (navigator.hardwareConcurrency ?? 8) < 6;
+
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 200);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
+    camera.position.set(0, 0, 7.4);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: !lowPower,
+      alpha: true,
+      powerPreference: "low-power",
+      stencil: false,
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1.5 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.02;
+    renderer.localClippingEnabled = true;
+    renderer.domElement.setAttribute(
+      "aria-label",
+      "Modèle 3D interactif. Faites glisser pour tourner, la molette pour zoomer, et touchez une pastille pour lire la structure.",
+    );
+    renderer.domElement.tabIndex = 0;
     mount.appendChild(renderer.domElement);
 
-    // Even, top-lit, no rim: the lighting of a diagram rather than a stage.
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xc4cad6, 2.1));
-    const key = new THREE.DirectionalLight(0xffffff, 1.7);
+    // Even and top-lit — the lighting of an anatomical plate, not of a stage.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd8cec2, 2.0));
+    const key = new THREE.DirectionalLight(0xffffff, 1.6);
     key.position.set(3, 5, 6);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xffffff, 0.7);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.65);
     fill.position.set(-5, 1, -4);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.35);
-    rim.position.set(0, -4, 2);
-    scene.add(rim);
+    const under = new THREE.DirectionalLight(0xffffff, 0.3);
+    under.position.set(0, -4, 2);
+    scene.add(under);
 
     const stage = new THREE.Group();
     scene.add(stage);
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.055;
+    controls.enablePan = false;
+    controls.minDistance = 4.6;
+    controls.maxDistance = 12;
+    controls.autoRotateSpeed = 0.65;
+    controls.target.set(0, 0, 0);
+
+    const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), CLIP_OPEN);
     const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     const cache = new Map();
     let current = null;
+    let disposed = false;
 
-    // ---- camera ----
-    const cam = { az: 0, pol: Math.PI / 2, dist: 7.4 };
-    const goal = { ...cam };
-    let animating = false;
-
-    function place() {
-      const sp = Math.sin(cam.pol);
-      camera.position.set(cam.dist * sp * Math.sin(cam.az), cam.dist * Math.cos(cam.pol), cam.dist * sp * Math.cos(cam.az));
-      camera.lookAt(0, 0, 0);
-    }
-
-    let queued = false;
+    // ---- the loop ----
+    let dirty = true;
+    let raf = 0;
+    let visible = true;
+    let pageVisible = !document.hidden;
+    let busyUntil = 0;
+    let autoRotateWanted = false;
+    let interactionUntil = 0;
     let syncPins = () => {};
-    function render() {
-      queued = false;
-      place();
+
+    const markDirty = () => {
+      dirty = true;
+    };
+    /** Hold the loop awake for a stretch — used while a tween is running. */
+    const busy = (seconds) => {
+      busyUntil = Math.max(busyUntil, performance.now() + seconds * 1000);
+      dirty = true;
+    };
+
+    function frame() {
+      raf = requestAnimationFrame(frame);
+      const now = performance.now();
+
+      // Auto-rotation yields to the student: it stops the moment they touch the
+      // model and stays off while a structure is open.
+      controls.autoRotate = autoRotateWanted && now >= interactionUntil;
+
+      // update() returns true while damping (or auto-rotation) is still moving
+      // the camera, which is exactly the condition for needing another frame.
+      const moving = controls.update();
+      if (moving || now < busyUntil) dirty = true;
+      if (!dirty) return;
+
+      dirty = false;
       renderer.render(scene, camera);
       syncPins();
     }
-    function invalidate() {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(render);
+
+    function startLoop() {
+      if (raf || !visible || !pageVisible) return;
+      dirty = true;
+      raf = requestAnimationFrame(frame);
+    }
+    function stopLoop() {
+      cancelAnimationFrame(raf);
+      raf = 0;
     }
 
-    function step() {
-      const k = 0.17;
-      cam.az += (goal.az - cam.az) * k;
-      cam.pol += (goal.pol - cam.pol) * k;
-      cam.dist += (goal.dist - cam.dist) * k;
-      if (
-        Math.abs(goal.az - cam.az) < 1e-3 &&
-        Math.abs(goal.pol - cam.pol) < 1e-3 &&
-        Math.abs(goal.dist - cam.dist) < 0.01
-      ) {
-        Object.assign(cam, goal);
-        animating = false;
-        render();
-        return;
-      }
-      render();
-      requestAnimationFrame(step);
-    }
-    function animateTo(next) {
-      Object.assign(goal, next);
-      if (!animating) {
-        animating = true;
-        requestAnimationFrame(step);
-      }
-    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        visible ? startLoop() : stopLoop();
+      },
+      { rootMargin: "120px" },
+    );
+    io.observe(mount);
 
-    // ---- pointer ----
-    let drag = null;
-    let moved = 0;
-    const pointers = new Map();
-    let pinchStart = 0;
+    const onVisibility = () => {
+      pageVisible = !document.hidden;
+      pageVisible ? startLoop() : stopLoop();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
-    function onDown(e) {
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 2) {
-        const [a, b] = [...pointers.values()];
-        pinchStart = Math.hypot(a.x - b.x, a.y - b.y);
-        drag = null;
-        return;
-      }
-      drag = { x: e.clientX, y: e.clientY };
-      moved = 0;
-      renderer.domElement.setPointerCapture(e.pointerId);
-    }
-    function onMove(e) {
-      if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 2 && pinchStart) {
-        const [a, b] = [...pointers.values()];
-        const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d > 4) {
-          goal.dist = cam.dist = THREE.MathUtils.clamp(cam.dist * (pinchStart / d), 2.6, 18);
-          pinchStart = d;
-          invalidate();
-        }
-        return;
-      }
-      if (!drag) return;
-      const dx = e.clientX - drag.x;
-      const dy = e.clientY - drag.y;
-      moved += Math.abs(dx) + Math.abs(dy);
-      cam.az = goal.az = cam.az - dx * 0.008;
-      cam.pol = goal.pol = THREE.MathUtils.clamp(cam.pol - dy * 0.006, 0.14, Math.PI - 0.14);
-      drag = { x: e.clientX, y: e.clientY };
-      invalidate();
-    }
-    function onUp(e) {
-      pointers.delete(e.pointerId);
-      if (pointers.size < 2) pinchStart = 0;
-      drag = null;
-    }
-    function onWheel(e) {
-      e.preventDefault();
-      goal.dist = cam.dist = THREE.MathUtils.clamp(cam.dist * (1 + Math.sign(e.deltaY) * 0.12), 2.6, 18);
-      invalidate();
-    }
-
-    const el = renderer.domElement;
-    el.style.cursor = "grab";
-    el.style.touchAction = "none";
-    el.addEventListener("pointerdown", onDown);
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerup", onUp);
-    el.addEventListener("pointercancel", onUp);
-    el.addEventListener("wheel", onWheel, { passive: false });
+    const onControlStart = () => {
+      interactionUntil = performance.now() + 2600;
+      dirty = true;
+    };
+    controls.addEventListener("start", onControlStart);
+    controls.addEventListener("change", markDirty);
 
     const ro = new ResizeObserver(() => {
-      const w = mount.clientWidth || 1;
-      const h = mount.clientHeight || 1;
+      const w = Math.max(mount.clientWidth, 1);
+      const h = Math.max(mount.clientHeight, 1);
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      invalidate();
+      dirty = true;
     });
     ro.observe(mount);
 
-    // ---- hotspot pin projection ----
-    // Pins are HTML, not sprites: crisp text at any DPI, and they inherit the
-    // page's type. Position and occlusion are recomputed on each drawn frame,
-    // which only happens when something actually moved.
+    // ---- hotspot labels ----
+    // The chip is pushed away from the model's centre and joined to its anchor
+    // by a leader line, so a name never sits on top of the structure it names.
     const world = new THREE.Vector3();
     const proj = new THREE.Vector3();
     const ray = new THREE.Raycaster();
-    const camDir = new THREE.Vector3();
+    const toPoint = new THREE.Vector3();
 
     syncPins = () => {
       const host = pinRef.current;
@@ -215,36 +220,86 @@ export default function AnatomyScene({
       const w = mount.clientWidth;
       const h = mount.clientHeight;
       for (const node of host.children) {
-        const i = Number(node.dataset.i);
-        const hs = current.organ.hotspots[i];
+        const hs = current.organ.hotspots[Number(node.dataset.i)];
         if (!hs) continue;
         world.set(hs.position[0], hs.position[1], hs.position[2]).applyMatrix4(current.pivot.matrixWorld);
         proj.copy(world).project(camera);
 
-        // Hidden when it projects behind the camera, or when the specimen's own
-        // geometry stands between it and the viewer — a label floating over the
-        // far side of a kidney points at nothing.
-        //
-        // The révision marker is exempt. Several hotspots sit at or just inside
-        // the surface (the mitral valve is deep in the heart), so the occlusion
-        // test hides them — and a drill that asks "which structure is marked?"
-        // with no visible mark is unanswerable. Showing it always is strictly
-        // better than a correct-but-useless hidden dot.
-        let visible = proj.z < 1;
-        if (visible && node.dataset.always !== "1") {
-          camDir.copy(world).sub(camera.position);
-          const dist = camDir.length();
-          ray.set(camera.position, camDir.normalize());
+        let shown = proj.z < 1;
+        // A marker the student is being asked to identify is exempt from the
+        // occlusion test: several hotspots sit at or just inside the surface,
+        // and a drill with no visible mark is unanswerable.
+        if (shown && node.dataset.always !== "1") {
+          toPoint.copy(world).sub(camera.position);
+          const dist = toPoint.length();
+          ray.set(camera.position, toPoint.normalize());
           ray.far = dist - 0.12;
-          visible = ray.intersectObjects(current.meshes, false).length === 0;
+          shown = ray.intersectObjects(current.meshes, false).length === 0;
         }
-        node.style.opacity = visible ? "1" : "0";
-        node.style.pointerEvents = visible ? "auto" : "none";
-        node.style.transform = `translate(-50%,-50%) translate(${((proj.x + 1) / 2) * w}px, ${((1 - proj.y) / 2) * h}px)`;
+        node.dataset.visible = shown ? "true" : "false";
+        if (!shown) continue;
+
+        const x = ((proj.x + 1) / 2) * w;
+        const y = ((1 - proj.y) / 2) * h;
+        node.style.transform = `translate(${x}px, ${y}px)`;
+
+        const side = x > w / 2 ? 1 : -1;
+        const dx = side * 36;
+        const dy = -20;
+        const chip = node.lastElementChild;
+        const line = node.firstElementChild;
+        if (chip) chip.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+        if (line) {
+          line.style.width = `${Math.hypot(dx, dy)}px`;
+          line.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+        }
       }
     };
 
-    // ---- organ loading ----
+    // ---- materials / tools ----
+    const materialsOf = (entry) => {
+      const out = [];
+      for (const mesh of entry?.meshes ?? []) {
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const m of mats) if (m) out.push(m);
+      }
+      return out;
+    };
+
+    let cancelClip = null;
+    function applyCrossSection(on) {
+      if (!current) return;
+      const mats = materialsOf(current);
+      for (const m of mats) {
+        m.clippingPlanes = on || clipPlane.constant < CLIP_OPEN ? [clipPlane] : null;
+        m.needsUpdate = true;
+      }
+      cancelClip?.();
+      cancelClip = tween({
+        from: clipPlane.constant,
+        to: on ? 0 : CLIP_OPEN,
+        duration: 0.75,
+        ease: easeInOutCubic,
+        onUpdate: (v) => {
+          clipPlane.constant = v;
+          dirty = true;
+        },
+        onComplete: () => {
+          if (!on) for (const m of materialsOf(current)) (m.clippingPlanes = null), (m.needsUpdate = true);
+          dirty = true;
+        },
+      });
+      busy(0.85);
+    }
+
+    function applyWireframe(on) {
+      for (const m of materialsOf(current)) {
+        if (m.isMeshStandardMaterial) m.wireframe = on;
+      }
+      dirty = true;
+    }
+
+    // ---- loading ----
     async function show(organDef, onDone) {
       if (!organDef?.model) return;
       const url = organDef.model;
@@ -252,6 +307,8 @@ export default function AnatomyScene({
         current.pivot.removeFromParent();
         current = null;
       }
+      clipPlane.constant = CLIP_OPEN;
+
       const hit = cache.get(url);
       if (hit) {
         cache.delete(url);
@@ -260,20 +317,22 @@ export default function AnatomyScene({
         hit.pivot.rotation.set(...(organDef.rotation ?? DEFAULT_ROT));
         stage.add(hit.pivot);
         onDone?.(hit);
-        invalidate();
+        dirty = true;
         return;
       }
 
       const gltf = await loader.loadAsync(url, (e) => {
         if (e.total > 0) api.current?.emitProgress(e.loaded / e.total);
       });
+      if (disposed) return;
+
       const model = gltf.scene;
       const box = new THREE.Box3().setFromObject(model);
       const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
+      const centre = box.getCenter(new THREE.Vector3());
       const scale = FIT_SIZE / Math.max(size.x, size.y, size.z, 0.001);
       model.scale.setScalar(scale);
-      model.position.copy(center.multiplyScalar(-scale));
+      model.position.copy(centre.multiplyScalar(-scale));
 
       const pivot = new THREE.Group();
       pivot.add(model);
@@ -292,7 +351,7 @@ export default function AnatomyScene({
           m.side = THREE.FrontSide;
           if (m.isMeshStandardMaterial) {
             // Holding roughness up and killing the second specular lobe is what
-            // stops highlights from crawling while the organ turns.
+            // stops highlights crawling while the organ turns.
             m.roughness = THREE.MathUtils.clamp(m.roughness ?? 0.5, 0.42, 0.62);
             m.metalness = 0;
             if ("transmission" in m) {
@@ -312,93 +371,125 @@ export default function AnatomyScene({
       const entry = { url, organ: organDef, pivot, meshes };
       cache.set(url, entry);
       while (cache.size > CACHE_LIMIT) {
-        const oldest = cache.keys().next().value;
-        const dead = cache.get(oldest);
-        cache.delete(oldest);
-        if (dead && dead !== entry) {
-          dead.pivot.removeFromParent();
-          dead.pivot.traverse((o) => {
-            if (!o.isMesh) return;
-            o.geometry?.dispose();
-            const mm = Array.isArray(o.material) ? o.material : [o.material];
-            for (const m of mm) {
-              for (const k of ["map", "normalMap", "roughnessMap", "aoMap", "emissiveMap"]) m?.[k]?.dispose?.();
-              m?.dispose?.();
-            }
-          });
-        }
+        const oldestKey = cache.keys().next().value;
+        const dead = cache.get(oldestKey);
+        cache.delete(oldestKey);
+        if (dead && dead !== entry) disposeEntry(dead);
       }
       current = entry;
       stage.add(pivot);
       onDone?.(entry);
-      invalidate();
+      dirty = true;
+    }
+
+    function disposeEntry(entry) {
+      entry.pivot.removeFromParent();
+      entry.pivot.traverse((o) => {
+        if (!o.isMesh) return;
+        o.geometry?.dispose();
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) {
+          for (const k of ["map", "normalMap", "roughnessMap", "aoMap", "emissiveMap"]) m?.[k]?.dispose?.();
+          m?.dispose?.();
+        }
+      });
     }
 
     api.current = {
       show,
-      invalidate,
       emitProgress: () => {},
-      resetView: () => animateTo({ az: 0, pol: Math.PI / 2, dist: 7.4 }),
+      markDirty,
+      setAutoRotate: (on) => {
+        autoRotateWanted = on;
+        if (on) interactionUntil = 0;
+        dirty = true;
+      },
+      setWireframe: applyWireframe,
+      setCrossSection: applyCrossSection,
+      resetView: () => {
+        api.current?.frameTo(0, Math.PI / 2, 7.4);
+      },
       setView: (name) => {
         const az = name === "dos" ? Math.PI : name === "profil" ? Math.PI / 2 : 0;
-        animateTo({ az, pol: Math.PI / 2, dist: goal.dist });
+        const sph = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        api.current?.frameTo(az, sph.phi, sph.radius);
       },
-      // Swing the model round so the hotspot faces the viewer, then close in.
-      //
-      // Azimuth only, with a gentle nod. Deriving the polar angle from the
-      // hotspot's own elevation looks right on paper and is wrong in practice:
-      // a structure near the vertical axis — the pelvis of a whole skeleton —
-      // has almost no horizontal radius, so the angle collapses and the camera
-      // ends up under the specimen looking up. Eye level is what a learner
-      // expects, so it stays put.
+      /** Eased camera move in spherical space around the target. */
+      frameTo: (az, pol, dist) => {
+        const from = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        const dAz = ((az - from.theta + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        const target = new THREE.Spherical(
+          THREE.MathUtils.clamp(dist, controls.minDistance, controls.maxDistance),
+          THREE.MathUtils.clamp(pol, 0.16, Math.PI - 0.16),
+          from.theta + dAz,
+        );
+        interactionUntil = performance.now() + 2600;
+        busy(0.75);
+        tween({
+          from: 0,
+          to: 1,
+          duration: 0.62,
+          ease: easeInOutCubic,
+          onUpdate: (t) => {
+            const s = new THREE.Spherical(
+              from.radius + (target.radius - from.radius) * t,
+              from.phi + (target.phi - from.phi) * t,
+              from.theta + (target.theta - from.theta) * t,
+            );
+            camera.position.setFromSpherical(s).add(controls.target);
+            camera.lookAt(controls.target);
+            dirty = true;
+          },
+        });
+      },
+      // Swing the model round so the structure faces the viewer, then close in.
+      // Azimuth only, with a gentle nod: deriving the polar angle from the
+      // hotspot's own elevation puts the camera under the specimen whenever the
+      // structure sits near the vertical axis, as the pelvis of a skeleton does.
       focusHotspot: (hs) => {
         if (!current || !hs) return;
         const v = new THREE.Vector3(...hs.position).applyEuler(current.pivot.rotation);
         const r = Math.hypot(v.x, v.z);
-        const nod = THREE.MathUtils.clamp(Math.PI / 2 - v.y * 0.16, 1.15, 1.95);
-        animateTo({
-          az: r > 0.15 ? Math.atan2(v.x, v.z) : goal.az,
-          pol: nod,
-          dist: 5.6,
-        });
+        const sph = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        api.current?.frameTo(
+          r > 0.15 ? Math.atan2(v.x, v.z) : sph.theta,
+          THREE.MathUtils.clamp(Math.PI / 2 - v.y * 0.16, 1.15, 1.95),
+          5.6,
+        );
       },
-      snapshot: () => renderer.domElement.toDataURL("image/png"),
+      /** Test hook: how many frames the renderer has actually drawn. */
+      frameCount: () => renderer.info.render.frame,
     };
 
-    place();
-    invalidate();
+    startLoop();
 
     return () => {
+      disposed = true;
+      stopLoop();
+      io.disconnect();
       ro.disconnect();
-      el.removeEventListener("pointerdown", onDown);
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerup", onUp);
-      el.removeEventListener("pointercancel", onUp);
-      el.removeEventListener("wheel", onWheel);
-      for (const entry of cache.values()) {
-        entry.pivot.traverse((o) => {
-          if (!o.isMesh) return;
-          o.geometry?.dispose();
-          const mm = Array.isArray(o.material) ? o.material : [o.material];
-          for (const m of mm) m?.dispose?.();
-        });
-      }
+      document.removeEventListener("visibilitychange", onVisibility);
+      controls.removeEventListener("start", onControlStart);
+      controls.removeEventListener("change", markDirty);
+      controls.dispose();
+      cancelClip?.();
+      for (const entry of cache.values()) disposeEntry(entry);
       cache.clear();
       renderer.dispose();
-      if (el.parentNode) el.parentNode.removeChild(el);
+      if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
       api.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (api.current) api.current.emitProgress = (p) => setProgress(p);
+    if (api.current) api.current.emitProgress = setProgress;
   }, []);
 
   useImperativeHandle(handle, () => ({
     reset: () => api.current?.resetView(),
     view: (n) => api.current?.setView(n),
     focusHotspot: (hs) => api.current?.focusHotspot(hs),
-    snapshot: () => api.current?.snapshot() ?? null,
+    frameCount: () => api.current?.frameCount() ?? 0,
   }));
 
   // ---- load whenever the chosen organ changes ----
@@ -414,9 +505,10 @@ export default function AnatomyScene({
       setPins(organ.hotspots.map((h, i) => ({ ...h, i })));
       setPhase("ready");
       a.resetView();
+      a.setWireframe(wireframe);
+      if (crossSection) a.setCrossSection(true);
     }).catch(() => {
-      if (!alive) return;
-      setPhase("error");
+      if (alive) setPhase("error");
     });
     return () => {
       alive = false;
@@ -424,31 +516,52 @@ export default function AnatomyScene({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ?.id]);
 
-  // Pins mount without a transform, so they would flash at the top-left corner
-  // until the next camera move. Ask for that frame.
   useEffect(() => {
-    api.current?.invalidate();
-  }, [pins, hotspotId, pinMode, quizHotspotId]);
+    api.current?.setAutoRotate(autoRotate);
+  }, [autoRotate]);
+  useEffect(() => {
+    if (phase === "ready") api.current?.setWireframe(wireframe);
+  }, [wireframe, phase]);
+  useEffect(() => {
+    if (phase === "ready") api.current?.setCrossSection(crossSection);
+  }, [crossSection, phase]);
 
-  const shown = phase !== "ready" ? [] : pinMode === "quiz" ? pins.filter((h) => h.id === quizHotspotId) : pins;
+  // A pin mounts without a transform, so it would flash at the corner until the
+  // next camera move. Ask for the frame that places it.
+  useEffect(() => {
+    api.current?.markDirty();
+  }, [pins, hotspotId, pinMode, soloHotspotId, marks]);
+
+  const shown =
+    phase !== "ready" ? [] : pinMode === "one" ? pins.filter((h) => h.id === soloHotspotId) : pins;
+  const blank = pinMode !== "all";
 
   return (
     <div className="an-viewport" ref={mountRef}>
       <div className="an-pins" ref={pinRef}>
-        {shown.map((h) => (
-          <button
-            key={h.id}
-            data-i={h.i}
-            data-always={pinMode === "quiz" ? "1" : undefined}
-            className={`an-pin${hotspotId === h.id ? " is-sel" : ""}${pinMode === "quiz" ? " is-quiz" : ""}`}
-            style={{ "--pin": h.color }}
-            onClick={() => pinMode !== "quiz" && onPickHotspot?.(h.id)}
-            title={pinMode === "quiz" ? "Structure à identifier" : h.label}
-          >
-            <span className="an-pin-dot" />
-            {pinMode !== "quiz" && <span className="an-pin-txt">{h.label}</span>}
-          </button>
-        ))}
+        {shown.map((h) => {
+          const mark = marks?.[h.id];
+          // The number ties a marker to its row in the calque, so it must be the
+          // hotspot's own index, not its position in the filtered list.
+          const face = pinMode === "one" ? "?" : h.i + 1;
+          return (
+            <span
+              key={h.id}
+              data-i={h.i}
+              data-always={blank ? "1" : undefined}
+              data-visible="false"
+              className={`an-pin${hotspotId === h.id ? " is-sel" : ""}${blank ? " is-blank" : ""}${
+                pinMode === "one" ? " is-pulse" : ""
+              }${mark ? ` is-${mark}` : ""}`}
+              style={{ "--pin": h.color }}
+            >
+              <i />
+              <button type="button" onClick={() => onPickHotspot?.(h.id)} title={blank ? "Structure à nommer" : h.label}>
+                {blank ? face : h.label}
+              </button>
+            </span>
+          );
+        })}
       </div>
 
       {phase === "loading" && (

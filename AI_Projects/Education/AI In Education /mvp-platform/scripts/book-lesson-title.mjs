@@ -1,0 +1,284 @@
+// Titles for the illustrated book lessons.
+//
+// These lessons used to be called "Manuel illustré (1)…(14)", which told a teacher
+// nothing about what was inside. The book's own section headings are right there in the
+// text — normalizeHeadings() has already promoted the numbered ones to "## 1.2 …" — so a
+// lesson can be named after the section it opens with.
+//
+// Two things make that harder than it sounds, and both are handled here:
+//
+//  * The book shouts its top-level sections: "1.1. THEORIE ATOMIQUE". Lower-casing that
+//    gives "theorie" — the accents are gone from the scan, not merely from the case. So
+//    accents (and proper nouns, and acronyms) are restored by asking the book itself:
+//    the same words appear thousands of times in the body text, correctly spelled. The
+//    corpus votes; nothing is hard-coded per book.
+//
+//  * The greedy packer cuts wherever the caps allow, so about a fifth of the lessons
+//    start mid-section, on "Résolution" or "Exercices". Those inherit the previous
+//    lesson's title with "(suite)" rather than being named after a fragment.
+
+import fs from "node:fs";
+import path from "node:path";
+
+const WORD = /[A-Za-zÀ-ÿ]+/g;
+
+export function stripAccents(s) {
+  return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+/**
+ * Count every word of the book, keeping its case, keyed by its accent-free lowercase
+ * form. SHOUTED words are skipped: they are the damaged spelling we are trying to undo,
+ * so letting them vote would just re-elect the damage.
+ */
+export function buildLexicon(text) {
+  const counts = new Map();
+  for (const w of String(text).match(WORD) ?? []) {
+    if (w.length < 2 || w === w.toUpperCase()) continue;
+    const key = stripAccents(w).toLowerCase();
+    let forms = counts.get(key);
+    if (!forms) counts.set(key, (forms = new Map()));
+    forms.set(w, (forms.get(w) ?? 0) + 1);
+  }
+  // Collapse to the winning spelling per key, and — separately — the winning
+  // *lower-case* spelling. The gap between them is what identifies a proper noun: this
+  // book writes "Propriétés" 18 times and "propriétés" 14, but "Taylor" 16 times and
+  // "taylor" never. So a word with no lower-case life of its own keeps its capital
+  // wherever it appears; everything else is lower-cased mid-title.
+  const best = new Map();
+  for (const [key, forms] of counts) {
+    let top = null, topN = 0, low = null, lowN = 0;
+    for (const [form, n] of forms) {
+      if (n > topN) { top = form; topN = n; }
+      if (form[0] === form[0].toLowerCase() && n > lowN) { low = form; lowN = n; }
+    }
+    best.set(key, { form: top, count: topN, lower: low, lowerCount: lowN });
+  }
+  return best;
+}
+
+let pooled = null;
+
+/**
+ * One lexicon for every book on the shelf.
+ *
+ * French spelling is not per-book, and the evidence for a word is thin in isolation: a
+ * maths book prints "Généralités" as a shouted heading and almost never in prose, so on
+ * its own it cannot repair itself. Pooled with the chemistry books, which use the word
+ * in sentences, it can. The pool is read once per process.
+ */
+export function pooledLexicon(dir) {
+  if (pooled) return pooled;
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".md")) : [];
+  const text = files.map((f) => fs.readFileSync(path.join(dir, f), "utf8")).join("\n");
+  pooled = buildLexicon(text);
+  return pooled;
+}
+
+// A word is only replaced when the books have real evidence for another spelling. Below
+// this, an unrecognised token — a symbol, a one-off — is left exactly as printed.
+const MIN_EVIDENCE = 3;
+
+function entry(key, lexicon) {
+  const hit = lexicon.get(key);
+  if (hit && hit.count >= MIN_EVIDENCE) return hit;
+  // "DEVELOPPEMENTS" is only ever shouted in this book, but "développement" fills its
+  // pages. Try the singular and put the plural back.
+  if (key.endsWith("s")) {
+    const sing = lexicon.get(key.slice(0, -1));
+    if (sing && sing.count >= MIN_EVIDENCE) {
+      return {
+        form: `${sing.form}s`,
+        count: sing.count,
+        lower: sing.lower ? `${sing.lower}s` : null,
+        lowerCount: sing.lowerCount,
+      };
+    }
+  }
+  return null;
+}
+
+/** The book's spelling, ignoring case — used where the caller re-cases it itself. */
+function lookup(key, lexicon) {
+  return entry(key, lexicon)?.form ?? null;
+}
+
+function respell(word, lexicon) {
+  const hit = entry(stripAccents(word).toLowerCase(), lexicon);
+  // Mid-title, prefer how the book writes the word in running prose. A word with no
+  // lower-case form in the whole book is a name (Taylor, Laurin) and keeps its capital.
+  if (hit) return hit.lowerCount >= MIN_EVIDENCE ? hit.lower : hit.form;
+  if (word !== word.toUpperCase()) return word;
+  // No evidence, and the word is shouting. Every common French word is in the lexicon
+  // many times over, so what lands here is either a rare word the scan happened to
+  // print only in headings, or an acronym. Length tells them apart well enough: lower
+  // the long ones (SHOUTING mid-title is certainly wrong, even if an accent is lost),
+  // leave the short ones alone.
+  return word.length > 3 ? word.toLowerCase() : word;
+}
+
+// "ÉTAGE D'OXYDATION (EO) OU NOMBRE D'OXYDATION (NO)" — the short all-caps group in
+// brackets is the symbol being defined, not a word to be lower-cased. Counting the
+// lexicon doesn't separate these from real three-letter words (LOI, GAZ, SEL); the
+// bracket does.
+const ACRONYM_GLOSS = /\(\s*[A-Z][A-Z.\s]{0,5}\)/g;
+
+/**
+ * Put back diacritics the scan dropped, without touching anything else.
+ *
+ * Headings the book prints in mixed case are left as the book has them — except that
+ * French typography routinely drops the accent from a capital, so the book's own
+ * "Etude", "Equations", "Etats" arrive bare. This restores only the marks: same letters,
+ * same capitalisation, same words.
+ */
+export function restoreDiacritics(s, lexicon) {
+  return String(s).replace(WORD, (w) => {
+    if (w === w.toUpperCase() && w.length > 1) return w; // shouted words are unshout()'s job
+    const hit = lookup(stripAccents(w).toLowerCase(), lexicon);
+    if (!hit || stripAccents(hit).toLowerCase() !== stripAccents(w).toLowerCase()) return w;
+    if (hit === w) return w;
+    // Keep the case the book used here, take only the marks from the lexicon.
+    const cased = w[0] === w[0].toUpperCase() ? hit[0].toUpperCase() + hit.slice(1) : hit;
+    return stripAccents(cased) === stripAccents(w) ? cased : w;
+  });
+}
+
+/** Is this heading in the book's shouting style? */
+export function isShouted(s) {
+  const letters = String(s).replace(/[^A-Za-zÀ-ÿ]/g, "");
+  if (letters.length < 3) return false;
+  const upper = letters.replace(/[^A-ZÀ-Þ]/g, "").length;
+  return upper / letters.length >= 0.75;
+}
+
+/** "THEORIE ATOMIQUE" → "Théorie atomique", using the book as the dictionary. */
+export function unshout(s, lexicon) {
+  // Lift the acronym glosses out, respell everything else, put them back.
+  const kept = [];
+  let out = String(s).replace(ACRONYM_GLOSS, (m) => `￼${kept.push(m) - 1}￼`);
+  out = out.replace(WORD, (w) => respell(w, lexicon));
+  out = out.replace(/￼(\d+)￼/g, (_, i) => kept[Number(i)]);
+  // Elided articles: the scan writes "ETAGE D'OXYDATION", and "D" is too short to carry
+  // evidence of its own. Any single letter before an apostrophe is an elision.
+  out = out.replace(/(^|[^A-Za-zÀ-ÿ])([A-Z])(['’])/g, (m, pre, letter, apo) => `${pre}${letter.toLowerCase()}${apo}`);
+  // Capitalise the opening word — unless the book's own spelling of it is deliberately
+  // lower-case, as in "pH des solutions".
+  const first = out.match(/[A-Za-zÀ-ÿ]+/);
+  if (first && first[0] === first[0].toLowerCase()) return out.replace(/[a-zà-ÿ]/, (c) => c.toUpperCase());
+  return out;
+}
+
+// Debris left by plainHeading() after it unwraps $…$: "(z in mathbfC)". The formula is
+// unreadable once stripped of its markup, and a title is no place for it.
+const MATH_DEBRIS = /math(?:bf|bb|rm|cal)|\b(?:frac|sqrt|cdot|leq|geq|neq|infty|forall|exists|Rightarrow|Leftrightarrow)\b/;
+const SEC_NUM = /^((?:[IVXLC]+|\d+)(?:\s*\.\s*\d+)*)\s*\.?\s+(.*)$/;
+
+/** Strip the section number and any maths wreckage; returns "" if nothing is left. */
+export function cleanHeading(raw) {
+  let t = String(raw ?? "").trim();
+  t = t.replace(/\$[^$]*\$/g, " ");                       // whole formulas, if still marked
+  t = t.replace(/[*_`]{1,3}/g, "");                       // the scan bolds whole headings
+  const m = SEC_NUM.exec(t);
+  if (m) t = m[2];
+  t = t.replace(/\([^()]*\)/g, (p) => (MATH_DEBRIS.test(p) ? " " : p));
+  t = t.replace(/\s{2,}/g, " ").replace(/\s+([,;:])/g, "$1").trim();
+  t = t.replace(/\b([dlnjcstDLNJCST])['’]\s+/g, "$1'");    // "d' auto" — the scan's spacing
+  t = t.replace(/^[\s:.\-—–]+/, "").replace(/[\s:.\-—–]+$/, "");
+  // A heading that was only its own number names nothing. Say so, and let the caller
+  // fall through to the continuation chain rather than shipping "1.2" as a title.
+  if (!/[A-Za-zÀ-ÿ]{2}/.test(t)) return "";
+  return t;
+}
+
+// Long enough for a real section name, short enough to stay a title.
+const MAX_LEN = 80;
+
+function truncate(t) {
+  if (t.length <= MAX_LEN) return t;
+  const cut = t.slice(0, MAX_LEN);
+  const sp = cut.lastIndexOf(" ");
+  return `${(sp > MAX_LEN * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:]+$/, "")}…`;
+}
+
+// The book's own section numbering, as normalizeHeadings leaves it: "1.2", "III.4",
+// "7." — but not "a)" or "2°", which label sub-points inside a section.
+const NUMBERED = /^(?:[IVXLC]+|\d+)(?:\s*\.\s*\d+)*\s*\.\s+\S/;
+
+/**
+ * Headings that name a section of the book, best first.
+ *
+ * @param {{major?: string[], minor?: string[]}} arg  "## " and "### " headings of a group
+ * @returns {string[]}
+ */
+export function titleCandidates({ major = [], minor = [] }) {
+  // A "## " heading is a section the book itself numbered at the top level. Only when a
+  // group has none — normalizeHeadings only promotes multi-part numbers like "1.2", so
+  // a plain "2. Equations" stays at "### " — do the numbered sub-headings get a turn.
+  return [...major, ...minor.filter((h) => NUMBERED.test(h.trim()))];
+}
+
+/**
+ * Title one lesson from the headings of the sections packed into it.
+ *
+ * @param {{numbered?: string[], lexicon: Map<string, any>, carry?: string|null}} arg
+ *   `numbered` — headings that name a section, best first;
+ *   `lexicon`  — from buildLexicon()/pooledLexicon();
+ *   `carry`    — the previous lesson's title, for continuation pieces.
+ * @returns {string|null}
+ */
+export function lessonTitle({ numbered = [], lexicon, carry = null }) {
+  for (const h of numbered) {
+    const cleaned = cleanHeading(h);
+    if (!cleaned) continue;
+    return truncate(isShouted(cleaned) ? unshout(cleaned, lexicon) : restoreDiacritics(cleaned, lexicon));
+  }
+  // No section of its own: this is the tail of the one before it.
+  if (!carry) return null;
+  const base = carry.replace(/\s*\(suite(?:\s+\d+)?\)$/, "");
+  const m = /\(suite(?:\s+(\d+))?\)$/.exec(carry);
+  if (!m) return `${base} (suite)`;
+  return `${base} (suite ${m[1] ? Number(m[1]) + 1 : 2})`;
+}
+
+// The module usually already holds a written-up lesson on the same section — the
+// summary the curriculum team authored. Both are legitimately called "Rappels", and a
+// teacher looking at two identical rows cannot tell which is which. The book's own text
+// takes the qualifier, since that is what distinguishes it.
+const MANUAL = "manuel";
+
+function qualify(title) {
+  const m = /^(.*?)\s*\(suite(?:\s+(\d+))?\)$/.exec(title);
+  if (!m) return `${title} — ${MANUAL}`;
+  return `${m[1]} — ${MANUAL} (suite${m[2] ? ` ${m[2]}` : ""})`;
+}
+
+/**
+ * Name every lesson of a chapter, threading the "(suite)" chain and keeping every title
+ * distinct — from its siblings, and from the lessons the module already has.
+ *
+ * @param {string[][]} groups   per lesson, its section headings (best first)
+ * @param {Map<string, any>} lexicon  from buildLexicon()/pooledLexicon()
+ * @param {{taken?: string[], fallback?: string}|string} [opts]
+ *   `taken` — titles already used in this module; `fallback` — when the very first
+ *   group names nothing. A bare string is read as `fallback`.
+ * @returns {string[]}
+ */
+export function titleGroups(groups, lexicon, opts = {}) {
+  const { taken = [], fallback = "Extrait du manuel" } =
+    typeof opts === "string" ? { fallback: opts } : opts;
+  const used = new Set(taken.map((t) => String(t).trim().toLowerCase()));
+  const out = [];
+  let carry = null;
+  for (const numbered of groups) {
+    let t = lessonTitle({ numbered, lexicon, carry });
+    if (!t) t = carry ? `${carry} (suite)` : fallback;
+    if (used.has(t.toLowerCase())) t = qualify(t);
+    // Still taken (the module has a "… — manuel" of its own, or two groups opened on
+    // the same section): fall back to continuing the previous title.
+    while (used.has(t.toLowerCase())) t = lessonTitle({ numbered: [], lexicon, carry: t }) ?? `${t} (suite)`;
+    used.add(t.toLowerCase());
+    out.push(t);
+    carry = t;
+  }
+  return out;
+}

@@ -1,6 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Send, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { BookOpen, Send, Sparkles, User } from "lucide-react";
+import { tidyAnswer } from "@/lib/anatomyAnswer";
+
+// The Copilot panel, on Mwalimu's own chat pattern (the .cp-* bubbles used in a
+// lesson and in Practice): an avatar per turn, a tailed bubble, the student on
+// the right. The accent is violet rather than the app's indigo, because inside
+// the atlas everything else is warm paper and indigo would read as a foreign
+// component pasted in.
+//
+// react-markdown, not the shared <Markdown> component: that one drags in KaTeX,
+// rehype-raw and the figure renderer for a page with no formulas and no figures.
 
 const ERRORS = {
   COPILOT_DISABLED: "Votre enseignant a désactivé le Copilote pour le moment.",
@@ -11,7 +23,7 @@ const ERRORS = {
 };
 
 // Three openers that always work, so a student who doesn't yet know what to ask
-// still has a way in. They follow the selection: once a hotspot is open the
+// still has a way in. They follow the selection: once a structure is open the
 // questions are about that structure, not the whole organ.
 function suggestions(organ, hotspot) {
   if (!organ) return [];
@@ -34,7 +46,7 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
 
   // The conversation belongs to the specimen on screen. Switching organs starts
   // a fresh thread rather than dragging the old context along; switching
-  // hotspot within an organ does not, since that is still the same discussion.
+  // structure within an organ does not, since that is the same discussion.
   useEffect(() => {
     abortRef.current?.abort();
     setTurns([]);
@@ -119,12 +131,12 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
   return (
     <section className="an-copilot">
       <header className="an-cop-head">
-        <span className="an-cop-badge">
-          <Sparkles size={15} />
+        <span className="an-cop-avatar">
+          <Sparkles size={17} />
         </span>
-        <div>
-          <h3>Copilote</h3>
-          <p>{subject ? `À propos de : ${subject}` : "Sélectionnez un spécimen"}</p>
+        <div className="an-cop-id">
+          <b>Copilote</b>
+          <small>{subject ? `À propos de : ${subject}` : "Sélectionnez un spécimen"}</small>
         </div>
       </header>
 
@@ -145,11 +157,30 @@ export default function AnatomyCopilot({ organ, hotspot, isStaff }) {
             </div>
           </div>
         )}
-        {turns.map((t, i) => (
-          <div key={i} className={`an-turn an-turn-${t.role}`}>
-            {t.content || (busy && i === turns.length - 1 ? <span className="an-dots"><i /><i /><i /></span> : null)}
-          </div>
-        ))}
+
+        {turns.map((t, i) => {
+          const me = t.role === "user";
+          const thinking = !t.content && busy && i === turns.length - 1;
+          return (
+            <div key={i} className={`an-msg${me ? " me" : ""}`}>
+              <span className="an-msg-av">{me ? <User size={13} /> : <Sparkles size={13} />}</span>
+              <div className="an-bubble">
+                {thinking ? (
+                  <span className="an-dots">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                ) : me ? (
+                  t.content
+                ) : (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{tidyAnswer(t.content)}</ReactMarkdown>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
         {!!sources.length && (
           <p className="an-cop-src">
             <BookOpen size={12} /> D'après : {sources.join(" · ")}

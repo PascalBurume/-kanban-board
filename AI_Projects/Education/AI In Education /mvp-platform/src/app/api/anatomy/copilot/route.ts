@@ -69,12 +69,22 @@ function systemPrompt(organId: string, hotspotId: string, isStaff: boolean): str
     "Contexte de la maquette 3D affichée à l'écran :",
     facts,
     "",
-    "Règles :",
-    "- Réponds en français, en 4 à 8 phrases maximum.",
+    // The shape matters as much as the content. Asked only for "4 to 8
+    // sentences", the model returned one unbroken block that restated the
+    // question, padded, and buried the answer in the middle — unreadable in a
+    // 340px panel and useless to copy into a carnet. This asks for the shape a
+    // student can actually use, and the client renders the Markdown.
+    "FORME DE LA RÉPONSE — respecte-la strictement :",
+    "1. Une phrase de réponse directe, en gras (**…**). Pas d'introduction, ne répète pas la question.",
+    "2. Deux à quatre puces commençant par « - », une idée par puce, une phrase courte chacune.",
+    "3. Si c'est utile, une dernière ligne « *Sur le modèle :* … » qui dit où regarder sur la maquette 3D.",
+    "Rien d'autre : pas de titre, pas de conclusion, pas de formule de politesse.",
+    "",
+    "Règles de fond :",
+    "- Écris en français, dans une langue simple. Maximum 90 mots au total.",
     "- Appuie-toi d'abord sur les faits ci-dessus ; ils font autorité pour cette maquette.",
     "- Si la question sort de l'anatomie et de la physiologie, ramène poliment vers le sujet.",
     "- N'invente jamais un chiffre ni un nom latin dont tu n'es pas sûr : dis plutôt que tu ne le sais pas.",
-    "- Tu peux renvoyer à ce qui est visible sur le modèle 3D (les structures repérées listées ci-dessus).",
     "- Ne donne aucun conseil médical ni diagnostic. Pour une question de santé personnelle, renvoie vers un professionnel de santé.",
   ].join("\n");
 }

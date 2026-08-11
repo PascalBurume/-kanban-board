@@ -50,6 +50,18 @@ describe("quiz corrections — the file's own discipline", () => {
     expect(applyQuizCorrections(lesson, fix.book)).toEqual([]);
   });
 
+  // A few entries rewrite the prompt, which is the field `match` searches. Without a
+  // second way in they would apply once and then report themselves stale for ever.
+  it("still finds a question whose prompt it rewrote", () => {
+    const fix = (QUIZ_CORRECTIONS as Fix[]).find((f) => f.set.promptMd);
+    expect(fix, "no correction rewrites a prompt — drop this test if that is intended").toBeTruthy();
+    const lesson = lessonFor(fix!, { optionsJson: "[]", answerJson: "0" });
+    expect(applyQuizCorrections(lesson, fix!.book)).toHaveLength(1);
+    // The old wording is gone; the entry must still recognise its own handiwork.
+    expect(lesson.quiz.questions[0].promptMd).toBe(fix!.set.promptMd);
+    expect(applyQuizCorrections(lesson, fix!.book)).toEqual([]);
+  });
+
   it("produces questions that the answerability checker accepts", () => {
     for (const fix of QUIZ_CORRECTIONS as Fix[]) {
       const lesson = lessonFor(fix, { optionsJson: "[]", answerJson: "0" });

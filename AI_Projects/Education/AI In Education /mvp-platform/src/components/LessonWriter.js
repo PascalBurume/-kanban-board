@@ -347,7 +347,7 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
     // `ribbonHidden` is the caller's choice, `latexFull` the editor's own. On a
     // laptop this ribbon wraps to four rows and eats most of the page the student
     // is trying to read back, so the carnet lets them fold it away.
-    <div className="lw-ribbon" onMouseDown={keepSelection} hidden={latexFull || ribbonHidden}>
+    <div id="cn-ribbon" className="lw-ribbon" onMouseDown={keepSelection} hidden={latexFull || ribbonHidden}>
         <div className="lw-group">
           <select
             className="lw-style"

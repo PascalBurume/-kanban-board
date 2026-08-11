@@ -8,6 +8,18 @@
 .cn-back:hover { background: var(--surface-2); color: var(--text); }
 .cn-back svg { width: 17px; height: 17px; }
 .cn-sidetoggle { display: none; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-sm); padding: 5px 10px; font: 500 12.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+
+/* Deliberately NOT .cn-sidetoggle, which is display:none until 1024px because the
+   carnets rail is always open on a desktop. The ribbon is auto-hidden at every
+   width, so the only way back to it has to be visible at every width. */
+.cn-tooltoggle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-sm); padding: 5px 10px; font: 500 12.5px var(--font-ui); color: var(--text-soft); cursor: pointer; white-space: nowrap; }
+.cn-tooltoggle:hover { border-color: var(--indigo-300); color: var(--primary); }
+.cn-tooltoggle.on { background: var(--indigo-50); border-color: var(--indigo-200); color: var(--indigo-700); }
+.cn-tooltoggle .icon > svg { width: 14px; height: 14px; }
+@media (max-width: 700px) {
+  /* Icon only — the header has the title and the subject picker to fit as well. */
+  .cn-tooltoggle span:not(.icon) { display: none; }
+}
 .cn-title { flex: 0 1 420px; min-width: 140px; border: 1px solid transparent; border-radius: var(--r-sm); padding: 5px 8px; font: 600 17px var(--font-ui); color: var(--text); background: transparent; }
 .cn-title:hover { border-color: var(--border); }
 .cn-title:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); background: var(--surface); }

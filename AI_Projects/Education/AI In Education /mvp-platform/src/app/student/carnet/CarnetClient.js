@@ -63,7 +63,12 @@ export default function CarnetClient() {
   const [md, setMd] = useState("");
   const [tab, setTab] = useState("contenu");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [ribbonOpen, setRibbonOpen] = useState(true);
+  // Auto-hidden: the carnet opens as a page to write and read on, not as a word
+  // processor. The ribbon wraps to four rows on a laptop and took more height
+  // than the text under it, so it is summoned from the header when wanted rather
+  // than sitting there by default. The choice is remembered, so a student who
+  // does want it open keeps it open.
+  const [ribbonOpen, setRibbonOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
   // Panel width. 320px is fine for a chip and one sentence, and cramped for a
   // worked answer with a formula in it — which is most of what this panel
@@ -80,6 +85,9 @@ export default function CarnetClient() {
   useEffect(() => {
     const saved = Number(window.localStorage.getItem("mwalimu.carnet.copilotW"));
     if (Number.isFinite(saved) && saved >= 280 && saved <= 620) setCopilotW(saved);
+    // Only an explicit "1" reopens it — an absent key means a first visit, which
+    // should get the hidden default.
+    if (window.localStorage.getItem("mwalimu.carnet.ribbon") === "1") setRibbonOpen(true);
   }, []);
 
   // ---- routing: ?id= selects the notebook, list view otherwise ----
@@ -349,16 +357,22 @@ export default function CarnetClient() {
         <button className="cn-sidetoggle" onClick={() => setSidebarOpen((o) => !o)} aria-expanded={sidebarOpen}>
           <Icon name="layers" /> {sidebarOpen ? "Masquer" : "Carnets"}
         </button>
-        {/* The second thing worth folding away. The ribbon wraps to four rows on a
-            laptop and takes more height than the text under it — which is the wrong
-            trade when the student is re-reading rather than writing. */}
+        {/* Summons the auto-hidden ribbon. It has to look like an available tool
+            rather than a state readout, or a student who has never seen the
+            toolbar has no reason to guess there is one. */}
         <button
-          className="cn-sidetoggle"
-          onClick={() => setRibbonOpen((o) => !o)}
+          className={`cn-tooltoggle${ribbonOpen ? " on" : ""}`}
+          onClick={() =>
+            setRibbonOpen((o) => {
+              window.localStorage.setItem("mwalimu.carnet.ribbon", o ? "0" : "1");
+              return !o;
+            })
+          }
           aria-expanded={ribbonOpen}
-          title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils"}
+          aria-controls="cn-ribbon"
+          title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils (mise en forme, formules, symboles)"}
         >
-          <Icon name="edit" /> {ribbonOpen ? "Barre d'outils" : "Outils"}
+          <Icon name="edit" /> <span>{ribbonOpen ? "Masquer les outils" : "Outils d'écriture"}</span>
         </button>
         <input
           className="cn-title"

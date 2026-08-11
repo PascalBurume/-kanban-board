@@ -1,0 +1,117 @@
+/* /profile is shared by students, teachers and admins. The literal #fff / #e2e8f0
+   fallbacks that used to be here defeated the token layer, so adding `teacher-page` did
+   nothing and staff landed on a cool slate page one click out of the warm teacher shell.
+   Tokens only from here on — the palette then follows whoever is signed in. */
+.profile-page { min-height: 100vh; background: var(--bg); }
+
+.profile-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.profile-top .mini-brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.profile-top .back-link {
+  display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted);
+  font-size: 13.5px; font-weight: 600; text-decoration: none; background: none; border: 0; cursor: pointer;
+}
+.profile-top .back-link:hover { color: var(--primary); }
+.profile-top .logout-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  color: var(--text-muted); padding: 8px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--surface);
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+.profile-top .logout-link:hover {
+  color: var(--danger); border-color: var(--danger); background: var(--danger-bg);
+}
+.profile-top .logout-link .icon svg { width: 16px; height: 16px; }
+
+/* ---- Identity band, then the settings desk. Same two-zone shape as « Rédiger une
+   leçon » — full-bleed host, measured column inside — so the app's two standalone
+   full-page surfaces are built the same way. ---- */
+.profile-in { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+.profile-band { background: linear-gradient(180deg, var(--indigo-50), var(--bg)); border-bottom: 1px solid var(--border); }
+.profile-band .profile-in { padding-top: 30px; padding-bottom: 26px; }
+.profile-body { padding-top: 26px; padding-bottom: 64px; }
+.pf-loading { font-size: 14px; color: var(--text-muted); }
+
+.profile-hero { display: flex; align-items: center; gap: 18px; }
+.profile-hero .avatar-xl {
+  width: 72px; height: 72px; flex: none; font-size: 26px; font-weight: 700; color: #fff;
+  display: grid; place-items: center; border-radius: 50%; text-transform: uppercase;
+  /* A white ring lifts the avatar off the wash and makes the live colour preview read
+     as a swatch rather than a stain. */
+  box-shadow: 0 0 0 4px var(--surface), 0 4px 14px rgba(20, 20, 40, .10);
+  transition: background .15s ease;
+}
+.profile-hero .ph-id { min-width: 0; }
+.profile-hero h1 { font-size: 24px; margin: 0; overflow-wrap: anywhere; }
+.ph-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 7px; }
+.ph-role { font: 700 10.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--indigo-700); background: var(--surface); border: 1px solid var(--indigo-200); border-radius: 999px; padding: 4px 10px; }
+.ph-mail { font-size: 13px; color: var(--text-muted); overflow-wrap: anywhere; }
+
+.profile-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 22px 24px; margin-bottom: 18px; box-shadow: var(--sh-xs);
+}
+/* One header shape for every card: title left, the section's own summary right. */
+.pf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.pf-head h2 { font-size: 16px; margin: 0; }
+.profile-card .field { margin-bottom: 18px; }
+.profile-card .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+
+.pf-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-actions .btn:disabled { opacity: .5; cursor: not-allowed; }
+.pf-unsaved { font-size: 12.5px; font-weight: 600; color: var(--warning-fg, #b45309); }
+.pf-note { display: flex; align-items: flex-start; gap: 9px; margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--text-soft); }
+.pf-note .icon svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--text-muted); }
+.pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pf-grid .field { margin-bottom: 16px; }
+
+/* ---- Enseignement — a teacher's assignments, which lived only as a joined string in
+   the sidebar footer until they grew to five books and pushed the navigation off screen.
+   One row per class, because the class is the unit a teacher thinks in. ---- */
+.pf-teach-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.pf-teach-hd h2 { margin: 0; }
+.pf-teach-sum { font-size: 12.5px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.pf-teach { list-style: none; margin: 0; padding: 0; }
+.pf-teach li { display: grid; grid-template-columns: minmax(110px, 215px) 1fr; align-items: baseline; gap: 8px 16px; padding: 11px 0; border-top: 1px solid var(--border); }
+.pf-teach li:first-child { border-top: 0; padding-top: 0; }
+.pf-teach-c { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--text); }
+/* nowrap on the name alone: wrapped, it dragged the badge to a second line and left it
+   floating against the middle of the row. */
+.pf-teach-n { white-space: nowrap; }
+/* The titulaire owns the class as a whole, not only their own subject in it. */
+.pf-lead { font: 700 9.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--indigo-700); background: var(--indigo-50); border-radius: 999px; padding: 3px 7px; }
+.pf-teach-s { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-chip { font-size: 12px; color: var(--text-soft); background: var(--slate-100); border-radius: var(--r-sm, 8px); padding: 4px 9px; }
+.pf-hint { font-size: 12.5px; color: var(--text-muted); margin: 16px 0 0; }
+
+@media (max-width: 560px) {
+  /* Retour / marque / Se déconnecter fits 375px only just — buy it some room. */
+  .profile-top { padding: 12px 14px; gap: 10px; }
+  .profile-top .logout-link { padding: 7px 11px; }
+  .pf-teach li { grid-template-columns: 1fr; }
+  .pf-grid { grid-template-columns: 1fr; }
+  .profile-hero { gap: 14px; }
+  .profile-hero .avatar-xl { width: 58px; height: 58px; font-size: 21px; }
+  .profile-hero h1 { font-size: 20px; }
+  .profile-card { padding: 18px 16px; }
+}
+
+/* align-self, not inline-flex: `.field` is a global flex COLUMN, so an inline-flex child
+   is blockified into a flex item and stretched to the card's full width — which is why a
+   two-option choice read as a split button bar spanning 630px. */
+.profile-card .seg { display: inline-flex; align-self: flex-start; background: var(--slate-100); border-radius: var(--r-md); padding: 3px; gap: 2px; }
+.profile-card .seg button { font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 7px 16px; border: 0; background: none; border-radius: var(--r-sm); cursor: pointer; }
+.profile-card .seg button.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-xs); }
+.profile-card .seg button.soon { opacity: .45; cursor: not-allowed; }
+
+.swatches { display: flex; gap: 9px; flex-wrap: wrap; }
+/* The tick beats a ring: on ten saturated circles a border reads as an eleventh colour,
+   and the picked one has to be unmistakable at a glance. */
+.swatch { width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; outline: none; display: grid; place-items: center; color: #fff; transition: transform .12s ease, box-shadow .12s ease; }
+.swatch:hover { transform: scale(1.08); }
+.swatch svg { width: 15px; height: 15px; stroke-width: 3.2; }
+.swatch.on { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text); transform: scale(1.06); }
+.swatch:focus-visible { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--indigo-500); }

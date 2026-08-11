@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 380" role="img" aria-label="Symétrie orthogonale d'axe Ox : le point A d'affixe z et son image A prime d'affixe z barre">
+  <rect width="470" height="380" fill="white"/>
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="30" y1="195" x2="440" y2="195"/>
+    <path d="M440 195l-12-6M440 195l-12 6"/>
+    <line x1="150" y1="365" x2="150" y2="25"/>
+    <path d="M150 25l-6 12M150 25l6 12"/>
+  </g>
+  <!-- Conjugation: same abscissa, opposite ordinate. -->
+  <g fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4">
+    <path d="M150 105H290"/>
+    <path d="M290 105V285"/>
+    <path d="M150 285H290"/>
+  </g>
+  <g fill="#111"><circle cx="290" cy="105" r="3.4"/><circle cx="290" cy="285" r="3.4"/></g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="450" y="201">x</text>
+    <text x="136" y="20">y</text>
+    <text x="127" y="216">O</text>
+    <text x="255" y="80">A(x , y)</text>
+    <text x="299" y="128" font-style="italic">z</text>
+    <text x="125" y="111" font-style="italic">y</text>
+    <text x="112" y="291" font-style="italic">−y</text>
+    <text x="297" y="188" font-style="italic">x</text>
+    <text x="268" y="305">A′</text>
+    <text x="299" y="305" font-size="17">z′ = z̄</text>
+  </g>
+</svg>

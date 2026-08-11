@@ -1,0 +1,669 @@
+/* Word-processor chrome for lesson content: ribbon, page on a desk, status bar.
+   The page is a fixed measure (a real document width) centred on a grey canvas —
+   long lines are hard to proofread, and teachers recognise the shape immediately. */
+
+.lw { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
+/* ---- ribbon ---- */
+.lw-ribbon { flex: none; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.lw-group { display: flex; align-items: center; gap: 2px; padding: 0 6px; border-right: 1px solid var(--border); }
+.lw-group:last-child { border-right: 0; }
+.lw-right { margin-left: auto; border-right: 0; }
+
+.lw-btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; min-width: 30px; justify-content: center; padding: 0 7px; border: 1px solid transparent; border-radius: var(--r-sm); background: transparent; color: var(--text-soft); font: 500 12.5px var(--font-ui); cursor: pointer; }
+.lw-btn:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.lw-btn.on { background: var(--indigo-50); border-color: var(--indigo-200, var(--border)); color: var(--indigo-700); }
+.lw-btn:disabled { opacity: .4; cursor: default; }
+.lw-btn svg { width: 16px; height: 16px; }
+.lw-btn.wide { padding: 0 10px; }
+
+.lw-style { height: 30px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text); }
+
+.lw-seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.lw-seg button { border: 0; background: var(--surface); padding: 6px 12px; font: 500 12.5px var(--font-ui); color: var(--text-muted); cursor: pointer; }
+.lw-seg button.on { background: var(--indigo-600, var(--indigo-700)); color: #fff; }
+.lw-seg.sm button { padding: 5px 10px; font-size: 12px; }
+
+/* ---- symbol palette ----
+   Only the popover SHELL lives here; the palette's own styles moved to
+   components/editor/SymbolPalette.css when the LaTeX editor and the LaTeX workspace
+   started showing the same component. */
+/* ONE window, whatever tab is showing.
+ *
+ * It is a centred dialog rather than a popover anchored in the document column,
+ * because the column is only ~460px wide once the outline and the Copilot rail have
+ * taken their share — narrower than the five tabs plus the search field, which is why
+ * the header used to clip, and narrower than the 360px figure drawing.
+ *
+ * The size no longer depends on the tab. It did, and switching from Symboles to Figures
+ * resized and re-positioned the window under the teacher's cursor mid-click. A dialog
+ * that moves when you change tab inside it is a dialog you stop trusting.
+ *
+ * position:fixed is safe here: nothing above it transforms or filters. */
+.lw-palette {
+  position: fixed; z-index: 60; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  /* A fixed height, not a max-height. With max-height the dialog shrank to fit a short
+     tab (Chimie has far fewer symbols than Mathématiques), and because it is centred,
+     shrinking moved its top edge — so the tab strip slid up under the cursor that had
+     just clicked it. Empty space below a short tab is the cheaper cost. */
+  width: min(920px, calc(100vw - 48px)); height: min(820px, calc(100vh - 64px));
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  box-shadow: 0 18px 60px rgba(0,0,0,.24); overflow: hidden;
+}
+/* At that width an open figure reads side by side: the drawing on the left, and the
+   relation, its LaTeX and the insert buttons on the right. Stacked, the entry ran ~580px
+   and the buttons fell below the fold on a 800px-tall laptop — the teacher saw the
+   figure but not the control that inserts it.
+   Scoped to this shell: the LaTeX editor's palette is ~460px and stays single-column. */
+.lw-palette .fc-detail { display: flex; align-items: flex-start; gap: 18px; }
+.lw-palette .fc-detail > .fc-fig { flex: 0 0 380px; }
+.lw-palette .fc-detail > .fc-side { flex: 1; min-width: 0; }
+/* TexPreview's default class, still used by surfaces that do not pass their own. */
+.lw-tex { font-size: 15px; color: var(--text); min-height: 20px; display: flex; align-items: center; }
+
+/* ---- the page ---- */
+.lw-canvas { position: relative; flex: 1; min-height: 0; overflow-y: auto; background: var(--surface-2); padding: 22px 0 40px; }
+/* A panel that takes over the pane manages its own scrolling and wants every pixel —
+   the desk margin around the page is exactly what it does not need. */
+.lw-canvas.full { padding: 0; overflow: hidden; }
+.lw-page { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 6px 18px rgba(0,0,0,.05); padding: 56px 68px 72px; min-height: 640px; }
+
+.lw-input { display: block; width: 100%; border: 0; resize: none; overflow: hidden; background: transparent; color: var(--text); font: 400 15px/1.75 var(--font-ui); }
+.lw-input:focus { outline: none; }
+.lw-input::placeholder { color: var(--text-muted); }
+
+.lw-read { font-size: 15.5px; line-height: 1.75; color: var(--text); }
+.lw-read h1 { font-size: 24px; margin: 0 0 14px; }
+.lw-read h2 { font-size: 19px; margin: 22px 0 8px; }
+.lw-read h3 { font-size: 16px; margin: 18px 0 6px; }
+.lw-read p { margin: 0 0 12px; }
+.lw-read ul, .lw-read ol { margin: 0 0 12px; padding-left: 22px; }
+
+/* ---- status bar ---- */
+.lw-status { flex: none; display: flex; align-items: center; gap: 16px; padding: 7px 14px; border-top: 1px solid var(--border); background: var(--surface); font-size: 11.5px; color: var(--text-muted); }
+.lw-status .warn { display: inline-flex; align-items: center; gap: 5px; color: var(--warning-fg); }
+.lw-status .warn svg { width: 13px; height: 13px; }
+.lw-save { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .lw-page { padding: 28px 22px 40px; border-radius: 0; }
+  .lw-canvas { padding: 12px 0 24px; }
+  .lw-group { padding: 0 3px; }
+}
+
+/* ---- WYSIWYG document ---- */
+.lw-prose { outline: none; font: 400 15.5px/1.75 var(--font-ui); color: var(--text); min-height: 560px; }
+.lw-prose > * + * { margin-top: 12px; }
+.lw-prose h1 { font-size: 24px; font-weight: 600; margin-top: 20px; }
+.lw-prose h2 { font-size: 19px; font-weight: 600; margin-top: 24px; }
+.lw-prose h3 { font-size: 16px; font-weight: 600; margin-top: 20px; }
+.lw-prose p { margin: 0; }
+.lw-prose ul, .lw-prose ol { padding-left: 24px; }
+.lw-prose li > p { margin: 0; }
+.lw-prose blockquote { border-left: 3px solid var(--border-strong); padding-left: 14px; color: var(--text-soft); }
+.lw-prose code { font: 400 13.5px var(--font-mono, ui-monospace, monospace); background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+.lw-prose pre { background: var(--surface-2); padding: 12px 14px; border-radius: var(--r-sm); overflow-x: auto; }
+.lw-prose hr { border: 0; border-top: 1px solid var(--border); }
+.lw-prose a { color: var(--indigo-700); text-decoration: underline; }
+.lw-prose p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--text-muted); float: left; height: 0; pointer-events: none; }
+
+/* formulas are objects in the text, not editable characters */
+.lw-math { display: inline-block; padding: 0 2px; border-radius: 3px; cursor: pointer; }
+.lw-math-block { display: block; text-align: center; margin: 14px 0; padding: 6px 0; border-radius: var(--r-sm); cursor: pointer; }
+.lw-math:hover, .lw-math-block:hover { background: var(--indigo-50); }
+.lw-math.ProseMirror-selectednode, .lw-math-block.ProseMirror-selectednode { background: var(--indigo-50); outline: 2px solid var(--indigo-400); }
+.lw-math.bad, .lw-math-block.bad { color: var(--danger-fg); font: 400 13px var(--font-mono, ui-monospace, monospace); background: var(--danger-bg); }
+.lw-math.empty, .lw-math-block.empty { color: var(--text-muted); font-size: 12.5px; font-style: italic; }
+
+
+.lw-note { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--warning-bg); color: var(--warning-fg); font-size: 12.5px; border-bottom: 1px solid var(--warning-fg); }
+.lw-note svg { width: 15px; height: 15px; flex: none; }
+
+/* ---- formula editor, anchored under the formula it edits ---- */
+.fe { position: absolute; z-index: 30; width: min(420px, calc(100% - 24px)); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 8px 10px 10px; }
+.fe-row { display: flex; align-items: center; gap: 8px; }
+.fe-l { font: 600 10.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.fe-row input { flex: 1; min-width: 0; height: 30px; padding: 0 9px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 13px var(--font-mono, ui-monospace, monospace); background: var(--surface); color: var(--text); }
+.fe-row input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.fe-done { border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--r-sm); height: 30px; padding: 0 11px; font: 600 12px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.fe-done:hover { color: var(--text); border-color: var(--border-strong); }
+.fe-tools { margin-top: 6px; gap: 6px; }
+.fe-font { flex: 1; min-width: 0; height: 26px; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 500 12px var(--font-ui); background: var(--surface-2); color: var(--text-soft); cursor: pointer; }
+.fe-font:hover { color: var(--text); border-color: var(--border-strong); }
+.fe-copy { border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--r-sm); height: 26px; padding: 0 9px; font: 500 12px var(--font-ui); color: var(--text-soft); cursor: pointer; white-space: nowrap; }
+.fe-copy:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+.fe-copy:disabled { opacity: .45; cursor: default; }
+
+.fe-preview { margin-top: 8px; padding: 8px 4px; text-align: center; font-size: 16px; min-height: 34px; border-top: 1px solid var(--surface-2); }
+.fe-hint { font: 400 12px var(--font-ui); color: var(--text-muted); font-style: italic; }
+.fe-err { font: 400 12px var(--font-mono, ui-monospace, monospace); color: var(--danger-fg); }
+
+.fe-menu { list-style: none; margin: 6px 0 0; padding: 4px 0 0; border-top: 1px solid var(--surface-2); max-height: 190px; overflow-y: auto; }
+.fe-menu li { display: flex; align-items: center; gap: 9px; padding: 5px 7px; border-radius: var(--r-sm); cursor: pointer; }
+.fe-menu li.on { background: var(--indigo-50); }
+.fe-menu-tex { min-width: 30px; font-size: 14px; color: var(--text); }
+.fe-menu-l { flex: 1; font-size: 12.5px; color: var(--text); }
+.fe-menu code { font-size: 11px; color: var(--text-muted); }
+
+/* Ribbon scrolls sideways on small screens instead of wrapping to a second row —
+   a wrapped ribbon steals a whole line of the document on every narrow laptop. */
+@media (max-width: 900px) {
+  .lw-ribbon { flex-wrap: nowrap; overflow-x: auto; }
+  /* No .lw-palette override here any more: it is centred with a transform, and setting
+     left/right on top of that pushes it off its own centre. Its width already tracks
+     the viewport (100vw - 48px). */
+  .fe { width: calc(100% - 16px); left: 8px !important; }
+}
+
+.lw-note span { flex: 1; }
+.lw-note-a { flex: none; font-weight: 600; color: inherit; text-decoration: underline; }
+.lw-input[readonly] { color: var(--text-soft); cursor: default; }
+
+/* ---- figure insert menu ---- */
+.lw-figwrap { position: relative; display: inline-flex; }
+/* A little wider than before: an icon column plus a two-line label needs the room, and
+   the list is scrollable because 20 entries do not fit above the fold. */
+.lw-figmenu { position: absolute; z-index: 25; top: 34px; left: 0; width: 276px; max-height: min(560px, calc(100vh - 180px)); overflow-y: auto; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 24px rgba(0,0,0,.14); padding: 5px; }
+/* Grid, so the icon sits in its own column and BOTH text lines align to it — with the
+   icon inline the hint would wrap back under the picture. */
+.lw-figmenu button { display: grid; grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 9px; width: 100%; text-align: left; border: 0; background: transparent; border-radius: var(--r-sm); padding: 7px 9px; cursor: pointer; }
+.lw-figmenu button:hover { background: var(--indigo-50); }
+/* Spans both rows and sits on the first line of the label, not floating between them. */
+.lw-figmenu-i { grid-column: 1; grid-row: 1 / span 2; display: flex; align-items: flex-start; justify-content: center; padding-top: 1px; color: var(--text-muted); }
+.lw-figmenu button:hover .lw-figmenu-i { color: var(--indigo-700); }
+.lw-figmenu-i svg { width: 18px; height: 18px; }
+.lw-figmenu-t { grid-column: 2; font: 600 12.5px var(--font-ui); color: var(--text); }
+.lw-figmenu-h { grid-column: 2; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* ---- figure editing panel ---- */
+.fp { position: absolute; z-index: 30; width: min(440px, calc(100% - 28px)); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 10px; }
+.fp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.fp-l { display: inline-flex; align-items: center; gap: 6px; font: 600 11.5px var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--indigo-700); white-space: nowrap; }
+.fp-l svg { width: 14px; height: 14px; }
+.fp-title { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 500 12.5px var(--font-ui); background: var(--surface); color: var(--text); }
+.fp-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.fp-row label { font: 600 11.5px var(--font-ui); color: var(--text-muted); white-space: nowrap; }
+.fp-row input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 12.5px var(--font-mono, ui-monospace, monospace); background: var(--surface); color: var(--text); }
+.fp-row input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.fp-row input.bad { border-color: var(--danger-fg); }
+.fp-num { flex: 0 0 66px !important; }
+.fp-err { display: flex; align-items: center; gap: 6px; margin: 2px 0 6px; font-size: 11.5px; line-height: 1.4; color: var(--danger-fg); }
+.fp-err svg { width: 14px; height: 14px; flex: none; }
+.fp-preview { border-top: 1px solid var(--surface-2); padding-top: 8px; color: var(--text); }
+.fp-preview svg { width: 100%; height: auto; }
+
+/* ---- figure data table: raw cells, so a bad value is visible, never dropped ---- */
+.fp-table { margin-bottom: 8px; }
+.fp-th, .fp-tr { display: grid; grid-template-columns: 1fr 1fr 26px; gap: 6px; align-items: center; }
+.fp-th { font: 600 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); padding: 0 2px 4px; }
+.fp-tr { margin-bottom: 4px; }
+.fp-tr input { width: 100%; min-width: 0; height: 26px; padding: 0 7px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 400 12.5px var(--font-ui); background: var(--surface); color: var(--text); }
+.fp-tr input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.fp-tr input.bad { border-color: var(--danger-fg); background: var(--danger-bg); }
+.fp-tr button { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; padding: 2px; border-radius: var(--r-sm); }
+.fp-tr button:hover { color: var(--danger-fg); }
+.fp-tr button svg { width: 14px; height: 14px; }
+.fp-add { display: inline-flex; align-items: center; gap: 5px; margin-top: 2px; border: 0; background: transparent; color: var(--indigo-700); font: 600 12px var(--font-ui); cursor: pointer; padding: 3px 2px; }
+.fp-add svg { width: 13px; height: 13px; }
+
+/* ---- axes + appearance group ---- */
+.fp-toggle { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 2px; border: 0; background: transparent; color: var(--text-soft); font: 600 12px var(--font-ui); cursor: pointer; padding: 3px 2px; }
+.fp-toggle:hover { color: var(--text); }
+.fp-toggle svg { width: 14px; height: 14px; }
+.fp-adv { border-top: 1px solid var(--surface-2); padding-top: 8px; margin-bottom: 4px; }
+.fp-swatches { display: inline-flex; gap: 5px; flex: 1; }
+.fp-sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.fp-sw.on { border-color: var(--text); }
+.fp-check { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-weight: 600; }
+.fp-check input { width: auto !important; flex: none !important; height: auto !important; }
+.fp-range { flex: 1; min-width: 54px; padding: 0 !important; border: 0 !important; background: transparent !important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Document settings — the typographic preferences flow into the page as CSS
+   custom properties, so a teacher's choice is one variable, not a prop threaded
+   through the editor. Defaults keep the previous look when nothing is stored.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.lw-page { max-width: var(--doc-w, 760px); }
+.lw-prose, .lw-input { font-family: var(--doc-font, var(--font-ui)); font-size: var(--doc-size, 15.5px); line-height: var(--doc-lh, 1.75); }
+.lw-prose > * + * { margin-top: var(--doc-para, 12px); }
+.lw-prose code, .lw-prose pre { font-size: var(--doc-code-size, 13.5px); }
+.lw-math .katex, .lw-math-block .katex { font-size: var(--doc-math-size, 1em); line-height: var(--doc-math-lh, 1.4); }
+.lw-math-block { font-family: var(--doc-math-font, inherit); }
+
+/* Dark mode is the DOCUMENT's, not the app's — a teacher composing at night wants
+   the page dark, while the surrounding studio chrome stays as it is. */
+.lw-dark .lw-page { background: #16181d; border-color: #2a2e37; }
+.lw-dark .lw-prose, .lw-dark .lw-input { color: #e6e8ec; }
+.lw-dark .lw-input { background: transparent; }
+.lw-dark .lw-prose code, .lw-dark .lw-prose pre { background: #21242c; color: #e6e8ec; }
+
+/* ---- breadcrumb (1a callout 3): only at depth ≥ 1, carries the Esc affordance ---- */
+.lw-crumb { flex: none; display: flex; align-items: center; gap: 7px; padding: 5px 14px; border-bottom: 1px dashed var(--border); background: var(--indigo-50); font-size: 12px; color: var(--text-soft); }
+.lw-crumb b { color: var(--indigo-700); font-weight: 600; }
+.lw-crumb-gap { flex: 1; }
+.lw-crumb button { border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-sm); padding: 3px 9px; font: 500 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.lw-crumb button:hover { color: var(--text); border-color: var(--border-strong); }
+
+/* ---- LaTeX preview strip (1a callout 8) ---- */
+.lw-latex { flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 14px; border-top: 1px dashed var(--border); background: var(--surface-2); }
+.lw-latex-l { flex: none; font: 600 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.lw-latex code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font: 400 12px var(--font-mono, ui-monospace, monospace); color: var(--text); }
+
+.lw-figure { display: block; margin: 16px 0; border-radius: var(--r-sm); cursor: pointer; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Wireframe 1f — tablet chrome. Rails become a bottom dock, keys are ≥ 44px,
+   and every surface is sized for a finger rather than a cursor.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.tc { display: flex; flex-direction: column; flex: 1; min-height: 0; position: relative; }
+
+.tc-bar { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--border-strong); background: var(--surface); }
+.tc-b { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--text-soft); font: 500 16px var(--font-ui); cursor: pointer; }
+.tc-b:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.tc-b:disabled { opacity: .35; cursor: default; }
+.tc-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1px solid var(--indigo-400); border-radius: 999px; background: var(--indigo-50); font: 600 12.5px var(--font-ui); color: var(--indigo-700); white-space: nowrap; }
+.tc-crumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; }
+.tc-crumb b { color: var(--indigo-700); }
+.tc-gap { flex: 1; }
+.tc-save { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; }
+.tc-done { min-width: 76px; height: 40px; padding: 0 14px; border: 1px solid var(--indigo-400); border-radius: var(--r-sm); background: var(--indigo-600, var(--indigo-700)); color: #fff; font: 600 13px var(--font-ui); cursor: pointer; }
+.tc-done:disabled { opacity: .3; cursor: default; }
+
+.tc-scrim { position: fixed; inset: 0; z-index: 39; }
+.tc-menu { position: absolute; z-index: 40; top: 52px; left: 8px; width: 288px; padding: 6px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 10px 32px rgba(0,0,0,.18); }
+.tc-menu button { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 42px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: transparent; font: 500 13.5px var(--font-ui); color: var(--text); text-align: left; cursor: pointer; }
+.tc-menu button:hover:not(:disabled) { background: var(--indigo-50); }
+.tc-menu button:disabled { opacity: .4; cursor: default; }
+.tc-menu button svg { width: 16px; height: 16px; flex: none; color: var(--text-muted); }
+.tc-menu hr { border: 0; border-top: 1px solid var(--border); margin: 5px 6px; }
+.tc-menu-seg { display: flex; gap: 4px; padding: 2px 6px 4px; }
+.tc-menu-seg button { justify-content: center; border: 1px solid var(--border); }
+.tc-menu-seg button.on { background: var(--indigo-600, var(--indigo-700)); border-color: transparent; color: #fff; }
+
+.tc-stage { flex: 1; min-height: 0; overflow-y: auto; background: var(--surface-2); padding: 14px 0 20px; position: relative; }
+.tc .lw-page { padding: 30px 26px 40px; min-height: 380px; }
+
+.tc-latex { flex: none; display: flex; align-items: center; gap: 9px; padding: 6px 10px; border-top: 1px dashed var(--border); background: var(--surface-2); }
+.tc-latex-l { flex: none; font: 600 10px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.tc-latex code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font: 400 12px var(--font-mono, ui-monospace, monospace); color: var(--text); }
+.tc-latex button { flex: none; min-height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 600 12px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.tc-latex button:disabled { opacity: .4; cursor: default; }
+
+/* ---- the dock ---- */
+.tc-dock { flex: none; border-top: 1.5px solid var(--border-strong); background: var(--surface); }
+.tc-docdock { display: flex; align-items: center; gap: 5px; padding: 8px 10px; overflow-x: auto; }
+.tc-k { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; height: 44px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--text-soft); font: 500 13px var(--font-ui); cursor: pointer; flex: none; }
+.tc-k:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.tc-k.on { background: var(--indigo-50); border-color: var(--indigo-400); color: var(--indigo-700); }
+.tc-k:disabled { opacity: .35; cursor: default; }
+.tc-k svg { width: 18px; height: 18px; }
+.tc-k.wide { padding: 0 13px; }
+.tc-style { flex: none; height: 44px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 13px var(--font-ui); color: var(--text); }
+.tc-sep { flex: none; width: 1px; height: 28px; background: var(--border); margin: 0 3px; }
+.tc-figwrap { position: relative; display: inline-flex; flex: none; }
+.tc-figmenu { position: absolute; z-index: 30; bottom: 50px; left: 0; width: 262px; padding: 5px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 -8px 26px rgba(0,0,0,.16); }
+.tc-figmenu button { display: block; width: 100%; text-align: left; border: 0; background: transparent; border-radius: var(--r-sm); padding: 9px 10px; cursor: pointer; }
+.tc-figmenu button:hover { background: var(--indigo-50); }
+.tc-figmenu .t { display: block; font: 600 13px var(--font-ui); color: var(--text); }
+.tc-figmenu .h { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+
+/* ---- hint bar (1a callout 10) ---- */
+.tc-hints { flex: none; display: flex; align-items: center; gap: 14px; padding: 5px 12px; border-top: 1px solid var(--border); background: var(--indigo-50); font-size: 11px; color: var(--text-soft); overflow-x: auto; white-space: nowrap; }
+.tc-hints b { font-weight: 700; color: var(--indigo-700); }
+.tc-hints .warn { display: inline-flex; align-items: center; gap: 4px; color: var(--warning-fg); }
+.tc-hints .warn svg { width: 12px; height: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Symbol keyboard (1f callout 1)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.sk { display: flex; flex-direction: column; }
+.sk-zone { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--indigo-50); }
+.sk-zone-l { flex: none; font: 600 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--indigo-700); }
+.sk-zone-p { flex: 1; min-width: 0; overflow-x: auto; font-size: 20px; color: var(--text); }
+.sk-zone-h { flex: 1; font-size: 12.5px; font-style: italic; color: var(--text-muted); }
+.sk-err { font: 400 12px var(--font-mono, ui-monospace, monospace); color: var(--danger-fg); }
+.sk-x { flex: none; min-width: 52px; height: 36px; border: 1px solid var(--indigo-400); border-radius: var(--r-sm); background: var(--surface); font: 600 13px var(--font-ui); color: var(--indigo-700); cursor: pointer; }
+
+.sk-hint { display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 4px 10px; border-bottom: 1px dashed var(--border); background: var(--surface-2); }
+.sk-hint-tex { font-size: 17px; color: var(--text); }
+.sk-hint-l { font: 600 12.5px var(--font-ui); color: var(--text); }
+.sk-hint code { font: 400 11.5px var(--font-mono, ui-monospace, monospace); color: var(--text-muted); }
+.sk-hint-w { margin-left: auto; font-size: 11.5px; color: var(--indigo-700); white-space: nowrap; }
+.sk-hint-w b { font-weight: 700; }
+.sk-hint-idle { font-size: 11.5px; font-style: italic; color: var(--text-muted); }
+
+.sk-groups { display: flex; align-items: center; gap: 4px; padding: 6px 8px 0; overflow-x: auto; }
+.sk-g { flex: none; min-width: 46px; height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 14px var(--font-ui); color: var(--text-soft); cursor: pointer; white-space: nowrap; }
+.sk-g.on { background: var(--indigo-600, var(--indigo-700)); border-color: transparent; color: #fff; }
+.sk-g:disabled { opacity: .35; cursor: default; }
+.sk-spacer { flex: 1; }
+.sk-tex { font-family: var(--font-mono, ui-monospace, monospace); font-size: 12.5px; }
+
+.sk-search { display: flex; align-items: center; gap: 7px; margin: 7px 8px 0; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); }
+.sk-search svg { width: 15px; height: 15px; color: var(--text-muted); flex: none; }
+.sk-search input { flex: 1; min-width: 0; height: 36px; border: 0; background: transparent; font: 400 13px var(--font-ui); color: var(--text); }
+.sk-search input:focus { outline: none; }
+.sk-clear { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; padding: 4px; }
+.sk-clear svg { width: 14px; height: 14px; }
+
+.sk-keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 5px; padding: 8px; max-height: 172px; overflow-y: auto; }
+.sk-k { display: flex; align-items: center; justify-content: center; height: 44px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); cursor: pointer; }
+.sk-k:hover:not(:disabled) { border-color: var(--indigo-400); background: var(--indigo-50); }
+.sk-k:active { background: var(--indigo-50); transform: translateY(1px); }
+.sk-k:disabled { opacity: .4; cursor: default; }
+.sk-k-tex { font-size: 16px; color: var(--text); }
+.sk-none { grid-column: 1 / -1; margin: 6px 2px; font-size: 12.5px; color: var(--text-muted); }
+
+.sk-raw { display: flex; align-items: center; gap: 7px; padding: 8px; }
+.sk-raw-i { flex: 1; min-width: 0; height: 44px; padding: 0 11px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 14px var(--font-mono, ui-monospace, monospace); background: var(--surface); color: var(--text); }
+.sk-raw-i:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.sk-raw-f { flex: none; height: 44px; padding: 0 9px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); font: 500 12.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Document Settings modal (1e callout 3) — two columns, hairline-ruled, no tabs
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.ds-back { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(24, 24, 27, .42); }
+.ds { width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 18px 50px rgba(0,0,0,.28); }
+.ds-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border-strong); }
+.ds-head h2 { margin: 0; font: 600 17px var(--font-ui); color: var(--text); }
+.ds-head button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--text-soft); cursor: pointer; }
+.ds-head button svg { width: 16px; height: 16px; }
+.ds-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding: 8px 16px 12px; }
+.ds-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--border); }
+.ds-f.wide { grid-column: 1 / -1; }
+.ds-f label { font: 500 12.5px var(--font-ui); color: var(--text); }
+.ds-f select { min-width: 132px; height: 32px; padding: 0 7px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12.5px var(--font-ui); color: var(--text); }
+.ds-range { display: inline-flex; align-items: center; gap: 8px; }
+.ds-range input { width: 104px; }
+.ds-range b { min-width: 46px; text-align: right; font: 600 12px var(--font-mono, ui-monospace, monospace); color: var(--text-soft); }
+.ds-toggle { width: 44px; height: 24px; padding: 2px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface-2); cursor: pointer; }
+.ds-toggle i { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--text-muted); transition: transform .14s ease; }
+.ds-toggle.on { background: var(--indigo-600, var(--indigo-700)); border-color: transparent; }
+.ds-toggle.on i { background: #fff; transform: translateX(20px); }
+.ds-foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 16px; border-top: 1px solid var(--border-strong); background: var(--surface-2); }
+.ds-reset { border: 0; background: transparent; font: 500 12.5px var(--font-ui); color: var(--text-muted); text-decoration: underline; cursor: pointer; }
+.ds-reset:hover { color: var(--text); }
+.ds-actions { display: inline-flex; gap: 8px; }
+
+@media (max-width: 640px) {
+  .ds-grid { grid-template-columns: 1fr; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LaTeX editor — Copilot | source | render, with the function palette docked
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.lx { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--surface); }
+
+.lx-bar { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--border-strong); background: var(--indigo-50); }
+.lx-title { display: inline-flex; align-items: center; gap: 6px; font: 600 12.5px var(--font-ui); color: var(--text); }
+.lx-title svg { width: 15px; height: 15px; }
+.lx-gap { flex: 1; }
+.lx-font { height: 30px; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12px var(--font-ui); color: var(--text); }
+.lx-b { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 12px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.lx-b:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+.lx-b.on { background: var(--indigo-600, var(--indigo-700)); border-color: transparent; color: #fff; }
+.lx-b:disabled { opacity: .4; cursor: default; }
+.lx-b svg { width: 14px; height: 14px; }
+.lx-done { min-height: 30px; padding: 0 13px; border: 1px solid var(--indigo-400); border-radius: var(--r-sm); background: var(--indigo-600, var(--indigo-700)); color: #fff; font: 600 12px var(--font-ui); cursor: pointer; }
+
+/* Three columns on a desktop. The source is the widest: it is the thing being typed.
+   The min-height matters on a 1024×768 school laptop — without it the palette below
+   squeezes the columns down to their content and the source box becomes two lines. */
+/* Copilot gets a wider column than it used to (0.95fr against 1fr, from 230px to
+   300px minimum). Its prompt box, its proposal preview and its starter list were all
+   wrapping after three words in a 230px rail, which made the one pane you read
+   sentences in the hardest one to read. */
+.lx-body { flex: 1; min-height: 240px; display: grid; grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.4fr) minmax(240px, 1fr); }
+.lx-body > div { min-width: 0; overflow-y: auto; padding: 10px 12px; }
+.lx-ai { border-right: 1px solid var(--border); background: var(--surface-2); display: flex; flex-direction: column; }
+.lx-out { border-left: 1px solid var(--border); background: var(--surface-2); }
+
+.lx-l { display: flex; align-items: center; gap: 5px; margin: 0 0 6px; font: 600 10.5px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.lx-l svg { width: 13px; height: 13px; }
+
+/* ---- Copilot ---- */
+/* Same rule as the workspace rail: the prompt box absorbs the column's slack, and
+   everything around it keeps its natural height. */
+.lx-ai-in { flex: 1 1 auto; min-height: 84px; width: 100%; padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); font: 400 13px/1.5 var(--font-ui); color: var(--text); resize: none; }
+.lx-ai-in:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.lx-ai > .lx-l, .lx-ai-go, .lx-ai-err, .lx-prop, .lx-starters { flex: none; }
+.lx-ai-go { width: 100%; margin-top: 7px; justify-content: center; }
+.lx-ai-err { display: flex; align-items: flex-start; gap: 6px; margin: 9px 0 0; padding: 8px 10px; border-radius: var(--r-sm); background: var(--danger-bg); font: 400 12px var(--font-ui); color: var(--danger-fg); }
+.lx-ai-err svg { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+
+.lx-prop { margin-top: 12px; padding: 10px; border: 1px solid var(--indigo-400); border-radius: var(--r-md); background: var(--surface); }
+.lx-prop-r { overflow-x: auto; padding: 6px 0; }
+.lx-prop-s { display: block; margin: 7px 0; padding: 6px 8px; border-radius: var(--r-sm); background: var(--surface-2); font: 400 11.5px var(--font-mono, ui-monospace, monospace); color: var(--text-soft); white-space: pre-wrap; word-break: break-word; }
+.lx-prop-a { display: flex; gap: 7px; }
+.lx-disclaim { margin: 8px 0 0; font: 400 11px var(--font-ui); color: var(--text-muted); }
+
+.lx-starters { margin-top: 16px; display: grid; gap: 5px; }
+.lx-starter { display: grid; gap: 1px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); text-align: left; cursor: pointer; }
+.lx-starter:hover { border-color: var(--indigo-400); background: var(--indigo-50); }
+.lx-starter b { font: 600 12.5px var(--font-ui); color: var(--text); }
+.lx-starter span { font: 400 11px var(--font-ui); color: var(--text-muted); }
+
+/* ---- source ---- */
+.lx-src { display: flex; flex-direction: column; }
+.lx-ta-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
+.lx-ta { flex: 1; width: 100%; min-height: 220px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); font: 400 13.5px/1.65 var(--font-mono, ui-monospace, monospace); color: var(--text); resize: none; tab-size: 2; }
+.lx-ta:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.lx-ta.bad { border-color: var(--danger-fg); }
+.lx-tip { margin: 7px 0 0; font: 400 11px var(--font-ui); color: var(--text-muted); }
+
+.lx-menu { position: absolute; z-index: 30; left: 8px; right: 8px; bottom: 8px; max-height: 232px; overflow-y: auto; margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 26px rgba(0,0,0,.16); }
+.lx-menu li { display: flex; align-items: center; gap: 9px; padding: 5px 8px; border-radius: var(--r-sm); cursor: pointer; }
+.lx-menu li.on, .lx-menu li:hover { background: var(--indigo-50); }
+.lx-menu-tex { flex: none; min-width: 42px; }
+.lx-menu-l { flex: 1; font: 500 12.5px var(--font-ui); color: var(--text); }
+.lx-menu code { font: 400 11px var(--font-mono, ui-monospace, monospace); color: var(--text-muted); }
+
+/* ---- render ---- */
+.lx-render { min-height: 96px; display: flex; align-items: center; justify-content: center; padding: 14px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); overflow-x: auto; }
+.lx-empty { font: 400 12px var(--font-ui); color: var(--text-muted); text-align: center; }
+.lx-err, .lx-warn, .lx-ok, .lx-note { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0 0; font: 400 11.5px/1.45 var(--font-ui); }
+.lx-err svg, .lx-warn svg, .lx-ok svg { flex: none; width: 13px; height: 13px; margin-top: 1px; }
+.lx-err { color: var(--danger-fg); }
+.lx-warn { color: var(--warning-fg); }
+.lx-ok { color: var(--text-muted); }
+.lx-note { color: var(--text-muted); }
+
+/* ---- docked palette ----
+   flex-shrink is on: when the window is short the palette gives ground before the
+   source box does, because you can scroll a palette and you cannot scroll away a
+   textarea that has collapsed to one line. */
+.lx-pal { flex: 0 1 auto; max-height: 210px; min-height: 96px; display: flex; flex-direction: column; border-top: 1px solid var(--border-strong); background: var(--surface); overflow: hidden; }
+.lx-pal .sp-body { flex: 1; min-height: 0; }
+/* The figure catalogue is a browsable list with a preview and a code block inside each
+   row — 210px shows one and a half entries. */
+.lx-pal.tall { max-height: 400px; }
+
+/* On a tablet the three columns become one scrolling stack: 1024px cannot hold three
+   readable columns, and a squeezed source pane is the one that hurts most. */
+@media (max-width: 1100px) {
+  .lx-body { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow-y: auto; }
+  .lx-body > div { overflow-y: visible; }
+  .lx-ai { border-right: 0; border-bottom: 1px solid var(--border); }
+  .lx-out { border-left: 0; border-top: 1px solid var(--border); }
+  .lx-ta { min-height: 180px; }
+  .lx-pal { max-height: 210px; }
+}
+
+/* ---- live typing hints ----
+   Amber, not red: these fire on LaTeX that is on its way to being correct, and a red
+   strip on every half-typed \begin{aligned} would train the teacher to ignore it. */
+.lx-hints { list-style: none; margin: 7px 0 0; padding: 0; display: grid; gap: 4px; }
+.lx-hints li { display: flex; align-items: center; gap: 7px; padding: 6px 9px; border-radius: var(--r-sm); background: var(--warning-bg); font: 400 11.5px/1.4 var(--font-ui); color: var(--warning-fg); }
+.lx-hints svg { flex: none; width: 13px; height: 13px; }
+.lx-hints li > span { flex: 1; }
+.lx-hints button { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid currentColor; border-radius: var(--r-sm); background: transparent; font: 600 11px var(--font-ui); color: inherit; cursor: pointer; }
+.lx-hints button:hover:not(:disabled) { background: rgba(0,0,0,.06); }
+.lx-hints button:disabled { opacity: .5; cursor: default; }
+.lx-hints code { font: 600 10.5px var(--font-mono, ui-monospace, monospace); }
+
+.lx-fix { margin-top: 8px; width: 100%; justify-content: center; }
+
+/* ── colour / case dropdowns (Phase 3) ── */
+.lw-swatchwrap { position: relative; display: inline-flex; }
+.lw-swatches {
+  position: absolute; top: 100%; left: 0; z-index: 40; margin-top: 4px;
+  display: grid; grid-template-columns: repeat(4, 22px); gap: 6px;
+  padding: 8px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--sh-lg);
+}
+.lw-swatch { width: 22px; height: 22px; border: 1px solid var(--border-strong); border-radius: 5px; cursor: pointer; padding: 0; }
+.lw-swatch:hover { transform: scale(1.12); }
+.lw-swatch-clear, .lw-cases button {
+  grid-column: 1 / -1; border: 0; background: transparent; padding: 6px 4px;
+  font: 500 12.5px var(--font-ui); color: var(--text-soft); text-align: left; cursor: pointer; border-radius: var(--r-sm);
+}
+.lw-swatch-clear:hover, .lw-cases button:hover { background: var(--surface-2); color: var(--text); }
+.lw-cases { grid-template-columns: 1fr; min-width: 160px; }
+
+/* ── the dialect's own marks, as the student will see them ── */
+.lw-prose mark { background: #fef08a; padding: 0 2px; border-radius: 2px; }
+.lw-prose u { text-decoration: underline; text-underline-offset: 2px; }
+.lw-prose sub, .lw-prose sup { font-size: 0.75em; line-height: 0; }
+.lw-prose [style*="text-align"] { display: block; }
+
+/* ¶ — paragraph boundaries made visible. Markdown has no invisible characters, but
+   the difference between a paragraph break and a hard break is what changes how the
+   lesson renders, so that is what this shows. */
+.lw-marks .lw-prose p::after { content: "¶"; color: var(--indigo-300); margin-left: 4px; font-size: 0.85em; }
+.lw-marks .lw-prose br::after { content: "↵"; color: var(--indigo-300); font-size: 0.85em; }
+.tc-swatch { border: 1px solid var(--border-strong) !important; }
+
+/* ── tables (Phase 4) ── */
+.lw-tablegrid { position: absolute; top: 100%; left: 0; z-index: 40; margin-top: 4px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-lg); }
+.lw-tablegrid-cells { display: grid; grid-template-columns: repeat(8, 16px); gap: 2px; }
+.lw-tablecell { width: 16px; height: 16px; padding: 0; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--surface); cursor: pointer; }
+.lw-tablecell.on { background: var(--indigo-200); border-color: var(--indigo-400); }
+.lw-tablegrid-l { margin: 8px 0 0; text-align: center; font: 500 12px var(--font-ui); color: var(--text-soft); }
+
+/* Styled to match .prose-reader so the editor shows what the class will see. */
+.lw-prose table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
+.lw-prose th, .lw-prose td { border: 1px solid var(--border-strong); padding: 6px 10px; text-align: left; vertical-align: top; }
+.lw-prose th { background: var(--surface-2); font-weight: 600; }
+.lw-prose .selectedCell::after { content: ""; position: absolute; inset: 0; background: var(--indigo-100); opacity: .45; pointer-events: none; }
+.lw-prose td, .lw-prose th { position: relative; }
+.lw-prose table p { margin: 0; }
+
+/* ── find & replace ── */
+.lw-find { position: absolute; top: 8px; right: 20px; z-index: 30; display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--sh-lg); }
+.lw-find-row { display: flex; align-items: center; gap: 6px; }
+.lw-find-in { width: 190px; padding: 6px 9px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 13px var(--font-ui); color: var(--text); background: var(--surface); }
+.lw-find-in:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.lw-find-n { min-width: 52px; text-align: right; font: 500 11.5px var(--font-ui); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.lw-find-n.none { color: var(--danger-fg); }
+.lw-find-case { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-soft); }
+.lw-prose .lw-find-hit { background: #fde68a; border-radius: 2px; }
+.lw-prose .lw-find-cur { background: #fb923c; }
+
+/* ── côte à côte ──
+   Source left, the student renderer right. The page grows to the full desk width here:
+   two 760px columns do not fit, and the point of the mode is to compare, not to
+   preserve the page metaphor. */
+.lw-page-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; max-width: min(1400px, 100%); padding: 0; align-items: stretch; }
+.lw-page-split .lw-input { border: 0; border-right: 1px solid var(--border); border-radius: 0; padding: 28px 24px; resize: none; background: var(--surface-2); font: 400 13.5px/1.7 var(--font-mono, ui-monospace, monospace); }
+.lw-page-split .lw-input:focus { outline: none; }
+.lw-render { overflow-y: auto; padding: 28px 32px; background: var(--surface); }
+.lw-render .prose-reader { font-size: 15px; }
+
+@media (max-width: 900px) {
+  /* Two columns on a tablet gives neither half enough room to read. */
+  .lw-page-split { grid-template-columns: 1fr; }
+  .lw-page-split .lw-input { border-right: 0; border-bottom: 1px solid var(--border); }
+}
+
+/* ── rawHtml (épures) ── */
+.lw-rawhtml { position: relative; margin: 16px 0; padding: 8px; border: 1px dashed var(--border-strong); border-radius: var(--r-sm); background: var(--surface-2); }
+.lw-rawhtml svg { max-width: 100%; height: auto; }
+.lw-rawhtml figure { margin: 0; }
+.lw-rawhtml figcaption { font-size: 12.5px; color: var(--text-soft); text-align: center; margin-top: 6px; }
+.lw-rawhtml-tag { position: absolute; top: -9px; left: 10px; padding: 1px 7px; border-radius: 999px; background: var(--surface); font: 600 9.5px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; color: var(--text-muted); }
+.lw-rawhtml.ProseMirror-selectednode { outline: 2px solid var(--indigo-400); outline-offset: 2px; }
+
+/* ---- pictures ---- */
+/* inline-block, not block: the node is inline (that is the shape markdown gives), so a
+   picture can sit mid-sentence. Alone in its paragraph it still reads as a figure. */
+.lw-img { position: relative; display: inline-block; max-width: 100%; line-height: 0; }
+.lw-img img { max-width: 100%; height: auto; border-radius: var(--r-sm); }
+.lw-img.ProseMirror-selectednode img { outline: 2px solid var(--indigo-400); outline-offset: 2px; }
+/* The grip only appears on hover or selection — a handle on every picture turns a page
+   of figures into a page of controls. */
+.lw-img-grip { position: absolute; right: -4px; bottom: -4px; width: 14px; height: 14px; border: 2px solid var(--surface); border-radius: 3px; background: var(--indigo-500, #4f46e5); cursor: nwse-resize; opacity: 0; transition: opacity .12s; touch-action: none; }
+.lw-img:hover .lw-img-grip, .lw-img.ProseMirror-selectednode .lw-img-grip { opacity: 1; }
+/* A picture whose bytes did not arrive. On a school LAN this usually means the server
+   is down, not that the lesson is wrong — so it says so instead of showing nothing. */
+.lw-img.broken { line-height: 1.5; }
+.lw-img.broken img { display: none; }
+.lw-img.broken::after { content: "Image indisponible — le serveur de l'école ne répond peut-être pas."; display: inline-block; padding: 8px 12px; border: 1px dashed var(--border-strong); border-radius: var(--r-sm); background: var(--surface-2); font: 400 12.5px var(--font-ui); color: var(--text-soft); }
+
+/* ---- épure editor ---- */
+/* Wider than the chart panel: the canvas is the primary control here, and a drag
+   target squeezed into 440px is a drag target you miss. */
+.ep { position: absolute; z-index: 30; width: min(560px, calc(100% - 28px)); max-height: min(78vh, 820px); overflow-y: auto; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 10px; }
+
+/* The drawing and the handles are two stacked layers sharing one coordinate space, so
+   a handle always sits exactly on the point it moves. */
+.ep-canvas { position: relative; border: 1px solid var(--border); border-radius: var(--r-sm); background: #fff; overflow: hidden; }
+.ep-draw svg, .ep-handles { display: block; width: 100%; height: auto; }
+.ep-handles { position: absolute; inset: 0; height: 100%; }
+.ep-h { fill: var(--indigo-500, #4f46e5); fill-opacity: 0; stroke: var(--indigo-500, #4f46e5); stroke-opacity: 0; stroke-width: 2; cursor: grab; touch-action: none; transition: fill-opacity .12s, stroke-opacity .12s; }
+.ep-canvas:hover .ep-h { fill-opacity: .12; stroke-opacity: .45; }
+.ep-h:hover, .ep-h.on { fill-opacity: .22 !important; stroke-opacity: 1 !important; }
+.ep-h:focus { outline: none; fill-opacity: .22; stroke-opacity: 1; }
+.ep-h:active { cursor: grabbing; }
+
+.ep-hint { margin: 6px 2px 8px; font: 400 11px/1.45 var(--font-ui); color: var(--text-muted); }
+
+.ep-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.ep-tabs button { padding: 6px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; font: 600 11.5px var(--font-ui); color: var(--text-muted); cursor: pointer; }
+.ep-tabs button:hover { color: var(--text); }
+.ep-tabs button.on { color: var(--indigo-700); border-bottom-color: var(--indigo-500, #4f46e5); }
+
+.ep-body { max-height: 260px; overflow-y: auto; }
+.ep-th, .ep-tr { display: grid; grid-template-columns: 62px 72px 72px 1fr 26px; gap: 6px; align-items: center; }
+.ep-th.seg, .ep-tr.seg { grid-template-columns: 1fr 1fr 96px 1fr 26px; }
+.ep-tr.sh { grid-template-columns: auto 1fr auto 1fr auto 26px; }
+.ep-th { font: 600 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); padding: 0 2px 4px; }
+.ep-tr { margin-bottom: 4px; padding: 2px; border-radius: var(--r-sm); }
+.ep-tr.on { background: var(--indigo-50, #eef2ff); }
+.ep-tr input, .ep-tr select { width: 100%; min-width: 0; height: 26px; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--r-sm); font: 400 12px var(--font-ui); background: var(--surface); color: var(--text); }
+.ep-tr input:focus, .ep-tr select:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.ep-tr > button { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-muted); cursor: pointer; }
+.ep-tr > button:hover { background: var(--danger-bg, #fee2e2); color: var(--danger-fg, #b91c1c); }
+.ep-tr > button svg { width: 13px; height: 13px; }
+.ep-tr label { font: 600 10.5px var(--font-ui); color: var(--text-muted); white-space: nowrap; }
+.ep-check { display: inline-flex; align-items: center; gap: 4px; }
+.ep-check input { width: auto !important; height: auto !important; }
+
+.ep-sec { margin: 8px 2px 5px; font: 600 10.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.ep-add { display: inline-flex; align-items: center; gap: 5px; margin: 4px 0 2px; padding: 5px 9px; border: 1px dashed var(--border-strong); border-radius: var(--r-sm); background: transparent; font: 600 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.ep-add:hover:not(:disabled) { border-color: var(--indigo-400); color: var(--indigo-700); }
+.ep-add:disabled { opacity: .45; cursor: default; }
+.ep-add svg { width: 12px; height: 12px; }
+
+.ep-tpl { margin-top: 8px; border-top: 1px solid var(--surface-2); padding-top: 6px; }
+.ep-tpl summary { font: 600 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.ep-tplgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 7px; }
+.ep-tplgrid button { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font: 500 11.5px var(--font-ui); color: var(--text); text-align: left; cursor: pointer; }
+.ep-tplgrid button:hover { border-color: var(--indigo-400); background: var(--indigo-50, #eef2ff); }
+.lw-figmenu-s { margin: 6px 9px 3px; font: 700 9.5px var(--font-ui); letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); }
+.lw-figmenu-s:first-child { margin-top: 2px; }
+.ep-th.lbl, .ep-tr.lbl { grid-template-columns: 1fr 62px 62px 1fr 26px; }
+.ep-none { margin: 10px 2px; font: 400 12px/1.5 var(--font-ui); color: var(--text-muted); }
+/* A named vertex is the meaningful handle; a bare line end is still draggable but
+   should not shout as loudly, or a physics diagram becomes a field of blue dots. */
+.ep-h.named { stroke-width: 2.5; }
+.ep-canvas:hover .ep-h:not(.named) { fill-opacity: .06; stroke-opacity: .25; }
+/* A picture still on this device: shown from its local blob, marked so the teacher
+   knows the class cannot see it yet. The audit blocks publication until it uploads. */
+.lw-img.pending img { outline: 2px dashed var(--warning-fg, #b45309); outline-offset: 2px; opacity: .92; }
+.lw-img.pending::after { content: "sur cet appareil"; position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 999px; background: var(--warning-fg, #b45309); color: #fff; font: 600 9.5px var(--font-ui); letter-spacing: .02em; }

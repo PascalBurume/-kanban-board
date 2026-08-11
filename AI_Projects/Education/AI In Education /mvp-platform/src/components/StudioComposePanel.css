@@ -1,0 +1,121 @@
+/* Copilot APS panel for the lesson Studio. Mirrors the project compose panel's look
+   (.cp-* in projects.css) but self-contained so it ships with the studio route. */
+.cp-panel { border: 1px solid var(--indigo-200); background: linear-gradient(180deg, var(--indigo-50), var(--surface) 60%); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 16px; }
+.cp-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.cp-badge { display: inline-flex; align-items: center; gap: 6px; font: 700 13px var(--font-ui); color: var(--indigo-700); }
+.cp-badge svg { width: 16px; height: 16px; }
+.cp-sub { font-size: 12.5px; color: var(--text-muted); }
+
+.cp-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.cp-row input.cp-text { flex: 1; min-width: 180px; padding: 8px 11px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 13.5px var(--font-ui); background: var(--surface); }
+.cp-row input.cp-text:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+.cp-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cp-actions .btn svg, .cp-row .btn svg { width: 15px; height: 15px; }
+
+.cp-hint { font-size: 12.5px; color: var(--text-muted); margin: -2px 0 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cp-hint-l { flex: 1 1 100%; }
+.cp-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cp-chip { border: 1px solid var(--border); background: var(--surface); color: var(--indigo-700); font: 600 12px var(--font-ui); padding: 3px 9px; border-radius: 999px; cursor: pointer; }
+.cp-chip:hover { border-color: var(--indigo-400); background: var(--indigo-50, var(--surface-2)); }
+/* Not a chip: this one navigates the list, it does not pick a topic from it. */
+.cp-more { border: 0; background: transparent; color: var(--indigo-700); font: 600 12.5px var(--font-ui); cursor: pointer; padding: 0; margin-left: 5px; display: inline-flex; align-items: center; gap: 3px; vertical-align: baseline; }
+.cp-more:hover { text-decoration: underline; }
+.cp-more svg { width: 12px; height: 12px; }
+
+.cp-warn { margin-top: 12px; border: 1px solid var(--warn-border, var(--border-strong)); background: var(--warn-bg, var(--surface-2)); border-radius: var(--r-md); padding: 10px 12px; }
+.cp-warn-h { display: flex; align-items: center; gap: 7px; font: 700 12px var(--font-ui); color: var(--warn-fg, var(--text)); margin-bottom: 5px; }
+.cp-warn-h svg { width: 15px; height: 15px; flex: none; }
+.cp-warn ul { margin: 0; padding-left: 20px; }
+.cp-warn li { font-size: 12.5px; line-height: 1.5; color: var(--text); }
+
+.cp-chat-toggle { margin-top: 10px; border: 0; background: transparent; color: var(--indigo-700); font: 600 13px var(--font-ui); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 0; }
+.cp-chat-toggle svg { width: 15px; height: 15px; }
+
+.cp-error { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--danger-fg); background: var(--danger-bg); border-radius: var(--r-md); padding: 9px 12px; }
+.cp-error svg { width: 15px; height: 15px; flex: none; }
+.cp-retry { margin-left: auto; border: 0; background: transparent; color: var(--danger-fg); font-weight: 700; cursor: pointer; text-decoration: underline; }
+
+.cp-preview { margin-top: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px; }
+.cp-result-title { font-size: 14px; margin-bottom: 8px; }
+.cp-field-l { font: 700 11px var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.cp-doc { font-size: 14px; line-height: 1.55; color: var(--text); max-height: 320px; overflow-y: auto; padding-right: 4px; }
+.cp-doc h2 { font-size: 16px; margin: 14px 0 6px; }
+.cp-doc p { margin: 0 0 8px; }
+.cp-insert { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--surface-2); }
+.cp-disclaim { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 10px; }
+
+/* generated quiz preview */
+.cp-q { border-left: 3px solid var(--indigo-200); padding: 2px 0 2px 12px; margin-bottom: 12px; font-size: 13.5px; }
+.cp-q-type { font: 700 10px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--indigo-700); }
+.cp-q-prompt { font-weight: 600; margin: 2px 0 5px; }
+.cp-q-opt { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-soft); padding: 1px 0; }
+/* prompts/options are rendered markdown — keep their paragraph from breaking the row */
+.cp-q-prompt p, .cp-q-opt p { margin: 0; }
+.cp-q-opt p { display: inline; }
+.cp-q-opt.correct { color: var(--success-fg); font-weight: 600; }
+.cp-q-opt .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); flex: none; }
+.cp-q-opt.correct .dot { background: var(--success-fg); }
+
+/* brainstorm chat */
+.cp-chat { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.cp-chat-box { max-height: 240px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cp-chat-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; }
+.cp-msg { font-size: 13.5px; line-height: 1.5; }
+.cp-msg.user { align-self: flex-end; background: var(--indigo-600); color: #fff; padding: 8px 12px; border-radius: 14px 14px 4px 14px; max-width: 85%; }
+.cp-msg.user :where(p) { margin: 0; }
+.cp-msg.assistant { align-self: flex-start; background: var(--surface-2); padding: 9px 13px; border-radius: 14px 14px 14px 4px; max-width: 92%; }
+.cp-use { margin-top: 6px; border: 0; background: transparent; color: var(--indigo-700); font: 600 12px var(--font-ui); cursor: pointer; padding: 0; }
+.cp-chat-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--surface-2); }
+.cp-chat-input input { flex: 1; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--r-md); font: 400 14px var(--font-ui); }
+.cp-chat-input input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+
+/* ── filling the rail ──
+   The panel used to sit at its natural height with the rest of the rail left as dead
+   grey. Rather than just stretching the box and leaving the emptiness inside it, the
+   slack goes to the conversation: the chat is the one part that genuinely benefits
+   from more room, and a taller transcript is why a teacher opens the rail at all. */
+.rd-rail .rd-pane-body { display: flex; flex-direction: column; }
+.rd-rail .rd-pane-body > * { flex: 1 1 auto; min-height: 0; }
+.rd-rail .cp-panel { display: flex; flex-direction: column; margin-bottom: 0; }
+/* The controls keep their size; only the chat grows. */
+.rd-rail .cp-panel > * { flex: none; }
+.rd-rail .cp-panel > .cp-chat { flex: 1 1 auto; min-height: 180px; display: flex; flex-direction: column; }
+.rd-rail .cp-chat > .cp-chat-box { flex: 1 1 auto; max-height: none; }
+
+/* In the rail the input shared its row with a button, leaving ~150px for a sentence
+   and truncating every placeholder mid-word. Wrapping gives the field the full width
+   and drops the button beneath it, right-aligned. */
+.rd-rail .cp-row { flex-wrap: wrap; }
+.rd-rail .cp-row > .cp-text { flex: 1 1 100%; }
+.rd-rail .cp-row > .btn { margin-left: auto; }
+
+/* ---- formula Copilot (Rapide | Agent) ----
+   The LaTeX atelier's agent, folded into the rail. Shapes deliberately match .lxp-*
+   there: a teacher who has used one should recognise the other, because it IS the
+   other — same endpoint, same steps, same verification. */
+.cp-tex { margin: 8px 0 2px; padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); }
+.cp-tex-in { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); font: 400 12.5px/1.5 var(--font-ui); background: var(--surface); color: var(--text); resize: vertical; }
+.cp-tex-in:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
+
+.cp-mode { display: inline-flex; width: 100%; margin-top: 7px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); overflow: hidden; }
+.cp-mode button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 0; border-right: 1px solid var(--border); background: var(--surface); padding: 6px 8px; font: 600 11.5px var(--font-ui); color: var(--text-soft); cursor: pointer; }
+.cp-mode button:last-child { border-right: 0; }
+.cp-mode button.on { background: var(--indigo-600, var(--indigo-700)); color: #fff; }
+.cp-mode button svg { width: 13px; height: 13px; }
+
+.cp-tex-go { width: 100%; margin-top: 7px; justify-content: center; }
+.cp-tex-hint { margin: 7px 0 0; font: 400 11px/1.45 var(--font-ui); color: var(--text-muted); }
+.cp-tex-hint.warn { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--warning-bg); color: var(--warning-fg); }
+.cp-tex-hint.warn svg { width: 14px; height: 14px; flex: none; }
+.cp-tex-err, .cp-tex-warn { display: flex; align-items: flex-start; gap: 6px; margin: 9px 0 0; padding: 8px 10px; border-radius: var(--r-sm); font: 400 12px/1.45 var(--font-ui); }
+.cp-tex-err { background: var(--danger-bg); color: var(--danger-fg); }
+.cp-tex-warn { background: var(--warning-bg); color: var(--warning-fg); }
+.cp-tex-err svg, .cp-tex-warn svg { width: 14px; height: 14px; flex: none; }
+
+.cp-tex-prop { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
+/* Rendered big, because the question the teacher is answering is "does this say what I
+   meant?" — and that is not readable at body size. */
+.cp-tex-render { display: flex; justify-content: center; padding: 12px 8px; margin: 6px 0; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); overflow-x: auto; }
+.cp-tex-katex { font-size: 17px; color: var(--text); }
+.cp-tex-note { margin: 6px 0 0; font: 400 11.5px/1.45 var(--font-ui); color: var(--text-soft); }
+.cp-tex-src { display: block; margin-top: 7px; padding: 7px 9px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); font: 400 11.5px/1.5 var(--font-mono, ui-monospace, monospace); color: var(--text-soft); white-space: pre-wrap; word-break: break-word; }

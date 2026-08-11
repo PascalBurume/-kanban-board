@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 580" role="img" aria-label="Deux figures : l'homothétie de rapport k envoyant A sur A prime, et la symétrie centrale envoyant z sur moins z">
+  <rect width="470" height="580" fill="white"/>
+
+  <!-- Haut : homothétie de centre O, z' = kz. A and A' stay on one ray from O. -->
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="35" y1="210" x2="430" y2="210"/>
+    <path d="M430 210l-12-6M430 210l-12 6"/>
+    <line x1="105" y1="262" x2="105" y2="30"/>
+    <path d="M105 30l-6 12M105 30l6 12"/>
+  </g>
+  <line x1="105" y1="210" x2="360" y2="55" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <path d="M195 152 C 205 108, 250 96, 288 88" fill="none" stroke="#111" stroke-width="1.6"/>
+  <path d="M288 88l-12 2M288 88l-8-9" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+  <g fill="#111"><circle cx="195" cy="155" r="3.4"/><circle cx="295" cy="94" r="3.4"/></g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="438" y="216">x</text><text x="91" y="24">y</text><text x="84" y="232">O</text>
+    <text x="197" y="177">A</text><text x="160" y="150" font-style="italic">z</text>
+    <text x="283" y="76">A′</text><text x="303" y="98" font-size="17">z′ = kz</text>
+    <text x="212" y="112" font-style="italic">h</text>
+  </g>
+
+  <!-- Bas : symétrie centrale, z' = -z. A and A' are opposite through O. -->
+  <g fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round">
+    <line x1="60" y1="430" x2="430" y2="430"/>
+    <path d="M430 430l-12-6M430 430l-12 6"/>
+    <line x1="235" y1="560" x2="235" y2="300"/>
+    <path d="M235 300l-6 12M235 300l6 12"/>
+  </g>
+  <line x1="110" y1="520" x2="360" y2="340" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <g fill="#111"><circle cx="340" cy="354" r="3.4"/><circle cx="130" cy="505" r="3.4"/></g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#111">
+    <text x="438" y="436">x</text><text x="221" y="294">y</text><text x="213" y="452">O</text>
+    <text x="333" y="342">A</text><text x="350" y="362" font-size="17">z = x + yi</text>
+    <text x="106" y="498">A′</text><text x="84" y="528" font-size="17">z′ = −x − yi</text>
+  </g>
+</svg>

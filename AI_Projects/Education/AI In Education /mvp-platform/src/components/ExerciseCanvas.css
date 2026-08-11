@@ -1,0 +1,120 @@
+/* Exercise ↔ programme connector canvas (teacher « Exercices » page).
+   Same architecture as ModuleConnector.css, re-skinned for the warm teacher
+   theme: paper surfaces, indigo custom edges, muted dashed book bundles. */
+
+.exc-scroll { flex: 1; min-height: 0; min-width: 0; overflow: auto; container-type: inline-size; }
+/* Both lanes keep a floor and the gap tracks the container (cqi): opening the
+   Copilot panel shrinks this canvas without the viewport changing, and a bare
+   `1fr` programme lane collapsed to ~274px, clipping every module node. */
+.exc-inner { position: relative; display: grid; grid-template-columns: minmax(260px, 340px) minmax(280px, 1fr); gap: clamp(40px, 6cqi, 110px); padding: 24px 32px 40px; min-height: 100%; align-content: start; }
+
+/* SVG overlay above the columns; clicks pass through. */
+.exc-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.exc-edge { fill: none; stroke-width: 2; transition: opacity .15s, stroke .15s; }
+.exc-edge.custom { stroke: var(--indigo-400); stroke-dasharray: 600; stroke-dashoffset: 0; animation: exc-draw .5s ease-out; }
+.exc-edge.custom.lesson { stroke: var(--indigo-500); }
+.exc-edge.custom.lit { stroke: var(--indigo-600); stroke-width: 2.5; }
+.exc-edge.bundle { stroke: var(--slate-300); stroke-width: 2.5; stroke-dasharray: 6 6; animation: none; }
+.exc-edge.dragging { stroke: var(--indigo-500); stroke-dasharray: 5 5; }
+.exc-dim { opacity: .18; }
+@keyframes exc-draw { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+
+.exc-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; height: max-content; }
+.exc-col-h { font: 700 11px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+.exc-col-h.book { margin-top: 22px; }
+.exc-count { background: var(--slate-200); color: var(--slate-600, #5b5852); border-radius: var(--r-pill); padding: 1px 8px; font-size: 11px; font-weight: 700; flex: none; }
+.exc-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 6px 2px; }
+
+/* ── custom exercise cards ── */
+.exc-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 13px; box-shadow: var(--sh-xs); transition: box-shadow .15s, border-color .15s, transform .15s; }
+.exc-card:hover { border-color: var(--indigo-200); box-shadow: var(--sh-sm); transform: translateY(-1px); }
+.exc-card:hover .exc-card-x, .exc-card:hover .exc-card-ai { opacity: 1; }
+.exc-card.busy { opacity: .6; pointer-events: none; }
+/* Selected into the Copilot panel. */
+.exc-card.advised { border-color: var(--indigo-400); box-shadow: 0 0 0 3px var(--indigo-50); }
+.exc-card.advised .exc-card-ai { opacity: 1; color: var(--indigo-600); }
+
+/* « Analyser avec le Copilot » — on custom cards and book rows alike. */
+.exc-card-ai { opacity: 0; border: 0; background: transparent; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; padding: 3px; border-radius: var(--r-sm); flex: none; transition: opacity .12s, color .12s; }
+.exc-card-ai:hover { background: var(--indigo-50); color: var(--indigo-600); }
+.exc-card-ai svg { width: 13px; height: 13px; }
+.exc-brow:hover .exc-card-ai { opacity: 1; }
+.exc-brow.advised { background: var(--indigo-50); box-shadow: inset 2px 0 0 var(--indigo-400); }
+.exc-brow.advised .exc-card-ai { opacity: 1; color: var(--indigo-600); }
+.exc-card-main { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.exc-card-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--indigo-500); }
+.exc-card-title { flex: 1; font: 600 13.5px var(--font-ui); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-card-x { opacity: 0; border: 0; background: transparent; color: var(--danger-fg); cursor: pointer; display: grid; place-items: center; padding: 3px; border-radius: var(--r-sm); flex: none; transition: opacity .12s; }
+.exc-card-x:hover { background: var(--danger-bg); }
+.exc-card-x svg { width: 13px; height: 13px; }
+.exc-card-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.exc-pill { display: inline-flex; align-items: center; gap: 4px; font: 600 11px var(--font-ui); padding: 2px 8px; border-radius: var(--r-pill); background: var(--indigo-50); color: var(--indigo-700); max-width: 100%; }
+.exc-pill svg { width: 11px; height: 11px; flex: none; }
+.exc-pill.lesson { background: #ecebfb; }
+.exc-pill.unlinked { background: var(--warning-bg); color: var(--warning-fg); }
+.exc-pill-x { border: 0; background: transparent; color: inherit; opacity: .55; cursor: pointer; display: grid; place-items: center; padding: 1px; border-radius: 50%; }
+.exc-pill-x:hover { opacity: 1; background: rgba(0,0,0,.06); }
+.exc-pill-x svg { width: 10px; height: 10px; }
+
+/* drag handle on the right edge of an owned card */
+.exc-handle { position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--indigo-500); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--indigo-300); cursor: grab; z-index: 3; touch-action: none; transition: transform .12s; }
+.exc-handle:hover { background: var(--indigo-600); transform: translateY(-50%) scale(1.15); }
+.exc-handle:active { cursor: grabbing; }
+
+/* ── book exercise groups (accordion per chapter) ── */
+.exc-group { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); }
+.exc-group.open { background: var(--surface); box-shadow: var(--sh-xs); }
+.exc-group-h { display: flex; align-items: center; gap: 9px; padding: 10px 12px; cursor: pointer; border-radius: var(--r-md); }
+.exc-group-h:hover { background: var(--slate-100); }
+.exc-group-ic { width: 24px; height: 24px; flex: none; display: grid; place-items: center; border-radius: var(--r-sm); background: var(--slate-100); color: var(--text-muted); }
+.exc-group-ic svg { width: 12px; height: 12px; }
+.exc-group-title { flex: 1; font: 600 12.5px var(--font-ui); color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-chev { color: var(--text-muted); display: flex; flex: none; }
+.exc-chev svg { width: 15px; height: 15px; }
+/* Which lessons a chapter's exercises belong to. Muted against the exercise
+   count beside it: the count is what the row is about, this is context. */
+.exc-group-les { font: 600 11px var(--font-ui); color: var(--text-muted); flex: none; }
+.exc-group-list { padding: 2px 8px 8px; max-height: 320px; overflow-y: auto; }
+.exc-group-les-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 6px 8px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.exc-group-les-l { display: inline-flex; align-items: center; gap: 5px; font: 700 9.5px var(--font-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); width: 100%; }
+.exc-group-les-l svg { width: 12px; height: 12px; }
+.exc-lchip { font: 600 11px var(--font-ui); padding: 2px 8px; border-radius: var(--r-pill); background: #ecebfb; color: var(--indigo-700); text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-lchip:hover { background: var(--indigo-100, #dcd9f7); }
+.exc-lchip.muted { background: var(--slate-100); color: var(--text-muted); }
+/* The lesson a book exercise was filed under, on its row. Capped so a long lesson
+   title cannot push the tag and the chevron off the end of the row. */
+.exc-blink { display: inline-flex; align-items: center; gap: 4px; flex: none; max-width: 42%; font: 600 10.5px var(--font-ui); padding: 2px 7px; border-radius: var(--r-pill); background: #ecebfb; color: var(--indigo-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-blink svg { width: 10px; height: 10px; flex: none; }
+.exc-brow { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: var(--r-sm); cursor: pointer; }
+.exc-brow:hover { background: var(--indigo-50); }
+.exc-bnum { width: 24px; height: 24px; flex: none; display: grid; place-items: center; font: 700 11px var(--font-ui); border-radius: var(--r-sm); background: var(--slate-100); color: var(--text-soft); }
+.exc-btitle { flex: 1; font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-btag { font: 700 9.5px var(--font-ui); letter-spacing: .03em; text-transform: uppercase; padding: 2px 7px; border-radius: var(--r-pill); background: var(--success-bg); color: var(--success-fg); flex: none; }
+.exc-btag.draft { background: var(--warning-bg); color: var(--warning-fg); }
+.exc-btag.ai { background: #fff7ed; color: #c2410c; }
+.exc-btag.prof { background: var(--indigo-100); color: var(--indigo-600); }
+.exc-btag.todo { background: var(--danger-bg); color: var(--danger-fg); }
+
+/* ── right column: programme ── */
+.exc-module { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-xs); }
+.exc-module.open { border-color: var(--indigo-200); box-shadow: var(--sh-sm); }
+.exc-node { position: relative; display: flex; align-items: center; gap: 10px; padding: 13px 16px; min-height: 52px; cursor: pointer; border-radius: var(--r-md); transition: background .12s; }
+.exc-node.targetable { outline: 1px dashed var(--indigo-300); outline-offset: -1px; }
+.exc-node.hover { outline: 2px solid var(--indigo-500); outline-offset: -2px; background: var(--indigo-50); box-shadow: 0 0 0 5px var(--indigo-100); }
+.exc-module.open .exc-node { border-bottom: 1px solid var(--border); border-radius: var(--r-md) var(--r-md) 0 0; }
+.exc-anchor { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--indigo-300); }
+.exc-node-ic { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: var(--r-sm); background: var(--indigo-50); color: var(--indigo-600); }
+.exc-node-ic svg { width: 16px; height: 16px; }
+.exc-node-title { flex: 1; font: 600 13.5px var(--font-ui); color: var(--text); line-height: 1.25; }
+
+.exc-lessons { padding: 6px 12px 10px; }
+.exc-lrow { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--r-sm); transition: background .1s; }
+.exc-lrow.targetable { outline: 1px dashed var(--indigo-200); outline-offset: -1px; margin: 2px 0; }
+.exc-lrow.hover { outline: 2px solid var(--indigo-500); outline-offset: -2px; background: var(--indigo-50); }
+.exc-lnum { width: 20px; text-align: center; font: 700 11px var(--font-ui); color: var(--text-muted); flex: none; }
+.exc-ltitle { flex: 1; font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 980px) {
+  .exc-inner { grid-template-columns: 1fr; gap: 26px; }
+  .exc-edges { display: none; }
+}

@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "katex/dist/katex.min.css";
+
+:root { color-scheme: light; }
+html, body { height: 100%; }
+body { @apply bg-slate-50 text-ink antialiased; }
+
+/*
+  Icon size floor.
+
+  <Icon> renders <span class="icon"><svg viewBox="0 0 24 24"></span> and leaves
+  the size to CSS, so a call site with no rule of its own lays the icon out at
+  0×0: in the DOM, absent from the screen. Nothing warns about it — « Projets
+  appliqués » styles itself from scratch and sized none of them, so 11 of its 12
+  icons were blank and the page simply looked as though it had been designed
+  without any; the lesson and dashboard eyebrows had lost theirs the same way.
+
+  :where() carries no specificity at all, so this is a floor rather than a rule:
+  every selector already sizing an icon — down to `.brand-mark svg` — still wins,
+  whatever the source order. It only decides what happens where nobody chose.
+*/
+:where(.icon > svg) { width: 16px; height: 16px; }
+
+/* Reading view typography */
+.prose-reader { @apply leading-relaxed; }
+.prose-reader h1 { @apply text-2xl font-bold mt-2 mb-4 text-slate-900; }
+.prose-reader h2 { @apply text-xl font-semibold mt-6 mb-3 text-slate-900 border-b border-slate-200 pb-1; }
+.prose-reader h3 { @apply text-lg font-semibold mt-5 mb-2 text-slate-800; }
+.prose-reader p  { @apply my-3; }
+.prose-reader ul { @apply list-disc pl-6 my-3 space-y-1; }
+.prose-reader ol { @apply list-decimal pl-6 my-3 space-y-1; }
+.prose-reader blockquote { @apply border-l-4 border-brand-light bg-teal-50/60 text-slate-600 px-4 py-2 my-4 rounded-r text-sm; }
+.prose-reader strong { @apply font-semibold text-slate-900; }
+/* Scroll wide tables inside their own box (see Markdown.js) instead of clipping. */
+.prose-reader .md-table-wrap { @apply my-4 overflow-x-auto rounded-lg border border-slate-200; -webkit-overflow-scrolling: touch; }
+.prose-reader table { @apply w-full text-sm my-4 border-collapse; }
+/* The table fills the box and lays its columns out to fit. It sized to `max-content`
+   with every cell `nowrap` before, which was right for the sign and variation tables
+   (short cells, genuinely wide) but wrong for the book's prose tables: three sentences
+   of 90 characters were pushed onto one unbreakable line, so the third column sat off
+   the right edge behind a scrollbar. Sentences now wrap; a table that still cannot fit
+   overflows and the wrapper scrolls exactly as before. */
+.prose-reader .md-table-wrap table { @apply my-0 border-0; min-width: 100%; }
+.prose-reader .md-table-wrap th, .prose-reader .md-table-wrap td { white-space: normal; }
+/* What must never break is a formula — KaTeX lays out its own boxes and a line break
+   through the middle of one is unreadable. This is the guarantee the blanket nowrap
+   was really providing. */
+.prose-reader .md-table-wrap .katex { white-space: nowrap; }
+.prose-reader th, .prose-reader td { @apply border border-slate-300 px-2 py-1 text-left; }
+.prose-reader thead th { @apply bg-slate-50 font-semibold; }
+/* Worked calculations (ASCII math, long division…) read as a clean light block,
+   not a dark terminal. */
+.prose-reader pre { @apply bg-slate-50 text-slate-700 text-[13.5px] leading-relaxed p-4 rounded-xl border border-slate-200 overflow-x-auto my-4 whitespace-pre-wrap; }
+.prose-reader pre code { @apply text-slate-700; }
+.prose-reader code { @apply text-[13px] bg-slate-100 text-slate-800 rounded px-1 py-0.5; }
+.prose-reader pre code { @apply bg-transparent p-0; }
+.katex { font-size: 1.02em; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+mark { @apply bg-yellow-200 rounded px-0.5; }
+
+/* ---------- Authored figures: hand-drawn SVG épures embedded in lessons ----------
+   Scoped under .prose-reader so .ai-badge does NOT collide with the unrelated
+   teacher-insights pill of the same name (insights.css). Figures always sit on a
+   white surface so the black strokes stay legible. */
+/* Recreated SVG figures share a fixed 720×480 canvas; without a cap the reader's
+   `max-width:100%` inflates each to the full column width (~700px), which reads as
+   oversized diagrams. Cap to a natural, centered size so they sit like textbook
+   figures; the box hugs its content instead of spanning the whole column. */
+.prose-reader figure.ai-figure { margin: 1.5rem auto; padding: 12px 14px; width: fit-content; max-width: min(100%, 520px); background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.04); overflow-x: auto; }
+.prose-reader figure.ai-figure svg { display: block; margin: 0 auto; width: 100%; max-width: 492px; height: auto; }
+/* Photographs and diagrams lifted from the scan. Their width/height attributes
+   carry the size the injector chose (small diagrams scaled up, large photographs
+   held to the column); this only centres them and lets a narrow screen shrink
+   them without distorting the aspect ratio. */
+.prose-reader figure.ai-figure img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.prose-reader figure.ai-figure figcaption { margin-top: 10px; font-size: 13px; line-height: 1.45; color: #475569; text-align: center; }
+.prose-reader .ai-badge { display: block; margin-top: 8px; font-size: 11.5px; line-height: 1.4; color: #64748b; font-style: italic; }
+.prose-reader .fig-omissions { display: block; margin-top: 5px; font-size: 11px; line-height: 1.4; color: #94a3b8; }
+
+/* ---------- Exercise cards (shared: /practice + /manuels) ---------- */
+/* Single-column worksheet: even, readable, no masonry gaps. */
+.ex-grid { display: flex; flex-direction: column; gap: 16px; max-width: 760px; margin: 0 auto; }
+
+.ex-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px; color: #94a3b8; text-align: center; }
+.ex-empty .icon svg { width: 30px; height: 30px; }
+
+.ex-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04); padding: 16px 18px; transition: box-shadow .15s, transform .15s; overflow: hidden; }
+.ex-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,.08); }
+.ex-clean { border-top: 3px solid #14b8a6; }
+.ex-draft { border-top: 3px solid #f59e0b; }
+
+.ex-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.ex-num { width: 34px; height: 34px; flex: none; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 15px; background: #eef2ff; color: #4338ca; }
+.ex-draft .ex-num { background: #fef3c7; color: #b45309; }
+.ex-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.ex-title { font-weight: 700; font-size: 14.5px; color: #0f172a; }
+.ex-src { font-size: 11.5px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ex-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: #d1fae5; color: #047857; white-space: nowrap; }
+.ex-tag svg { width: 12px; height: 12px; }
+.ex-tag.draft { background: #fef3c7; color: #b45309; }
+.ex-tag.prof { background: #ede9fe; color: #6d28d9; }
+/* AI-reconstructed from an unreadable scan — deliberately not the green
+   "Vérifié" treatment, which asserts the book's own answer key. */
+.ex-tag.ai { background: #fff7ed; color: #c2410c; }
+
+.ex-body { font-size: 14.5px; color: #334155; line-height: 1.6; }
+.ex-body .prose-reader { margin: 0; }
+.ex-pre { white-space: pre-wrap; word-break: break-word; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #475569; background: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 10px; padding: 12px 14px; margin: 0; }
+.ex-pre.sol { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; margin-top: 8px; }
+
+.ex-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ex-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #4338ca; cursor: pointer; }
+.ex-btn:hover { border-color: #c7d2fe; background: #eef2ff; }
+.ex-btn.on { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+.ex-btn svg { width: 14px; height: 14px; }
+
+.ex-sol { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.ex-sol-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: #047857; margin-bottom: 6px; }
+.ex-sol-tag svg { width: 13px; height: 13px; }
+.ex-sol-md { font-size: 14px; color: #065f46; }
+.ex-sol-md .prose-reader { margin: 0; }
+
+/* ---------- Understanding rating (module page + lesson popup) ---------- */
+.ur { display: flex; flex-direction: column; gap: 14px; }
+.ur-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.ur-opt { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 6px; border: 1.5px solid #e2e8f0; border-radius: 14px; background: #fff; cursor: pointer; transition: all .14s; }
+.ur-opt:hover { border-color: #c7d2fe; background: #eef2ff; }
+.ur-opt.on { border-color: #4f46e5; background: #eef2ff; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+.ur-emoji { font-size: 22px; line-height: 1; }
+.ur-pct { font-size: 13px; font-weight: 800; color: #0f172a; }
+.ur-lbl { font-size: 10.5px; color: #64748b; text-align: center; line-height: 1.2; }
+.ur-msg { display: flex; flex-direction: column; gap: 6px; }
+.ur-msg label { font-size: 12.5px; font-weight: 600; color: #334155; }
+.ur-msg textarea { width: 100%; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 14px; resize: vertical; }
+.ur-msg textarea:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+.ur-send { align-self: flex-start; }
+@media (max-width: 520px) { .ur-scale { grid-template-columns: repeat(5, 1fr); gap: 5px; } .ur-lbl { display: none; } }
+
+/* Figures (```figure) — the same renderer runs in the editor and on the student
+   page, so the class sees exactly what the teacher plotted. */
+.md-figure, .lw-figure { margin: 18px auto; max-width: 640px; color: var(--text); }
+.md-figure svg, .lw-figure svg { width: 100%; height: auto; display: block; }
+.md-figure-bad { font-size: 12px; color: var(--danger-fg); background: var(--danger-bg); padding: 8px 10px; border-radius: 6px; overflow-x: auto; }
+.lw-figure { cursor: pointer; border-radius: 6px; padding: 4px; }
+.lw-figure:hover { background: var(--indigo-50); }
+.lw-figure.ProseMirror-selectednode { outline: 2px solid var(--indigo-400); background: var(--indigo-50); }

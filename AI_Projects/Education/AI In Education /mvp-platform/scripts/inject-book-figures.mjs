@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pooledLexicon, titleGroups, titleCandidates, anyHeading, namedHeadings, opensSection } from "./book-lesson-title.mjs";
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "./book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures } from "./book-text-repair.mjs";
 import { recap } from "./lesson-recap.mjs";
 
 // normalizeHeadings() has already sorted the chapter's headings into two levels: "## "
@@ -249,7 +249,7 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // split into sections, or it lands at the top of one and reads like its title. Then
     // each figure moves under the caption that names it.
     const chapterText = trimTrailingHeadings(stripRunningHeads(lines.slice(start + 1, end).join("\n"), runningHeads));
-    const body = clean(normalizeHeadings(anchorFigures(prepFigures(chapterText))));
+    const body = clean(normalizeHeadings(anchorFigures(dropRedundantFigures(prepFigures(chapterText)))));
 
     const textLenOf = (s) => stripFigs(s).length;
     const figsOf = (s) => (s.match(/<figure class="ai-figure/g) || []).length;

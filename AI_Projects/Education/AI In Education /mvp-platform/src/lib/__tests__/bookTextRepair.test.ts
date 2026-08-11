@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // Plain .mjs pipeline module.
-import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings } from "../../../scripts/book-text-repair.mjs";
+import { findRunningHeads, stripRunningHeads, anchorFigures, trimTrailingHeadings, dropRedundantFigures } from "../../../scripts/book-text-repair.mjs";
 
 const fig = (inner = "") => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>Un cercle.</figcaption></figure>`;
 
@@ -150,5 +150,54 @@ describe("trimTrailingHeadings — page numbers", () => {
   it("does not mistake a numeric answer for furniture", () => {
     const src = "La réponse est :\n\n$$x = 1234567890$$";
     expect(trimTrailingHeadings(src)).toBe(src);
+  });
+});
+
+describe("dropRedundantFigures", () => {
+  const crop = (inner: string) => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>c</figcaption></figure>`;
+
+  it("drops a crop that caught only the page number and the watermark", () => {
+    const src = `Du texte.\n${crop('<text>277</text><text>Scanned by CamScanner</text>')}\nFin.`;
+    expect(dropRedundantFigures(src)).not.toContain("<figure");
+  });
+
+  it("keeps an unlabelled diagram, which has no text at all", () => {
+    const src = crop('<circle cx="1" cy="1" r="1"/>');
+    expect(dropRedundantFigures(src)).toBe(src);
+  });
+
+  it("keeps a labelled diagram whose labels include a page number", () => {
+    const src = crop('<circle cx="1" cy="1" r="1"/><text>277</text><text>Fig. 3</text>');
+    expect(dropRedundantFigures(src)).toBe(src);
+  });
+
+  it("drops the second of two byte-identical figures", () => {
+    const f = crop('<text>c) f(x)</text><path d="M1 1"/>');
+    expect(dropRedundantFigures(`${f}\n${f}`).match(/<figure/g)).toHaveLength(1);
+  });
+
+  it("keeps two figures that merely look alike", () => {
+    // Different crystal systems; different points. Resemblance is not identity.
+    const a = crop('<text>a≠b≠c</text><circle/>');
+    const b = crop('<text>a=b≠c</text><circle/>');
+    expect(dropRedundantFigures(`${a}\n${b}`).match(/<figure/g)).toHaveLength(2);
+  });
+
+  it("is a no-op on text with no figures", () => {
+    expect(dropRedundantFigures("Rien.")).toBe("Rien.");
+  });
+});
+
+describe("dropRedundantFigures — the scanner's watermark", () => {
+  const crop = (inner: string) => `<figure class="ai-figure"><svg>${inner}</svg><figcaption>c</figcaption></figure>`;
+
+  it("drops a watermark crop even when it draws a rule under itself", () => {
+    const src = crop('<text>277</text><text>Scanned by CamScanner</text><line x1="1" y1="1" x2="2" y2="2"/>');
+    expect(dropRedundantFigures(src)).toBe("");
+  });
+
+  it("keeps a real diagram that happens to carry the watermark too", () => {
+    const src = crop('<circle/><text>Le cercle trigonométrique</text><text>Scanned by CamScanner</text>');
+    expect(dropRedundantFigures(src)).toBe(src);
   });
 });

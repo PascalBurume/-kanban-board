@@ -124,7 +124,7 @@ function displayWidth(natural) {
   return Math.round(Math.min(COLUMN, Math.max(natural, target)));
 }
 
-export function injectBookFigures({ src, refined, label, bookTitle, book, locate, intro: introText, headings }) {
+export function injectBookFigures({ src, refined, label, bookTitle, book, locate, intro: introText, headings, startsLesson }) {
   // A book whose sections are not numbered supplies its own rule for which headings may
   // name a lesson — the EXETAT manual is divided by exam session, not by "1.2".
   const namesOf = headings ? (group) => headings(allHeadings(group)) : headingsOf;
@@ -261,27 +261,38 @@ export function injectBookFigures({ src, refined, label, bookTitle, book, locate
     // Sub-split any oversized section (long prose OR a run of "sketch the curve"
     // figures) at paragraph boundaries so no piece is over-long or figure-flooded.
     const PIECE_FIG = 7, PIECE_TXT = 14000;
+    // Each piece remembers the section it came from, so the packer below can be told
+    // never to put two different sections in one lesson.
     const fine = [];
-    for (const sec of secs) {
-      if (figsOf(sec) <= PIECE_FIG && textLenOf(sec) <= PIECE_TXT) { fine.push(sec); continue; }
+    secs.forEach((sec) => {
+      // Does this section begin a unit that must open its own lesson?
+      const opens = startsLesson ? startsLesson(sec) : false;
+      if (figsOf(sec) <= PIECE_FIG && textLenOf(sec) <= PIECE_TXT) { fine.push({ text: sec, opens }); return; }
       let buf = [], bf = 0, bt = 0;
       for (const para of sec.split(/\n\n+/)) {
         const pf = figsOf(para), pt = textLenOf(para);
-        if (buf.length && (bf + pf > PIECE_FIG || bt + pt > PIECE_TXT)) { fine.push(buf.join("\n\n")); buf = []; bf = 0; bt = 0; }
+        if (buf.length && (bf + pf > PIECE_FIG || bt + pt > PIECE_TXT)) { fine.push({ text: buf.join("\n\n"), opens: opens && !fine.some((x) => x.from === sec) }); buf = []; bf = 0; bt = 0; }
         buf.push(para); bf += pf; bt += pt;
       }
-      if (buf.length) fine.push(buf.join("\n\n"));
-    }
-    secs = fine;
+      if (buf.length) fine.push({ text: buf.join("\n\n"), opens: false });
+    });
 
     // Greedily pack pieces into lessons under hard caps — balanced, no tuning.
+    //
+    // `startsLesson` marks a section that must open a lesson of its own rather than be
+    // packed onto the one before. For a bank of past exam papers that is the difference
+    // between a usable index and a misleading one: three sittings of the EXETAT maths
+    // paper were sharing a lesson with the sitting before, so 2020 Kin-Centre, 2019 and
+    // 2015 were present in the text but findable nowhere in the tree, their lesson
+    // carrying only the first sitting's name.
     const LES_FIG = 9, LES_TXT = 15000;
     const groups = [];
     let curG = [], curF = 0, curT = 0;
-    for (const s of secs) {
-      const sf = figsOf(s), st = textLenOf(s);
-      if (curG.length && (curF + sf > LES_FIG || curT + st > LES_TXT)) { groups.push(curG); curG = []; curF = 0; curT = 0; }
-      curG.push(s); curF += sf; curT += st;
+    for (const p of fine) {
+      const sf = figsOf(p.text), st = textLenOf(p.text);
+      const overCap = curF + sf > LES_FIG || curT + st > LES_TXT;
+      if (curG.length && (overCap || p.opens)) { groups.push(curG); curG = []; curF = 0; curT = 0; }
+      curG.push(p.text); curF += sf; curT += st;
     }
     if (curG.length) groups.push(curG);
 

@@ -148,7 +148,11 @@
 /* ---------- SIM FRAME ---------- */
 .sim-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; }
 .sim-frame { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg, 16px); box-shadow: var(--sh-sm); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.sim-frame.is-full { position: fixed; inset: 0; z-index: 100; border-radius: 0; justify-content: center; max-width: 900px; margin: 0 auto; }
+/* max-width was 900px, which is NARROWER than the 1056px the frame already gets
+   inline on a laptop — so the box shrank on the way into fullscreen. It did not
+   matter much, because the drawing inside is capped separately and the extra
+   width was whitespace, but there is no reason to give width back. */
+.sim-frame.is-full { position: fixed; inset: 0; z-index: 100; border-radius: 0; justify-content: center; max-width: min(1200px, 100%); margin: 0 auto; }
 .sim-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .sim-head h3 { font-size: 16px; margin: 0; }
 .sim-hint { font-size: 12.5px; color: var(--text-muted); margin: 3px 0 0; max-width: 48ch; }
@@ -158,7 +162,10 @@
 /* Stage stacks vertically: visual on top, then caption, then sliders. */
 .sim-stage { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
 .sim-svg { display: block; width: 100%; height: auto; max-width: 460px; max-height: 60vh; margin: 0 auto; }
-.sim-frame.is-full .sim-svg { max-width: 760px; }
+/* The drawing is the whole point of the button. 460px inline, and 760px in
+   fullscreen left most of an 880px-tall screen unused — the cap, not the space,
+   was the limit. 60vh stays the guard against a short window. */
+.sim-frame.is-full .sim-svg { max-width: min(1000px, 100%); max-height: 72vh; }
 .sim-caption { font-size: 14px; color: var(--slate-700); text-align: center; margin: 0; padding: 9px 12px; background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--r-sm, 8px); }
 .sim-caption b { color: var(--primary); font-size: 15px; }
 .sim-controls { display: flex; flex-direction: column; gap: 10px; }

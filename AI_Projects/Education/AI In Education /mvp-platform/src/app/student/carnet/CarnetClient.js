@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import LessonWriter from "@/components/LessonWriter";
 import CarnetCopilot from "@/components/CarnetCopilot";
+import ResizeGrip from "@/components/ui/ResizeGrip";
 import { useOfflineDoc, syncAllDirty, saveLabel } from "@/lib/useOfflineDoc";
 import { listDocs, loadDoc, putServerDoc, saveDoc, markDeleted, deleteDoc } from "@/lib/localDocs";
 import { extractFormulas } from "@/lib/formulas";
@@ -63,11 +64,22 @@ export default function CarnetClient() {
   const [tab, setTab] = useState("contenu");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  // Panel width. 320px is fine for a chip and one sentence, and cramped for a
+  // worked answer with a formula in it — which is most of what this panel
+  // returns. Remembered per device: it is a screen-size preference, not account data.
+  const [copilotW, setCopilotW] = useState(320);
   const [notFound, setNotFound] = useState(false);
   const seeded = useRef(false);
   // Handed over by LessonWriter once TipTap is live, so Copilot text can land at
   // the caret instead of being appended to the bottom of the page.
   const writerRef = useRef(null);
+
+  // Restore the remembered panel width. After mount, so the server render and the
+  // first client render agree.
+  useEffect(() => {
+    const saved = Number(window.localStorage.getItem("mwalimu.carnet.copilotW"));
+    if (Number.isFinite(saved) && saved >= 280 && saved <= 620) setCopilotW(saved);
+  }, []);
 
   // ---- routing: ?id= selects the notebook, list view otherwise ----
   useEffect(() => {
@@ -367,7 +379,7 @@ export default function CarnetClient() {
         </button>
       </header>
 
-      <div className="cn-body">
+      <div className="cn-body" style={{ "--cop-w": `${copilotW}px` }}>
         <aside className="cn-side" hidden={!sidebarOpen}>
           <p className="cn-side-l">Mes carnets</p>
           <ul>
@@ -430,6 +442,15 @@ export default function CarnetClient() {
 
         {copilotOpen && (
           <aside className="cn-copilot">
+            <ResizeGrip
+              value={copilotW}
+              min={280}
+              max={620}
+              side="left"
+              label="Largeur du Copilot"
+              onChange={setCopilotW}
+              onCommit={(v) => window.localStorage.setItem("mwalimu.carnet.copilotW", String(v))}
+            />
             {/* The server reads the notes straight from the database, so the panel
                 does not need the text — only which notebook is open. */}
             <CarnetCopilot notebookId={docId} onInsert={insertFromCopilot} onClose={() => setCopilotOpen(false)} />

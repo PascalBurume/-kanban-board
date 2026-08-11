@@ -21,7 +21,9 @@
 .cn-save.bad .dot { background: var(--danger-fg, #b91c1c); }
 
 .cn-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; padding: 16px 20px 20px; }
-.cn-body:has(.cn-copilot) { grid-template-columns: 220px minmax(0, 1fr) 320px; }
+/* --cop-w is written by CarnetClient from the student's remembered width; the
+   320px fallback is what a first visit gets. */
+.cn-body:has(.cn-copilot) { grid-template-columns: 220px minmax(0, 1fr) var(--cop-w, 320px); }
 
 /* ---- document sidebar ---- */
 .cn-side { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px; }
@@ -49,7 +51,14 @@
 .cn-writer { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cn-writer[hidden] { display: none; }
 
-.cn-copilot { min-height: 0; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+/* relative so the drag handle can sit on the panel's own left edge; visible
+   overflow on that axis so the 6px strip is grabbable outside the border. */
+.cn-copilot { position: relative; min-height: 0; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+
+/* Drag handle, same component and metrics as the Rédiger outline. Keyboard is
+   not decoration here: the school's tablets are used with a keyboard and no mouse. */
+.cn-copilot .rz { position: absolute; top: 0; bottom: 0; width: 8px; left: -4px; cursor: col-resize; z-index: 5; touch-action: none; }
+.cn-copilot .rz:hover, .cn-copilot .rz:focus-visible { background: var(--indigo-200); outline: none; }
 .cn-copilot .cp-panel { flex: 1; min-height: 0; }
 /* Insert is an explicit choice, so it reads as an action under the answer rather
    than something that already happened. */

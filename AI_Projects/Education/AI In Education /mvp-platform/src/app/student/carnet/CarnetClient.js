@@ -7,6 +7,7 @@ import CarnetCopilot from "@/components/CarnetCopilot";
 import ResizeGrip from "@/components/ui/ResizeGrip";
 import { useOfflineDoc, syncAllDirty, saveLabel } from "@/lib/useOfflineDoc";
 import { listDocs, loadDoc, putServerDoc, saveDoc, markDeleted, deleteDoc } from "@/lib/localDocs";
+import katex from "katex";
 import { extractFormulas } from "@/lib/formulas";
 import { toast } from "@/lib/toast";
 
@@ -357,23 +358,6 @@ export default function CarnetClient() {
         <button className="cn-sidetoggle" onClick={() => setSidebarOpen((o) => !o)} aria-expanded={sidebarOpen}>
           <Icon name="layers" /> {sidebarOpen ? "Masquer" : "Carnets"}
         </button>
-        {/* Summons the auto-hidden ribbon. It has to look like an available tool
-            rather than a state readout, or a student who has never seen the
-            toolbar has no reason to guess there is one. */}
-        <button
-          className={`cn-tooltoggle${ribbonOpen ? " on" : ""}`}
-          onClick={() =>
-            setRibbonOpen((o) => {
-              window.localStorage.setItem("mwalimu.carnet.ribbon", o ? "0" : "1");
-              return !o;
-            })
-          }
-          aria-expanded={ribbonOpen}
-          aria-controls="cn-ribbon"
-          title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils (mise en forme, formules, symboles)"}
-        >
-          <Icon name="edit" /> <span>{ribbonOpen ? "Masquer les outils" : "Outils d'écriture"}</span>
-        </button>
         <input
           className="cn-title"
           value={title}
@@ -434,6 +418,25 @@ export default function CarnetClient() {
                 {badge != null && <span className="cn-badge warn">{badge}</span>}
               </button>
             ))}
+            {/* The way back to the auto-hidden ribbon, sitting directly above the
+                place the ribbon appears. The header is too far from the writing to
+                be where you look for a writing tool. */}
+            {tab === "contenu" && (
+              <button
+                className={`cn-tooltoggle cn-tabs-tool${ribbonOpen ? " on" : ""}`}
+                onClick={() =>
+                  setRibbonOpen((o) => {
+                    window.localStorage.setItem("mwalimu.carnet.ribbon", o ? "0" : "1");
+                    return !o;
+                  })
+                }
+                aria-expanded={ribbonOpen}
+                aria-controls="cn-ribbon"
+                title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils (mise en forme, formules, symboles)"}
+              >
+                <Icon name="edit" /> <span>{ribbonOpen ? "Masquer les outils" : "Outils d'écriture"}</span>
+              </button>
+            )}
           </nav>
 
           {/* The editor stays mounted across tabs: unmounting it would drop the
@@ -450,13 +453,51 @@ export default function CarnetClient() {
 
           {tab === "formules" && (
             <div className="cn-pane">
+              {/* This tab used to list only the LaTeX source, so a student saw
+                  \frac{x^2}{3} where they had written a fraction — which reads as
+                  debug output, not as their own notes. Rendering it makes it a
+                  formulary: every formula in the carnet on one page, which is what
+                  you actually want the night before a test. The source stays,
+                  underneath, because it is what you edit and what breaks. */}
+              <p className="cn-pane-intro">
+                Toutes les formules de ce carnet, réunies pour réviser.
+                {brokenCount > 0 && (
+                  <>
+                    {" "}
+                    <strong>{brokenCount}</strong>{" "}
+                    {brokenCount === 1 ? "est à corriger" : "sont à corriger"} : elles ne s'afficheront pas
+                    correctement dans tes notes.
+                  </>
+                )}
+              </p>
               {formulas.length === 0 ? (
-                <p className="cn-none">Aucune formule dans ce carnet.</p>
+                <p className="cn-none">
+                  Aucune formule pour l'instant. Ouvre les outils d'écriture et utilise « Formule » pour en
+                  ajouter une — elle apparaîtra ici.
+                </p>
               ) : (
                 <ul className="cn-formulas">
                   {formulas.map((f, i) => (
                     <li key={i} className={!f.ok || f.suspect ? "bad" : ""}>
-                      <code>{f.tex}</code>
+                      <span className="cn-fx">
+                        {f.ok ? (
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: katex.renderToString(f.tex, {
+                                displayMode: false,
+                                throwOnError: false,
+                                output: "html",
+                              }),
+                            }}
+                          />
+                        ) : (
+                          <code>{f.tex}</code>
+                        )}
+                      </span>
+                      <span className="cn-fx-meta">
+                        {f.ok && <code>{f.tex}</code>}
+                        <span className="cn-fx-line">ligne {f.line}</span>
+                      </span>
                       {!f.ok && <span className="why">{f.error || "ne s'affiche pas"}</span>}
                       {f.ok && f.suspect && <span className="why">à vérifier — une commande semble incomplète</span>}
                     </li>

@@ -8,6 +8,39 @@
 .lesson-body { display: grid; grid-template-columns: 1fr 380px; min-height: 0; transition: grid-template-columns .25s ease; }
 .lesson-body.collapsed { grid-template-columns: 1fr 0px; }
 
+/* Staff preview banner. It adds a row above the top bar, so the shell has to declare
+   it — the default two-row template would give .lesson-body an implicit auto row and
+   the page would stop filling the viewport. */
+.lesson-shell.is-preview { grid-template-rows: auto auto 1fr; }
+.lesson-preview-bar {
+  display: flex; align-items: center; gap: 12px; padding: 9px 20px;
+  background: var(--indigo-50); border-bottom: 1px solid var(--indigo-200);
+  color: var(--indigo-700); font-size: 13px; line-height: 1.35;
+}
+/* <Icon> wraps its svg in a span, so size the wrapper and the svg it holds. */
+.lesson-preview-bar > .icon { flex: none; }
+.lesson-preview-bar > .icon svg { width: 18px; height: 18px; }
+/* flex-basis 0 rather than auto: at `auto` the sentence's max-content width overflows
+   the line and wraps below the icon instead of shrinking beside it. */
+.lesson-preview-bar > span { flex: 1 1 0; min-width: 0; }
+.lesson-preview-bar b { font-weight: 700; }
+.lesson-preview-bar .lpb-back {
+  margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: var(--r-pill); border: 1px solid var(--indigo-200);
+  background: var(--surface); color: var(--indigo-700); font-weight: 600; font-size: 12.5px;
+}
+.lesson-preview-bar .lpb-back:hover { background: var(--indigo-100); }
+.lesson-preview-bar .lpb-back .icon svg { width: 15px; height: 15px; }
+
+/* On a phone the sentence needs the full width, so the button drops below it. A grid
+   rather than flex-wrap: wrapping by shrink order put the button beside a five-line
+   sentence at some widths and under it at others. */
+@media (max-width: 640px) {
+  .lesson-preview-bar { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: start; }
+  .lesson-preview-bar > .icon { margin-top: 1px; }
+  .lesson-preview-bar .lpb-back { grid-column: 2; justify-self: start; margin-left: 0; }
+}
+
 /* top bar */
 .lesson-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .crumb { display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0; }

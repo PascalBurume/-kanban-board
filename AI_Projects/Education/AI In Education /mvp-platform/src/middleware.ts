@@ -9,7 +9,10 @@ const RULES: { prefix: string; role?: Role | null; roles?: Role[] }[] = [
   { prefix: "/admin", role: "ADMIN" },
   { prefix: "/teacher/studio", roles: ["TEACHER", "ADMIN"] },
   { prefix: "/teacher", role: "TEACHER" },
-  { prefix: "/lesson", role: "STUDENT" },
+  // /lesson also admits staff: it is the studio's « Vue élève » preview. What they may
+  // open is decided by the API (getViewableLesson — their own subjects), and every write
+  // route under /api/student stays STUDENT-only, so a preview records nothing.
+  { prefix: "/lesson", roles: ["STUDENT", "TEACHER", "ADMIN"] },
   { prefix: "/student", role: "STUDENT" },
   { prefix: "/practice", role: "STUDENT" },
   { prefix: "/projects", role: "STUDENT" },

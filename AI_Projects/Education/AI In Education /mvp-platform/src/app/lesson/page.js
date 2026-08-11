@@ -9,6 +9,7 @@ import { useFullscreen } from "@/lib/fullscreen";
 import UnderstandingRating from "@/components/UnderstandingRating";
 import { chipPool, rotateChips } from "@/lib/copilotSuggestions";
 import { extractHighlights } from "@/lib/highlights";
+import { studentPreviewHref } from "@/lib/previewHref";
 
 let MSG_ID = 0;
 const nextMsgId = () => ++MSG_ID;
@@ -45,17 +46,23 @@ const BEAT_SECONDS = 30; // POST a heartbeat every 30s of active time
 export default function LessonPage() {
   /* ---- lesson id (read client-side to avoid prerender/Suspense) ---- */
   const [lessonId, setLessonId] = useState(null);
+  const [previewClassId, setPreviewClassId] = useState(null);
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("id");
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
     if (!id) {
       window.location.href = "/student/";
       return;
     }
+    setPreviewClassId(params.get("classId"));
     setLessonId(id);
   }, []);
 
   /* ---- remote data ---- */
-  const [data, setData] = useState(null); // { lesson, progress, quiz, nav }
+  const [data, setData] = useState(null); // { lesson, progress, quiz, nav, preview? }
+  // Staff previewing from the studio. The server decides this from the session — the
+  // ?preview=1 in the URL is only there to make the intent legible in the address bar.
+  const preview = !!data?.preview;
   const [loadState, setLoadState] = useState("loading"); // loading | ready | notfound | error
   const [completed, setCompleted] = useState(false);
   const [nextId, setNextId] = useState(null);
@@ -139,7 +146,7 @@ export default function LessonPage() {
   /* ---- time tracking: tick while visible + not idle, beat every 30s ---- */
   const sendBeat = useCallback(
     (seconds) => {
-      if (!lessonId || seconds <= 0) return;
+      if (!lessonId || seconds <= 0 || preview) return;
       fetch(`/api/student/lessons/${lessonId}/heartbeat/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -151,6 +158,8 @@ export default function LessonPage() {
 
   useEffect(() => {
     if (loadState !== "ready") return;
+    // A preview records nothing, so there is no clock to run.
+    if (preview) return;
     lastActivityRef.current = Date.now();
     const markActivity = () => {
       lastActivityRef.current = Date.now();
@@ -181,7 +190,7 @@ export default function LessonPage() {
         pendingRef.current = 0;
       }
     };
-  }, [loadState, sendBeat]);
+  }, [loadState, preview, sendBeat]);
 
   // autoscroll chat to bottom on new message / typing
   useEffect(() => {
@@ -193,6 +202,8 @@ export default function LessonPage() {
   // Load Copilot history + policy (enabled/paused) for this lesson.
   useEffect(() => {
     if (loadState !== "ready" || !lessonId) return;
+    // Copilot threads belong to a student; there is none to load for a preview.
+    if (preview) return;
     let alive = true;
     fetch(`/api/copilot/thread/?lessonId=${lessonId}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -209,7 +220,7 @@ export default function LessonPage() {
     return () => {
       alive = false;
     };
-  }, [loadState, lessonId]);
+  }, [loadState, lessonId, preview]);
 
   const mm = String(Math.floor(secs / 60)).padStart(2, "0");
   const ss = String(secs % 60).padStart(2, "0");
@@ -257,6 +268,12 @@ export default function LessonPage() {
 
   const submitQuiz = () => {
     if (!quiz || submitting) return;
+    // Grading belongs to the student who sat the quiz. A previewing teacher can read the
+    // questions but has no attempt to score, and the attempt route would refuse anyway.
+    if (preview) {
+      toast("Aperçu : le quiz se corrige côté élève.", { icon: "eye", color: "#c4b5fd" });
+      return;
+    }
     setSubmitting(true);
     const durationS = quizStartRef.current ? Math.floor((Date.now() - quizStartRef.current) / 1000) : 0;
     fetch(`/api/student/quiz/${quiz.id}/attempt/`, {
@@ -297,6 +314,10 @@ export default function LessonPage() {
   async function send(textArg) {
     const v = (typeof textArg === "string" ? textArg : input).trim();
     if (!v || streaming) return;
+    if (preview) {
+      toast("Aperçu : le Copilot répond aux élèves, pas ici.", { icon: "eye", color: "#c4b5fd" });
+      return;
+    }
     if (!active) {
       toast("Le Copilot est en pause.", { icon: "pause" });
       return;
@@ -457,17 +478,33 @@ export default function LessonPage() {
   const subjClass = ["math", "svt", "sptic", "chimie", "physique"].includes(lesson.icon)
     ? `subj-${lesson.icon}`
     : "";
-  const prevHref = nav.prevId ? `/lesson/?id=${nav.prevId}` : null;
-  const nextHref = nextId ? `/lesson/?id=${nextId}` : null;
+  // Paging keeps the preview scope, or the next lesson would lose the class whose
+  // compléments this teacher came to look at.
+  const lessonHref = (id) => (preview ? studentPreviewHref(id, previewClassId) : `/lesson/?id=${id}`);
+  const prevHref = nav.prevId ? lessonHref(nav.prevId) : null;
+  const nextHref = nextId ? lessonHref(nextId) : null;
 
   return (
     <div className="lesson-page">
-      <div className={`lesson-shell${isFull ? " is-full" : ""}`} ref={shellRef}>
+      <div className={`lesson-shell${isFull ? " is-full" : ""}${preview ? " is-preview" : ""}`} ref={shellRef}>
+        {preview && (
+          <div className="lesson-preview-bar">
+            <Icon name="eye" />
+            <span>
+              <b>Aperçu côté élève.</b> Voici la leçon telle que votre classe la voit. Rien n’est enregistré :
+              ni temps passé, ni progression.
+            </span>
+            <a className="lpb-back" href="/teacher/studio/">
+              <Icon name="chevL" /> Retour au studio
+            </a>
+          </div>
+        )}
+
         {/* Top */}
         <div className="lesson-top">
           <div className="crumb">
-            <a className="back" href="/student/">
-              <Icon name="home" /> Parcours
+            <a className="back" href={preview ? "/teacher/studio/" : "/student/"}>
+              <Icon name="home" /> {preview ? "Studio" : "Parcours"}
             </a>
             <span
               className={`subject-tile ${subjClass}`.trim()}
@@ -496,11 +533,13 @@ export default function LessonPage() {
                 <>
                   <div className="lm-scrim" onClick={() => setMenuOpen(false)} />
                   <div className="lesson-menu-pop">
-                    <div className="lm-row">
-                      <span className="lm-ic"><Icon name="clock" /></span>
-                      <span className="lm-label">Temps sur la leçon</span>
-                      <b className="lm-val">{`${mm}:${ss}`}</b>
-                    </div>
+                    {!preview && (
+                      <div className="lm-row">
+                        <span className="lm-ic"><Icon name="clock" /></span>
+                        <span className="lm-label">Temps sur la leçon</span>
+                        <b className="lm-val">{`${mm}:${ss}`}</b>
+                      </div>
+                    )}
                     <div className="lm-row">
                       <span className="lm-ic ok"><span className="lm-dot" /></span>
                       <span className="lm-label">Serveur local connecté</span>
@@ -588,7 +627,7 @@ export default function LessonPage() {
                   </span>
                 )}
 
-                {!completed && (
+                {!completed && !preview && (
                   <button className="btn btn-ghost" onClick={onComplete}>
                     <Icon name="check" /> Marquer comme terminé
                   </button>
@@ -680,14 +719,19 @@ export default function LessonPage() {
               <p className="cop-disclaimer">
                 <Icon name="sparkles" /> Le Copilot peut se tromper — vérifie les informations importantes.
               </p>
-              {!active && (
+              {/* The same overlay covers two cases: a teacher who paused the Copilot for
+                  the class, and a teacher previewing — whose session has no student
+                  thread to hold a conversation in. */}
+              {(preview || !active) && (
                 <div className="cop-disabled" style={{ display: "flex" }}>
                   <div className="di">
-                    <Icon name="pause" />
+                    <Icon name={preview ? "eye" : "pause"} />
                   </div>
-                  <h4>Le Copilot est en pause</h4>
+                  <h4>{preview ? "Copilot — aperçu" : "Le Copilot est en pause"}</h4>
                   <p>
-                    Ton enseignant a mis le Copilot en pause pour cette leçon. Tu peux toujours lire et terminer la leçon.
+                    {preview
+                      ? "Vos élèves discutent ici avec le Copilot pendant la leçon. La conversation appartient à l’élève, elle ne s’ouvre pas en aperçu."
+                      : "Ton enseignant a mis le Copilot en pause pour cette leçon. Tu peux toujours lire et terminer la leçon."}
                   </p>
                 </div>
               )}

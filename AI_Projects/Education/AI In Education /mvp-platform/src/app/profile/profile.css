@@ -109,12 +109,50 @@
 .pf-chip { font-size: 12px; color: var(--text-soft); background: var(--slate-100); border-radius: var(--r-sm, 8px); padding: 4px 9px; }
 .pf-hint { font-size: 12.5px; color: var(--text-muted); margin: 16px 0 0; }
 
+/* ---- « Ma classe » — the student's own side of Enseignement: which class, whose
+   class, and each book with how much of it is behind them. ---- */
+.pf-class {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px;
+  padding: 12px 14px; margin-bottom: 14px;
+  background: var(--indigo-50); border-radius: var(--r-md);
+}
+.pf-class-id { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
+.pf-class-n { font: 700 15px var(--font-head, var(--font-ui)); color: var(--text); }
+.pf-class-f { font-size: 12.5px; color: var(--text-soft); }
+.pf-class-t { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--indigo-700); }
+.pf-class-t svg { width: 14px; height: 14px; }
+
+.pf-books { list-style: none; margin: 0; padding: 0; }
+.pf-books li {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center; gap: 12px;
+  padding: 11px 0; border-top: 1px solid var(--border);
+}
+.pf-books li:first-child { border-top: 0; padding-top: 2px; }
+.pf-book-ic {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: var(--r-sm, 8px);
+  background: var(--slate-100); color: var(--text-soft);
+}
+.pf-book-ic svg { width: 17px; height: 17px; }
+.pf-book-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-book-n { font-size: 13.5px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+.pf-book-m { font-size: 12px; color: var(--text-muted); }
+.pf-book-p { display: flex; align-items: center; gap: 10px; }
+.pf-bar { width: 88px; height: 6px; border-radius: 999px; background: var(--slate-100); overflow: hidden; flex: none; }
+.pf-bar i { display: block; height: 100%; border-radius: 999px; }
+/* tabular-nums so 8/72 and 167/168 do not jitter against each other down the column. */
+.pf-book-c { font: 600 12.5px var(--font-ui); color: var(--text-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 @media (max-width: 560px) {
   /* Retour / marque / Se déconnecter fits 375px only just — buy it some room. */
   .profile-top { padding: 12px 14px; gap: 10px; }
   .profile-top .logout-link { padding: 7px 11px; }
   .pf-teach li { grid-template-columns: 1fr; }
   .pf-grid { grid-template-columns: 1fr; }
+  /* The 88px bar and the count together need more room than a phone has beside a
+     book title, and the title is the part that matters. Bar goes, count stays. */
+  .pf-books li { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; }
+  .pf-bar { display: none; }
   .profile-hero { gap: 14px; }
   .profile-hero .avatar-xl { width: 58px; height: 58px; font-size: 21px; }
   .profile-hero h1 { font-size: 20px; }

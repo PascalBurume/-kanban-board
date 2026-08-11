@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession, getCurrentUser, audit } from "@/lib/auth";
 import { teacherClasses } from "@/lib/teacher";
+import { studentSchooling } from "@/lib/path";
 import { normalizeGender } from "@/lib/gender";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,12 @@ export async function GET() {
     };
   }
 
-  return NextResponse.json({ user, teaching });
+  // The student equivalent of `teaching`: which class they are in and which books
+  // it studies. Same source as the dashboard (Offering → subjects), so the two can
+  // never quote different totals for the same book.
+  const schooling = user.role === "STUDENT" ? await studentSchooling(u.userId) : null;
+
+  return NextResponse.json({ user, teaching, schooling });
 }
 
 // PATCH { firstName?, lastName?, locale?, avatarColor?, gender? }

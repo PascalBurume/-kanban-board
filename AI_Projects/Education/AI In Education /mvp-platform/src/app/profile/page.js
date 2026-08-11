@@ -18,6 +18,7 @@ const CIVILITIES = [
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [teaching, setTeaching] = useState(null);
+  const [schooling, setSchooling] = useState(null);
   const [form, setForm] = useState({ firstName: "", lastName: "", avatarColor: COLORS[0], gender: null });
   const [saving, setSaving] = useState(false);
 
@@ -37,6 +38,7 @@ export default function ProfilePage() {
         if (d?.user) {
           setUser(d.user);
           setTeaching(d.teaching || null);
+          setSchooling(d.schooling || null);
           setForm({
             firstName: d.user.firstName || "",
             lastName: d.user.lastName || "",
@@ -220,6 +222,58 @@ export default function ProfilePage() {
             {dirty && !saving && <span className="pf-unsaved">Modifications non enregistrées</span>}
           </div>
         </section>
+
+        {/* The student mirror of « Enseignement ». The dashboard shows the books as
+            work to get through; here they are stated as what the student HAS —
+            which class, whose class, and how much of each book is behind them. */}
+        {schooling && schooling.books.length > 0 && (
+          <section className="profile-card">
+            <div className="pf-head">
+              <h2><span className="pf-ic"><Icon name="book" /></span> Ma classe</h2>
+              <span className="pf-teach-sum">
+                {schooling.doneLessons} / {schooling.totalLessons} leçons
+              </span>
+            </div>
+
+            <div className="pf-class">
+              <div className="pf-class-id">
+                <span className="pf-class-n">{schooling.className}</span>
+                {schooling.field && <span className="pf-class-f">{schooling.field}</span>}
+              </div>
+              {schooling.titulaire && (
+                <span className="pf-class-t">
+                  <Icon name="user" />
+                  Titulaire&nbsp;: {withCivility(schooling.titulaire.gender, `${schooling.titulaire.firstName} ${schooling.titulaire.lastName}`)}
+                </span>
+              )}
+            </div>
+
+            <ul className="pf-books">
+              {schooling.books.map((b) => (
+                <li key={b.slug}>
+                  <span className="pf-book-ic" style={b.color ? { background: `${b.color}1a`, color: b.color } : undefined}>
+                    <Icon name={b.icon || "book"} />
+                  </span>
+                  <div className="pf-book-t">
+                    <span className="pf-book-n">{b.name}</span>
+                    <span className="pf-book-m">
+                      {b.modules} chapitre{b.modules > 1 ? "s" : ""} · {b.total} leçon{b.total > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="pf-book-p">
+                    {/* The bar is decoration over the number, not a substitute for it —
+                        the count is what a parent looking over a shoulder reads. */}
+                    <span className="pf-bar" aria-hidden="true">
+                      <i style={{ width: `${b.pct}%`, background: b.color || "var(--primary)" }} />
+                    </span>
+                    <span className="pf-book-c">{b.done}/{b.total}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="pf-hint">Vos manuels sont définis par votre classe.</p>
+          </section>
+        )}
 
         {teaching && teaching.classes.length > 0 && (
           <section className="profile-card">

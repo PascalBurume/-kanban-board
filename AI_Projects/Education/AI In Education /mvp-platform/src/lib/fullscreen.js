@@ -53,19 +53,43 @@ export function useFullscreen(ref) {
   const enter = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+
+    const fallback = () => {
+      if (faking.current || fullscreenElement()) return;
+      faking.current = true;
+      setIsFull(true);
+    };
+
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (!req) {
-      faking.current = true;
-      setIsFull(true);
-      return;
+    if (!req) return fallback();
+
+    // Three ways this call fails, and the third is the one that bit us.
+    //
+    //   1. throws synchronously  — some engines do, for a detached element
+    //   2. rejects              — a refused permission, no user activation
+    //   3. never settles at all — what an embedded browser actually did here:
+    //      "requestFullscreen called" and then silence. No resolve, no reject,
+    //      no fullscreenchange, no fullscreenerror. A .catch() waits forever,
+    //      so the button was dead on a real click while a scripted one — which
+    //      gets refused immediately for lack of activation — appeared to work.
+    //      That is why this looked fixed when it was not.
+    //
+    // So the fallback is driven by the outcome, not by the promise: if we are
+    // not actually in fullscreen shortly after asking, take over. A genuine
+    // transition sets document.fullscreenElement well inside this window, and
+    // the guard above means a late success is never overridden.
+    let settled = false;
+    try {
+      Promise.resolve(req.call(el)).then(
+        () => { settled = true; },
+        () => { settled = true; fallback(); },
+      );
+    } catch {
+      return fallback();
     }
-    // requestFullscreen resolves/rejects async, so the fallback has to live in
-    // the catch rather than behind a capability check — document.fullscreenEnabled
-    // reports true in embedders that then refuse the actual call.
-    Promise.resolve(req.call(el)).catch(() => {
-      faking.current = true;
-      setIsFull(true);
-    });
+    setTimeout(() => {
+      if (!settled) fallback();
+    }, 400);
   }, [ref]);
 
   const toggle = useCallback(() => {

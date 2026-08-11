@@ -5,6 +5,11 @@ public/content/
 .DS_Store
 npm-debug.log*
 
+# TypeScript's incremental build cache. Rewritten by every tsc run, so tracking it
+# left the working tree dirty after any typecheck and put a meaningless diff in
+# front of anyone reading a commit.
+*.tsbuildinfo
+
 # backend
 .env
 *.db

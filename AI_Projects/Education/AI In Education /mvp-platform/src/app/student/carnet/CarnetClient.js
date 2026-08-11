@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import LessonWriter from "@/components/LessonWriter";
 import CarnetCopilot from "@/components/CarnetCopilot";
+import ResizeGrip from "@/components/ui/ResizeGrip";
 import { useOfflineDoc, syncAllDirty, saveLabel } from "@/lib/useOfflineDoc";
 import { listDocs, loadDoc, putServerDoc, saveDoc, markDeleted, deleteDoc } from "@/lib/localDocs";
+import katex from "katex";
 import { extractFormulas } from "@/lib/formulas";
 import { toast } from "@/lib/toast";
 
@@ -62,12 +64,32 @@ export default function CarnetClient() {
   const [md, setMd] = useState("");
   const [tab, setTab] = useState("contenu");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Auto-hidden: the carnet opens as a page to write and read on, not as a word
+  // processor. The ribbon wraps to four rows on a laptop and took more height
+  // than the text under it, so it is summoned from the header when wanted rather
+  // than sitting there by default. The choice is remembered, so a student who
+  // does want it open keeps it open.
+  const [ribbonOpen, setRibbonOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  // Panel width. 320px is fine for a chip and one sentence, and cramped for a
+  // worked answer with a formula in it — which is most of what this panel
+  // returns. Remembered per device: it is a screen-size preference, not account data.
+  const [copilotW, setCopilotW] = useState(320);
   const [notFound, setNotFound] = useState(false);
   const seeded = useRef(false);
   // Handed over by LessonWriter once TipTap is live, so Copilot text can land at
   // the caret instead of being appended to the bottom of the page.
   const writerRef = useRef(null);
+
+  // Restore the remembered panel width. After mount, so the server render and the
+  // first client render agree.
+  useEffect(() => {
+    const saved = Number(window.localStorage.getItem("mwalimu.carnet.copilotW"));
+    if (Number.isFinite(saved) && saved >= 280 && saved <= 620) setCopilotW(saved);
+    // Only an explicit "1" reopens it — an absent key means a first visit, which
+    // should get the hidden default.
+    if (window.localStorage.getItem("mwalimu.carnet.ribbon") === "1") setRibbonOpen(true);
+  }, []);
 
   // ---- routing: ?id= selects the notebook, list view otherwise ----
   useEffect(() => {
@@ -367,7 +389,7 @@ export default function CarnetClient() {
         </button>
       </header>
 
-      <div className="cn-body">
+      <div className="cn-body" style={{ "--cop-w": `${copilotW}px` }}>
         <aside className="cn-side" hidden={!sidebarOpen}>
           <p className="cn-side-l">Mes carnets</p>
           <ul>
@@ -396,6 +418,25 @@ export default function CarnetClient() {
                 {badge != null && <span className="cn-badge warn">{badge}</span>}
               </button>
             ))}
+            {/* The way back to the auto-hidden ribbon, sitting directly above the
+                place the ribbon appears. The header is too far from the writing to
+                be where you look for a writing tool. */}
+            {tab === "contenu" && (
+              <button
+                className={`cn-tooltoggle cn-tabs-tool${ribbonOpen ? " on" : ""}`}
+                onClick={() =>
+                  setRibbonOpen((o) => {
+                    window.localStorage.setItem("mwalimu.carnet.ribbon", o ? "0" : "1");
+                    return !o;
+                  })
+                }
+                aria-expanded={ribbonOpen}
+                aria-controls="cn-ribbon"
+                title={ribbonOpen ? "Masquer la barre d'outils" : "Afficher la barre d'outils (mise en forme, formules, symboles)"}
+              >
+                <Icon name="edit" /> <span>{ribbonOpen ? "Masquer les outils" : "Outils d'écriture"}</span>
+              </button>
+            )}
           </nav>
 
           {/* The editor stays mounted across tabs: unmounting it would drop the
@@ -406,18 +447,57 @@ export default function CarnetClient() {
               onChange={(v) => { if (v === md) return; edit({ contentMd: v }); }}
               saveState={saveLabel(status, lastSyncedAt)}
               onReady={onWriterReady}
+              ribbonHidden={!ribbonOpen}
             />
           </div>
 
           {tab === "formules" && (
             <div className="cn-pane">
+              {/* This tab used to list only the LaTeX source, so a student saw
+                  \frac{x^2}{3} where they had written a fraction — which reads as
+                  debug output, not as their own notes. Rendering it makes it a
+                  formulary: every formula in the carnet on one page, which is what
+                  you actually want the night before a test. The source stays,
+                  underneath, because it is what you edit and what breaks. */}
+              <p className="cn-pane-intro">
+                Toutes les formules de ce carnet, réunies pour réviser.
+                {brokenCount > 0 && (
+                  <>
+                    {" "}
+                    <strong>{brokenCount}</strong>{" "}
+                    {brokenCount === 1 ? "est à corriger" : "sont à corriger"} : elles ne s'afficheront pas
+                    correctement dans tes notes.
+                  </>
+                )}
+              </p>
               {formulas.length === 0 ? (
-                <p className="cn-none">Aucune formule dans ce carnet.</p>
+                <p className="cn-none">
+                  Aucune formule pour l'instant. Ouvre les outils d'écriture et utilise « Formule » pour en
+                  ajouter une — elle apparaîtra ici.
+                </p>
               ) : (
                 <ul className="cn-formulas">
                   {formulas.map((f, i) => (
                     <li key={i} className={!f.ok || f.suspect ? "bad" : ""}>
-                      <code>{f.tex}</code>
+                      <span className="cn-fx">
+                        {f.ok ? (
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: katex.renderToString(f.tex, {
+                                displayMode: false,
+                                throwOnError: false,
+                                output: "html",
+                              }),
+                            }}
+                          />
+                        ) : (
+                          <code>{f.tex}</code>
+                        )}
+                      </span>
+                      <span className="cn-fx-meta">
+                        {f.ok && <code>{f.tex}</code>}
+                        <span className="cn-fx-line">ligne {f.line}</span>
+                      </span>
                       {!f.ok && <span className="why">{f.error || "ne s'affiche pas"}</span>}
                       {f.ok && f.suspect && <span className="why">à vérifier — une commande semble incomplète</span>}
                     </li>
@@ -430,6 +510,15 @@ export default function CarnetClient() {
 
         {copilotOpen && (
           <aside className="cn-copilot">
+            <ResizeGrip
+              value={copilotW}
+              min={280}
+              max={620}
+              side="left"
+              label="Largeur du Copilot"
+              onChange={setCopilotW}
+              onCommit={(v) => window.localStorage.setItem("mwalimu.carnet.copilotW", String(v))}
+            />
             {/* The server reads the notes straight from the database, so the panel
                 does not need the text — only which notebook is open. */}
             <CarnetCopilot notebookId={docId} onInsert={insertFromCopilot} onClose={() => setCopilotOpen(false)} />

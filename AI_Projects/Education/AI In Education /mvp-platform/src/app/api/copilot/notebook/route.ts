@@ -6,6 +6,7 @@ import { resolveCopilotEnabled } from "@/lib/teacher";
 import { getNotebook } from "@/lib/notebook";
 import { notebookCoachPrompt, streamChat, acquireSlot, releaseSlot, ollamaOnline, type ChatMessage } from "@/lib/ollama";
 import { retrieveChunks } from "@/lib/rag";
+import { getStudyRecord, formatStudyRecord } from "@/lib/studyRecord";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,9 +16,51 @@ const RATE_MAX = 12;
 const HISTORY_TURNS = 6;
 const RAG_CHARS = 1500;
 
+// The same study record the coach is grounded in, for the panel's opening line.
+// The greeting used to promise help "à partir de tes notes" and then, on an empty
+// carnet, refuse for exactly that reason. Naming a finished module up front makes
+// the offer one the assistant can actually honour.
+export async function GET(req: Request) {
+  const u = await getCurrentUser();
+  if (!u || u.role !== "STUDENT") return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+
+  const notebookId = new URL(req.url).searchParams.get("notebookId") ?? "";
+  const notebook = notebookId ? await getNotebook(u.userId, notebookId) : null;
+  const classId = u.classId ?? (await prisma.enrollment.findUnique({ where: { studentId: u.userId } }))?.classId;
+  if (!classId) return NextResponse.json({ finishedModules: [], weakest: null, totalDone: 0 });
+
+  try {
+    const rec = await getStudyRecord(u.userId, classId, notebook?.subjectSlug);
+    // `current` is the point of this payload. Keyed off the module actually being
+    // worked, not the first finished one — that is fixed in curriculum order, so
+    // the suggestion never changed and read as decoration rather than a
+    // suggestion. Falls back to the last lesson completed, which is still "what
+    // I am on" rather than "what I did in September".
+    const active = rec.modules.find((m) => !m.finished && (m.inProgress.length > 0 || m.doneCount > 0));
+    return NextResponse.json({
+      current: active
+        ? {
+            module: active.name,
+            lesson: active.inProgress[0] ?? null,
+            doneCount: active.doneCount,
+            lessonCount: active.lessonCount,
+          }
+        : null,
+      finishedModules: rec.modules.filter((m) => m.finished).map((m) => m.name),
+      inProgressModules: rec.modules.filter((m) => !m.finished && m.doneCount > 0).map((m) => m.name),
+      weakest: rec.weakest[0] ?? null,
+      lastLessons: rec.lastLessons.slice(0, 3),
+      totalDone: rec.totalDone,
+    });
+  } catch {
+    return NextResponse.json({ finishedModules: [], weakest: null, totalDone: 0 });
+  }
+}
+
 // Study assistant for the student's own carnet. Same guarantees as the lesson tutor
 // (student-only, teacher kill-switch, per-student rate limit, one Ollama slot), but
-// grounded in the student's notes plus the book passages that match them.
+// grounded in the student's notes, their progress on the platform, and the book
+// passages that match them.
 export async function POST(req: Request) {
   const u = await getCurrentUser();
   if (!u || u.role !== "STUDENT") return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
@@ -51,12 +94,31 @@ export async function POST(req: Request) {
     ? (await prisma.subject.findUnique({ where: { slug: notebook.subjectSlug }, select: { name: true } }))?.name ?? "Notes libres"
     : "Notes libres";
 
-  let system = notebookCoachPrompt(notebook.title, subjectName, notebook.contentMd || "");
+  // What the student has already covered. Without it the coach sees only the
+  // notebook, so a carnet opened for the first time — every carnet, once — got
+  // "tes notes sont encore vides" instead of a revision plan drawn from lessons
+  // the platform already knows they finished. Best-effort: a failure here
+  // degrades to the previous behaviour rather than losing the assistant.
+  let record = "";
+  try {
+    record = formatStudyRecord(await getStudyRecord(u.userId, classId, notebook.subjectSlug));
+  } catch {
+    record = "";
+  }
+
+  let system = notebookCoachPrompt(notebook.title, subjectName, notebook.contentMd || "", record);
 
   // Ground the answer in the actual textbook where the notes touch it.
   try {
     const slugs = notebook.subjectSlug ? [notebook.subjectSlug] : await accessibleSubjectSlugs(classId);
-    const hits = await retrieveChunks(content, { k: 3, subjectSlugs: slugs });
+    // "Résume mes notes" against an empty carnet is a query with nothing in it
+    // to match, so retrieval returned noise. Widening it with the lessons the
+    // student actually finished pulls back the passages they were revising.
+    const query =
+      notebook.contentMd?.trim() || !record
+        ? content
+        : `${content}\n${record.split("\n").filter((l) => l.startsWith("- ")).slice(0, 4).join("\n")}`;
+    const hits = await retrieveChunks(query, { k: 3, subjectSlugs: slugs });
     const blocks: string[] = [];
     let used = 0;
     for (const h of hits.filter((x) => x.score > 0.5)) {

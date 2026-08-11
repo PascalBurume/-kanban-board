@@ -13,6 +13,52 @@ const CHIPS = [
   "Résume mes notes",
 ];
 
+const HELLO =
+  "Bonjour 👋 Je peux expliquer une formule, relire un calcul ou te proposer un exercice à partir de tes notes.";
+
+// Opening line drawn from what the student has actually finished. The old
+// greeting offered help "à partir de tes notes" and then, on a carnet opened for
+// the first time, refused for exactly that reason. Naming a module they have
+// completed makes the offer one the assistant can honour straight away.
+function greeting(rec) {
+  if (!rec?.totalDone) return HELLO;
+  const bits = [];
+  // Lead with where the student actually is. Opening on the count of finished
+  // modules described a history; this describes the work in front of them.
+  if (rec.current) {
+    const where = rec.current.lesson ? ` (en cours : « ${rec.current.lesson} »)` : "";
+    bits.push(`Tu en es à « ${rec.current.module} », ${rec.current.doneCount}/${rec.current.lessonCount} leçons${where}.`);
+  } else if (rec.lastLessons?.length) {
+    bits.push(`Ta dernière leçon terminée : « ${rec.lastLessons[0]} ».`);
+  } else if (rec.finishedModules?.length) {
+    bits.push(`Tu as terminé le module « ${rec.finishedModules[0]} ».`);
+  }
+  if (rec.weakest) bits.push(`Ton quiz le plus faible est « ${rec.weakest.lesson} » (${rec.weakest.score}/100).`);
+  bits.push("Je peux te faire réviser tout ça, même si ton carnet est encore vide.");
+  return `Bonjour 👋 ${bits.join(" ")}`;
+}
+
+/**
+ * Chips anchored on the work in progress, then the generic ones.
+ *
+ * The first version offered `finishedModules[0]`, which is the first module in
+ * curriculum order — fixed for the whole year. It read as a label rather than a
+ * suggestion, because it never changed no matter what the student was doing.
+ */
+function chipsFor(rec) {
+  if (!rec?.totalDone) return CHIPS;
+  const out = [];
+  if (rec.current?.lesson) out.push(`Explique « ${rec.current.lesson} »`);
+  if (rec.current?.module) out.push(`Interroge-moi sur « ${rec.current.module} »`);
+  if (rec.weakest) out.push(`Révise « ${rec.weakest.lesson} »`);
+  // Nothing in flight: fall back to the most recent lesson, still more current
+  // than the first module of the year.
+  if (!out.length && rec.lastLessons?.length) out.push(`Révise « ${rec.lastLessons[0]} »`);
+  // De-duplicate: a weak quiz on the lesson in progress would otherwise appear twice.
+  const seen = new Set();
+  return [...out, ...CHIPS].filter((c) => !seen.has(c) && seen.add(c)).slice(0, 5);
+}
+
 // Study assistant docked beside the notebook. Two things make it different from the
 // lesson tutor: it reads the student's OWN notes (so it can catch their mistakes),
 // and every answer can be dropped into the page at the caret.
@@ -21,12 +67,30 @@ const CHIPS = [
 // that genuinely needs the network. It says so plainly and gets out of the way —
 // writing never depends on it.
 export default function CarnetCopilot({ notebookId, onInsert, onClose }) {
-  const [messages, setMessages] = useState([
-    { id: ++NB_ID, who: "bot", text: "Bonjour 👋 Je peux expliquer une formule, relire un calcul ou te proposer un exercice à partir de tes notes." },
-  ]);
+  const [messages, setMessages] = useState([{ id: ++NB_ID, who: "bot", text: HELLO }]);
   const [val, setVal] = useState("");
   const [busy, setBusy] = useState(false);
+  const [record, setRecord] = useState(null);
   const msgsRef = useRef(null);
+
+  // Rewrite the greeting once the student's record arrives. Only while the panel
+  // is still untouched — replacing the first line after a conversation has begun
+  // would rewrite history under the student.
+  useEffect(() => {
+    if (!notebookId) return;
+    let alive = true;
+    fetch(`/api/copilot/notebook/?notebookId=${encodeURIComponent(notebookId)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rec) => {
+        if (!alive || !rec?.totalDone) return;
+        setRecord(rec);
+        setMessages((m) => (m.length === 1 && m[0].who === "bot" ? [{ ...m[0], text: greeting(rec) }] : m));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [notebookId]);
 
   useEffect(() => {
     msgsRef.current?.scrollTo({ top: msgsRef.current.scrollHeight, behavior: "smooth" });
@@ -111,7 +175,7 @@ export default function CarnetCopilot({ notebookId, onInsert, onClose }) {
       </div>
 
       <div className="cp-chips">
-        {CHIPS.map((c) => (
+        {chipsFor(record).map((c) => (
           <button key={c} className="cp-chip" onClick={() => send(c)} disabled={busy}>{c}</button>
         ))}
       </div>

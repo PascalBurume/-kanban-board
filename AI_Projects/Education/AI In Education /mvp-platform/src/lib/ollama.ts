@@ -62,11 +62,33 @@ export function copilotSystemPrompt(lessonTitle: string, subject: string, excerp
 // authored lesson to stay faithful to — the reference text is the student's own
 // notes, which may well be wrong. That is the point: catch the mistake and make the
 // student find the fix, rather than rewrite the page for them.
-export function notebookCoachPrompt(noteTitle: string, subject: string, notes: string): string {
+export function notebookCoachPrompt(
+  noteTitle: string,
+  subject: string,
+  notes: string,
+  /** What the student has already studied — see lib/studyRecord.ts. */
+  studyRecord = "",
+): string {
   const trimmed = notes.length > EXCERPT_CHARS ? notes.slice(0, EXCERPT_CHARS) + "\n…(notes tronquées)" : notes;
+  const empty = !notes.trim();
   return [
     "Tu es **Copilot**, un tuteur patient qui aide un élève du secondaire en République Démocratique du Congo à réviser dans son carnet personnel.",
     "Tu réponds TOUJOURS en français, clairement et brièvement, pour un élève de 15 à 19 ans.",
+    // Hoisted to the top on purpose. As the last bullet of a long prompt this was
+    // ignored: the model still opened with "il faut d'abord écrire tes notes"
+    // and only then offered the revision. A small model weights the beginning,
+    // and the first sentence is the whole point here — the student came to
+    // revise, not to be told their empty page is empty.
+    ...(empty && studyRecord
+      ? [
+          "",
+          "⚠ CONSIGNE PRIORITAIRE — le carnet est vide.",
+          "N'écris NI « ton carnet est vide », NI « il faut d'abord écrire tes notes », NI aucune variante.",
+          "Un carnet vide n'est pas un obstacle : tu connais déjà tout le parcours de l'élève (plus bas).",
+          "Commence DIRECTEMENT par proposer une révision : nomme deux ou trois leçons ou modules qu'il a",
+          "terminés, ou son quiz le plus faible, puis demande par où il veut commencer.",
+        ]
+      : []),
     "",
     "Règles importantes :",
     "- Les notes ci-dessous sont écrites PAR L'ÉLÈVE : elles peuvent contenir des erreurs. Si tu en repères une, signale-la avec bienveillance et explique pourquoi.",
@@ -82,6 +104,33 @@ export function notebookCoachPrompt(noteTitle: string, subject: string, notes: s
     "<<<",
     trimmed || "(le carnet est encore vide)",
     ">>>",
+    // The parcours is the answer to "the carnet is empty". Before this, a new
+    // carnet got "écris d'abord tes notes" — a refusal at the exact moment a
+    // revision assistant is most useful, and about material the platform could
+    // already name lesson by lesson.
+    ...(studyRecord
+      ? [
+          "",
+          "Parcours de l'élève sur la plateforme (données réelles, tu peux t'y fier) :",
+          "<<<PARCOURS",
+          studyRecord,
+          ">>>",
+          "",
+          "Comment t'en servir :",
+          "- Cite les modules et les leçons par leur nom exact : ce sont ceux que l'élève a réellement vus.",
+          "- Un quiz sous 60/100 est une priorité de révision : propose-la sans attendre qu'on te la demande.",
+          "- N'affirme jamais qu'une leçon absente de cette liste a été étudiée.",
+          // Repeated at the end as well as the top: these are the two positions a
+          // small model actually attends to.
+          ...(empty ? ["- Rappel : le carnet est vide — propose la révision tout de suite, sans le faire remarquer."] : []),
+        ]
+      : empty
+        ? [
+            "",
+            "Le carnet est vide et l'élève n'a encore terminé aucune leçon : propose-lui d'écrire ce qu'il a retenu",
+            "du dernier cours, ou pose-lui une question simple sur la matière.",
+          ]
+        : []),
   ].join("\n");
 }
 

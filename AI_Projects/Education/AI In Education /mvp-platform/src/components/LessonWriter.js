@@ -166,7 +166,7 @@ function TableGrid({ onPick }) {
 // being lifted out as props so this component keeps owning the editor: React context
 // and event bubbling both follow the portal, so `keepSelection` and every `ed.*`
 // command work exactly as they do inline. Without a host, they render in place.
-export default function LessonWriter({ value, onChange, disabled, saveState, lessonId, onReady, subjectSlug, classLevel, toolbarHost, statusHost }) {
+export default function LessonWriter({ value, onChange, disabled, saveState, lessonId, onReady, subjectSlug, classLevel, toolbarHost, statusHost, ribbonHidden = false }) {
   const ed = useLessonEditor({ value, onChange, disabled });
   const { editor, mode, setMode, gate, ctx, exitCtx, mathSel, figSel, latexOpen, insertMarkdown } = ed;
 
@@ -344,7 +344,10 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
 
   // ── desktop ribbon ──
   const ribbon = (
-    <div className="lw-ribbon" onMouseDown={keepSelection} hidden={latexFull}>
+    // `ribbonHidden` is the caller's choice, `latexFull` the editor's own. On a
+    // laptop this ribbon wraps to four rows and eats most of the page the student
+    // is trying to read back, so the carnet lets them fold it away.
+    <div id="cn-ribbon" className="lw-ribbon" onMouseDown={keepSelection} hidden={latexFull || ribbonHidden}>
         <div className="lw-group">
           <select
             className="lw-style"

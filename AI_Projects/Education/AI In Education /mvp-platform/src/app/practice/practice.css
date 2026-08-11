@@ -228,7 +228,15 @@
 .cp-msg.me { align-self: flex-end; flex-direction: row-reverse; }
 .cp-mav { width: 28px; height: 28px; border-radius: 8px; flex: none; display: grid; place-items: center; background: var(--indigo-100); color: var(--indigo-700); }
 .cp-mav svg { width: 15px; height: 15px; }
-.cp-bubble { padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.55; }
+/* position:relative is load-bearing, not cosmetic. KaTeX renders a MathML copy of
+   every formula in `.katex-mathml`, which is position:absolute and hidden with
+   clip. Absolute means it needs a positioned ancestor — and this bubble had none,
+   nor did .cp-msg, .cp-msgs or .cp-panel, so the MathML escaped all the way to the
+   initial containing block. Once a message scrolled up out of the log, its MathML
+   landed ~1800px down the document and stretched the page's scroll height by
+   845px: a phantom scrollbar and a screenful of dead space under the carnet. Clip
+   hides the paint, it does not remove the element from the scroll extent. */
+.cp-bubble { position: relative; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.55; }
 .cp-msg.bot .cp-bubble { background: var(--slate-100); color: var(--slate-800); border-bottom-left-radius: 4px; }
 .cp-msg.me .cp-bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
 .cp-bubble .prose-reader { margin: 0; }

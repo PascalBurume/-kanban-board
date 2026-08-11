@@ -38,14 +38,25 @@
     radial-gradient(circle at 48% 22%, rgba(255, 255, 255, 0.96), transparent 34%),
     linear-gradient(135deg, #f7f1e8, #fdf9f2 48%, #f2e9dd);
 }
-/* Fullscreen. The shell had no .is-full rule at all after the design port, so
-   when the browser did grant fullscreen the layout was unchanged, and when it
-   refused (see lib/fullscreen.js) nothing happened either way. Fixed-position
-   overlay covers both: the real API just removes the browser chrome around it. */
+/* Fullscreen on this page had to mean something more than "cover the viewport",
+   because the atlas already does: the shell is height:100dvh with no page chrome
+   around it, so `position: fixed; inset: 0` changed precisely nothing. Measured
+   before and after — shell, stage, canvas and both rails came back identical to
+   the pixel. The button toggled a class and the student saw no difference, which
+   is indistinguishable from a broken button.
+
+   So it is a focus mode: the two rails fold away and the specimen takes the
+   full width — 571px to about 1200px on a laptop, better than double. The
+   header stays, because the tool rail's « Quitter » and the header's way back
+   are the only exits and one of them should always be in view. Fixed
+   positioning is kept for the case where the browser refuses real fullscreen. */
 .an-shell.is-full {
   position: fixed; inset: 0; z-index: 200;
   height: 100vh; height: 100dvh;
 }
+.an-shell.is-full .an-body { grid-template-columns: minmax(0, 1fr); }
+.an-shell.is-full .an-library,
+.an-shell.is-full .an-info { display: none; }
 .an-shell *,
 .an-shell *::before,
 .an-shell *::after { box-sizing: border-box; }

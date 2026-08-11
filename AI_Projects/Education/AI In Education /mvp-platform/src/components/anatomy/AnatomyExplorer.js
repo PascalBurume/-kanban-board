@@ -346,9 +346,13 @@ export default function AnatomyExplorer({ user }) {
                   <Target size={17} />
                   Révision
                 </button>
-                <button className="an-tool an-tool-sep" onClick={toggleFull} title="Plein écran">
+                <button
+                  className={`an-tool an-tool-sep${isFull ? " is-on" : ""}`}
+                  onClick={toggleFull}
+                  title={isFull ? "Réafficher la bibliothèque et la fiche" : "Agrandir le spécimen (masque la bibliothèque et la fiche)"}
+                >
                   {isFull ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
-                  {isFull ? "Quitter" : "Écran"}
+                  {isFull ? "Réduire" : "Agrandir"}
                 </button>
               </div>
 

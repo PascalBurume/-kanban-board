@@ -227,6 +227,7 @@ export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLe
       {/* Draft a full lesson from a topic (content authoring only) */}
       {allowContent && (
         <>
+          <div className="cp-group">Créer</div>
           <div className="cp-row">
             <input className="cp-text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Thème de la leçon…"
             title="Le sujet de la leçon à rédiger — ex. « Les fractions »" onKeyDown={(e) => e.key === "Enter" && !busy && run("lesson_full", { topic })} />
@@ -262,17 +263,26 @@ export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLe
         </>
       )}
 
-      {/* Improve (content) + quiz (always) from the current content */}
-      <div className="cp-row">
-        {allowContent && (
-          <>
+      {/* Refine the lesson already on screen. Its own group: the instruction field belongs
+          to « Améliorer » alone, and sharing a row with the quiz and exercise buttons made
+          all three look like they answered it. */}
+      {allowContent && (
+        <>
+          <div className="cp-group">Améliorer</div>
+          <div className="cp-row">
             <input className="cp-text" value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Que faut-il améliorer ?"
             title="Optionnel — ex. « ajoute un exemple concret »" disabled={!contentReady} onKeyDown={(e) => e.key === "Enter" && !busy && contentReady && run("improve", { contentMd: getContent(), instruction })} />
             <button className="btn btn-secondary btn-sm" disabled={!!busy || !contentReady} title={contentReady ? "" : "Écrivez d'abord un peu de contenu"} onClick={() => run("improve", { contentMd: getContent(), instruction })}>
               <Icon name={thinking("improve") ? "refresh" : "edit"} /> {thinking("improve") ? "Amélioration…" : "Améliorer"}
             </button>
-          </>
-        )}
+          </div>
+        </>
+      )}
+
+      {/* Made from the finished lesson rather than from a prompt. Quiz is the one action
+          that survives when allowContent is false, so this group carries no condition. */}
+      <div className="cp-group">Produire</div>
+      <div className="cp-row">
         <button className="btn btn-primary btn-sm" disabled={!!busy || !contentReady} title={contentReady ? "" : "La leçon doit avoir du contenu"} onClick={() => run("quiz", { contentMd: getContent() })}>
           <Icon name={thinking("quiz") ? "refresh" : "target"} /> {thinking("quiz") ? "Génération…" : "Générer un quiz"}
         </button>
@@ -286,6 +296,8 @@ export function StudioComposePanel({ subjectSlug, moduleId, classLevel, sourceLe
       {/* Formula writing, with the atelier's agent behind the same panel. Folded away
           by default: most of the work here is prose, and a maths-only control open at
           all times would push the rest of Copilot below the fold. */}
+      {allowContent && <div className="cp-group">Aller plus loin</div>}
+
       {allowContent && onApplyFormula && (
         <>
           <button className="cp-chat-toggle" onClick={() => setTexOpen((o) => !o)}>

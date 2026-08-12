@@ -548,7 +548,16 @@
      against the same box for each. */
   --plate-size: min(100%, var(--plate-w), 44dvh);
 }
-.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; max-width: var(--plate-size); margin-inline: auto; }
+/* One line, scrolling sideways when the four labels outrun the plate's width — the same
+   move .lesson-toc makes on a phone. Wrapping instead cost a second 24px row on exactly
+   the viewport with the least height to spare (202px of plate against 269px of tabs at
+   1000x460). Above that the row fits and never scrolls. */
+.an-plate-tabs {
+  display: flex; gap: 2px; margin-bottom: 10px;
+  max-width: var(--plate-size); margin-inline: auto;
+  flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.an-plate-tabs::-webkit-scrollbar { display: none; }
 .an-plate-tabs button {
   border: 1px solid transparent;
   background: transparent;
@@ -557,6 +566,8 @@
   font: 500 10.5px var(--serif);
   color: var(--muted);
   cursor: pointer;
+  flex: none;
+  white-space: nowrap;
 }
 .an-plate-tabs button:hover { background: rgba(116, 89, 67, 0.06); color: var(--ink); }
 .an-plate-tabs button.is-on { color: var(--ink); border-color: var(--line); background: rgba(255, 255, 255, 0.7); }

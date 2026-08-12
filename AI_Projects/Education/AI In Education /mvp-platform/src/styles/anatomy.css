@@ -26,6 +26,13 @@
   --serif: var(--font-serif), "Cormorant Garamond", Georgia, serif;
   --sans: var(--font-sans), "DM Sans", system-ui, sans-serif;
 
+  /* One knob for the whole atlas. The ported design was drawn for a dense desktop
+     explorer and every size in this file was an absolute px — 8.5px facts labels,
+     9px tool captions, 12.8px body — which reads small for a student on a school
+     laptop. Every font-size and font shorthand below is now that px value times
+     this factor, so the page keeps its proportions and one number moves it all. */
+  --an-fs: 1.14;
+
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -33,7 +40,7 @@
   overflow: hidden;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: calc(14px * var(--an-fs));
   background:
     radial-gradient(circle at 48% 22%, rgba(255, 255, 255, 0.96), transparent 34%),
     linear-gradient(135deg, #f7f1e8, #fdf9f2 48%, #f2e9dd);
@@ -120,16 +127,16 @@
   transition: color .14s, border-color .14s, background .14s;
 }
 .an-back:hover { color: var(--coral); border-color: color-mix(in srgb, var(--coral), transparent 55%); background: #fff; }
-.an-back-txt { font-size: 12px; white-space: nowrap; }
+.an-back-txt { font-size: calc(12px * var(--an-fs)); white-space: nowrap; }
 .an-title { flex: 1; min-width: 0; }
 .an-title h1 {
   margin: 0;
-  font: 500 clamp(22px, 1.8vw, 30px)/1 var(--serif);
+  font: 500 calc(clamp(22px, 1.8vw, 30px) * var(--an-fs))/1 var(--serif);
   letter-spacing: 0.01em;
 }
 .an-title p {
   margin: 4px 0 0;
-  font-size: 11px;
+  font-size: calc(11px * var(--an-fs));
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -183,7 +190,7 @@
 .an-kicker {
   text-transform: uppercase;
   letter-spacing: 0.13em;
-  font-size: 10px;
+  font-size: calc(10px * var(--an-fs));
   font-weight: 600;
   color: var(--muted);
 }
@@ -207,7 +214,7 @@
   outline: 0;
   background: transparent;
   padding: 9px 0;
-  font-size: 12.5px;
+  font-size: calc(12.5px * var(--an-fs));
   font-family: inherit;
   color: var(--ink);
 }
@@ -222,7 +229,7 @@
   padding: 0 5px;
   text-transform: uppercase;
   letter-spacing: 0.13em;
-  font-size: 9.5px;
+  font-size: calc(9.5px * var(--an-fs));
   font-weight: 600;
   color: var(--muted);
 }
@@ -255,17 +262,17 @@
   background: radial-gradient(circle at 38% 30%, #fff, color-mix(in srgb, var(--accent), white 86%));
 }
 .an-thumb img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-.an-thumb .an-glyph { font-size: 20px; color: var(--accent); line-height: 1; }
+.an-thumb .an-glyph { font-size: calc(20px * var(--an-fs)); color: var(--accent); line-height: 1; }
 .an-item-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 1px; }
-.an-item-txt b { font: 500 14px/1.15 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.an-item-txt small { color: var(--muted); font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.an-item-n { font-size: 9.5px; color: var(--muted); flex: none; }
+.an-item-txt b { font: 500 calc(14px * var(--an-fs))/1.15 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-item-txt small { color: var(--muted); font-size: calc(9.5px * var(--an-fs)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-item-n { font-size: calc(9.5px * var(--an-fs)); color: var(--muted); flex: none; }
 .an-empty, .an-rail-locked {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 16px 8px;
-  font-size: 12px;
+  font-size: calc(12px * var(--an-fs));
   color: var(--muted);
 }
 
@@ -309,7 +316,9 @@
   top: 50%;
   z-index: 3;
   transform: translateY(-50%);
-  width: 62px;
+  /* Widened with the icons (17px → 21px) and the caption under them, so « Fil de
+     fer » and « Révision » still sit on one line each. */
+  width: 72px;
   padding: 8px 5px;
   display: flex;
   flex-direction: column;
@@ -321,6 +330,9 @@
   box-shadow: 0 12px 30px rgba(75, 54, 40, 0.08);
 }
 .an-tool {
+  /* Held at 58px even though the icon grew to 21px: icon + gap + caption is ~36px, so
+     there is room, and the rail is centred on the stage — a taller button multiplied by
+     six spills past a short stage. See the max-height note at the foot of this file. */
   height: 58px;
   border: 0;
   border-radius: 12px;
@@ -332,7 +344,7 @@
   gap: 5px;
   cursor: pointer;
   color: var(--ink);
-  font: 500 9px/1 var(--serif);
+  font: 500 calc(9px * var(--an-fs))/1 var(--serif);
 }
 .an-tool:hover:not(:disabled) { background: rgba(116, 89, 67, 0.06); }
 .an-tool.is-on { color: var(--coral); background: rgba(238, 124, 106, 0.08); }
@@ -362,7 +374,7 @@
   border-radius: 10px;
   padding: 6px 11px;
   cursor: pointer;
-  font: 500 11px var(--serif);
+  font: 500 calc(11px * var(--an-fs)) var(--serif);
   color: var(--ink);
 }
 .an-views button:hover { background: rgba(116, 89, 67, 0.07); }
@@ -378,7 +390,7 @@
   border-radius: 999px;
   background: rgba(253, 250, 244, 0.78);
   backdrop-filter: blur(10px);
-  font-size: 10px;
+  font-size: calc(10px * var(--an-fs));
   color: var(--muted);
   white-space: nowrap;
   pointer-events: none;
@@ -411,7 +423,7 @@
   backdrop-filter: blur(9px);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--pin), transparent 84%), 0 5px 14px rgba(83, 59, 42, 0.1);
   color: var(--ink);
-  font: 500 11px/1.35 var(--serif);
+  font: 500 calc(11px * var(--an-fs))/1.35 var(--serif);
   white-space: nowrap;
   cursor: pointer;
   pointer-events: auto;
@@ -431,7 +443,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font: 600 11px var(--sans);
+  font: 600 calc(11px * var(--an-fs)) var(--sans);
   color: var(--ink);
   background: rgba(255, 252, 247, 0.96);
 }
@@ -453,7 +465,7 @@
   width: min(280px, 74%);
   text-align: center;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--an-fs));
   z-index: 2;
 }
 .an-load p { margin: 8px 0 0; }
@@ -467,7 +479,7 @@
   gap: 14px;
   align-content: center;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--an-fs));
 }
 .an-spin {
   width: 24px;
@@ -491,8 +503,8 @@
   padding: 40px;
   color: var(--muted);
 }
-.an-fallback h2 { margin: 0; font: 500 18px var(--serif); color: var(--ink); }
-.an-fallback p { margin: 0; max-width: 42ch; font-size: 12.5px; line-height: 1.6; }
+.an-fallback h2 { margin: 0; font: 500 calc(18px * var(--an-fs)) var(--serif); color: var(--ink); }
+.an-fallback p { margin: 0; max-width: 42ch; font-size: calc(12.5px * var(--an-fs)); line-height: 1.6; }
 
 /* ---------- info panel ---------- */
 .an-card { padding: 18px 18px 16px; border-bottom: 1px solid var(--line); }
@@ -503,7 +515,7 @@
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 9px;
+  font-size: calc(9px * var(--an-fs));
   font-weight: 600;
   color: color-mix(in srgb, var(--sys), black 22%);
   background: color-mix(in srgb, var(--sys), transparent 86%);
@@ -515,25 +527,25 @@
   border: 0;
   background: transparent;
   padding: 0;
-  font-size: 10.5px;
+  font-size: calc(10.5px * var(--an-fs));
   color: var(--lavender);
   cursor: pointer;
   white-space: nowrap;
 }
 .an-sheet-link:hover, .an-back-link:hover { text-decoration: underline; }
 .an-back-link { color: var(--muted); margin-bottom: 10px; }
-.an-card h2 { margin: 0; font: 500 26px/1.1 var(--serif); }
-.an-latin { margin: 3px 0 0; font-size: 11px; font-style: italic; color: var(--muted); }
-.an-role { margin: 12px 0 0; font-size: 13px; line-height: 1.6; color: color-mix(in srgb, var(--ink), var(--muted) 25%); }
+.an-card h2 { margin: 0; font: 500 calc(26px * var(--an-fs))/1.1 var(--serif); }
+.an-latin { margin: 3px 0 0; font-size: calc(11px * var(--an-fs)); font-style: italic; color: var(--muted); }
+.an-role { margin: 12px 0 0; font-size: calc(13px * var(--an-fs)); line-height: 1.6; color: color-mix(in srgb, var(--ink), var(--muted) 25%); }
 .an-card h3 {
   margin: 18px 0 8px;
   text-transform: uppercase;
   letter-spacing: 0.13em;
-  font-size: 9.5px;
+  font-size: calc(9.5px * var(--an-fs));
   font-weight: 600;
   color: var(--muted);
 }
-.an-para { margin: 0 0 10px; font-size: 12.8px; line-height: 1.65; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
+.an-para { margin: 0 0 10px; font-size: calc(12.8px * var(--an-fs)); line-height: 1.65; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
 
 /* Plate viewer — the four illustration slots beyond the thumbnail. */
 /* One column for the tabs and the plate they switch, so the tabs stay on the picture's
@@ -556,6 +568,15 @@
   display: flex; gap: 2px; margin-bottom: 10px;
   max-width: var(--plate-size); margin-inline: auto;
   flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  /* With the scrollbar hidden there is nothing to say the row scrolls, so the right
+     edge fades out. The padding is what keeps this honest without JS: it reserves the
+     fade's own width at the end of the scrollable area, so a row that fits sits
+     entirely left of the gradient and shows no fade at all, and one scrolled to its
+     end clears it too — the fade appears exactly while there is more to reach. */
+  padding-right: var(--tabs-fade);
+  --tabs-fade: 20px;
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--tabs-fade)), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--tabs-fade)), transparent);
 }
 .an-plate-tabs::-webkit-scrollbar { display: none; }
 .an-plate-tabs button {
@@ -563,7 +584,7 @@
   background: transparent;
   border-radius: 9px;
   padding: 4px 9px;
-  font: 500 10.5px var(--serif);
+  font: 500 calc(10.5px * var(--an-fs)) var(--serif);
   color: var(--muted);
   cursor: pointer;
   flex: none;
@@ -600,8 +621,8 @@
 
 .an-facts { margin: 16px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
 .an-facts > div { min-width: 0; }
-.an-facts dt { text-transform: uppercase; letter-spacing: 0.1em; font-size: 8.5px; font-weight: 600; color: var(--muted); }
-.an-facts dd { margin: 3px 0 0; font-size: 12px; line-height: 1.45; }
+.an-facts dt { text-transform: uppercase; letter-spacing: 0.1em; font-size: calc(8.5px * var(--an-fs)); font-weight: 600; color: var(--muted); }
+.an-facts dd { margin: 3px 0 0; font-size: calc(12px * var(--an-fs)); line-height: 1.45; }
 .an-fun {
   margin: 16px 0 0;
   display: flex;
@@ -609,7 +630,7 @@
   padding: 11px 13px;
   border-radius: 14px;
   background: rgba(141, 107, 204, 0.07);
-  font-size: 12.2px;
+  font-size: calc(12.2px * var(--an-fs));
   line-height: 1.55;
   color: color-mix(in srgb, var(--ink), var(--muted) 20%);
 }
@@ -632,15 +653,15 @@
 .an-hs:hover { background: rgba(255, 255, 255, 0.6); }
 .an-hs.is-sel { border-color: color-mix(in srgb, var(--pin), transparent 45%); background: rgba(255, 255, 255, 0.85); }
 .an-hs-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 5px; background: var(--pin); }
-.an-hs b { display: block; font: 500 13px var(--serif); }
-.an-hs em { display: block; font-style: normal; font-size: 10.5px; color: var(--muted); }
+.an-hs b { display: block; font: 500 calc(13px * var(--an-fs)) var(--serif); }
+.an-hs em { display: block; font-style: normal; font-size: calc(10.5px * var(--an-fs)); color: var(--muted); }
 .an-hs-body { margin-top: 14px; padding-left: 14px; border-left: 2px solid var(--line); }
-.an-hs-body p { margin: 0 0 10px; font-size: 12.6px; line-height: 1.68; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
+.an-hs-body p { margin: 0 0 10px; font-size: calc(12.6px * var(--an-fs)); line-height: 1.68; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
 .an-hs-body p:last-child { margin-bottom: 0; }
 
 .an-cond-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .an-cond-chips span {
-  font-size: 10.5px;
+  font-size: calc(10.5px * var(--an-fs));
   color: var(--muted);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -650,9 +671,9 @@
 /* ---------- calque à annoter ---------- */
 .an-calque { padding: 18px; }
 .an-calque > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.an-calque h2 { margin: 0; font: 500 19px var(--serif); display: flex; align-items: center; gap: 8px; }
-.an-score { font: 600 12px var(--sans); color: var(--coral); background: rgba(238, 124, 106, 0.1); border-radius: 999px; padding: 3px 11px; }
-.an-calque-intro { margin: 0 0 14px; font-size: 12.2px; line-height: 1.55; color: var(--muted); }
+.an-calque h2 { margin: 0; font: 500 calc(19px * var(--an-fs)) var(--serif); display: flex; align-items: center; gap: 8px; }
+.an-score { font: 600 calc(12px * var(--an-fs)) var(--sans); color: var(--coral); background: rgba(238, 124, 106, 0.1); border-radius: 999px; padding: 3px 11px; }
+.an-calque-intro { margin: 0 0 14px; font-size: calc(12.2px * var(--an-fs)); line-height: 1.55; color: var(--muted); }
 .an-tags { display: flex; flex-direction: column; gap: 7px; }
 .an-tag { display: flex; align-items: center; gap: 9px; }
 .an-tag-n {
@@ -664,7 +685,7 @@
   border-radius: 50%;
   background: color-mix(in srgb, var(--pin), white 72%);
   border: 1px solid color-mix(in srgb, var(--pin), transparent 45%);
-  font: 600 10px var(--sans);
+  font: 600 calc(10px * var(--an-fs)) var(--sans);
 }
 .an-tag select {
   flex: 1;
@@ -673,7 +694,7 @@
   border-radius: 11px;
   padding: 8px 10px;
   background: rgba(255, 255, 255, 0.7);
-  font: 400 12.5px var(--sans);
+  font: 400 calc(12.5px * var(--an-fs)) var(--sans);
   color: var(--ink);
   cursor: pointer;
 }
@@ -695,20 +716,20 @@
   padding: 11px;
   background: var(--ink);
   color: #fdfaf4;
-  font: 500 12.5px var(--sans);
+  font: 500 calc(12.5px * var(--an-fs)) var(--sans);
   cursor: pointer;
 }
 .an-btn:hover { background: #1f1b19; }
 .an-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .an-btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
 .an-btn-ghost:hover { background: rgba(116, 89, 67, 0.06); color: var(--ink); }
-.an-corrige { margin: 14px 0 0; padding: 11px 13px; border-radius: 13px; background: rgba(118, 157, 116, 0.1); font-size: 12.2px; line-height: 1.55; }
+.an-corrige { margin: 14px 0 0; padding: 11px 13px; border-radius: 13px; background: rgba(118, 157, 116, 0.1); font-size: calc(12.2px * var(--an-fs)); line-height: 1.55; }
 
 /* ---------- révision ---------- */
 .an-quiz { padding: 18px; display: flex; flex-direction: column; gap: 13px; }
 .an-quiz > header { display: flex; align-items: center; justify-content: space-between; }
-.an-quiz h2 { margin: 0; font: 500 19px var(--serif); display: flex; align-items: center; gap: 8px; }
-.an-quiz-q { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.an-quiz h2 { margin: 0; font: 500 calc(19px * var(--an-fs)) var(--serif); display: flex; align-items: center; gap: 8px; }
+.an-quiz-q { margin: 0; font-size: calc(12.5px * var(--an-fs)); line-height: 1.5; color: var(--muted); }
 .an-quiz-opts { display: flex; flex-direction: column; gap: 7px; }
 .an-opt {
   display: flex;
@@ -720,7 +741,7 @@
   border: 1px solid var(--line);
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.6);
-  font: 500 12.5px var(--serif);
+  font: 500 calc(12.5px * var(--an-fs)) var(--serif);
   text-align: left;
   cursor: pointer;
 }
@@ -729,8 +750,8 @@
 .an-opt.is-right { border-color: var(--sage); background: color-mix(in srgb, var(--sage), white 84%); }
 .an-opt.is-wrong { border-color: var(--coral); background: color-mix(in srgb, var(--coral), white 86%); }
 .an-quiz-after { display: flex; flex-direction: column; gap: 11px; }
-.an-quiz-role { margin: 0; padding: 10px 12px; border-radius: 13px; background: rgba(255, 255, 255, 0.7); font-size: 12.2px; line-height: 1.55; }
-.an-quiz-quit { border: 0; background: transparent; color: var(--muted); font-size: 11.5px; cursor: pointer; text-decoration: underline; align-self: center; }
+.an-quiz-role { margin: 0; padding: 10px 12px; border-radius: 13px; background: rgba(255, 255, 255, 0.7); font-size: calc(12.2px * var(--an-fs)); line-height: 1.55; }
+.an-quiz-quit { border: 0; background: transparent; color: var(--muted); font-size: calc(11.5px * var(--an-fs)); cursor: pointer; text-decoration: underline; align-self: center; }
 
 /* ---------- copilot ----------
    Mwalimu's own chat pattern (.cp-* in practice.css): an avatar per turn, a
@@ -765,10 +786,10 @@
   box-shadow: 0 6px 16px rgba(124, 88, 189, 0.28);
 }
 .an-cop-id { min-width: 0; }
-.an-cop-id b { display: block; font: 500 15px var(--serif); }
+.an-cop-id b { display: block; font: 500 calc(15px * var(--an-fs)) var(--serif); }
 .an-cop-id small {
   display: block;
-  font-size: 10.5px;
+  font-size: calc(10.5px * var(--an-fs));
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -794,7 +815,7 @@
 .an-bubble {
   padding: 10px 13px;
   border-radius: 15px;
-  font-size: 12.8px;
+  font-size: calc(12.8px * var(--an-fs));
   line-height: 1.6;
   min-width: 0;
 }
@@ -839,24 +860,24 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-size: 11px;
+  font-size: calc(11px * var(--an-fs));
   font-weight: 600;
   color: var(--violet-soft);
 }
 .an-bubble code {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--an-fs));
   background: rgba(117, 91, 70, 0.08);
   border-radius: 5px;
   padding: 1px 5px;
 }
-.an-cop-empty p { margin: 0 0 11px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.an-cop-empty p { margin: 0 0 11px; font-size: calc(12px * var(--an-fs)); line-height: 1.55; color: var(--muted); }
 .an-cop-tips { display: flex; flex-direction: column; gap: 5px; }
 .an-cop-tips button {
   border: 1px dashed var(--line);
   background: transparent;
   border-radius: 12px;
   padding: 8px 11px;
-  font: 400 11.5px var(--sans);
+  font: 400 calc(11.5px * var(--an-fs)) var(--sans);
   color: var(--muted);
   text-align: left;
   cursor: pointer;
@@ -868,8 +889,8 @@
 .an-dots i:nth-child(2) { animation-delay: 0.18s; }
 .an-dots i:nth-child(3) { animation-delay: 0.36s; }
 @keyframes an-blink { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
-.an-cop-src { margin: 0; display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 10px; color: var(--muted); }
-.an-cop-err { margin: 0; padding: 8px 11px; border-radius: 12px; background: color-mix(in srgb, var(--coral), white 86%); color: color-mix(in srgb, var(--coral), black 30%); font-size: 12px; }
+.an-cop-src { margin: 0; display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: calc(10px * var(--an-fs)); color: var(--muted); }
+.an-cop-err { margin: 0; padding: 8px 11px; border-radius: 12px; background: color-mix(in srgb, var(--coral), white 86%); color: color-mix(in srgb, var(--coral), black 30%); font-size: calc(12px * var(--an-fs)); }
 .an-cop-form { display: flex; gap: 8px; padding: 11px 18px 16px; border-top: 1px solid var(--line); flex: none; }
 .an-cop-form input {
   flex: 1;
@@ -878,7 +899,7 @@
   border-radius: 999px;
   padding: 9px 14px;
   background: rgba(255, 255, 255, 0.7);
-  font: 400 12.5px var(--sans);
+  font: 400 calc(12.5px * var(--an-fs)) var(--sans);
   color: var(--ink);
   outline: 0;
 }
@@ -900,7 +921,7 @@
 
 /* ---------- system sheet ---------- */
 .an-retenir { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
-.an-retenir li { position: relative; padding-left: 15px; font-size: 12.6px; line-height: 1.55; }
+.an-retenir li { position: relative; padding-left: 15px; font-size: calc(12.6px * var(--an-fs)); line-height: 1.55; }
 .an-retenir li::before { content: ""; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
 
 /* ---------- responsive ----------
@@ -935,8 +956,9 @@
   .an-back-txt { display: none; }
   .an-back { padding: 0; width: 42px; min-height: 42px; justify-content: center; border-radius: 50%; }
   .an-top .offline-pill { display: none; }
-  .an-tools { left: 10px; width: 54px; }
-  .an-tool { height: 52px; font-size: 8.5px; }
+  .an-tools { left: 10px; width: 62px; }
+  .an-tool { height: 52px; font-size: calc(8.5px * var(--an-fs)); }
+  .an-tool svg { width: 18px; height: 18px; }
   .an-stage { min-height: 52dvh; }
   .an-facts { grid-template-columns: 1fr; }
   /* The pill is wider than the phone and half of it ("molette") means nothing

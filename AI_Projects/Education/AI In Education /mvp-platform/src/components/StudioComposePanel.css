@@ -99,12 +99,26 @@
 .rd-rail .cp-panel > .cp-chat { flex: 1 0 auto; min-height: 180px; display: flex; flex-direction: column; }
 .rd-rail .cp-chat > .cp-chat-box { flex: 0 1 auto; max-height: 45vh; }
 
-/* In the rail the input shared its row with a button, leaving ~150px for a sentence
-   and truncating every placeholder mid-word. Wrapping gives the field the full width
-   and drops the button beneath it, right-aligned. */
-.rd-rail .cp-row { flex-wrap: wrap; }
+/* ── the action rows ──
+   The field needs the rail's full width — sharing a line with a button left ~150px for
+   a sentence and truncated every placeholder mid-word. But wrapping the row and pushing
+   each button right with `margin-left: auto` made a staircase: four buttons came out at
+   four widths (120 / 164 / 165 / 202px) with four different left edges scattered across
+   190px, three flushed right and « Améliorer » stranded mid-row. Nothing lined up with
+   anything, which is what read as disorder.
+
+   Two even columns instead — but as a wrapping flex, not a grid. A `1fr 1fr` grid was
+   the first attempt and it overflowed: `1fr` floors at min-content, so at the rail's
+   300px minimum « Proposer un exercice » held its track at 292px inside a 244px panel.
+   A shared flex-basis has the property the grid lacked: the buttons sit two-up while a
+   line can hold them and one-up when it cannot, and because they all grow, whatever
+   ends up on a line comes out the same width. Equal widths, two edges, no overflow. */
+.rd-rail .cp-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .rd-rail .cp-row > .cp-text { flex: 1 1 100%; }
-.rd-rail .cp-row > .btn { margin-left: auto; }
+.rd-rail .cp-row > .btn {
+  flex: 1 1 140px; min-width: 0; margin-left: 0;
+  justify-content: center; white-space: normal;
+}
 
 /* ── the rail's type scale ──
    Every size in this stylesheet was drawn for the panel as it appears inline on a wide

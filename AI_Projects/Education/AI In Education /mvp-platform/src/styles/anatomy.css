@@ -538,8 +538,17 @@
 /* Plate viewer — the four illustration slots beyond the thumbnail. */
 /* One column for the tabs and the plate they switch, so the tabs stay on the picture's
    left edge instead of drifting to the far side of a full-width panel. */
-.an-plates { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); --plate-w: 420px; }
-.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; max-width: var(--plate-w); margin-inline: auto; }
+.an-plates {
+  padding: 14px 18px 16px; border-bottom: 1px solid var(--line);
+  --plate-w: 420px;
+  /* Shared by the tabs and the plate so the two are always the same width. Capping the
+     tabs at --plate-w alone only matched while 100% or 420px bound the plate: once 44dvh
+     bound it the row overhung the picture by 12px a side at 1000x900 and 109px at
+     1000x460. Both elements are in-flow children of .an-plates, so the 100% term resolves
+     against the same box for each. */
+  --plate-size: min(100%, var(--plate-w), 44dvh);
+}
+.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; max-width: var(--plate-size); margin-inline: auto; }
 .an-plate-tabs button {
   border: 1px solid transparent;
   background: transparent;
@@ -562,10 +571,12 @@
      the height directly instead does not shrink the width: the box went letterbox at
      2:1 and the illustration overflowed it and was cropped top and bottom.
 
-     Square, because every one of the 219 plates in public/anatomy is square. The box was
-     4/3, so `object-fit: contain` was quietly trimming a quarter off the top and bottom
-     of every illustration in the atlas. */
-  width: min(100%, var(--plate-w), 44dvh);
+     Square, because every one of the 219 plates in public/anatomy is square (720², 1024²,
+     256², 180²). The box was 4/3, and `object-fit: contain` never crops — it letterboxes,
+     so a square plate painted at 3/4 of the box width with empty gradient either side:
+     231.8² inside a 309px box at 375px wide, 56% of the frame it had. Matching the frame
+     to the source is what fills it. */
+  width: var(--plate-size);
   aspect-ratio: 1 / 1;
   margin-inline: auto;
   border-radius: 16px;

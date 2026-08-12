@@ -4,7 +4,7 @@ import { EditorContent } from "@tiptap/react";
 import Icon from "@/components/ui/Icon";
 import SymbolKeyboard from "@/components/editor/SymbolKeyboard";
 import LatexPanel from "@/components/editor/LatexPanel";
-import FigurePanel from "@/components/editor/FigurePanel";
+import FigureEditPanel from "@/components/editor/FigureEditPanel";
 import { CONTEXTS, keepSelection } from "@/components/editor/useLessonEditor";
 import { FIGURE_KINDS } from "@/lib/figures";
 import { toast } from "@/lib/toast";
@@ -140,7 +140,7 @@ export default function TabletChrome({ ed, value, onChange, disabled, saveState,
           <div className="lw-page">
             {mode === "visual" ? (
               <>
-                {figSel && !disabled && <FigurePanel spec={figSel.spec} anchor={figSel.anchor} onChange={ed.updateFigure} onClose={() => ed.setFigSel(null)} />}
+                {figSel && !disabled && <FigureEditPanel spec={figSel.spec} anchor={figSel.anchor} onChange={ed.updateFigure} onClose={() => ed.setFigSel(null)} />}
                 <EditorContent editor={editor} />
               </>
             ) : (

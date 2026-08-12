@@ -1,4 +1,5 @@
 import { C, esc } from "./figureSvg";
+import { applyConstructions, constructionProblems, type Construction } from "./epureConstruct";
 
 // A geometric figure as DATA, not as a drawing.
 //
@@ -32,6 +33,14 @@ export type EpurePoint = {
   id: string;        // "A" — also the default label
   x: number;
   y: number;         // MATHS orientation: y grows upward (see fit())
+  /**
+   * Placed by CONSTRUCTION rather than by coordinates — the midpoint of [AB], the foot
+   * of a perpendicular, where two circles meet. Present, x/y are computed from the
+   * other points before anything is drawn, so the dot follows when they move; the
+   * literal x/y stay as the fallback for a construction that has no answer. See
+   * lib/epureConstruct.ts.
+   */
+  from?: Construction;
   label?: string;    // when the caption differs from the id
   color?: string;
   dot?: boolean;     // false draws the point unmarked but still usable as an anchor
@@ -167,10 +176,15 @@ const H = 240;
 const PAD = 34; // room for labels outside the figure's own bounding box
 
 const num = (v: unknown, fallback = 0) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
-/** Points by id, so every anchor that is a name can be resolved. */
+/**
+ * Points by id, so every anchor that is a name can be resolved.
+ *
+ * Constructed points are solved here — the single funnel every other function goes
+ * through (fit, extent, renderEpure), so nothing else has to know they exist.
+ */
 export function indexPoints(spec: EpureSpec): Map<string, EpurePoint> {
   const m = new Map<string, EpurePoint>();
-  for (const p of spec.points ?? []) {
+  for (const p of applyConstructions(spec).points ?? []) {
     if (p && typeof p.id === "string" && p.id) m.set(p.id, { ...p, x: num(p.x), y: num(p.y) });
   }
   return m;
@@ -545,6 +559,9 @@ export function epureProblems(spec: EpureSpec): string[] {
     + (spec.circles ?? []).length + (spec.paths ?? []).length + (spec.rects ?? []).length
     + (spec.ellipses ?? []).length + (spec.labels ?? []).length;
   if (!drawn) out.push("La figure ne contient encore rien.");
+  // A construction that cannot be run draws its point at stale coordinates rather than
+  // not at all, so it is invisible without being told.
+  out.push(...constructionProblems(spec));
   return [...new Set(out)];
 }
 

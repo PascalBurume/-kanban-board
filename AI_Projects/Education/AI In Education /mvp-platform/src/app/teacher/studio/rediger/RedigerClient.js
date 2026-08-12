@@ -13,6 +13,7 @@ import { auditDocument, auditQuiz } from "@/lib/lessonAudit";
 import { repairLatex } from "@/lib/latexRepair";
 import { FIGURE_KINDS } from "@/lib/figures";
 import { EPURE_TEMPLATES } from "@/lib/epure";
+import { INTERACTIVE_WIDGETS, WIDGET_FAMILIES } from "@/lib/interactive";
 import { isBlankContent } from "@/lib/lessonSkeleton";
 import { studentPreviewHref } from "@/lib/previewHref";
 import { lintLesson } from "@/lib/lessonLint";
@@ -580,6 +581,18 @@ export default function RedigerClient() {
           ...FIGURE_KINDS.map((k) => ({ id: `figure:${k.kind}`, icon: k.icon, label: k.label, hint: k.hint, disabled: noVisual })),
           { id: "catalogue", icon: "grid", label: "Catalogue de figures…", hint: "76 figures prêtes à insérer", disabled: off },
           { type: "sep" },
+          // Figures the student can move. Flat rather than grouped by family: this menu
+          // has no nesting, and the hint carries the distinction anyway.
+          ...WIDGET_FAMILIES.flatMap((g) =>
+            g.widgets.map((w) => ({
+              id: `interactive:${w}`,
+              icon: INTERACTIVE_WIDGETS[w].icon,
+              label: `${INTERACTIVE_WIDGETS[w].label} (interactif)`,
+              hint: INTERACTIVE_WIDGETS[w].hint,
+              disabled: noVisual,
+            })),
+          ),
+          { type: "sep" },
           ...STARTERS.map((s) => ({ id: `starter:${s.id}`, icon: s.icon, label: s.label, hint: s.hint, disabled: off })),
         ],
       },
@@ -659,6 +672,7 @@ export default function RedigerClient() {
         return;
       }
       if (id.startsWith("figure:")) return void e?.insertFigure(id.slice(7));
+      if (id.startsWith("interactive:")) return void e?.insertInteractive(id.slice(12));
       if (id.startsWith("epure:")) {
         const t = EPURE_TEMPLATES.find((x) => x.id === id.slice(6));
         return void (t && e?.insertEpure(t.spec));

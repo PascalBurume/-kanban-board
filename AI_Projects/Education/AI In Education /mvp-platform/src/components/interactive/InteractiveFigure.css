@@ -1,0 +1,89 @@
+/* The handful of rules JSXGraph actually needs, restyled to the platform.
+ *
+ * Written here rather than importing jsxgraph/distrib/jsxgraph.css for two reasons: that
+ * file is mostly rules for the navigation bar and the infobox, both of which these
+ * widgets turn off, and its default box is a 10px-radius #356aa0 blue that belongs to no
+ * other surface in this app. Positioning of the text layer is set inline by JSXGraph
+ * itself, so nothing load-bearing is being reimplemented. */
+
+.md-interactive {
+  margin: 20px auto;
+  max-width: 640px;
+  /* react-markdown wraps a fenced block in <pre>, and this component renders inside it.
+     Without these two the caption comes out in Courier and refuses to wrap. */
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  white-space: normal;
+}
+
+.md-interactive__frame {
+  position: relative;
+  width: 100%;
+}
+
+.md-interactive__board {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  /* JSXGraph sets touch-action in JS too, but doing it here as well stops the first
+     drag on a phone from scrolling the lesson before the handler attaches. */
+  touch-action: none;
+}
+
+.md-interactive__board .JXGtext {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.md-interactive__board svg text {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.md-interactive__board :focus {
+  outline: 2px solid var(--accent, #4f46e5);
+  outline-offset: 1px;
+}
+
+/* Covers the board until the library is on the page, and stays for good if it never
+   arrives. An overlay rather than a substitute, so the board underneath is laid out at
+   its true size while JSXGraph measures it. */
+.md-interactive__still {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 22px;
+  border: 1px dashed var(--border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--surface-2, #f8fafc);
+  color: var(--muted, #64748b);
+  font-size: 13.5px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.md-interactive__caption {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted, #64748b);
+  text-align: center;
+}
+
+.md-interactive__hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted, #94a3b8);
+}
+
+@media (max-width: 640px) {
+  .md-interactive { margin: 16px 0; }
+}

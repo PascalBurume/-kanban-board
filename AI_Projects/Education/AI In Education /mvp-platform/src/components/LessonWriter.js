@@ -4,8 +4,6 @@ import { createPortal } from "react-dom";
 import { EditorContent } from "@tiptap/react";
 import Icon from "@/components/ui/Icon";
 import FormulaEditor from "@/components/editor/FormulaEditor";
-import FigurePanel from "@/components/editor/FigurePanel";
-import EpurePanel from "@/components/editor/EpurePanel";
 import LatexPanel from "@/components/editor/LatexPanel";
 import SymbolPalette from "@/components/editor/SymbolPalette";
 import DocSettings from "@/components/editor/DocSettings";
@@ -13,8 +11,10 @@ import FindReplacePanel from "@/components/editor/FindReplacePanel";
 import Markdown from "@/components/Markdown";
 import TabletChrome from "@/components/editor/TabletChrome";
 import { useLessonEditor, keepSelection } from "@/components/editor/useLessonEditor";
-import { FIGURE_KINDS, isEpure } from "@/lib/figures";
+import { FIGURE_KINDS } from "@/lib/figures";
 import { EPURE_TEMPLATES } from "@/lib/epure";
+import { INTERACTIVE_WIDGETS, WIDGET_FAMILIES } from "@/lib/interactive";
+import FigureEditPanel from "@/components/editor/FigureEditPanel";
 import { insertAt, insertBlock } from "@/lib/mdCaret";
 import { addImage } from "@/lib/imageUpload";
 import { toast } from "@/lib/toast";
@@ -415,6 +415,24 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
                     <span className="lw-figmenu-h">{t.hint}</span>
                   </button>
                 ))}
+                {/* Figures the student can move. Grouped by the part of the curriculum
+                    they belong to, because the list is long enough that an alphabetical
+                    one would make a teacher read all fourteen to find the one they want. */}
+                {WIDGET_FAMILIES.map((g) => (
+                  <div key={g.family}>
+                    <p className="lw-figmenu-s">Interactif · {g.label}</p>
+                    {g.widgets.map((w) => {
+                      const def = INTERACTIVE_WIDGETS[w];
+                      return (
+                        <button key={w} role="menuitem" onClick={() => { setFigMenu(false); ed.insertInteractive(w); }}>
+                          <span className="lw-figmenu-i"><Icon name={def.icon} /></span>
+                          <span className="lw-figmenu-t">{def.label}</span>
+                          <span className="lw-figmenu-h">{def.hint}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
                 <p className="lw-figmenu-s">Graphiques</p>
                 {FIGURE_KINDS.map((k) => (
                   <button key={k.kind} role="menuitem" onClick={() => { setFigMenu(false); ed.insertFigure(k.kind); }}>
@@ -531,11 +549,7 @@ export default function LessonWriter({ value, onChange, disabled, saveState, les
         ) : (
           <>
             {figSel && mode === "visual" && !disabled && (
-              // Same node, same storage, two editors: an épure is geometry and a chart
-              // is data, and a single panel that tried to be both would serve neither.
-              isEpure(figSel.spec)
-                ? <EpurePanel spec={figSel.spec} anchor={figSel.anchor} onChange={ed.updateFigure} onClose={() => ed.setFigSel(null)} />
-                : <FigurePanel spec={figSel.spec} anchor={figSel.anchor} onChange={ed.updateFigure} onClose={() => ed.setFigSel(null)} />
+              <FigureEditPanel spec={figSel.spec} anchor={figSel.anchor} onChange={ed.updateFigure} onClose={() => ed.setFigSel(null)} />
             )}
             {mathSel && mode === "visual" && !disabled && (
               <FormulaEditor

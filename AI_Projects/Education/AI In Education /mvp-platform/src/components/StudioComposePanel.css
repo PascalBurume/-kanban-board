@@ -85,14 +85,18 @@
    before there is one, and its transcript caps at 45vh so a long exchange scrolls
    inside the chat instead of pushing the controls off the top of the rail.
 
-   The cost is the dead grey the old rule was written to avoid, back whenever the
-   content is shorter than the rail. That is the right way round: empty space below a
-   card is untidy, a card too small for its own contents is broken. */
+   `flex: 1 0 auto` is what gets both halves of that, and the two numbers are the whole
+   trick. grow:1 means a card shorter than the rail still fills it, so there is no dead
+   grey under it. shrink:0 is the part the old rule was missing: free space can be given
+   away, but it can never be taken back out of the content, so a card that needs more
+   than the rail keeps its full height and the pane scrolls instead. The chat carries the
+   same pair, so when there IS slack it goes to the conversation — the one part that
+   benefits from room — rather than pooling under the last control. */
 .rd-rail .rd-pane-body { display: flex; flex-direction: column; }
-.rd-rail .rd-pane-body > * { flex: 0 0 auto; min-height: 0; }
+.rd-rail .rd-pane-body > * { flex: 1 0 auto; min-height: 0; }
 .rd-rail .cp-panel { display: flex; flex-direction: column; margin-bottom: 0; }
 .rd-rail .cp-panel > * { flex: none; }
-.rd-rail .cp-panel > .cp-chat { flex: 0 0 auto; min-height: 180px; display: flex; flex-direction: column; }
+.rd-rail .cp-panel > .cp-chat { flex: 1 0 auto; min-height: 180px; display: flex; flex-direction: column; }
 .rd-rail .cp-chat > .cp-chat-box { flex: 0 1 auto; max-height: 45vh; }
 
 /* In the rail the input shared its row with a button, leaving ~150px for a sentence

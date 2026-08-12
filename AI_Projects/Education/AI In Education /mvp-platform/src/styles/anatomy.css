@@ -536,8 +536,10 @@
 .an-para { margin: 0 0 10px; font-size: 12.8px; line-height: 1.65; color: color-mix(in srgb, var(--ink), var(--muted) 22%); }
 
 /* Plate viewer — the four illustration slots beyond the thumbnail. */
-.an-plates { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); }
-.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; }
+/* One column for the tabs and the plate they switch, so the tabs stay on the picture's
+   left edge instead of drifting to the far side of a full-width panel. */
+.an-plates { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); --plate-w: 420px; }
+.an-plate-tabs { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; max-width: var(--plate-w); margin-inline: auto; }
 .an-plate-tabs button {
   border: 1px solid transparent;
   background: transparent;
@@ -550,8 +552,22 @@
 .an-plate-tabs button:hover { background: rgba(116, 89, 67, 0.06); color: var(--ink); }
 .an-plate-tabs button.is-on { color: var(--ink); border-color: var(--line); background: rgba(255, 255, 255, 0.7); }
 .an-plate {
-  width: 100%;
-  aspect-ratio: 4 / 3;
+  /* Sized off the panel, but with a ceiling. In the three-column layout the panel is
+     340px and no limit binds. Below 1150px the grid collapses to a single full-width
+     column and, without this, a 4/3 box followed the panel to ~920px — a 690px-tall
+     plate that pushed the facts and the rest of the article off the screen. The plate is
+     an illustration beside the text, not a banner, so it stops growing and centres.
+
+     All three limits act on the WIDTH and the height follows from aspect-ratio. Capping
+     the height directly instead does not shrink the width: the box went letterbox at
+     2:1 and the illustration overflowed it and was cropped top and bottom.
+
+     Square, because every one of the 219 plates in public/anatomy is square. The box was
+     4/3, so `object-fit: contain` was quietly trimming a quarter off the top and bottom
+     of every illustration in the atlas. */
+  width: min(100%, var(--plate-w), 44dvh);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
   border-radius: 16px;
   overflow: hidden;
   display: grid;

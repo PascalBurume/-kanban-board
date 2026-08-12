@@ -127,8 +127,12 @@ export default function RedigerClient() {
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [railOpen, setRailOpen] = useState(true);
   const [outlineW, setOutlineW] = useState(240);
-  const [railW, setRailW] = useState(340);
+  // 340 left the Copilot controls in a ~300px column of content: every prompt field
+  // wrapped onto its own row, the Rapide|Agent pair split a 150px each, and the manual
+  // chips stacked three deep. 400 is the width at which those stop fighting.
+  const [railW, setRailW] = useState(400);
   const [narrow, setNarrow] = useState(false);
+  const [winW, setWinW] = useState(1440);
 
   // Portal hosts for the toolbar and status bar owned by LessonWriter.
   const [toolHost, setToolHost] = useState(null);
@@ -154,7 +158,7 @@ export default function RedigerClient() {
     setOutlineW(num("mwalimu.rediger.outlineW", 240));
     // Migrate the atelier's stored width once, so a teacher who sized the rail there
     // finds it the same here.
-    setRailW(num("mwalimu.rediger.railW", num("mwalimu.latex.railW", 340)));
+    setRailW(num("mwalimu.rediger.railW", num("mwalimu.latex.railW", 400)));
   }, []);
 
   useEffect(() => {
@@ -167,6 +171,17 @@ export default function RedigerClient() {
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  // The rail's ceiling depends on what is left for the lesson. Raising it to a flat
+  // 720px let the editor collapse to 174px on a 1134px laptop with the outline open —
+  // a column too narrow to write in. RAIL_MAX is the want; EDITOR_MIN is the floor that
+  // wins when the window cannot pay for it.
+  useEffect(() => {
+    const onResize = () => setWinW(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   // ---- load ----
@@ -850,10 +865,18 @@ export default function RedigerClient() {
     </nav>
   );
 
+  const RAIL_MAX = 720;
+  const EDITOR_MIN = 420;
+  const railMax = Math.max(300, Math.min(RAIL_MAX,
+    winW - (outlineOpen && !narrow ? outlineW : 0) - EDITOR_MIN));
+  // Clamped for display too, so a width sized on a wide monitor does not crush the
+  // editor when the same teacher opens the lesson on a laptop.
+  const railWUsed = Math.min(railW, railMax);
+
   const cols = [
     outlineOpen && !narrow ? `${outlineW}px` : null,
     "minmax(0,1fr)",
-    railOpen && !narrow ? `${railW}px` : null,
+    railOpen && !narrow ? `${railWUsed}px` : null,
   ].filter(Boolean).join(" ");
 
   return (
@@ -1036,9 +1059,9 @@ export default function RedigerClient() {
         {railOpen && !narrow && (
           <aside className="rd-rail">
             <ResizeGrip
-              value={railW}
-              min={280}
-              max={560}
+              value={railWUsed}
+              min={300}
+              max={railMax}
               side="left"
               label="Largeur du panneau Copilot"
               onChange={setRailW}

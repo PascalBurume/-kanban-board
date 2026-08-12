@@ -89,6 +89,54 @@
 .rd-rail .cp-row > .cp-text { flex: 1 1 100%; }
 .rd-rail .cp-row > .btn { margin-left: auto; }
 
+/* ── the rail's type scale ──
+   Every size in this stylesheet was drawn for the panel as it appears inline on a wide
+   page — 10px quiz labels, 11px hints, 11.5px mode buttons, 12.5px prompts. In the rail
+   the same text sits in a ~400px column a teacher reads while writing, and it was too
+   small for that. One knob rescales it; each entry below is the base size above times
+   --cp-fs, so the panel keeps its own proportions.
+
+   Scoped to .rd-rail on purpose. These cp-* class names are not private to this file —
+   .cp-panel, .cp-badge, .cp-sub, .cp-hint and .cp-chip are also styled by carnet.css,
+   practice.css and projects.css, and Next's CSS is global. Scaling them unscoped would
+   have reached the student's practice Copilot and the carnet. The inline exercise panel
+   that shares this stylesheet is likewise untouched. */
+.rd-rail { --cp-fs: 1.15; }
+.rd-rail .cp-badge                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-sub                   { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-row input.cp-text     { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-hint                  { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-chip                  { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-more                  { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-warn-h                { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-warn li               { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-chat-toggle           { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-error                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-result-title          { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-field-l               { font-size: calc(11px * var(--cp-fs)); }
+.rd-rail .cp-doc                   { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-doc h2                { font-size: calc(16px * var(--cp-fs)); }
+.rd-rail .cp-disclaim              { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-q                     { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-q-type                { font-size: calc(10px * var(--cp-fs)); }
+.rd-rail .cp-q-opt                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-chat-empty            { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-msg                   { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-use                   { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-chat-input input      { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-tex-in                { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-mode button           { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .cp-tex-hint              { font-size: calc(11px * var(--cp-fs)); }
+.rd-rail .cp-tex-err,
+.rd-rail .cp-tex-warn              { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-tex-katex             { font-size: calc(17px * var(--cp-fs)); }
+.rd-rail .cp-tex-note              { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .cp-tex-src               { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .rd-railtab               { font-size: calc(12.5px * var(--cp-fs)); }
+/* The buttons come from the global .btn-sm, so without this the labels a teacher
+   actually clicks would be the only text in the rail that did not grow. */
+.rd-rail .btn-sm                   { font-size: calc(13px * var(--cp-fs)); min-height: 37px; }
+
 /* ---- formula Copilot (Rapide | Agent) ----
    The LaTeX atelier's agent, folded into the rail. Shapes deliberately match .lxp-*
    there: a teacher who has used one should recognise the other, because it IS the

@@ -436,6 +436,14 @@ export function useLessonEditor({ value, onChange, disabled }) {
     insertAfterSelection({ type: "figure", attrs: { spec: JSON.parse(JSON.stringify(spec)) } });
   }, [insertAfterSelection]);
 
+  // And again for a figure the student can move: same `figure` node, spec.type
+  // "interactive". Only the widget name is stored — every other field is left unset so
+  // the widget's own preset supplies it, which keeps the inserted fence to three lines
+  // and lets a preset improve without rewriting lessons that already used it.
+  const insertInteractive = useCallback((widget) => {
+    insertAfterSelection({ type: "figure", attrs: { spec: { type: "interactive", widget } } });
+  }, [insertAfterSelection]);
+
   // Through insertAfterSelection, NOT a bare insertContent. An image is inline and
   // does land at the caret — but when the selection is a NodeSelection, insertContent
   // REPLACES the selected node, and on a lesson opened but never clicked into that
@@ -580,7 +588,7 @@ export function useLessonEditor({ value, onChange, disabled }) {
     mathSel, figSel, latexOpen,
     setMathSel, setFigSel, setLatexOpen,
     chain, active, setBlock,
-    insertFormula, insertFigure, insertEpure, insertImage, openLatex, insertSymbol, insertMarkdown,
+    insertFormula, insertFigure, insertEpure, insertInteractive, insertImage, openLatex, insertSymbol, insertMarkdown,
     getSelectedTex, applyFormula,
     changeCase, clearFormatting, setAlign, setColor, setHighlight,
     setLink, insertRule, insertCodeBlock, insertTable, tableCmd, inTable,

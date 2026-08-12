@@ -106,7 +106,7 @@ function FormulaCopilot({ subjectSlug, classLevel, getSelectedTex, onApply }) {
         className="cp-tex-in"
         value={instruction}
         onChange={(e) => setInstruction(e.target.value)}
-        rows={3}
+        rows={2}
         placeholder="« écris l'intégrale de 0 à 1 de (1+x)^3 et calcule-la étape par étape »"
         onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); ask(); } }}
       />

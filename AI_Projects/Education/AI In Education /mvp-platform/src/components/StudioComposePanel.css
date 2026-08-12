@@ -69,18 +69,35 @@
 .cp-chat-input input { flex: 1; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--r-md); font: 400 14px var(--font-ui); }
 .cp-chat-input input:focus { outline: none; border-color: var(--indigo-400); box-shadow: var(--ring); }
 
-/* ── filling the rail ──
-   The panel used to sit at its natural height with the rest of the rail left as dead
-   grey. Rather than just stretching the box and leaving the emptiness inside it, the
-   slack goes to the conversation: the chat is the one part that genuinely benefits
-   from more room, and a taller transcript is why a teacher opens the rail at all. */
+/* ── the card is as tall as what is in it ──
+   This used to stretch the panel to the rail and hand the slack to the chat, so that a
+   short panel left no dead grey below it. It only worked while the content was short.
+   Once the controls grew — three manual chips, a formula block, two collapsible
+   sections — they needed 839px in a 723px rail, and `flex: 1 1 auto` with `min-height:
+   0` does not grow a box past its container, it SHRINKS it to fit: the card was capped
+   at 703px with its own content overflowing, and the chat sat clamped at its 180px
+   floor no matter how long the conversation got. A fixed card cannot hold a variable
+   answer, and Copilot's answers are nothing but variable.
+
+   So nothing is stretched or shrunk now. Every part takes the height of what it holds,
+   the card is their sum, and .rd-pane-body — already overflow-y: auto — scrolls when
+   that exceeds the rail. The chat keeps a 180px floor so it looks like a conversation
+   before there is one, and its transcript caps at 45vh so a long exchange scrolls
+   inside the chat instead of pushing the controls off the top of the rail.
+
+   `flex: 1 0 auto` is what gets both halves of that, and the two numbers are the whole
+   trick. grow:1 means a card shorter than the rail still fills it, so there is no dead
+   grey under it. shrink:0 is the part the old rule was missing: free space can be given
+   away, but it can never be taken back out of the content, so a card that needs more
+   than the rail keeps its full height and the pane scrolls instead. The chat carries the
+   same pair, so when there IS slack it goes to the conversation — the one part that
+   benefits from room — rather than pooling under the last control. */
 .rd-rail .rd-pane-body { display: flex; flex-direction: column; }
-.rd-rail .rd-pane-body > * { flex: 1 1 auto; min-height: 0; }
+.rd-rail .rd-pane-body > * { flex: 1 0 auto; min-height: 0; }
 .rd-rail .cp-panel { display: flex; flex-direction: column; margin-bottom: 0; }
-/* The controls keep their size; only the chat grows. */
 .rd-rail .cp-panel > * { flex: none; }
-.rd-rail .cp-panel > .cp-chat { flex: 1 1 auto; min-height: 180px; display: flex; flex-direction: column; }
-.rd-rail .cp-chat > .cp-chat-box { flex: 1 1 auto; max-height: none; }
+.rd-rail .cp-panel > .cp-chat { flex: 1 0 auto; min-height: 180px; display: flex; flex-direction: column; }
+.rd-rail .cp-chat > .cp-chat-box { flex: 0 1 auto; max-height: 45vh; }
 
 /* In the rail the input shared its row with a button, leaving ~150px for a sentence
    and truncating every placeholder mid-word. Wrapping gives the field the full width
@@ -88,6 +105,80 @@
 .rd-rail .cp-row { flex-wrap: wrap; }
 .rd-rail .cp-row > .cp-text { flex: 1 1 100%; }
 .rd-rail .cp-row > .btn { margin-left: auto; }
+
+/* ── the rail's type scale ──
+   Every size in this stylesheet was drawn for the panel as it appears inline on a wide
+   page — 10px quiz labels, 11px hints, 11.5px mode buttons, 12.5px prompts. In the rail
+   the same text sits in a ~400px column a teacher reads while writing, and it was too
+   small for that. One knob rescales it; each entry below is the base size above times
+   --cp-fs, so the panel keeps its own proportions.
+
+   Scoped to .rd-rail on purpose. These cp-* class names are not private to this file —
+   .cp-panel, .cp-badge, .cp-sub, .cp-hint and .cp-chip are also styled by carnet.css,
+   practice.css and projects.css, and Next's CSS is global. Scaling them unscoped would
+   have reached the student's practice Copilot and the carnet. The inline exercise panel
+   that shares this stylesheet is likewise untouched. */
+.rd-rail { --cp-fs: 1.15; }
+.rd-rail .cp-badge                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-sub                   { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-row input.cp-text     { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-hint                  { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-chip                  { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-more                  { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-warn-h                { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-warn li               { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-chat-toggle           { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-error                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-result-title          { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-field-l               { font-size: calc(11px * var(--cp-fs)); }
+.rd-rail .cp-doc                   { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-doc h2                { font-size: calc(16px * var(--cp-fs)); }
+.rd-rail .cp-disclaim              { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-q                     { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-q-type                { font-size: calc(10px * var(--cp-fs)); }
+.rd-rail .cp-q-opt                 { font-size: calc(13px * var(--cp-fs)); }
+.rd-rail .cp-chat-empty            { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-msg                   { font-size: calc(13.5px * var(--cp-fs)); }
+.rd-rail .cp-use                   { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-chat-input input      { font-size: calc(14px * var(--cp-fs)); }
+.rd-rail .cp-tex-in                { font-size: calc(12.5px * var(--cp-fs)); }
+.rd-rail .cp-mode button           { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .cp-tex-hint              { font-size: calc(11px * var(--cp-fs)); }
+.rd-rail .cp-tex-err,
+.rd-rail .cp-tex-warn              { font-size: calc(12px * var(--cp-fs)); }
+.rd-rail .cp-tex-katex             { font-size: calc(17px * var(--cp-fs)); }
+.rd-rail .cp-tex-note              { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .cp-tex-src               { font-size: calc(11.5px * var(--cp-fs)); }
+.rd-rail .rd-railtab               { font-size: calc(12.5px * var(--cp-fs)); }
+/* The buttons come from the global .btn-sm, so without this the labels a teacher
+   actually clicks would be the only text in the rail that did not grow. */
+.rd-rail .btn-sm                   { font-size: calc(13px * var(--cp-fs)); min-height: 37px; }
+
+/* ── compacting the formula block ──
+   Scaling the type up made this section 235px tall for one field, a two-way switch, a
+   button and a caption — and it is a bordered card inside the bordered .cp-panel, so
+   the height read as boxes nested in boxes. The card treatment goes (the section
+   already has a heading to own it), the field drops to two rows, and the switch and
+   the button share a row instead of stacking full-width. 235px → 149px, and the two
+   still clear each other at the rail's 300px minimum (74 + 8 + 144 in 268 of content). */
+/* Flex-wrap, not a two-column grid: a fixed second column forced the switch to give up
+   width, and .cp-mode clips (overflow:hidden), so at the rail's 300px minimum « Agent »
+   was shaved off the control entirely. Here the switch keeps its content width, the
+   button takes the rest, and if the two cannot fit a line the button wraps below
+   instead of either of them shrinking. */
+.rd-rail .cp-tex {
+  display: flex; flex-wrap: wrap; gap: 7px 8px; align-items: center;
+  border: 0; background: transparent; padding: 0; margin: 10px 0 2px;
+}
+.rd-rail .cp-tex-in { flex: 1 1 100%; }
+.rd-rail .cp-mode { flex: 0 0 auto; width: max-content; margin-top: 0; }
+.rd-rail .cp-mode button { flex: none; }
+.rd-rail .cp-tex-go { flex: 1 1 auto; width: auto; min-width: max-content; margin-top: 0; }
+.rd-rail .cp-tex-hint { flex: 1 1 100%; margin-top: 0; }
+/* Full-width: these are messages, not controls, and they carry their own box. */
+.rd-rail .cp-tex-err,
+.rd-rail .cp-tex-warn,
+.rd-rail .cp-tex-prop { flex: 1 1 100%; }
 
 /* ---- formula Copilot (Rapide | Agent) ----
    The LaTeX atelier's agent, folded into the rail. Shapes deliberately match .lxp-*

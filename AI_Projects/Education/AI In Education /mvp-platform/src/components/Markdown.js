@@ -5,6 +5,8 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { renderFigure, parseFigure } from "@/lib/figures";
+import { isInteractive } from "@/lib/interactive";
+import InteractiveFigure from "@/components/interactive/InteractiveFigure";
 import { sanitizeHast } from "@/lib/mdSanitize";
 import { dropBlankTableRows } from "@/lib/mdTables";
 
@@ -42,6 +44,9 @@ function closeDanglingMath(md) {
 function FigureBlock({ json }) {
   const spec = parseFigure(json);
   if (!spec) return <pre className="md-figure-bad">{json}</pre>;
+  // The one place a figure is not a picture. Everywhere else — the editor, the print
+  // path, renderFigure itself — an interactive spec draws its still frame instead.
+  if (isInteractive(spec)) return <InteractiveFigure spec={spec} />;
   return <div className="md-figure" role="img" aria-label={spec.title ? `Figure : ${spec.title}` : "Figure"} dangerouslySetInnerHTML={{ __html: renderFigure(spec) }} />;
 }
 

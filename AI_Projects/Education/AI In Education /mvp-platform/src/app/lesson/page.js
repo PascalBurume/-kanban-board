@@ -30,7 +30,16 @@ function TocBar({ contentMd, scrollRef }) {
     if (!root) return;
     const hs = [...root.querySelectorAll("h2, h3")];
     const el = hs.find((h) => h.textContent.trim().startsWith(text.slice(0, 22)));
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!el) return;
+    // Not scrollIntoView: it scrolls *every* scrollable ancestor, and .lesson-page
+    // — overflow:hidden but still scrollable programmatically — got dragged along,
+    // pushing the lesson header off-screen with no way to bring it back. Scroll the
+    // one container ourselves, reusing the heading's own scroll-margin-top so the
+    // offset stays in sync with the sticky .steps-bar.
+    const offset = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+    const top = root.scrollTop + el.getBoundingClientRect().top
+      - root.getBoundingClientRect().top - offset;
+    root.scrollTo({ top, behavior: "smooth" });
   };
   return (
     <div className="lesson-toc">

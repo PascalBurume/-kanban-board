@@ -211,7 +211,7 @@ export default function AnatomyExplorer({ user }) {
           aria-label="Revenir au tableau de bord"
           title="Revenir au tableau de bord"
         >
-          <Home size={16} />
+          <Home size={18} />
           <span className="an-back-txt">Tableau de bord</span>
         </Link>
         <div className="an-title">
@@ -309,7 +309,7 @@ export default function AnatomyExplorer({ user }) {
                   onClick={() => setAutoRotate((v) => !v)}
                   title="Rotation automatique"
                 >
-                  <RotateCcw size={17} />
+                  <RotateCcw size={21} />
                   Rotation
                 </button>
                 <button
@@ -317,7 +317,7 @@ export default function AnatomyExplorer({ user }) {
                   onClick={() => setCrossSection((v) => !v)}
                   title="Coupe transversale"
                 >
-                  <ScanLine size={17} />
+                  <ScanLine size={21} />
                   Coupe
                 </button>
                 <button
@@ -325,7 +325,7 @@ export default function AnatomyExplorer({ user }) {
                   onClick={() => setWireframe((v) => !v)}
                   title="Calque fil de fer"
                 >
-                  <Layers3 size={17} />
+                  <Layers3 size={21} />
                   Fil de fer
                 </button>
                 <button
@@ -334,7 +334,7 @@ export default function AnatomyExplorer({ user }) {
                   disabled={!organ?.hotspots.length}
                   title="Calque à annoter"
                 >
-                  <ClipboardCheck size={17} />
+                  <ClipboardCheck size={21} />
                   Calque
                 </button>
                 <button
@@ -343,7 +343,7 @@ export default function AnatomyExplorer({ user }) {
                   disabled={!organ?.hotspots.length}
                   title="Mode révision"
                 >
-                  <Target size={17} />
+                  <Target size={21} />
                   Révision
                 </button>
                 <button
@@ -351,7 +351,7 @@ export default function AnatomyExplorer({ user }) {
                   onClick={toggleFull}
                   title={isFull ? "Réafficher la bibliothèque et la fiche" : "Agrandir le spécimen (masque la bibliothèque et la fiche)"}
                 >
-                  {isFull ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+                  {isFull ? <Minimize2 size={21} /> : <Maximize2 size={21} />}
                   {isFull ? "Réduire" : "Agrandir"}
                 </button>
               </div>

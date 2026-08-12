@@ -1,4 +1,6 @@
 import { renderEpure, type EpureSpec } from "./epure";
+import { isInteractive, type InteractiveSpec } from "./interactive";
+import { renderInteractiveStill } from "./interactiveStill";
 // Figures for lessons: function graphs and small data charts, drawn as plain SVG.
 //
 // Everything here is deliberately dependency-free and synchronous. The school server
@@ -24,7 +26,10 @@ export type FigureKind =
   // Geometry, not a chart. It shares the ```figure storage and the figure node, but it
   // has no axes and no data series, so it is deliberately ABSENT from FIGURE_KINDS —
   // that array is the chart-type menu. Its shape lives in lib/epure.ts.
-  | "epure";
+  | "epure"
+  // A figure the student can move. Also absent from FIGURE_KINDS, also its own panel;
+  // its shape lives in lib/interactive.ts and its still frame in lib/interactiveStill.ts.
+  | "interactive";
 
 export type FigurePoint = { x: number; y: number };
 
@@ -132,7 +137,7 @@ const PREC: Record<string, number> = { "+": 1, "-": 1, "*": 2, "/": 2, "^": 3 };
 
 type Tok = { t: "num" | "var" | "op" | "fn" | "(" | ")"; v: string };
 
-function tokenize(src: string): Tok[] | null {
+function tokenize(src: string, params?: readonly string[]): Tok[] | null {
   const out: Tok[] = [];
   const s = src.replace(/\s+/g, "");
   let i = 0;
@@ -150,7 +155,7 @@ function tokenize(src: string): Tok[] | null {
       while (j < s.length && /[a-zA-Z]/.test(s[j])) j++;
       const w = s.slice(i, j);
       if (FUNCS[w]) out.push({ t: "fn", v: w });
-      else if (w === "x" || w === "pi" || w === "e") out.push({ t: "var", v: w });
+      else if (w === "x" || w === "pi" || w === "e" || params?.includes(w)) out.push({ t: "var", v: w });
       else return null; // unknown identifier — refuse rather than guess
       i = j;
       continue;
@@ -168,9 +173,19 @@ function tokenize(src: string): Tok[] | null {
   return out;
 }
 
-// Compile once, evaluate per sample point — a graph needs hundreds of evaluations.
-export function compile(expr: string): ((x: number) => number) | null {
-  const toks = tokenize(expr);
+/**
+ * Compile once, evaluate per sample point — a graph needs hundreds of evaluations.
+ *
+ * `params` names extra identifiers the expression may use besides x, pi and e — the
+ * a, b, c a pupil drags on an interactive figure. Their values are passed per call in
+ * `scope`; an unnamed identifier is still refused at compile time rather than guessed,
+ * so "ax" cannot quietly become a variable nobody declared.
+ */
+export function compile(
+  expr: string,
+  params?: readonly string[],
+): ((x: number, scope?: Record<string, number>) => number) | null {
+  const toks = tokenize(expr, params);
   if (!toks || toks.length === 0) return null;
   const out: Tok[] = [];
   const ops: Tok[] = [];
@@ -208,11 +223,18 @@ export function compile(expr: string): ((x: number) => number) | null {
   }
   if (depth !== 1) return null;
 
-  return (x: number) => {
+  return (x: number, scope?: Record<string, number>) => {
     const st: number[] = [];
     for (const tk of out) {
       if (tk.t === "num") st.push(parseFloat(tk.v));
-      else if (tk.t === "var") st.push(tk.v === "x" ? x : tk.v === "pi" ? Math.PI : Math.E);
+      else if (tk.t === "var") {
+        st.push(
+          tk.v === "x" ? x
+            : tk.v === "pi" ? Math.PI
+              : tk.v === "e" ? Math.E
+                : scope?.[tk.v] ?? NaN,
+        );
+      }
       else if (tk.t === "fn") st.push(FUNCS[tk.v](st.pop() ?? 0));
       else {
         const b = st.pop() ?? 0, a = st.pop() ?? 0;
@@ -303,6 +325,10 @@ export function renderFigure(spec: FigureSpec): string {
     // in the same ```figure block so it inherits the markdown round trip, the editor's
     // figure node and the student renderer without any of them learning a new construct.
     if (spec.type === "epure") return renderEpure(spec as unknown as EpureSpec);
+    // An interactive widget renders here as its STILL frame. Only the student's lesson
+    // page swaps in the live board; the editor, the server render and anything printing
+    // get this, so a figure the teacher cannot animate is still a figure they can see.
+    if (spec.type === "interactive") return renderInteractiveStill(spec as unknown as InteractiveSpec);
     if (spec.type === "function") return renderFunction(spec);
     if (spec.type === "pie" || spec.type === "doughnut") return renderPie(spec);
     if (spec.type === "boxplot") return renderBoxplot(spec);
@@ -616,6 +642,10 @@ export function parseFigure(json: string): FigureSpec | null {
     // the chart-type menu, and an épure is not a chart. It has its own menu entry and
     // its own panel.
     if (o.type === "epure") return Array.isArray(o.points) ? (o as FigureSpec) : null;
+    // Accepted for the same reason as an épure, and with the same care: a fence this
+    // returns null for is a fence the editor's figure node cannot carry, and it would be
+    // dropped the next time a teacher saved the lesson.
+    if (o.type === "interactive") return isInteractive(o) ? (o as unknown as FigureSpec) : null;
     if (!FIGURE_KINDS.some((k) => k.kind === o.type)) return null;
     return o as FigureSpec;
   } catch {

@@ -13,6 +13,7 @@ import { auditDocument, auditQuiz } from "@/lib/lessonAudit";
 import { repairLatex } from "@/lib/latexRepair";
 import { FIGURE_KINDS } from "@/lib/figures";
 import { EPURE_TEMPLATES } from "@/lib/epure";
+import { INTERACTIVE_WIDGETS, WIDGET_FAMILIES } from "@/lib/interactive";
 import { isBlankContent } from "@/lib/lessonSkeleton";
 import { studentPreviewHref } from "@/lib/previewHref";
 import { lintLesson } from "@/lib/lessonLint";
@@ -126,8 +127,12 @@ export default function RedigerClient() {
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [railOpen, setRailOpen] = useState(true);
   const [outlineW, setOutlineW] = useState(240);
-  const [railW, setRailW] = useState(340);
+  // 340 left the Copilot controls in a ~300px column of content: every prompt field
+  // wrapped onto its own row, the Rapide|Agent pair split a 150px each, and the manual
+  // chips stacked three deep. 400 is the width at which those stop fighting.
+  const [railW, setRailW] = useState(400);
   const [narrow, setNarrow] = useState(false);
+  const [winW, setWinW] = useState(1440);
 
   // Portal hosts for the toolbar and status bar owned by LessonWriter.
   const [toolHost, setToolHost] = useState(null);
@@ -153,7 +158,7 @@ export default function RedigerClient() {
     setOutlineW(num("mwalimu.rediger.outlineW", 240));
     // Migrate the atelier's stored width once, so a teacher who sized the rail there
     // finds it the same here.
-    setRailW(num("mwalimu.rediger.railW", num("mwalimu.latex.railW", 340)));
+    setRailW(num("mwalimu.rediger.railW", num("mwalimu.latex.railW", 400)));
   }, []);
 
   useEffect(() => {
@@ -166,6 +171,17 @@ export default function RedigerClient() {
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  // The rail's ceiling depends on what is left for the lesson. Raising it to a flat
+  // 720px let the editor collapse to 174px on a 1134px laptop with the outline open —
+  // a column too narrow to write in. RAIL_MAX is the want; EDITOR_MIN is the floor that
+  // wins when the window cannot pay for it.
+  useEffect(() => {
+    const onResize = () => setWinW(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   // ---- load ----
@@ -580,6 +596,18 @@ export default function RedigerClient() {
           ...FIGURE_KINDS.map((k) => ({ id: `figure:${k.kind}`, icon: k.icon, label: k.label, hint: k.hint, disabled: noVisual })),
           { id: "catalogue", icon: "grid", label: "Catalogue de figures…", hint: "76 figures prêtes à insérer", disabled: off },
           { type: "sep" },
+          // Figures the student can move. Flat rather than grouped by family: this menu
+          // has no nesting, and the hint carries the distinction anyway.
+          ...WIDGET_FAMILIES.flatMap((g) =>
+            g.widgets.map((w) => ({
+              id: `interactive:${w}`,
+              icon: INTERACTIVE_WIDGETS[w].icon,
+              label: `${INTERACTIVE_WIDGETS[w].label} (interactif)`,
+              hint: INTERACTIVE_WIDGETS[w].hint,
+              disabled: noVisual,
+            })),
+          ),
+          { type: "sep" },
           ...STARTERS.map((s) => ({ id: `starter:${s.id}`, icon: s.icon, label: s.label, hint: s.hint, disabled: off })),
         ],
       },
@@ -659,6 +687,7 @@ export default function RedigerClient() {
         return;
       }
       if (id.startsWith("figure:")) return void e?.insertFigure(id.slice(7));
+      if (id.startsWith("interactive:")) return void e?.insertInteractive(id.slice(12));
       if (id.startsWith("epure:")) {
         const t = EPURE_TEMPLATES.find((x) => x.id === id.slice(6));
         return void (t && e?.insertEpure(t.spec));
@@ -836,10 +865,18 @@ export default function RedigerClient() {
     </nav>
   );
 
+  const RAIL_MAX = 720;
+  const EDITOR_MIN = 420;
+  const railMax = Math.max(300, Math.min(RAIL_MAX,
+    winW - (outlineOpen && !narrow ? outlineW : 0) - EDITOR_MIN));
+  // Clamped for display too, so a width sized on a wide monitor does not crush the
+  // editor when the same teacher opens the lesson on a laptop.
+  const railWUsed = Math.min(railW, railMax);
+
   const cols = [
     outlineOpen && !narrow ? `${outlineW}px` : null,
     "minmax(0,1fr)",
-    railOpen && !narrow ? `${railW}px` : null,
+    railOpen && !narrow ? `${railWUsed}px` : null,
   ].filter(Boolean).join(" ");
 
   return (
@@ -1022,9 +1059,9 @@ export default function RedigerClient() {
         {railOpen && !narrow && (
           <aside className="rd-rail">
             <ResizeGrip
-              value={railW}
-              min={280}
-              max={560}
+              value={railWUsed}
+              min={300}
+              max={railMax}
               side="left"
               label="Largeur du panneau Copilot"
               onChange={setRailW}

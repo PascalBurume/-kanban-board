@@ -137,6 +137,32 @@
    actually clicks would be the only text in the rail that did not grow. */
 .rd-rail .btn-sm                   { font-size: calc(13px * var(--cp-fs)); min-height: 37px; }
 
+/* ── compacting the formula block ──
+   Scaling the type up made this section 235px tall for one field, a two-way switch, a
+   button and a caption — and it is a bordered card inside the bordered .cp-panel, so
+   the height read as boxes nested in boxes. The card treatment goes (the section
+   already has a heading to own it), the field drops to two rows, and the switch and
+   the button share a row instead of stacking full-width. 235px → 149px, and the two
+   still clear each other at the rail's 300px minimum (74 + 8 + 144 in 268 of content). */
+/* Flex-wrap, not a two-column grid: a fixed second column forced the switch to give up
+   width, and .cp-mode clips (overflow:hidden), so at the rail's 300px minimum « Agent »
+   was shaved off the control entirely. Here the switch keeps its content width, the
+   button takes the rest, and if the two cannot fit a line the button wraps below
+   instead of either of them shrinking. */
+.rd-rail .cp-tex {
+  display: flex; flex-wrap: wrap; gap: 7px 8px; align-items: center;
+  border: 0; background: transparent; padding: 0; margin: 10px 0 2px;
+}
+.rd-rail .cp-tex-in { flex: 1 1 100%; }
+.rd-rail .cp-mode { flex: 0 0 auto; width: max-content; margin-top: 0; }
+.rd-rail .cp-mode button { flex: none; }
+.rd-rail .cp-tex-go { flex: 1 1 auto; width: auto; min-width: max-content; margin-top: 0; }
+.rd-rail .cp-tex-hint { flex: 1 1 100%; margin-top: 0; }
+/* Full-width: these are messages, not controls, and they carry their own box. */
+.rd-rail .cp-tex-err,
+.rd-rail .cp-tex-warn,
+.rd-rail .cp-tex-prop { flex: 1 1 100%; }
+
 /* ---- formula Copilot (Rapide | Agent) ----
    The LaTeX atelier's agent, folded into the rail. Shapes deliberately match .lxp-*
    there: a teacher who has used one should recognise the other, because it IS the
